@@ -3260,8 +3260,24 @@ export class ClineProvider
 			if (lastMsg?.role === "user" && Array.isArray(lastMsg.content)) {
 				for (const block of lastMsg.content) {
 					if (block.type === "tool_result" && block.tool_use_id === toolUseId) {
-						// Update the existing tool_result content
-						block.content = `Subtask ${childTaskId} completed.\n\nResult:\n${completionResultSummary}`
+						// Update the existing tool_result content with verification requirements
+						const verificationMessage = `<subtask_completion task_id="${childTaskId}">
+<result>
+${completionResultSummary}
+</result>
+</subtask_completion>
+
+IMPORTANT: Before accepting this result, you MUST verify the child agent's work:
+
+1. **Question the claims**: Identify 1-2 specific claims in the result that should be verified
+2. **Request evidence**: Use send_message_to_agent with target_agent_id="${childTaskId}" to ask for concrete proof
+   - Example: "Show me the exact code you added"
+   - Example: "What was the actual test output?"
+   - Example: "How does your solution handle edge case X?"
+3. **Verify before accepting**: Only accept after you have seen evidence and confirmed correctness
+
+You can send multiple messages to the child agent to thoroughly verify their work. Do NOT accept the result without verification.`
+						block.content = verificationMessage
 						alreadyHasToolResult = true
 						break
 					}
@@ -3270,27 +3286,61 @@ export class ClineProvider
 
 			// If no existing tool_result found, create a NEW user message with the tool_result
 			if (!alreadyHasToolResult) {
+				// Construct verification-focused message using XML tags
+				const verificationMessage = `<subtask_completion task_id="${childTaskId}">
+<result>
+${completionResultSummary}
+</result>
+</subtask_completion>
+
+IMPORTANT: Before accepting this result, you MUST verify the child agent's work:
+
+1. **Question the claims**: Identify 1-2 specific claims in the result that should be verified
+2. **Request evidence**: Use send_message_to_agent with target_agent_id="${childTaskId}" to ask for concrete proof
+   - Example: "Show me the exact code you added"
+   - Example: "What was the actual test output?"
+   - Example: "How does your solution handle edge case X?"
+3. **Verify before accepting**: Only accept after you have seen evidence and confirmed correctness
+
+You can send multiple messages to the child agent to thoroughly verify their work. Do NOT accept the result without verification.`
+
 				parentApiMessages.push({
 					role: "user",
 					content: [
 						{
 							type: "tool_result" as const,
 							tool_use_id: toolUseId,
-							content: `Subtask ${childTaskId} completed.\n\nResult:\n${completionResultSummary}`,
+							content: verificationMessage,
 						},
 					],
 					ts,
 				})
 			}
 		} else {
-			// Fallback for XML protocol or when toolUseId couldn't be found:
-			// Add a text block (not ideal but maintains backward compatibility)
+			// Fallback for XML protocol or when toolUseId couldn't be found
+			const verificationMessage = `<subtask_completion task_id="${childTaskId}">
+<result>
+${completionResultSummary}
+</result>
+</subtask_completion>
+
+IMPORTANT: Before accepting this result, you MUST verify the child agent's work:
+
+1. **Question the claims**: Identify 1-2 specific claims in the result that should be verified
+2. **Request evidence**: Use send_message_to_agent with target_agent_id="${childTaskId}" to ask for concrete proof
+   - Example: "Show me the exact code you added"
+   - Example: "What was the actual test output?"
+   - Example: "How does your solution handle edge case X?"
+3. **Verify before accepting**: Only accept after you have seen evidence and confirmed correctness
+
+You can send multiple messages to the child agent to thoroughly verify their work. Do NOT accept the result without verification.`
+
 			parentApiMessages.push({
 				role: "user",
 				content: [
 					{
 						type: "text",
-						text: `Subtask ${childTaskId} completed.\n\nResult:\n${completionResultSummary}`,
+						text: verificationMessage,
 					},
 				],
 				ts,

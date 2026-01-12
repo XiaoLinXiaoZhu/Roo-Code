@@ -4,15 +4,42 @@
 
 实现了 `send_message_to_agent` 工具，使 parent agent 和 child agent 之间能够进行双向通信，支持任务协调和确认。同时优化了 `new_task` 工具的委派哲学，强调目标对齐而非实现细节。
 
+**关键改进**：修改了子任务完成时的消息传递机制，要求父 agent 必须验证子任务结果，而不是直接接受。
+
 ## 核心功能
 
 ### 1. 双向通信
 
 - **Child → Parent**: 子 agent 可以向父 agent 提问，寻求澄清
 - **Parent → Child**: 父 agent 可以向子 agent 发送消息，确认或质疑其方法
-- **XML 标签包裹**: 代理消息使用 `<agent_message>` 标签包裹，与用户消息区分
+- **XML 标签包裹**: 代理消息使用 `<agent_message>` 或 `<subtask_completion>` 标签包裹，与用户消息区分
 
-### 2. 三大使用场景
+### 2. 强制验证机制
+
+当子任务调用 `attempt_completion` 时，系统会自动在父 agent 的消息中注入验证要求：
+
+```xml
+<subtask_completion task_id="child_task_id">
+<result>
+子任务的完成结果...
+</result>
+</subtask_completion>
+
+IMPORTANT: Before accepting this result, you MUST verify the child agent's work:
+
+1. **Question the claims**: Identify 1-2 specific claims in the result that should be verified
+2. **Request evidence**: Use send_message_to_agent with target_agent_id="child_task_id" to ask for concrete proof
+   - Example: "Show me the exact code you added"
+   - Example: "What was the actual test output?"
+   - Example: "How does your solution handle edge case X?"
+3. **Verify before accepting**: Only accept after you have seen evidence and confirmed correctness
+
+You can send multiple messages to the child agent to thoroughly verify their work. Do NOT accept the result without verification.
+```
+
+这确保了父 agent 不会直接接受子任务的结果，而是被明确要求进行验证。
+
+### 3. 三大使用场景
 
 #### 对齐 (Alignment)
 
@@ -140,7 +167,15 @@
     - [src/core/prompts/tools/native-tools/new_task.ts](src/core/prompts/tools/native-tools/new_task.ts): 更新 Native 协议描述
     - 强调"对齐 WHAT，而非 HOW"的委派哲学
 
-7. **Native Tools Index** ([src/core/prompts/tools/native-tools/index.ts](src/core/prompts/tools/native-tools/index.ts))
+7. **关键修改: 子任务完成消息构建** ([src/core/webview/ClineProvider.ts](src/core/webview/ClineProvider.ts#L3260-L3340))
+
+    - **问题根源**: 之前版本在子任务完成时，只是简单地告诉父 agent "Subtask completed"，没有要求验证
+    - **解决方案**: 修改 `reopenParentFromDelegation()` 方法，注入强制验证指令
+    - **消息格式**: 使用 `<subtask_completion>` XML 标签包裹结果，附带明确的验证步骤要求
+    - **影响**: 父 agent 现在会收到明确的验证要求，包括具体的验证步骤和示例问题
+    - **覆盖范围**: 同时更新了 Native 协议（tool_result）和 XML 协议（text）的消息构建
+
+8. **Native Tools Index** ([src/core/prompts/tools/native-tools/index.ts](src/core/prompts/tools/native-tools/index.ts))
     - 将工具添加到工具列表
 
 ## 工作流程
@@ -151,6 +186,22 @@
 2. Child agent 暂停执行，消息保存到历史
 3. Parent agent 恢复，接收消息作为用户输入
 4. Parent agent 处理消息并可以回复（使用相同工具）
+
+### Child Task Completion (强制验证流程)
+
+1. Child agent 调用 `attempt_completion(result="完成结果")`
+2. 系统调用 `reopenParentFromDelegation()` 注入验证消息到父 agent
+3. 注入的消息包含：
+    - `<subtask_completion>` XML 标签包裹的结果
+    - 明确的 "IMPORTANT: Before accepting this result, you MUST verify" 指令
+    - 三步验证流程（质疑声明、请求证据、验证后接受）
+    - 具体的验证问题示例
+    - `send_message_to_agent` 使用说明，包含子任务 ID
+4. Parent agent 恢复执行，必须按照验证协议进行验证
+5. Parent agent 使用 `send_message_to_agent(target_agent_id="child_id", message="验证问题")` 追问
+6. Child agent 收到追问并回答
+7. 重复步骤 5-6 直到父 agent 满意
+8. Parent agent 最终接受或拒绝结果
 
 ### Parent → Child
 
