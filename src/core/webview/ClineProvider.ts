@@ -3447,6 +3447,16 @@ export class ClineProvider
 			)
 		}
 
+		// Special case: If target is a completed child task and source is parent,
+		// allow "reopening" it by changing status back to active for follow-up questioning
+		const isReopeningCompletedChild = isSourceParent && targetHistory.status === "completed"
+
+		if (isReopeningCompletedChild) {
+			this.log(
+				`[sendMessageToAgent] Parent ${sourceTaskId} is reopening completed child ${targetTaskId} for follow-up questions`,
+			)
+		}
+
 		// 2) Flush pending tool results from source task before switching
 		const sourceTask = this.getCurrentTask()
 		if (sourceTask?.taskId === sourceTaskId) {
@@ -3490,30 +3500,40 @@ export class ClineProvider
 		const ts = Date.now()
 		const direction = isSourceParent ? "from_parent" : "from_child"
 
-		// UI message
+		// UI message - use text type for proper display
+		const displayMessage = isSourceParent
+			? `📥 Message from parent agent:\n\n${message}`
+			: `📥 Message from child agent:\n\n${message}`
+
 		const agentMessage: ClineMessage = {
 			type: "say",
-			say: "agent_message_received",
-			text: JSON.stringify({
-				direction,
-				sourceTaskId,
-				message,
-			}),
+			say: "text",
+			text: displayMessage,
 			ts,
 		}
 		targetClineMessages.push(agentMessage)
 		await saveTaskMessages({ messages: targetClineMessages, taskId: targetTaskId, globalStoragePath })
 
-		// API message: Add as a user message with text content
-		// The target agent will see this as user input and can respond
+		// API message: Add as a user message with XML tags to distinguish from regular user messages
+		// The XML tags help the model understand this is inter-agent communication
+		const agentMessageContent = isSourceParent
+			? `<agent_message source="parent" task_id="${sourceTaskId}">
+${message}
+</agent_message>
+
+Please respond to this message from your parent agent by analyzing it and providing your answer or taking appropriate action. If you need clarification, you can use send_message_to_agent to ask follow-up questions.`
+			: `<agent_message source="child" task_id="${sourceTaskId}">
+${message}
+</agent_message>
+
+Please respond to this message from your child agent by analyzing it and providing your answer or taking appropriate action. You can use send_message_to_agent to ask follow-up questions for verification.`
+
 		targetApiMessages.push({
 			role: "user",
 			content: [
 				{
 					type: "text",
-					text: isSourceParent
-						? `Message from parent agent:\n\n${message}\n\nPlease respond to this message by analyzing it and providing your answer or taking appropriate action.`
-						: `Message from child agent:\n\n${message}\n\nPlease respond to this message by analyzing it and providing your answer or taking appropriate action.`,
+					text: agentMessageContent,
 				},
 			],
 			ts,
@@ -3562,7 +3582,7 @@ export class ClineProvider
 
 		// 10) Emit event for message received
 		try {
-			this.emit(RooCodeEventName.AgentMessageReceived, targetTaskId, sourceTaskId, message)
+			this.emit(RooCodeEventName.AgentMessageReceived, sourceTaskId, targetTaskId, message)
 		} catch {
 			// non-fatal
 		}

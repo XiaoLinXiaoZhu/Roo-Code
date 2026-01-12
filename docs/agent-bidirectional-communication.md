@@ -2,7 +2,7 @@
 
 ## 概述
 
-实现了 `send_message_to_agent` 工具，使 parent agent 和 child agent 之间能够进行双向通信，支持任务协调和确认。
+实现了 `send_message_to_agent` 工具，使 parent agent 和 child agent 之间能够进行双向通信，支持任务协调和确认。同时优化了 `new_task` 工具的委派哲学，强调目标对齐而非实现细节。
 
 ## 核心功能
 
@@ -10,6 +10,7 @@
 
 - **Child → Parent**: 子 agent 可以向父 agent 提问，寻求澄清
 - **Parent → Child**: 父 agent 可以向子 agent 发送消息，确认或质疑其方法
+- **XML 标签包裹**: 代理消息使用 `<agent_message>` 标签包裹，与用户消息区分
 
 ### 2. 三大使用场景
 
@@ -37,6 +38,57 @@
 "我完成了前端部分。请注意我使用了 React hooks，这会影响您的 API 设计。"
 ```
 
+## 委派哲学 (new_task 改进)
+
+### 对齐 WHAT，而非 HOW
+
+- **父 agent**: 明确说明目标和需求，但让子 agent 决定实现方法
+- **子 agent**: 拥有完全自主权来决定工具、文件和方法
+- **鼓励澄清**: 子 agent 应该使用 `send_message_to_agent` 询问不确定的问题，而不是猜测
+
+### 子 agent 协议
+
+1. **自主性与明确性**: 你有完全的自主权决定如何实现，但对需求不明确时必须询问
+2. **永不猜测 - 总是询问**: 遇到任何需求、约束或预期行为的不确定性时：
+    - **应该**: 立即使用 `send_message_to_agent` 向父 agent 询问
+    - **不应该**: 对父 agent 的意图做出假设或猜测
+3. **主动信息收集**: 在询问父 agent 之前，尝试通过以下方式收集信息：
+    - 阅读相关文件以了解现有模式
+    - 搜索代码库寻找类似实现
+    - 分析错误消息或测试失败
+    - 如果信息收集无法解决不确定性，则询问父 agent
+
+### 父 agent 验证协议
+
+父 agent 必须验证子 agent 的工作：
+
+1. **批判性审查**: 对子 agent 的完成结果持健康的怀疑态度
+2. **基于证据的验证**: 使用 `send_message_to_agent` 要求具体证据
+3. **后续问题**: 即使子 agent 已调用 `attempt_completion`，也可以继续提问
+4. **接受标准**: 只有在看到具体证据、验证关键功能并确认所有需求满足后才接受
+
+## 消息格式
+
+### XML 标签包裹
+
+代理间消息使用特殊的 XML 标签包裹，以区分用户消息：
+
+```xml
+<agent_message source="parent" task_id="task_xxx">
+消息内容
+</agent_message>
+```
+
+或
+
+```xml
+<agent_message source="child" task_id="task_yyy">
+消息内容
+</agent_message>
+```
+
+这使得模型能够清楚地识别消息来源，并相应地调整响应。
+
 ## 技术实现
 
 ### 新增文件
@@ -45,6 +97,7 @@
 
     - 实现工具的核心逻辑
     - 处理消息验证和发送
+    - 支持向已完成的子任务发送消息
 
 2. **Native Tool Definition** ([src/core/prompts/tools/native-tools/send_message_to_agent.ts](src/core/prompts/tools/native-tools/send_message_to_agent.ts))
     - 定义工具的 OpenAI 函数格式
@@ -56,12 +109,13 @@
 
     - 添加 `sendMessageToAgent()` 方法
     - 处理 agent 切换和消息注入
+    - 消息使用 `<agent_message>` XML 标签包裹
 
 2. **类型定义**
 
     - [packages/types/src/tool.ts](packages/types/src/tool.ts): 添加 `send_message_to_agent` 到工具名称
-    - [packages/types/src/message.ts](packages/types/src/message.ts): 添加消息类型 `agent_message_sent`, `agent_message_received`
     - [packages/types/src/events.ts](packages/types/src/events.ts): 添加事件 `AgentMessageSent`, `AgentMessageReceived`
+    - [packages/types/src/task.ts](packages/types/src/task.ts): 更新 `TaskProviderEvents` 类型
     - [src/shared/tools.ts](src/shared/tools.ts): 添加类型定义和显示名称
 
 3. **presentAssistantMessage** ([src/core/assistant-message/presentAssistantMessage.ts](src/core/assistant-message/presentAssistantMessage.ts))
@@ -71,9 +125,22 @@
 
 4. **Tool Guidelines** ([src/core/prompts/sections/tool-use-guidelines.ts](src/core/prompts/sections/tool-use-guidelines.ts))
 
-    - 添加使用指导，说明何时使用此工具
+    - 添加子 agent 使用指导（主动询问，不要猜测）
+    - 添加父 agent 验证协议（必须验证子 agent 工作）
+    - 说明 XML 标签格式
 
-5. **Native Tools Index** ([src/core/prompts/tools/native-tools/index.ts](src/core/prompts/tools/native-tools/index.ts))
+5. **Rules** ([src/core/prompts/sections/rules.ts](src/core/prompts/sections/rules.ts))
+
+    - 添加"子 agent 协议"部分（自主性、主动询问、结构化问题）
+    - 添加"子 agent 验证协议"部分（父 agent 验证流程）
+
+6. **new_task 工具更新**
+
+    - [src/core/prompts/tools/new-task.ts](src/core/prompts/tools/new-task.ts): 更新 XML 协议描述
+    - [src/core/prompts/tools/native-tools/new_task.ts](src/core/prompts/tools/native-tools/new_task.ts): 更新 Native 协议描述
+    - 强调"对齐 WHAT，而非 HOW"的委派哲学
+
+7. **Native Tools Index** ([src/core/prompts/tools/native-tools/index.ts](src/core/prompts/tools/native-tools/index.ts))
     - 将工具添加到工具列表
 
 ## 工作流程
@@ -103,8 +170,32 @@
 ### 历史管理
 
 - 消息注入到 UI 历史（`clineMessages`）和 API 历史（`apiConversationHistory`）
-- 消息以特殊格式标记方向（from_parent/from_child）
+- UI 消息使用 📤/📥 表情符号显示方向
+- API 消息使用 `<agent_message source="parent|child" task_id="xxx">` XML 标签包裹
 - 完整保留对话上下文
+
+### XML 标签格式
+
+代理间消息在 API 上下文中使用特殊的 XML 标签：
+
+```xml
+<agent_message source="parent" task_id="parent_task_id">
+消息内容
+</agent_message>
+```
+
+这种格式的优势：
+
+- 清晰区分代理消息和用户消息
+- 提供消息来源信息（parent/child）
+- 包含任务 ID 用于追踪
+- 模型可以根据消息来源调整响应策略
+
+### 验证与追问
+
+- 父 agent 可以向已完成的子任务发送消息
+- 支持多轮验证对话
+- 通过 `historyItem.childIds` 验证父子关系
 
 ### 事件系统
 

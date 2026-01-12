@@ -85,14 +85,35 @@ export class SendMessageToAgentTool extends BaseTool<"send_message_to_agent"> {
 				targetTaskId = target_agent_id
 				direction = "to_child"
 
-				// Validate that the target is actually a child of this task
-				if (task.childTaskId !== targetTaskId) {
+				// Validate that the target is a child of this task (current or past)
+				// Allow messaging to any child task, including completed ones for follow-up questions
+				const provider = task.providerRef.deref()
+				if (!provider) {
+					pushToolResult(formatResponse.toolError("Provider reference lost"))
+					return
+				}
+
+				try {
+					const { historyItem } = await (provider as any).getTaskWithId(task.taskId)
+					const isChild = historyItem.childIds?.includes(targetTaskId)
+
+					if (!isChild) {
+						task.consecutiveMistakeCount++
+						task.recordToolError("send_message_to_agent")
+						pushToolResult(
+							formatResponse.toolError(
+								`Invalid target agent: ${targetTaskId} is not a child task of this task. ` +
+									`Known child tasks: ${historyItem.childIds?.join(", ") || "none"}`,
+							),
+						)
+						return
+					}
+				} catch (error) {
 					task.consecutiveMistakeCount++
 					task.recordToolError("send_message_to_agent")
 					pushToolResult(
 						formatResponse.toolError(
-							`Invalid target agent: ${targetTaskId} is not a child of this task. ` +
-								`Current child task ID is: ${task.childTaskId || "none"}`,
+							`Failed to validate target agent: ${error instanceof Error ? error.message : String(error)}`,
 						),
 					)
 					return
@@ -100,14 +121,12 @@ export class SendMessageToAgentTool extends BaseTool<"send_message_to_agent"> {
 			}
 
 			// Show the message in the current agent's view
-			await task.say(
-				"agent_message_sent",
-				JSON.stringify({
-					direction,
-					targetTaskId,
-					message,
-				}),
-			)
+			const displayMessage =
+				direction === "to_parent"
+					? `📤 Sending message to parent agent:\n\n${message}`
+					: `📤 Sending message to child agent (${targetTaskId}):\n\n${message}`
+
+			await task.say("text", displayMessage)
 
 			// Send the message to the target agent
 			await provider.sendMessageToAgent({
@@ -133,13 +152,12 @@ export class SendMessageToAgentTool extends BaseTool<"send_message_to_agent"> {
 		const message: string | undefined = block.params.message
 
 		const direction = target_agent_id ? "to_child" : "to_parent"
-		const partialMessage = JSON.stringify({
-			direction,
-			targetTaskId: target_agent_id || task.parentTaskId || "unknown",
-			message: this.removeClosingTag("message", message, block.partial),
-		})
+		const displayMessage =
+			direction === "to_parent"
+				? `📤 Sending message to parent agent:\n\n${this.removeClosingTag("message", message, block.partial)}`
+				: `📤 Sending message to child agent:\n\n${this.removeClosingTag("message", message, block.partial)}`
 
-		await task.say("agent_message_sent", partialMessage, undefined, block.partial).catch(() => {})
+		await task.say("text", displayMessage, undefined, block.partial).catch(() => {})
 	}
 }
 

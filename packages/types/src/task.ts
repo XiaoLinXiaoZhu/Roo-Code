@@ -78,6 +78,9 @@ export type TaskProviderEvents = {
 
 	[RooCodeEventName.TaskUserMessage]: [taskId: string]
 
+	[RooCodeEventName.AgentMessageSent]: [senderTaskId: string, receiverTaskId: string, message: string]
+	[RooCodeEventName.AgentMessageReceived]: [senderTaskId: string, receiverTaskId: string, message: string]
+
 	[RooCodeEventName.TaskTokenUsageUpdated]: [taskId: string, tokenUsage: TokenUsage, toolUsage: ToolUsage]
 
 	[RooCodeEventName.ModeChanged]: [mode: string]

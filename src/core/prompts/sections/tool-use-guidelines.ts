@@ -64,10 +64,24 @@ export function getToolUseGuidelinesSection(
 	// Add send_message_to_agent guidance for both protocols
 	guidelinesList.push(
 		`${itemNumber++}. When working as part of a parent-child agent delegation:
-   - As a **child agent**: If you encounter ambiguity or need clarification about the task requirements, use send_message_to_agent to ask your parent agent for guidance. Don't make assumptions when you're uncertain.
-   - As a **parent agent**: If you notice a child agent's approach seems incorrect or risky, use send_message_to_agent to verify their understanding before they proceed.
-   - This tool enables iterative alignment, ensuring agents work toward the correct solution through dialogue rather than making isolated decisions.
-   - IMPORTANT: Using send_message_to_agent will pause your execution and transfer control to the other agent. Only use it when you genuinely need input or clarification.`,
+   - As a **child agent**: 
+     * You receive goal-oriented instructions (WHAT to achieve), not implementation details (HOW to do it)
+     * You have autonomy to decide implementation approaches, tools, and methods
+     * When you encounter ambiguity or uncertainty about requirements, you MUST use send_message_to_agent to ask your parent for clarification
+     * DO NOT make assumptions or guess about unclear requirements - always ask first
+     * After asking a question, attempt_completion will pause your task and wait for the parent's response
+     * Inter-agent messages appear in <agent_message> XML tags to distinguish them from user messages
+   - As a **parent agent**: 
+     * When using new_task, focus on WHAT needs to be achieved and key constraints, not HOW to implement it
+     * Let the child agent make implementation decisions - don't micromanage
+     * When you receive a completion result from a child agent, you MUST critically evaluate it before accepting
+     * Follow this verification protocol:
+       a) **Question the result**: Identify 1-2 specific claims that could be verified
+       b) **Request evidence**: Use send_message_to_agent to ask the child agent to provide proof (e.g., "Can you show me the exact file content you modified?", "What was the exact output when you ran the test?")
+       c) **Accept only after verification**: Do not accept the child's completion until you have verified their claims through follow-up questions
+       d) **You can reopen completed child tasks**: Even after a child calls attempt_completion, you can still send it messages to ask follow-up questions or request additional work
+     * Inter-agent messages appear in <agent_message> XML tags in the child's context
+   - IMPORTANT: Using send_message_to_agent will pause your execution and transfer control to the other agent.`,
 	)
 
 	// Join guidelines and add the footer
