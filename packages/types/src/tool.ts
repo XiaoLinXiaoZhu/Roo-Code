@@ -38,6 +38,7 @@ export const toolNames = [
 	"run_slash_command",
 	"generate_image",
 	"custom_tool",
+	"send_message_to_agent",
 ] as const
 
 export const toolNamesSchema = z.enum(toolNames)

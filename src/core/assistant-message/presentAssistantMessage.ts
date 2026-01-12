@@ -41,6 +41,7 @@ import { generateImageTool } from "../tools/GenerateImageTool"
 import { applyDiffTool as applyDiffToolClass } from "../tools/ApplyDiffTool"
 import { validateToolUse } from "../tools/validateToolUse"
 import { codebaseSearchTool } from "../tools/CodebaseSearchTool"
+import { sendMessageToAgentTool } from "../tools/SendMessageToAgentTool"
 
 import { formatResponse } from "../prompts/responses"
 
@@ -447,6 +448,8 @@ export async function presentAssistantMessage(cline: Task) {
 						return `[${block.name} for '${block.params.command}'${block.params.args ? ` with args: ${block.params.args}` : ""}]`
 					case "generate_image":
 						return `[${block.name} for '${block.params.path}']`
+					case "send_message_to_agent":
+						return `[${block.name}${block.params.target_agent_id ? ` to child ${block.params.target_agent_id}` : " to parent"}]`
 					default:
 						return `[${block.name}]`
 				}
@@ -1097,6 +1100,15 @@ export async function presentAssistantMessage(cline: Task) {
 				}
 				case "run_slash_command":
 					await runSlashCommandTool.handle(cline, block as ToolUse<"run_slash_command">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+						removeClosingTag,
+						toolProtocol,
+					})
+					break
+				case "send_message_to_agent":
+					await sendMessageToAgentTool.handle(cline, block as ToolUse<"send_message_to_agent">, {
 						askApproval,
 						handleError,
 						pushToolResult,

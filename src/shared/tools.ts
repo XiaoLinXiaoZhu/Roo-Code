@@ -76,6 +76,7 @@ export const toolParamNames = [
 	"old_string", // search_replace and edit_file parameter
 	"new_string", // search_replace and edit_file parameter
 	"expected_replacements", // edit_file parameter for multiple occurrences
+	"target_agent_id", // send_message_to_agent parameter
 ] as const
 
 export type ToolParamName = (typeof toolParamNames)[number]
@@ -110,6 +111,7 @@ export type NativeToolArgs = {
 	update_todo_list: { todos: string }
 	use_mcp_tool: { server_name: string; tool_name: string; arguments?: Record<string, unknown> }
 	write_to_file: { path: string; content: string }
+	send_message_to_agent: { message: string; target_agent_id?: string }
 	// Add more tools as they are migrated to native protocol
 }
 
@@ -236,6 +238,11 @@ export interface GenerateImageToolUse extends ToolUse<"generate_image"> {
 	params: Partial<Pick<Record<ToolParamName, string>, "prompt" | "path" | "image">>
 }
 
+export interface SendMessageToAgentToolUse extends ToolUse<"send_message_to_agent"> {
+	name: "send_message_to_agent"
+	params: Partial<Pick<Record<ToolParamName, string>, "message" | "target_agent_id">>
+}
+
 // Define tool group configuration
 export type ToolGroupConfig = {
 	tools: readonly string[]
@@ -267,6 +274,7 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	run_slash_command: "run slash command",
 	generate_image: "generate images",
 	custom_tool: "use custom tools",
+	send_message_to_agent: "communicate with agents",
 } as const
 
 // Define available tool groups.
@@ -301,6 +309,7 @@ export const ALWAYS_AVAILABLE_TOOLS: ToolName[] = [
 	"new_task",
 	"update_todo_list",
 	"run_slash_command",
+	"send_message_to_agent",
 ] as const
 
 /**

@@ -61,6 +61,15 @@ export function getToolUseGuidelinesSection(
 		)
 	}
 
+	// Add send_message_to_agent guidance for both protocols
+	guidelinesList.push(
+		`${itemNumber++}. When working as part of a parent-child agent delegation:
+   - As a **child agent**: If you encounter ambiguity or need clarification about the task requirements, use send_message_to_agent to ask your parent agent for guidance. Don't make assumptions when you're uncertain.
+   - As a **parent agent**: If you notice a child agent's approach seems incorrect or risky, use send_message_to_agent to verify their understanding before they proceed.
+   - This tool enables iterative alignment, ensuring agents work toward the correct solution through dialogue rather than making isolated decisions.
+   - IMPORTANT: Using send_message_to_agent will pause your execution and transfer control to the other agent. Only use it when you genuinely need input or clarification.`,
+	)
+
 	// Join guidelines and add the footer
 	// For native protocol, the footer is less relevant since multiple tools can execute in one message
 	const footer = isNativeProtocol(protocol)

@@ -30,6 +30,10 @@ export enum RooCodeEventName {
 	TaskDelegationCompleted = "taskDelegationCompleted",
 	TaskDelegationResumed = "taskDelegationResumed",
 
+	// Agent Communication
+	AgentMessageSent = "agentMessageSent",
+	AgentMessageReceived = "agentMessageReceived",
+
 	// Task Execution
 	Message = "message",
 	TaskModeSwitched = "taskModeSwitched",
@@ -88,6 +92,17 @@ export const rooCodeEventsSchema = z.object({
 	[RooCodeEventName.TaskDelegationResumed]: z.tuple([
 		z.string(), // parentTaskId
 		z.string(), // childTaskId
+	]),
+
+	[RooCodeEventName.AgentMessageSent]: z.tuple([
+		z.string(), // sourceTaskId
+		z.string(), // targetTaskId
+		z.string(), // message
+	]),
+	[RooCodeEventName.AgentMessageReceived]: z.tuple([
+		z.string(), // targetTaskId
+		z.string(), // sourceTaskId
+		z.string(), // message
 	]),
 
 	[RooCodeEventName.Message]: z.tuple([

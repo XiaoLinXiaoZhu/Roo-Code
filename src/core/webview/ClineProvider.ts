@@ -3412,4 +3412,159 @@ export class ClineProvider
 			return vscode.Uri.file(filePath).toString()
 		}
 	}
+
+	/**
+	 * Send a message from one agent to another (bidirectional communication).
+	 * This method enables parent-child communication beyond the traditional
+	 * delegation → completion flow.
+	 *
+	 * When a message is sent:
+	 * 1. The source agent is paused/disposed
+	 * 2. The target agent is loaded/resumed
+	 * 3. The message is injected into the target agent's history
+	 * 4. Control transfers to the target agent
+	 *
+	 * @param params - Message parameters
+	 */
+	public async sendMessageToAgent(params: {
+		sourceTaskId: string
+		targetTaskId: string
+		message: string
+	}): Promise<void> {
+		const { sourceTaskId, targetTaskId, message } = params
+		const globalStoragePath = this.contextProxy.globalStorageUri.fsPath
+
+		// 1) Validate that source and target have a parent-child relationship
+		const { historyItem: sourceHistory } = await this.getTaskWithId(sourceTaskId)
+		const { historyItem: targetHistory } = await this.getTaskWithId(targetTaskId)
+
+		const isSourceParent = sourceHistory.childIds?.includes(targetTaskId)
+		const isSourceChild = sourceHistory.parentTaskId === targetTaskId
+
+		if (!isSourceParent && !isSourceChild) {
+			throw new Error(
+				`Cannot send message: ${sourceTaskId} and ${targetTaskId} do not have a parent-child relationship`,
+			)
+		}
+
+		// 2) Flush pending tool results from source task before switching
+		const sourceTask = this.getCurrentTask()
+		if (sourceTask?.taskId === sourceTaskId) {
+			try {
+				await sourceTask.flushPendingToolResultsToHistory()
+			} catch (error) {
+				this.log(
+					`[sendMessageToAgent] Error flushing pending tool results from source (non-fatal): ${
+						error instanceof Error ? error.message : String(error)
+					}`,
+				)
+			}
+		}
+
+		// 3) Load target agent's histories
+		let targetClineMessages: ClineMessage[] = []
+		try {
+			targetClineMessages = await readTaskMessages({
+				taskId: targetTaskId,
+				globalStoragePath,
+			})
+		} catch {
+			targetClineMessages = []
+		}
+
+		let targetApiMessages: any[] = []
+		try {
+			targetApiMessages = (await readApiMessages({
+				taskId: targetTaskId,
+				globalStoragePath,
+			})) as any[]
+		} catch {
+			targetApiMessages = []
+		}
+
+		// Defensive: ensure arrays
+		if (!Array.isArray(targetClineMessages)) targetClineMessages = []
+		if (!Array.isArray(targetApiMessages)) targetApiMessages = []
+
+		// 4) Inject agent message into target's history
+		const ts = Date.now()
+		const direction = isSourceParent ? "from_parent" : "from_child"
+
+		// UI message
+		const agentMessage: ClineMessage = {
+			type: "say",
+			say: "agent_message_received",
+			text: JSON.stringify({
+				direction,
+				sourceTaskId,
+				message,
+			}),
+			ts,
+		}
+		targetClineMessages.push(agentMessage)
+		await saveTaskMessages({ messages: targetClineMessages, taskId: targetTaskId, globalStoragePath })
+
+		// API message: Add as a user message with text content
+		// The target agent will see this as user input and can respond
+		targetApiMessages.push({
+			role: "user",
+			content: [
+				{
+					type: "text",
+					text: isSourceParent
+						? `Message from parent agent:\n\n${message}\n\nPlease respond to this message by analyzing it and providing your answer or taking appropriate action.`
+						: `Message from child agent:\n\n${message}\n\nPlease respond to this message by analyzing it and providing your answer or taking appropriate action.`,
+				},
+			],
+			ts,
+		})
+		await saveApiMessages({ messages: targetApiMessages as any, taskId: targetTaskId, globalStoragePath })
+
+		// 5) Emit event for message sent
+		try {
+			this.emit(RooCodeEventName.AgentMessageSent, sourceTaskId, targetTaskId, message)
+		} catch {
+			// non-fatal
+		}
+
+		// 6) Close source task if still open (single-open-task invariant)
+		const current = this.getCurrentTask()
+		if (current?.taskId === sourceTaskId) {
+			await this.removeClineFromStack()
+		}
+
+		// 7) Update target task status to active (if not already)
+		const updatedTargetHistory: typeof targetHistory = {
+			...targetHistory,
+			status: "active",
+		}
+		await this.updateTaskHistory(updatedTargetHistory)
+
+		// 8) Reopen target task and inject histories
+		// IMPORTANT: startTask=false to prevent immediate resume ask
+		const targetInstance = await this.createTaskWithHistoryItem(updatedTargetHistory, { startTask: false })
+
+		if (targetInstance) {
+			try {
+				await targetInstance.overwriteClineMessages(targetClineMessages)
+			} catch {
+				// non-fatal
+			}
+			try {
+				await targetInstance.overwriteApiConversationHistory(targetApiMessages as any)
+			} catch {
+				// non-fatal
+			}
+
+			// 9) Auto-resume target task to process the message
+			await targetInstance.resumeAfterDelegation()
+		}
+
+		// 10) Emit event for message received
+		try {
+			this.emit(RooCodeEventName.AgentMessageReceived, targetTaskId, sourceTaskId, message)
+		} catch {
+			// non-fatal
+		}
+	}
 }

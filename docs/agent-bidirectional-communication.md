@@ -1,0 +1,162 @@
+# Agent 双向通信功能
+
+## 概述
+
+实现了 `send_message_to_agent` 工具，使 parent agent 和 child agent 之间能够进行双向通信，支持任务协调和确认。
+
+## 核心功能
+
+### 1. 双向通信
+
+- **Child → Parent**: 子 agent 可以向父 agent 提问，寻求澄清
+- **Parent → Child**: 父 agent 可以向子 agent 发送消息，确认或质疑其方法
+
+### 2. 三大使用场景
+
+#### 对齐 (Alignment)
+
+子 agent 在任务执行过程中遇到歧义时，主动向父 agent 寻求确认：
+
+```
+"您的意思是使用 JWT tokens 还是 session-based 认证？我理解您提到'无状态'，这建议使用 JWT，但我想在继续之前确认。"
+```
+
+#### 确认 (Confirmation)
+
+父 agent 注意到子 agent 的方法可能存在风险时，主动质疑：
+
+```
+"您计划删除数据库。您确定这是正确的吗？"
+```
+
+#### 复用 (Reuse)
+
+继续与同一 agent 工作，复用之前的上下文和共识：
+
+```
+"我完成了前端部分。请注意我使用了 React hooks，这会影响您的 API 设计。"
+```
+
+## 技术实现
+
+### 新增文件
+
+1. **SendMessageToAgentTool** ([src/core/tools/SendMessageToAgentTool.ts](src/core/tools/SendMessageToAgentTool.ts))
+
+    - 实现工具的核心逻辑
+    - 处理消息验证和发送
+
+2. **Native Tool Definition** ([src/core/prompts/tools/native-tools/send_message_to_agent.ts](src/core/prompts/tools/native-tools/send_message_to_agent.ts))
+    - 定义工具的 OpenAI 函数格式
+    - 包含详细的使用说明和示例
+
+### 修改的文件
+
+1. **ClineProvider** ([src/core/webview/ClineProvider.ts](src/core/webview/ClineProvider.ts))
+
+    - 添加 `sendMessageToAgent()` 方法
+    - 处理 agent 切换和消息注入
+
+2. **类型定义**
+
+    - [packages/types/src/tool.ts](packages/types/src/tool.ts): 添加 `send_message_to_agent` 到工具名称
+    - [packages/types/src/message.ts](packages/types/src/message.ts): 添加消息类型 `agent_message_sent`, `agent_message_received`
+    - [packages/types/src/events.ts](packages/types/src/events.ts): 添加事件 `AgentMessageSent`, `AgentMessageReceived`
+    - [src/shared/tools.ts](src/shared/tools.ts): 添加类型定义和显示名称
+
+3. **presentAssistantMessage** ([src/core/assistant-message/presentAssistantMessage.ts](src/core/assistant-message/presentAssistantMessage.ts))
+
+    - 注册工具处理器
+    - 添加工具描述
+
+4. **Tool Guidelines** ([src/core/prompts/sections/tool-use-guidelines.ts](src/core/prompts/sections/tool-use-guidelines.ts))
+
+    - 添加使用指导，说明何时使用此工具
+
+5. **Native Tools Index** ([src/core/prompts/tools/native-tools/index.ts](src/core/prompts/tools/native-tools/index.ts))
+    - 将工具添加到工具列表
+
+## 工作流程
+
+### Child → Parent
+
+1. Child agent 调用 `send_message_to_agent(message="需要澄清的问题")`（不提供 `target_agent_id`）
+2. Child agent 暂停执行，消息保存到历史
+3. Parent agent 恢复，接收消息作为用户输入
+4. Parent agent 处理消息并可以回复（使用相同工具）
+
+### Parent → Child
+
+1. Parent agent 调用 `send_message_to_agent(target_agent_id="child_id", message="确认问题")`
+2. Parent agent 暂停执行
+3. Child agent 恢复，接收消息
+4. Child agent 可以回复或继续工作
+
+## 关键特性
+
+### 单一打开约束
+
+- 系统始终只有一个 agent 处于活动状态
+- 发送消息时自动切换活动 agent
+- 保证视图显示当前活动 agent
+
+### 历史管理
+
+- 消息注入到 UI 历史（`clineMessages`）和 API 历史（`apiConversationHistory`）
+- 消息以特殊格式标记方向（from_parent/from_child）
+- 完整保留对话上下文
+
+### 事件系统
+
+- `AgentMessageSent`: 消息发送时触发
+- `AgentMessageReceived`: 消息接收时触发
+- 可用于遥测和 UI 更新
+
+## 使用示例
+
+### 子 Agent 向父 Agent 提问
+
+```typescript
+// 子 agent 中
+send_message_to_agent({
+	message:
+		"我需要实现用户认证。应该使用 JWT 还是基于会话的认证？需求中提到'无状态'，这暗示 JWT，但我想在继续之前确认。",
+})
+```
+
+### 父 Agent 向子 Agent 确认
+
+```typescript
+// 父 agent 中
+send_message_to_agent({
+	target_agent_id: "child-task-123",
+	message: "你计划删除生产数据库？请再次确认这是正确的操作，因为这是不可逆的。",
+})
+```
+
+## 注意事项
+
+1. **阻塞操作**: 调用此工具会暂停当前 agent 并转移控制权
+2. **验证关系**: 只能在有父子关系的 agent 之间发送消息
+3. **适度使用**: 仅在真正需要输入或澄清时使用，不要用于简单的状态更新
+
+## 未来改进
+
+### UI 显示（待实现）
+
+- 在 webview 中显示 agent 间消息的特殊样式
+- 实现视图自动切换的动画效果
+- 添加消息历史追踪可视化
+
+### 增强功能
+
+- 支持附件/图片传递
+- 消息优先级标记
+- 超时和自动回退机制
+- 支持多层嵌套 agent 通信
+
+## 相关 Issue 和文档
+
+- TASK.md: 原始需求文档
+- 单一打开约束：确保系统稳定性的核心机制
+- Agent 委托机制：`delegateParentAndOpenChild()` 和 `reopenParentFromDelegation()`

@@ -20,6 +20,7 @@ import searchFiles from "./search_files"
 import switchMode from "./switch_mode"
 import updateTodoList from "./update_todo_list"
 import writeToFile from "./write_to_file"
+import sendMessageToAgent from "./send_message_to_agent"
 
 export { getMcpServerTools } from "./mcp_server"
 export { convertOpenAIToolToAnthropic, convertOpenAIToolsToAnthropic } from "./converters"
@@ -71,6 +72,7 @@ export function getNativeTools(options: NativeToolsOptions = {}): OpenAI.Chat.Ch
 		searchReplace,
 		edit_file,
 		searchFiles,
+		sendMessageToAgent,
 		switchMode,
 		updateTodoList,
 		writeToFile,
