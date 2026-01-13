@@ -123,8 +123,11 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 				parentTaskId: task.taskId,
 				message: taskMessage,
 				initialTodos: [],
-				mode: "ask", // 使用 ask 模式作为基础,通过自定义指令实现 expert 角色
+				mode: "expert", // 使用专门的 expert 模式
 				customInstructions,
+				modeOverrides: {
+					roleDefinition: expertPrompt,
+				},
 			})
 
 			// 等待子任务完成并返回结果
