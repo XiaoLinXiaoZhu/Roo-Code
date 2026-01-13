@@ -7,7 +7,6 @@ import { BaseTool, ToolCallbacks } from "./BaseTool"
 
 interface Suggestion {
 	text: string
-	mode?: string
 }
 
 interface AskFollowupQuestionParams {
@@ -40,15 +39,11 @@ export class AskFollowupQuestionTool extends BaseTool<"ask_followup_question"> {
 				// Transform parsed XML to our Suggest format
 				for (const sug of rawSuggestions) {
 					if (typeof sug === "string") {
-						// Simple string suggestion (no mode attribute)
+						// Simple string suggestion
 						suggestions.push({ text: sug })
 					} else {
-						// XML object with text content and optional mode attribute
-						const suggestion: Suggestion = { text: sug["#text"] }
-						if (sug["@_mode"]) {
-							suggestion.mode = sug["@_mode"]
-						}
-						suggestions.push(suggestion)
+						// XML object with text content (ignore mode attribute)
+						suggestions.push({ text: sug["#text"] })
 					}
 				}
 			} catch (error) {
@@ -80,7 +75,7 @@ export class AskFollowupQuestionTool extends BaseTool<"ask_followup_question"> {
 			// Transform follow_up suggestions to the format expected by task.ask
 			const follow_up_json = {
 				question,
-				suggest: follow_up.map((s) => ({ answer: s.text, mode: s.mode })),
+				suggest: follow_up.map((s) => ({ answer: s.text })),
 			}
 
 			task.consecutiveMistakeCount = 0

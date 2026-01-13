@@ -417,15 +417,15 @@ export async function addCustomInstructions(
 		sections.push(`Global Instructions:\n${globalCustomInstructions.trim()}`)
 	}
 
-	// Add mode-specific instructions after
+	// Add custom instructions after
 	if (typeof modeCustomInstructions === "string" && modeCustomInstructions.trim()) {
-		sections.push(`Mode-specific Instructions:\n${modeCustomInstructions.trim()}`)
+		sections.push(`Custom Instructions:\n${modeCustomInstructions.trim()}`)
 	}
 
-	// Add rules - include both mode-specific and generic rules if they exist
+	// Add rules - include both custom and generic rules if they exist
 	const rules = []
 
-	// Add mode-specific rules first if they exist
+	// Add custom rules first if they exist
 	if (modeRuleContent && modeRuleContent.trim()) {
 		if (usedRuleFile.includes(path.join(".roo", `rules-${mode}`))) {
 			rules.push(modeRuleContent.trim())

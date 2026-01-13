@@ -53,8 +53,6 @@ export const toolParamNames = [
 	"question",
 	"result",
 	"diff",
-	"mode_slug",
-	"reason",
 	"line",
 	"mode",
 	"message",
@@ -108,7 +106,7 @@ export type NativeToolArgs = {
 	apply_patch: { patch: string }
 	ask_followup_question: {
 		question: string
-		follow_up: Array<{ text: string; mode?: string }>
+		follow_up: Array<{ text: string }>
 	}
 	browser_action: BrowserActionParams
 	codebase_search: { query: string; path?: string }
@@ -116,7 +114,6 @@ export type NativeToolArgs = {
 	generate_image: GenerateImageParams
 	run_slash_command: { command: string; args?: string }
 	search_files: { path: string; regex: string; file_pattern?: string | null }
-	switch_mode: { mode_slug: string; reason: string }
 	update_todo_list: { todos: string }
 	use_mcp_tool: { server_name: string; tool_name: string; arguments?: Record<string, unknown> }
 	write_to_file: { path: string; content: string }
@@ -226,11 +223,6 @@ export interface AttemptCompletionToolUse extends ToolUse<"attempt_completion"> 
 	params: Partial<Pick<Record<ToolParamName, string>, "result">>
 }
 
-export interface SwitchModeToolUse extends ToolUse<"switch_mode"> {
-	name: "switch_mode"
-	params: Partial<Pick<Record<ToolParamName, string>, "mode_slug" | "reason">>
-}
-
 export interface NewTaskToolUse extends ToolUse<"new_task"> {
 	name: "new_task"
 	params: Partial<Pick<Record<ToolParamName, string>, "mode" | "message" | "todos">>
@@ -270,7 +262,6 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	access_mcp_resource: "access mcp resources",
 	ask_followup_question: "ask questions",
 	attempt_completion: "complete tasks",
-	switch_mode: "switch modes",
 	new_task: "create new task",
 	codebase_search: "codebase search",
 	update_todo_list: "update todo list",

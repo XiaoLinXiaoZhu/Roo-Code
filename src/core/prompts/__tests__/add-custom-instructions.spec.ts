@@ -90,9 +90,9 @@ __setMockImplementation(
 			sections.push(`Global Instructions:\n${globalCustomInstructions.trim()}`)
 		}
 
-		// Add mode-specific instructions after
+		// Add custom instructions after
 		if (modeCustomInstructions?.trim()) {
-			sections.push(`Mode-specific Instructions:\n${modeCustomInstructions}`)
+			sections.push(`Custom Instructions:\n${modeCustomInstructions}`)
 		}
 
 		// Add rules
