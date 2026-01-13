@@ -309,9 +309,9 @@ export const ALWAYS_AVAILABLE_TOOLS: ToolName[] = [
 	"update_todo_list",
 	// "run_slash_command",
 	// Agent as Tools 架构的新工具 - 在所有模式下都可用
-	"search_project",
-	"apply_edit",
-	"consult_expert",
+	// "search_project",
+	// "apply_edit",
+	// "consult_expert",
 ] as const
 
 /**
