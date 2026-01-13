@@ -86,14 +86,8 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 
 		task.consecutiveMistakeCount = 0
 
-		// 根据 domain 构建专家角色
-		const expertPrompt = this.buildExpertPrompt(domain, outputFormat)
-
 		// 构建任务消息
-		const taskMessage = this.buildConsultMessage(topic, question, attachments)
-
-		// 构建自定义指令
-		const customInstructions = this.buildExpertModeInstructions(domain, outputFormat)
+		const taskMessage = this.buildConsultMessage(domain, topic, question, outputFormat, attachments)
 
 		// 获取 Provider
 		const provider = task.providerRef.deref()
@@ -124,10 +118,6 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 				message: taskMessage,
 				initialTodos: [],
 				mode: "expert", // 使用专门的 expert 模式
-				customInstructions,
-				modeOverrides: {
-					roleDefinition: expertPrompt,
-				},
 			})
 
 			// 等待子任务完成并返回结果
@@ -140,79 +130,25 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 		}
 	}
 
-	private buildExpertPrompt(domain: string, outputFormat?: string): string {
-		let prompt = `你是一位 ${domain} 领域的资深专家。`
+	private buildConsultMessage(
+		domain: string,
+		topic: string,
+		question: string,
+		outputFormat?: string,
+		attachments?: string,
+	): string {
+		let message = `你现在是以下专家角色：\n\n<expert_domain>${domain}</expert_domain>\n\n<expert_topic>${topic}</expert_topic>\n\n<expert_question>${question}</expert_question>`
 
-		if (outputFormat === "design") {
-			prompt += `\n\n你擅长架构设计和技术方案设计。你的输出应该清晰、可执行、考虑周全。`
-		} else if (outputFormat === "comparison") {
-			prompt += `\n\n你擅长技术方案对比和分析。你的输出应该客观、基于事实、给出明确建议。`
-		} else if (outputFormat === "recommendation") {
-			prompt += `\n\n你擅长提供实践建议和最佳实践。你的输出应该具体、可操作、有优先级。`
+		if (outputFormat) {
+			message += `\n\n<expert_output_format>${outputFormat}</expert_output_format>`
 		}
 
-		prompt += `
-
-**你的角色:**
-- 基于专业知识提供深思熟虑的建议
-- 考虑多种方案和权衡
-- 识别潜在风险和注意事项
-- 提供清晰、可执行的建议
-
-**你的限制:**
-- 不能修改任何文件
-- 不能执行任何代码
-- 只能进行分析和建议
-`.trim()
-
-		return prompt
-	}
-
-	private buildConsultMessage(topic: string, question: string, attachments?: string): string {
-		let message = `**主题:** ${topic}\n\n**问题:** ${question}`
-
 		if (attachments) {
-			message += `\n\n**附件:**\n${attachments}`
+			message += `\n\n<expert_attachments>\n${attachments}\n</expert_attachments>`
 		}
 
 		return message
 	}
-
-	private buildExpertModeInstructions(domain: string, outputFormat?: string): string {
-		const expertRole = this.buildExpertPrompt(domain, outputFormat)
-
-		let instructions = `${expertRole}
-
-**你的工具权限:**
-- ✅ read_file
-- ✅ search_files
-- ✅ list_files
-- ✅ codebase_search
-- ❌ write_to_file (禁止编辑)
-- ❌ apply_diff (禁止编辑)
-- ❌ consultExpert (禁止递归)
-- ❌ applyEdit (禁止编辑)
-
-**你的任务:**
-1. 理解咨询主题和问题
-2. 使用 search_files 和 codebase_search 了解相关上下文
-3. 基于你的专业领域知识提供深入分析
-4. 考虑多种方案,识别风险
-5. 使用 attempt_completion 返回你的意见
-
-**输出格式要求:**
-- 提供简明的意见摘要
-- 列出具体的建议
-- 识别注意事项和风险点
-`.trim()
-
-		if (outputFormat) {
-			instructions += `\n\n**输出格式:** ${outputFormat}`
-		}
-
-		return instructions
-	}
-
 	override async handlePartial(task: Task, block: ToolUse<"consult_expert">): Promise<void> {
 		const domain: string | undefined = block.params.domain
 		const topic: string | undefined = block.params.topic
