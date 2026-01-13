@@ -38,6 +38,10 @@ export const toolNames = [
 	"run_slash_command",
 	"generate_image",
 	"custom_tool",
+	// Agent as Tools 架构的新工具
+	"search_project",
+	"apply_edit",
+	"consult_expert",
 ] as const
 
 export const toolNamesSchema = z.enum(toolNames)

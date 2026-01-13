@@ -76,6 +76,15 @@ export const toolParamNames = [
 	"old_string", // search_replace and edit_file parameter
 	"new_string", // search_replace and edit_file parameter
 	"expected_replacements", // edit_file parameter for multiple occurrences
+	// Agent as Tools 架构的新工具参数
+	"schema", // search_project optional parameter
+	"instruction", // apply_edit required parameter
+	"context", // apply_edit optional parameter
+	"validate", // apply_edit optional parameter
+	"domain", // consult_expert required parameter
+	"topic", // consult_expert required parameter
+	"attachments", // consult_expert optional parameter
+	"outputFormat", // consult_expert optional parameter
 ] as const
 
 export type ToolParamName = (typeof toolParamNames)[number]
@@ -267,6 +276,9 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	run_slash_command: "run slash command",
 	generate_image: "generate images",
 	custom_tool: "use custom tools",
+	search_project: "search project",
+	apply_edit: "apply edit",
+	consult_expert: "consult expert",
 } as const
 
 // Define available tool groups.
@@ -276,19 +288,22 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 	},
 	edit: {
 		tools: ["apply_diff", "write_to_file", "generate_image"],
-		customTools: ["search_and_replace", "search_replace", "edit_file", "apply_patch"],
 	},
 	browser: {
-		tools: ["browser_action"],
+		// tools: ["browser_action"],
+		tools: [], // ! disable browser tools for now
 	},
 	command: {
 		tools: ["execute_command"],
 	},
 	mcp: {
-		tools: ["use_mcp_tool", "access_mcp_resource"],
+		// 	tools: ["use_mcp_tool", "access_mcp_resource"],
+		tools: [], // ! disable mcp tools for now
 	},
 	modes: {
-		tools: ["switch_mode", "new_task"],
+		// 	tools: ["switch_mode", "new_task"],
+		// ! disable modes tools,because we move all modes tools to agent as tools,like search_project, apply_edit, consult_expert
+		tools: ["search_project", "apply_edit", "consult_expert"],
 		alwaysAvailable: true,
 	},
 }
@@ -301,6 +316,10 @@ export const ALWAYS_AVAILABLE_TOOLS: ToolName[] = [
 	"new_task",
 	"update_todo_list",
 	"run_slash_command",
+	// Agent as Tools 架构的新工具 - 在所有模式下都可用
+	"search_project",
+	"apply_edit",
+	"consult_expert",
 ] as const
 
 /**

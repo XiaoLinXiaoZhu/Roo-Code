@@ -20,6 +20,9 @@ import searchFiles from "./search_files"
 import switchMode from "./switch_mode"
 import updateTodoList from "./update_todo_list"
 import writeToFile from "./write_to_file"
+import searchProject from "./search_project"
+import applyEdit from "./apply_edit"
+import consultExpert from "./consult_expert"
 
 export { getMcpServerTools } from "./mcp_server"
 export { convertOpenAIToolToAnthropic, convertOpenAIToolsToAnthropic } from "./converters"
@@ -74,6 +77,10 @@ export function getNativeTools(options: NativeToolsOptions = {}): OpenAI.Chat.Ch
 		switchMode,
 		updateTodoList,
 		writeToFile,
+		// Agent as Tools 架构的新工具
+		searchProject,
+		applyEdit,
+		consultExpert,
 	] satisfies OpenAI.Chat.ChatCompletionTool[]
 }
 

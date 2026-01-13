@@ -41,6 +41,9 @@ import { generateImageTool } from "../tools/GenerateImageTool"
 import { applyDiffTool as applyDiffToolClass } from "../tools/ApplyDiffTool"
 import { validateToolUse } from "../tools/validateToolUse"
 import { codebaseSearchTool } from "../tools/CodebaseSearchTool"
+import { searchProjectTool } from "../tools/SearchProjectTool"
+import { applyEditTool } from "../tools/ApplyEditTool"
+import { consultExpertTool } from "../tools/ConsultExpertTool"
 
 import { formatResponse } from "../prompts/responses"
 
@@ -433,8 +436,14 @@ export async function presentAssistantMessage(cline: Task) {
 						return `[${block.name}]`
 					case "switch_mode":
 						return `[${block.name} to '${block.params.mode_slug}'${block.params.reason ? ` because: ${block.params.reason}` : ""}]`
-					case "codebase_search": // Add case for the new tool
+					case "codebase_search":
 						return `[${block.name} for '${block.params.query}']`
+					case "search_project":
+						return `[${block.name} for '${block.params.query}']`
+					case "apply_edit":
+						return `[${block.name} for '${block.params.instruction}']`
+					case "consult_expert":
+						return `[${block.name} on '${block.params.topic}']`
 					case "update_todo_list":
 						return `[${block.name}]`
 					case "new_task": {
@@ -1107,6 +1116,34 @@ export async function presentAssistantMessage(cline: Task) {
 				case "generate_image":
 					await checkpointSaveAndMark(cline)
 					await generateImageTool.handle(cline, block as ToolUse<"generate_image">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+						removeClosingTag,
+						toolProtocol,
+					})
+					break
+				case "search_project":
+					await searchProjectTool.handle(cline, block as ToolUse<"search_project">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+						removeClosingTag,
+						toolProtocol,
+					})
+					break
+				case "apply_edit":
+					await checkpointSaveAndMark(cline)
+					await applyEditTool.handle(cline, block as ToolUse<"apply_edit">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+						removeClosingTag,
+						toolProtocol,
+					})
+					break
+				case "consult_expert":
+					await consultExpertTool.handle(cline, block as ToolUse<"consult_expert">, {
 						askApproval,
 						handleError,
 						pushToolResult,
