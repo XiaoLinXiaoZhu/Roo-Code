@@ -415,6 +415,8 @@ await sendEmail({ // 发送邮件给专家，请求专家设计登录页面架�
     - 复杂推理：sendEmail
     - 应用编辑：applyEdit
     - 调查项目情况：searchProject
+- 实际实现仍然是 new_task 派发子任务、attempt_completion 完成任务，但对模型完全隐藏。
+- 提示词构建上，可以为 每个模式创建专门的提示词。比如 sendEmail 调用的 expert 使用 expertExpected 字段组织系统提示词，从而指导模型更好的撰写内容。
 
 #### 2. 移除旧架构的工具实现
 
