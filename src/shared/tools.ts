@@ -312,10 +312,10 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 export const ALWAYS_AVAILABLE_TOOLS: ToolName[] = [
 	"ask_followup_question",
 	"attempt_completion",
-	"switch_mode",
-	"new_task",
+	// "switch_mode",
+	// "new_task",
 	"update_todo_list",
-	"run_slash_command",
+	// "run_slash_command",
 	// Agent as Tools 架构的新工具 - 在所有模式下都可用
 	"search_project",
 	"apply_edit",
