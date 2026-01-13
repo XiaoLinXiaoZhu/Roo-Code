@@ -32,7 +32,6 @@ import {
 	getMcpServersSection,
 	getToolUseGuidelinesSection,
 	getCapabilitiesSection,
-	getModesSection,
 	addCustomInstructions,
 	markdownFormattingSection,
 	getSkillsSection,
@@ -94,8 +93,7 @@ async function generatePrompt(
 	// Determine the effective protocol (defaults to 'xml')
 	const effectiveProtocol = getEffectiveProtocol(settings?.toolProtocol)
 
-	const [modesSection, mcpServersSection, skillsSection] = await Promise.all([
-		getModesSection(context),
+	const [mcpServersSection, skillsSection] = await Promise.all([
 		shouldIncludeMcp
 			? getMcpServersSection(
 					mcpHub,
@@ -150,7 +148,6 @@ ${mcpServersSection}
 
 ${getCapabilitiesSection(cwd, shouldIncludeMcp ? mcpHub : undefined)}
 
-${modesSection}
 ${skillsSection ? `\n${skillsSection}` : ""}
 ${getRulesSection(cwd, settings)}
 

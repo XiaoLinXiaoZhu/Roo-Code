@@ -78,6 +78,7 @@ export const toolParamNames = [
 	"expected_replacements", // edit_file parameter for multiple occurrences
 	// Agent as Tools 架构的新工具参数
 	"schema", // search_project optional parameter
+	"scope", // search_project optional parameter
 	"instruction", // apply_edit required parameter
 	"context", // apply_edit optional parameter
 	"validate", // apply_edit optional parameter

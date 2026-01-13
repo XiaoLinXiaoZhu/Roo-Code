@@ -1,6 +1,6 @@
 import type OpenAI from "openai"
 
-const APPLY_EDIT_DESCRIPTION = `Edit and modify code in the project. This tool creates a subtask to perform code changes based on natural language instructions. It supports creating new files, modifying existing files, and refactoring code.`
+const APPLY_EDIT_DESCRIPTION = `Edit and modify code in the project. This tool performs code changes based on natural language instructions. It supports creating new files, modifying existing files, and refactoring code.`
 
 const INSTRUCTION_PARAMETER_DESCRIPTION = `Natural language instruction describing the edit to make (e.g., "Change the error handling to try-catch", "Add type annotations to all parameters", "Create a new UserAvatar component")`
 

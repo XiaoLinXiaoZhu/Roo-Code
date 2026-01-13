@@ -54,11 +54,6 @@ import "../../../utils/path"
 import { addCustomInstructions } from "../sections/custom-instructions"
 import { MultiSearchReplaceDiffStrategy } from "../../diff/strategies/multi-search-replace"
 
-// Mock the sections
-vi.mock("../sections/modes", () => ({
-	getModesSection: vi.fn().mockImplementation(async () => `====\n\nMODES\n\n- Test modes section`),
-}))
-
 // Mock the custom instructions
 vi.mock("../sections/custom-instructions", () => {
 	const addCustomInstructions = vi.fn()

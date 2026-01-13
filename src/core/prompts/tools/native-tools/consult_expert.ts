@@ -1,6 +1,6 @@
 import type OpenAI from "openai"
 
-const CONSULT_EXPERT_DESCRIPTION = `Consult an expert for in-depth analysis, architectural advice, or technical decision-making. This tool creates a subtask with expert role to provide specialized recommendations based on domain knowledge.`
+const CONSULT_EXPERT_DESCRIPTION = `Consult an expert for in-depth analysis, architectural advice, or technical decision-making. This tool provides specialized recommendations based on domain knowledge.`
 
 const DOMAIN_PARAMETER_DESCRIPTION = `Expert domain or specialty (e.g., "UI/UX design and user experience", "Backend architecture and distributed systems", "Database design and optimization", "Security and code review")`
 

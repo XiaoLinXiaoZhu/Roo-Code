@@ -1,6 +1,6 @@
 import type OpenAI from "openai"
 
-const SEARCH_PROJECT_DESCRIPTION = `Search and investigate the project codebase. This tool creates a read-only subtask to explore the codebase, search for files, and answer questions about the project structure, dependencies, or implementation details.`
+const SEARCH_PROJECT_DESCRIPTION = `Search and investigate the project codebase. This tool performs read-only exploration of the codebase to search for files and answer questions about project structure, dependencies, or implementation details. When using this tool, always consider providing a schema parameter to structure the output format for better integration with subsequent operations.`
 
 const QUERY_PARAMETER_DESCRIPTION = `Natural language query describing what you want to search for (e.g., "Find all files handling user authentication", "What databases are used in this project?")`
 
