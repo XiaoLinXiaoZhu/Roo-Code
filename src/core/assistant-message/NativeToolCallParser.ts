@@ -470,15 +470,6 @@ export class NativeToolCallParser {
 				}
 				break
 
-			case "switch_mode":
-				if (partialArgs.mode_slug !== undefined || partialArgs.reason !== undefined) {
-					nativeArgs = {
-						mode_slug: partialArgs.mode_slug,
-						reason: partialArgs.reason,
-					}
-				}
-				break
-
 			case "update_todo_list":
 				if (partialArgs.todos !== undefined) {
 					nativeArgs = {
