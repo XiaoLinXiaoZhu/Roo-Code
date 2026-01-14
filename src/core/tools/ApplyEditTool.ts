@@ -1,9 +1,11 @@
 import * as vscode from "vscode"
+import crypto from "crypto"
 
 import { Task } from "../task/Task"
 import { formatResponse } from "../prompts/responses"
 import { BaseTool, ToolCallbacks } from "./BaseTool"
 import type { ToolUse } from "../../shared/tools"
+import type { TodoItem, TodoStatus } from "@roo-code/types"
 
 /**
  * ApplyEditTool - 应用编辑工具
@@ -71,9 +73,6 @@ export class ApplyEditTool extends BaseTool<"apply_edit"> {
 		// 构建任务消息
 		const taskMessage = this.buildEditMessage(instruction, files, context)
 
-		// 构建自定义指令
-		const customInstructions = this.buildCodeModeInstruction(files)
-
 		// 获取 Provider
 		const provider = task.providerRef.deref()
 		if (!provider) {
@@ -106,12 +105,11 @@ export class ApplyEditTool extends BaseTool<"apply_edit"> {
 			const todos = this.buildTodos(instruction, files)
 
 			// 委派到 code 模式的子任务
-			const child = await (provider as any).delegateParentAndOpenChild({
+			const child = await provider.delegateParentAndOpenChild({
 				parentTaskId: task.taskId,
 				message: taskMessage,
 				initialTodos: todos,
 				mode: "code",
-				customInstructions,
 			})
 
 			// 等待子任务完成并返回结果
@@ -138,46 +136,30 @@ export class ApplyEditTool extends BaseTool<"apply_edit"> {
 		return message
 	}
 
-	private buildCodeModeInstruction(files?: string): string {
-		let instructions = `
-你在一个代码编辑任务中执行。
-
-**你的工具权限:**
-- ✅ read_file
-- ✅ write_to_file
-- ✅ apply_diff
-- ✅ search_files
-- ✅ list_files
-- ❌ consultExpert (禁止递归调用)
-- ❌ searchProject (禁止递归调用)
-
-**你的任务:**
-1. 理解编辑指令
-2. 使用 read_file 阅读需要修改的文件
-3. 使用 write_to_file 或 apply_diff 进行修改
-4. 完成后使用 attempt_completion 返回结果
-
-**返回要求:**
-- 提供修改摘要
-- 列出所有修改的文件
-`.trim()
+	private buildTodos(instruction: string, files?: string): TodoItem[] {
+		const todos: TodoItem[] = []
 
 		if (files) {
-			instructions += `\n\n**文件限制:**\n你只能修改以下文件:\n${files}`
+			todos.push({ id: crypto.randomUUID(), content: `阅读文件: ${files}`, status: "pending" })
 		}
 
-		return instructions
-	}
-
-	private buildTodos(instruction: string, files?: string): string[] {
-		const todos: string[] = ["理解编辑指令"]
-
-		if (files) {
-			todos.push(`阅读文件: ${files}`)
-		}
-
-		todos.push("进行代码修改")
-		todos.push("完成编辑")
+		todos.push({ id: crypto.randomUUID(), content: "理解编辑指令：" + instruction, status: "pending" })
+		todos.push({
+			id: crypto.randomUUID(),
+			content: "若信息不全，请直接使用 attempt_completion 返回结果报告不明确处",
+			status: "pending",
+		})
+		todos.push({ id: crypto.randomUUID(), content: "进行代码修改", status: "pending" })
+		todos.push({
+			id: crypto.randomUUID(),
+			content: "运行代码校验（如 Lint、TypeScript 检查等）",
+			status: "pending",
+		})
+		todos.push({
+			id: crypto.randomUUID(),
+			content: "使用 attempt_completion 返回结果：提供修改摘要，报告修改范围",
+			status: "pending",
+		})
 
 		return todos
 	}
