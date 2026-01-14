@@ -4,6 +4,7 @@ import { Task } from "../task/Task"
 import { formatResponse } from "../prompts/responses"
 import { BaseTool, ToolCallbacks } from "./BaseTool"
 import type { ToolUse } from "../../shared/tools"
+import { TodoItem } from "@roo-code/types"
 
 /**
  * ConsultExpertTool - 咨询专家工具
@@ -102,6 +103,8 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 			domain: domain,
 			topic: topic,
 			question: question,
+			attachments: attachments,
+			outputFormat: outputFormat,
 		})
 
 		// 请求审批
@@ -111,12 +114,14 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 			return
 		}
 
+		const todos = this.buildTodos(domain, topic, question, attachments, outputFormat)
+
 		try {
 			// 委派到 expert 模式的子任务
 			const child = await (provider as any).delegateParentAndOpenChild({
 				parentTaskId: task.taskId,
 				message: taskMessage,
-				initialTodos: [],
+				initialTodos: todos,
 				mode: "expert", // 使用专门的 expert 模式
 			})
 
@@ -137,17 +142,62 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 		outputFormat?: string,
 		attachments?: string,
 	): string {
-		let message = `你现在是以下专家角色：\n\n<expert_domain>${domain}</expert_domain>\n\n<expert_topic>${topic}</expert_topic>\n\n<expert_question>${question}</expert_question>`
-
-		if (outputFormat) {
-			message += `\n\n<expert_output_format>${outputFormat}</expert_output_format>`
-		}
-
-		if (attachments) {
-			message += `\n\n<expert_attachments>\n${attachments}\n</expert_attachments>`
-		}
+		let message = `你现在是以下专家角色：\n\n<expert_domain>${domain}</expert_domain>\n
+${outputFormat ? `<output_format>${outputFormat}</output_format>` : ""}
+<email>
+<topic>${topic}</topic>
+<question>${question}</question>
+${attachments ? `<attachments>\n${attachments}\n</attachments>` : ""}
+</email>`
 
 		return message
+	}
+
+	private buildTodos(
+		domain: string,
+		topic: string,
+		question: string,
+		attachments?: string,
+		outputFormat?: string,
+	): TodoItem[] {
+		const todos: TodoItem[] = []
+
+		// 1. 身份锚定：去“作为”，强调“立足”与“见解”
+		todos.push({
+			id: crypto.randomUUID(),
+			content: `立足${domain}专家视角，展示专业造诣及对${topic}的独到见解`,
+			status: "pending",
+		})
+
+		// 2. 信息摄入：精简措辞，去冗余
+		todos.push({
+			id: crypto.randomUUID(),
+			content: `研读附件，消化背景信息${attachments ? `（附件：${attachments}）` : ""}`,
+			status: "pending",
+		})
+
+		// 3. 需求锁定：动词更精准（审视、明确）
+		todos.push({
+			id: crypto.randomUUID(),
+			content: `审视问题：${question}，明确核心诉求`,
+			status: "pending",
+		})
+
+		// 4. 逻辑推演：拒绝“进行”，强调“推演”
+		todos.push({
+			id: crypto.randomUUID(),
+			content: `结合背景与需求深度推演，呈现分析逻辑`,
+			status: "pending",
+		})
+
+		// 5. 结果交付：动词归位，去形容词后缀
+		todos.push({
+			id: crypto.randomUUID(),
+			content: `调用 attempt_completion 交付结论：包含摘要、建议及风险提示，严格遵循 <output_format>${outputFormat}</output_format> 格式`,
+			status: "pending",
+		})
+
+		return todos
 	}
 	override async handlePartial(task: Task, block: ToolUse<"consult_expert">): Promise<void> {
 		const domain: string | undefined = block.params.domain

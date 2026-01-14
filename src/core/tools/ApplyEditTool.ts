@@ -140,24 +140,23 @@ export class ApplyEditTool extends BaseTool<"apply_edit"> {
 		const todos: TodoItem[] = []
 
 		if (files) {
-			todos.push({ id: crypto.randomUUID(), content: `阅读文件: ${files}`, status: "pending" })
+			todos.push({ id: crypto.randomUUID(), content: `阅读指定文件：${files}`, status: "pending" })
 		}
-
-		todos.push({ id: crypto.randomUUID(), content: "理解编辑指令：" + instruction, status: "pending" })
+		todos.push({ id: crypto.randomUUID(), content: "分析编辑指令：" + instruction, status: "pending" })
 		todos.push({
 			id: crypto.randomUUID(),
-			content: "若信息不全，请直接使用 attempt_completion 返回结果报告不明确处",
+			content: "若信息不足，直接调用 attempt_completion 说明缺失内容",
 			status: "pending",
 		})
-		todos.push({ id: crypto.randomUUID(), content: "进行代码修改", status: "pending" })
+		todos.push({ id: crypto.randomUUID(), content: "修改代码", status: "pending" })
 		todos.push({
 			id: crypto.randomUUID(),
-			content: "运行代码校验（如 Lint、TypeScript 检查等）",
+			content: "验证代码（运行 Lint、TypeScript 检查等）",
 			status: "pending",
 		})
 		todos.push({
 			id: crypto.randomUUID(),
-			content: "使用 attempt_completion 返回结果：提供修改摘要，报告修改范围",
+			content: "调用 attempt_completion 提交结果：包含修改摘要及范围",
 			status: "pending",
 		})
 
