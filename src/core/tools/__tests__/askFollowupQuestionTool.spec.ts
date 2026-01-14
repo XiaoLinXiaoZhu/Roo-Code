@@ -114,7 +114,7 @@ describe("askFollowupQuestionTool", () => {
 				partial: true,
 				nativeArgs: {
 					question: "What would you like to do?",
-					follow_up: [{ text: "Option 1", mode: "code" }, { text: "Option 2" }],
+					follow_up: [{ text: "Option 1" }, { text: "Option 2" }],
 				},
 			}
 
