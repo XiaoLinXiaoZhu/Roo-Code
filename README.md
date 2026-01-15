@@ -205,10 +205,56 @@ export const ALWAYS_AVAILABLE_TOOLS: ToolName[] = [
 ]
 ```
 
-### 4. 系统提示词重构
+### 4. 系统提示词重构为 Soul Document
 
-#### 新增提示词模板
+采用 OpenAI 推荐的提示词设计原则，将系统提示词重构为"Soul Document"架构：
 
+#### 新的提示词结构
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  IDENTITY (角色定义)                                            │
+│  "你是 Roo，一个 AI 编程助手..."                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  SPIRIT (精神内核 - Few-shot 示例)                               │
+│  • 示例 1：确定性追求（面对模糊指令时的处理）                      │
+│  • 示例 2：结果导向（字面执行可能破坏代码时的判断）                │
+│  • 示例 3：诚实透明（二元问题需要多元回答时的表达）                │
+├─────────────────────────────────────────────────────────────────┤
+│  ENVIRONMENT (环境事实)                                         │
+│  • Markdown 规范                                                │
+│  • 工具使用说明 + 工具目录（约束内嵌于工具描述）                   │
+│  • MCP 服务器（如有）                                            │
+│  • 系统信息（OS、Shell、工作目录）                               │
+├─────────────────────────────────────────────────────────────────┤
+│  PROJECT CONTEXT (项目上下文)                                    │
+│  • 语言偏好                                                     │
+│  • 项目规则（.roorules, AGENTS.md 等客观事实）                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### 核心设计理念
+
+| 原则                 | 说明                                                 |
+| -------------------- | ---------------------------------------------------- |
+| **Soul Document**    | 系统提示词定义"你是谁"和"核心精神"，而非具体操作步骤 |
+| **Few-shot > Rules** | 用示例展示行为模式，而非堆砌规则                     |
+| **约束内嵌**         | Shell 兼容性等约束放入工具描述，而非独立章节         |
+| **用户消息承载指令** | 具体操作流程通过工具的 message 和 todos 传递         |
+
+#### 移除的冗余章节
+
+| 原章节                           | 处理方式                                     |
+| -------------------------------- | -------------------------------------------- |
+| `操作准则` (tool-use-guidelines) | ❌ 移除                                      |
+| `目标执行流程` (objective)       | ❌ 移除                                      |
+| `能力范围` (capabilities)        | ❌ 移除                                      |
+| `行为准则` (rules)               | ⚠️ Shell 约束移入 `execute_command` 工具描述 |
+| `Custom Instructions`            | ⚠️ 仅保留项目规则，模式指令移入工具 message  |
+
+#### 新增的提示词文件
+
+- `src/core/prompts/sections/spirit.ts` - 精神内核（Few-shot 示例）
 - `src/core/prompts/tools/native-tools/search_project.ts` - 项目搜索提示词
 - `src/core/prompts/tools/native-tools/consult_expert.ts` - 专家咨询提示词
 - `src/core/prompts/tools/native-tools/apply_edit.ts` - 应用编辑提示词
@@ -218,30 +264,84 @@ export const ALWAYS_AVAILABLE_TOOLS: ToolName[] = [
 - ❌ `src/core/prompts/tools/switch-mode.ts`
 - ❌ `src/core/prompts/tools/native-tools/switch_mode.ts`
 
-#### 提示词生成系统更新
+### 5. 工具的 Message 和 Todos 设计
 
-- 移除了模式（modes）部分的提示词生成
-- 更新了系统提示词中的模式定义和工具导入
-- 简化了自定义指令部分
+按照"用户消息承载指令"的原则，每个工具的任务说明通过结构化的 message 和 todos 传递：
 
-### 5. 工具增强和优化
+#### Message 结构（任务要求 - What）
 
-#### ConsultExpertTool 增强
+```xml
+<task>具体任务描述</task>
+<scope>修改/搜索范围</scope>
+<constraint>约束条件</constraint>
+<approach>方法论指导（归化自模式 customInstructions）</approach>
+<deliverable>交付物要求</deliverable>
+```
 
-- 简化消息构建流程
-- 增强的专家角色定义，支持领域特定指令
-- 改进的专家模式，包含详细的规范定义和自定义指令
+#### Todos 结构（SOP 步骤 - How）
 
-#### ApplyEditTool 简化
+| 步骤     | 设计意图                                 |
+| -------- | ---------------------------------------- |
+| 信息获取 | 读取文件/定位代码                        |
+| 分析指令 | 注入任务内容，**先想后做**               |
+| 提供退路 | 信息不足时可优雅退出（符合诚实透明原则） |
+| 执行操作 | 实际执行任务                             |
+| 验证结果 | lint/type-check                          |
+| 交付结果 | **末端重申交付要求**（利用注意力高峰）   |
 
-- 移除自定义指令，使用更简单的参数结构
-- 增强待办事项结构，支持唯一ID和状态跟踪
-- 改进的验证机制
+#### 各工具的 SOP 示例
 
-#### SearchProjectTool 优化
+**ApplyEditTool**：
 
-- 增强的工具描述和使用说明
-- 改进的自然语言理解能力
+```
+1. 读取目标文件：${files}
+2. 分析编辑指令：${instruction}  ← 注入指令，先想后做
+3. 若信息不足，调用 attempt_completion 说明缺失内容  ← 提供退路
+4. 执行代码修改
+5. 运行 lint 和 type-check 验证
+6. attempt_completion 提交结果：修改摘要及变更范围  ← 重申交付要求
+```
+
+**ConsultExpertTool**：
+
+```
+1. 读取附件：${attachments}
+2. 分析咨询问题：${question}  ← 注入问题，先想后做
+3. 若超出专业范围或信息不足，调用 attempt_completion 说明边界  ← 提供退路
+4. 基于专业知识推演解决方案
+5. attempt_completion 提交：核心结论、支撑分析、风险提示  ← 重申交付要求
+```
+
+**SearchProjectTool**：
+
+```
+1. 使用 codebase_search 定位相关代码
+2. 分析调查目标：${query}  ← 注入查询，先想后做
+3. 若无法找到相关信息，调用 attempt_completion 说明搜索结果  ← 提供退路
+4. read_file 阅读关键文件
+5. 整理发现并形成结论
+6. attempt_completion 提交：相关文件、关键代码、发现与结论  ← 重申交付要求
+```
+
+#### 工具优化详情
+
+**ConsultExpertTool**：
+
+- 结构化 message：`<role>`, `<consultation>`, `<approach>`, `<deliverable>`
+- 归化 expert 模式的 11 点 customInstructions 到 `<approach>` 部分
+- SOP 包含退路和交付要求
+
+**ApplyEditTool**：
+
+- 结构化 message：`<task>`, `<scope>`, `<context>`, `<deliverable>`
+- SOP 包含"分析指令"步骤（先想后做）
+- 移除 customInstructions 依赖
+
+**SearchProjectTool**：
+
+- 结构化 message：`<task>`, `<constraint>`, `<approach>`, `<deliverable>`
+- 归化 ask 模式的 customInstructions 到 `<approach>` 部分
+- SOP 包含 Mermaid 图表指导
 
 ---
 
@@ -267,8 +367,10 @@ src/
 │   │   │   │   └── ...                 # 其他工具提示词
 │   │   │   └── ...                     # 其他提示词文件
 │   │   ├── sections/                   # 提示词片段
-│   │   │   ├── index.ts                # 已移除 modes 部分
-│   │   │   └── rules.ts                # 已移除模式相关规则
+│   │   │   ├── index.ts                # 导出所有 sections
+│   │   │   ├── spirit.ts               # ✨ 精神内核（Few-shot 示例）
+│   │   │   ├── custom-instructions.ts  # 简化为仅项目规则
+│   │   │   └── ...                     # 其他 sections
 │   │   └── system.ts                   # 主提示词生成
 │   └── ...                             # 其他核心代码
 ├── shared/
@@ -287,15 +389,27 @@ docs/
 
 ### 核心设计原则
 
+#### 架构层面
+
 1. **认知减负**：主模型不再需要理解模式切换、状态管理
 2. **模块解耦**：子智能体作为黑盒工具，可独立升级和优化
 3. **自然交互**：使用自然语言作为工具接口，降低使用门槛
 4. **结果导向**：主模型只关心返回结果，不关心内部实现
 5. **简化复杂度**：移除不必要的抽象层，减少系统复杂度
 
+#### 提示词层面
+
+6. **Soul Document**：系统提示词定义精神内核，而非具体操作步骤
+7. **Few-shot 优于 Rules**：用示例展示行为模式，避免规则堆砌和矛盾
+8. **约束内嵌**：工具特定约束放入工具描述，保持系统提示词简洁
+9. **用户消息承载指令**：具体 SOP 通过工具的 message 和 todos 传递
+10. **先想后做**：SOP 中包含"分析"步骤，引导模型思考后再行动
+11. **诚实透明**：SOP 提供退路，允许模型在信息不足时优雅退出
+
 ### 提交历史概览
 
 ```bash
+# Phase 1: Agent as Tools 架构
 feat: 添加新工具实现（SearchProjectTool、ApplyEditTool、ConsultExpertTool）
 refactor: 增强 ConsultExpertTool 的专家角色定义
 refactor: 简化 ApplyEditTool 的自定义指令
@@ -306,6 +420,16 @@ refactor: 更新模式定义和工具导入
 feat: 扩展自动批准逻辑以包含新工具
 feat: 注释掉已废弃工具以清晰标识
 feat: 更新工具描述和说明以提高清晰度
+
+# Phase 2: Soul Document 提示词重构
+feat: 新增 SPIRIT section（精神内核 Few-shot 示例）
+refactor: 移除冗余 sections（操作准则、目标执行流程、能力范围）
+refactor: 工具约束移入工具描述（execute_command Shell 兼容性）
+refactor: 简化 custom-instructions，仅保留项目规则
+refactor: 重构 system.ts 使用 Soul Document 结构
+refactor: 优化工具 message 结构（task/scope/approach/deliverable）
+refactor: 优化工具 todos 结构（先想后做、提供退路、重申交付要求）
+refactor: 归化模式 customInstructions 到工具 message
 ```
 
 ---
