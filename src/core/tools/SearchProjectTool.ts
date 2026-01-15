@@ -1,10 +1,14 @@
 import * as vscode from "vscode"
 
+import type { TodoItem } from "@roo-code/types"
+
 import { Task } from "../task/Task"
 import { formatResponse } from "../prompts/responses"
-import { Package } from "../../shared/package"
 import { BaseTool, ToolCallbacks } from "./BaseTool"
 import type { ToolUse } from "../../shared/tools"
+
+// crypto for UUID generation
+const crypto = globalThis.crypto
 
 /**
  * SearchProjectTool - 搜索项目工具
@@ -79,11 +83,11 @@ export class SearchProjectTool extends BaseTool<"search_project"> {
 
 		task.consecutiveMistakeCount = 0
 
-		// 构建任务消息
+		// 构建任务消息（包含完整的任务要求）
 		const taskMessage = this.buildSearchMessage(query, scope, schema)
 
-		// 构建自定义指令
-		const customInstructions = this.buildAskModeInstructions(schema)
+		// 构建 SOP 步骤
+		const todos = this.buildTodos(query, scope, schema)
 
 		// 获取 Provider
 		const provider = task.providerRef.deref()
@@ -111,9 +115,8 @@ export class SearchProjectTool extends BaseTool<"search_project"> {
 			const child = await (provider as any).delegateParentAndOpenChild({
 				parentTaskId: task.taskId,
 				message: taskMessage,
-				initialTodos: [],
+				initialTodos: todos,
 				mode: "ask",
-				customInstructions,
 			})
 
 			// 等待子任务完成并返回结果
@@ -127,65 +130,110 @@ export class SearchProjectTool extends BaseTool<"search_project"> {
 	}
 
 	private buildSearchMessage(query: string, scope?: SearchProjectParams["scope"], schema?: string): string {
-		let message = `你需要调查项目并回答以下问题:\n\n${query}`
+		// 清晰明确的任务要求
+		let message = `<task>
+调查项目：${query}
+</task>
 
-		if (scope?.directories) {
-			message += `\n\n**搜索范围:** ${scope.directories}`
+<constraint>
+只读调查，禁止任何编辑操作
+</constraint>
+
+<approach>
+- 使用 codebase_search 和 search_files 定位相关代码
+- 使用 read_file 深入阅读关键文件
+- 彻底回答问题，不遗漏重要细节
+- 适当时使用 Mermaid 图表辅助说明
+</approach>`
+
+		if (scope?.directories || scope?.filePatterns || scope?.excludes) {
+			message += `\n\n<scope>`
+			if (scope.directories) {
+				message += `\n目录范围：${scope.directories}`
+			}
+			if (scope.filePatterns) {
+				message += `\n文件模式：${scope.filePatterns}`
+			}
+			if (scope.excludes) {
+				message += `\n排除：${scope.excludes}`
+			}
+			message += `\n</scope>`
 		}
 
-		if (scope?.filePatterns) {
-			message += `\n\n**文件模式:** ${scope.filePatterns}`
-		}
-
-		if (scope?.excludes) {
-			message += `\n\n**排除模式:** ${scope.excludes}`
+		// 明确交付物格式
+		if (schema) {
+			message += `\n\n<deliverable>
+按以下 schema 返回 JSON：
+\`\`\`json
+${schema}
+\`\`\`
+</deliverable>`
+		} else {
+			message += `\n\n<deliverable>
+完成后使用 attempt_completion 提交：
+- 相关文件列表
+- 关键代码片段
+- 发现与结论
+</deliverable>`
 		}
 
 		return message
 	}
 
-	private buildAskModeInstructions(schema?: string): string {
-		let instructions = `
-你在一个只读的调查任务中执行。
+	private buildTodos(query: string, scope?: SearchProjectParams["scope"], schema?: string): TodoItem[] {
+		const todos: TodoItem[] = []
 
-**你的工具权限:**
-- ✅ read_file
-- ✅ search_files
-- ✅ list_files
-- ✅ codebase_search
-- ❌ write_to_file (禁止任何编辑操作)
-- ❌ apply_diff (禁止任何编辑操作)
-- ❌ searchProject (禁止递归调用)
-- ❌ applyEdit (禁止编辑)
-- ❌ consultExpert (禁止递归调用)
-
-**你的任务:**
-1. 调查项目以回答问题
-2. 使用 search_files 和 codebase_search 查找相关代码
-3. 使用 read_file 阅读关键文件
-4. 使用 list_files 了解项目结构
-5. 完成后使用 attempt_completion 返回结果
-
-**输出要求:**
-`.trim()
-
-		if (schema) {
-			instructions += `
-严格按照提供的 schema 格式返回 JSON 数据:
-\`\`\`json
-${schema}
-\`\`\`
-`
+		// Step 1: 定位
+		if (scope?.directories) {
+			todos.push({
+				id: crypto.randomUUID(),
+				content: `在 ${scope.directories} 范围内搜索`,
+				status: "pending",
+			})
 		} else {
-			instructions += `
-提供清晰的结构化报告,包含:
-- 相关文件列表 (使用文件路径)
-- 关键代码片段
-- 你的发现和总结
-`
+			todos.push({
+				id: crypto.randomUUID(),
+				content: "使用 codebase_search 定位相关代码",
+				status: "pending",
+			})
 		}
 
-		return instructions
+		// Step 2: 分析查询（注入 query，先想后做）
+		todos.push({
+			id: crypto.randomUUID(),
+			content: `分析调查目标：${query}`,
+			status: "pending",
+		})
+
+		// Step 3: 提供退路（符合诚实透明原则）
+		todos.push({
+			id: crypto.randomUUID(),
+			content: "若无法找到相关信息，调用 attempt_completion 说明搜索结果",
+			status: "pending",
+		})
+
+		// Step 4: 深入阅读
+		todos.push({
+			id: crypto.randomUUID(),
+			content: "read_file 阅读关键文件",
+			status: "pending",
+		})
+
+		// Step 5: 整理结论
+		todos.push({
+			id: crypto.randomUUID(),
+			content: "整理发现并形成结论",
+			status: "pending",
+		})
+
+		// Step 6: 交付（末端重申质量要求）
+		todos.push({
+			id: crypto.randomUUID(),
+			content: "attempt_completion 提交：相关文件、关键代码、发现与结论",
+			status: "pending",
+		})
+
+		return todos
 	}
 
 	override async handlePartial(task: Task, block: ToolUse<"search_project">): Promise<void> {

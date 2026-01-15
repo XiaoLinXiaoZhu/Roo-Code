@@ -142,13 +142,51 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 		outputFormat?: string,
 		attachments?: string,
 	): string {
-		let message = `你现在是以下专家角色：\n\n<expert_domain>${domain}</expert_domain>\n
-${outputFormat ? `<output_format>${outputFormat}</output_format>` : ""}
-<email>
-<topic>${topic}</topic>
-<question>${question}</question>
-${attachments ? `<attachments>\n${attachments}\n</attachments>` : ""}
-</email>`
+		// 清晰明确的任务要求
+		let message = `<role>
+${domain} 领域专家
+</role>
+
+<consultation>
+主题：${topic}
+
+问题：${question}
+</consultation>`
+
+		if (attachments) {
+			message += `\n\n<attachments>
+${attachments}
+</attachments>`
+		}
+
+		// 专家咨询方法论（归化自 expert 模式 customInstructions）
+		message += `\n\n<approach>
+- 使用 read_file、search_files、codebase_search 获取上下文
+- 提供专家级深度分析，而非表面解释
+- 考虑多种方案，讨论各自的权衡
+- 主动识别潜在风险和边缘情况
+- 使用专业术语，提供代码示例佐证
+</approach>`
+
+		// 明确交付物格式
+		const formatDesc = outputFormat
+			? {
+					analysis: "深度分析报告",
+					design: "架构设计方案",
+					comparison: "方案对比评估",
+					recommendation: "具体行动建议",
+				}[outputFormat] || outputFormat
+			: "结构化专业意见"
+
+		message += `\n\n<deliverable>
+输出格式：${formatDesc}
+
+完成后使用 attempt_completion 提交：
+- 核心结论
+- 支撑分析
+- 风险与注意事项
+- 后续建议
+</deliverable>`
 
 		return message
 	}
@@ -162,38 +200,40 @@ ${attachments ? `<attachments>\n${attachments}\n</attachments>` : ""}
 	): TodoItem[] {
 		const todos: TodoItem[] = []
 
-		// 1. 身份锚定：去“作为”，强调“立足”与“见解”
+		// Step 1: 信息获取
+		if (attachments) {
+			todos.push({
+				id: crypto.randomUUID(),
+				content: `读取附件：${attachments}`,
+				status: "pending",
+			})
+		}
+
+		// Step 2: 分析问题（注入 question，先想后做）
 		todos.push({
 			id: crypto.randomUUID(),
-			content: `立足${domain}专家视角，展示专业造诣及对${topic}的独到见解`,
+			content: `分析咨询问题：${question}`,
 			status: "pending",
 		})
 
-		// 2. 信息摄入：精简措辞，去冗余
+		// Step 3: 提供退路（符合诚实透明原则）
 		todos.push({
 			id: crypto.randomUUID(),
-			content: `研读附件，消化背景信息${attachments ? `（附件：${attachments}）` : ""}`,
+			content: "若超出专业范围或信息不足，调用 attempt_completion 说明边界",
 			status: "pending",
 		})
 
-		// 3. 需求锁定：动词更精准（审视、明确）
+		// Step 4: 推演
 		todos.push({
 			id: crypto.randomUUID(),
-			content: `审视问题：${question}，明确核心诉求`,
+			content: "基于专业知识推演解决方案",
 			status: "pending",
 		})
 
-		// 4. 逻辑推演：拒绝“进行”，强调“推演”
+		// Step 5: 交付（末端重申质量要求）
 		todos.push({
 			id: crypto.randomUUID(),
-			content: `结合背景与需求深度推演，呈现分析逻辑`,
-			status: "pending",
-		})
-
-		// 5. 结果交付：动词归位，去形容词后缀
-		todos.push({
-			id: crypto.randomUUID(),
-			content: `调用 attempt_completion 交付结论：包含摘要、建议及风险提示，严格遵循 <output_format>${outputFormat}</output_format> 格式`,
+			content: "attempt_completion 提交：核心结论、支撑分析、风险提示",
 			status: "pending",
 		})
 

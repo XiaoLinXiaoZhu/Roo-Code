@@ -123,15 +123,29 @@ export class ApplyEditTool extends BaseTool<"apply_edit"> {
 	}
 
 	private buildEditMessage(instruction: string, files?: string, context?: string): string {
-		let message = `你需要按照以下指令编辑代码:\n\n**指令:**\n${instruction}`
+		// 清晰明确的任务要求
+		let message = `<task>
+编辑代码：${instruction}
+</task>`
 
 		if (files) {
-			message += `\n\n**需要修改的文件:**\n${files}`
+			message += `\n\n<scope>
+修改范围：${files}
+</scope>`
 		}
 
 		if (context) {
-			message += `\n\n**额外上下文:**\n${context}`
+			message += `\n\n<context>
+${context}
+</context>`
 		}
+
+		message += `\n\n<deliverable>
+完成后使用 attempt_completion 提交：
+- 修改了哪些文件
+- 每个文件的变更摘要
+- 验证结果（lint/type-check）
+</deliverable>`
 
 		return message
 	}
@@ -139,24 +153,53 @@ export class ApplyEditTool extends BaseTool<"apply_edit"> {
 	private buildTodos(instruction: string, files?: string): TodoItem[] {
 		const todos: TodoItem[] = []
 
+		// Step 1: 信息获取
 		if (files) {
-			todos.push({ id: crypto.randomUUID(), content: `阅读指定文件：${files}`, status: "pending" })
+			todos.push({
+				id: crypto.randomUUID(),
+				content: `读取目标文件：${files}`,
+				status: "pending",
+			})
+		} else {
+			todos.push({
+				id: crypto.randomUUID(),
+				content: "定位需要修改的文件",
+				status: "pending",
+			})
 		}
-		todos.push({ id: crypto.randomUUID(), content: "分析编辑指令：" + instruction, status: "pending" })
+
+		// Step 2: 分析指令（注入 instruction，先想后做）
 		todos.push({
 			id: crypto.randomUUID(),
-			content: "若信息不足，直接调用 attempt_completion 说明缺失内容",
+			content: `分析编辑指令：${instruction}`,
 			status: "pending",
 		})
-		todos.push({ id: crypto.randomUUID(), content: "修改代码", status: "pending" })
+
+		// Step 3: 提供退路（符合诚实透明原则）
 		todos.push({
 			id: crypto.randomUUID(),
-			content: "验证代码（运行 Lint、TypeScript 检查等）",
+			content: "若信息不足，调用 attempt_completion 说明缺失内容",
 			status: "pending",
 		})
+
+		// Step 4: 执行修改
 		todos.push({
 			id: crypto.randomUUID(),
-			content: "调用 attempt_completion 提交结果：包含修改摘要及范围",
+			content: "执行代码修改",
+			status: "pending",
+		})
+
+		// Step 5: 验证
+		todos.push({
+			id: crypto.randomUUID(),
+			content: "运行 lint 和 type-check 验证",
+			status: "pending",
+		})
+
+		// Step 6: 交付（末端重申质量要求）
+		todos.push({
+			id: crypto.randomUUID(),
+			content: "attempt_completion 提交结果：修改摘要及变更范围",
 			status: "pending",
 		})
 
