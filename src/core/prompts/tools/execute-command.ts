@@ -2,9 +2,20 @@ import { ToolArgs } from "./types"
 
 export function getExecuteCommandDescription(args: ToolArgs): string | undefined {
 	return `## execute_command
-Description: Request to execute a CLI command on the system. Use this when you need to perform system operations or run specific commands to accomplish any step in the user's task. You must tailor your command to the user's system and provide a clear explanation of what the command does. For command chaining, use the appropriate chaining syntax for the user's shell. Prefer to execute complex CLI commands over creating executable scripts, as they are more flexible and easier to run. Prefer relative commands and paths that avoid location sensitivity for terminal consistency, e.g: \`touch ./testdata/example.file\`, \`dir ./examples/model1/data/yaml\`, or \`go test ./cmd/front --config ./cmd/front/config.yml\`. If directed by the user, you may open a terminal in a different directory by using the \`cwd\` parameter.
+Description: Execute a CLI command on the system. Use for system operations or running commands to accomplish tasks.
+
+**Shell Compatibility:**
+- PowerShell: Use \`;\` to chain commands. Use PowerShell-native commands: \`Select-String\` (grep), \`Get-Content\` (cat), \`Remove-Item\` (rm), \`Copy-Item\` (cp), \`Move-Item\` (mv), \`-replace\` (sed). NEVER use Unix commands (sed/grep/awk/rm).
+- cmd.exe: Use \`&&\` to chain commands. Use built-in commands: \`type\` (cat), \`del\` (rm), \`copy\` (cp), \`move\` (mv), \`findstr\` (grep). NEVER use Unix commands.
+- bash/zsh: Use \`&&\` to chain commands. All standard Unix commands available.
+
+**Best Practices:**
+- Prefer relative paths for terminal consistency (e.g., \`./src/\` instead of absolute paths)
+- If no output is returned, assume the command succeeded
+- Prefer executing complex commands directly over creating scripts
+
 Parameters:
-- command: (required) The CLI command to execute. This should be valid for the current operating system. Ensure the command is properly formatted and does not contain any harmful instructions.
+- command: (required) The CLI command to execute, tailored to the user's shell
 - cwd: (optional) The working directory to execute the command in (default: ${args.cwd})
 Usage:
 <execute_command>

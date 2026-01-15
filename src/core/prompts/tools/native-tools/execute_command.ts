@@ -1,19 +1,20 @@
 import type OpenAI from "openai"
 
-const EXECUTE_COMMAND_DESCRIPTION = `Request to execute a CLI command on the system. Use this when you need to perform system operations or run specific commands to accomplish any step in the user's task. You must tailor your command to the user's system and provide a clear explanation of what the command does. For command chaining, use the appropriate chaining syntax for the user's shell. Prefer to execute complex CLI commands over creating executable scripts, as they are more flexible and easier to run. Prefer relative commands and paths that avoid location sensitivity for terminal consistency.
+const EXECUTE_COMMAND_DESCRIPTION = `Execute a CLI command on the system. Use for system operations or running commands to accomplish tasks.
 
-Parameters:
-- command: (required) The CLI command to execute. This should be valid for the current operating system. Ensure the command is properly formatted and does not contain any harmful instructions.
-- cwd: (optional) The working directory to execute the command in
+**Shell Compatibility:**
+- PowerShell: Use \`;\` to chain commands. Use PowerShell-native commands: \`Select-String\` (grep), \`Get-Content\` (cat), \`Remove-Item\` (rm), \`Copy-Item\` (cp), \`Move-Item\` (mv), \`-replace\` (sed). NEVER use Unix commands (sed/grep/awk/rm).
+- cmd.exe: Use \`&&\` to chain commands. Use built-in commands: \`type\` (cat), \`del\` (rm), \`copy\` (cp), \`move\` (mv), \`findstr\` (grep). NEVER use Unix commands.
+- bash/zsh: Use \`&&\` to chain commands. All standard Unix commands available.
 
-Example: Executing npm run dev
-{ "command": "npm run dev", "cwd": null }
+**Best Practices:**
+- Prefer relative paths for terminal consistency (e.g., \`./src/\` instead of absolute paths)
+- If no output is returned, assume the command succeeded
+- Prefer executing complex commands directly over creating scripts
 
-Example: Executing ls in a specific directory if directed
-{ "command": "ls -la", "cwd": "/home/user/projects" }
-
-Example: Using relative paths
-{ "command": "touch ./testdata/example.file", "cwd": null }`
+**Parameters:**
+- command: (required) The CLI command to execute, tailored to the user's shell
+- cwd: (optional) Working directory for the command`
 
 const COMMAND_PARAMETER_DESCRIPTION = `Shell command to execute`
 
