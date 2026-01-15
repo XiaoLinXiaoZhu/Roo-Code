@@ -25,14 +25,11 @@ import { PromptVariables, loadSystemPromptFile } from "./sections/custom-system-
 import type { SystemPromptSettings } from "./types"
 import { getToolDescriptionsForMode } from "./tools"
 import {
-	getRulesSection,
+	getSpiritSection,
 	getSystemInfoSection,
-	getObjectiveSection,
 	getSharedToolUseSection,
 	getMcpServersSection,
-	getToolUseGuidelinesSection,
-	getCapabilitiesSection,
-	addCustomInstructions,
+	getProjectContext,
 	markdownFormattingSection,
 	getSkillsSection,
 } from "./sections"
@@ -81,7 +78,7 @@ async function generatePrompt(
 
 	// Get the full mode config to ensure we have the role definition (used for groups, etc.)
 	const modeConfig = getModeBySlug(mode, customModeConfigs) || modes.find((m) => m.slug === mode) || modes[0]
-	const { roleDefinition, baseInstructions } = getModeSelection(mode, promptComponent, customModeConfigs)
+	const { roleDefinition } = getModeSelection(mode, promptComponent, customModeConfigs)
 
 	// Check if MCP functionality should be included
 	const hasMcpGroup = modeConfig.groups.some((groupEntry) => getGroupName(groupEntry) === "mcp")
@@ -136,30 +133,30 @@ async function generatePrompt(
 
 	const toolsCatalog = builtInToolsCatalog + customToolsSection
 
+	// 获取项目上下文（语言偏好 + 项目规则）
+	const projectContext = await getProjectContext(cwd, mode, {
+		language: language ?? formatLanguage(vscode.env.language),
+		rooIgnoreInstructions,
+		settings,
+	})
+
+	// 新的 Soul Document 结构：
+	// 1. Identity (角色定义)
+	// 2. Spirit (精神内核 - few-shot 示例)
+	// 3. Environment (系统信息 + 工具目录)
+	// 4. Project Context (项目规则)
 	const basePrompt = `${roleDefinition}
+
+${getSpiritSection()}
 
 ${markdownFormattingSection()}
 
 ${getSharedToolUseSection(effectiveProtocol, experiments)}${toolsCatalog}
 
-${getToolUseGuidelinesSection(effectiveProtocol, experiments)}
-
 ${mcpServersSection}
-
-${getCapabilitiesSection(cwd, shouldIncludeMcp ? mcpHub : undefined)}
-
 ${skillsSection ? `\n${skillsSection}` : ""}
-${getRulesSection(cwd, settings)}
-
 ${getSystemInfoSection(cwd)}
-
-${getObjectiveSection()}
-
-${await addCustomInstructions(baseInstructions, globalCustomInstructions || "", cwd, mode, {
-	language: language ?? formatLanguage(vscode.env.language),
-	rooIgnoreInstructions,
-	settings,
-})}`
+${projectContext}`
 
 	return basePrompt
 }
@@ -208,30 +205,19 @@ export const SYSTEM_PROMPT = async (
 
 	// If a file-based custom system prompt exists, use it
 	if (fileCustomSystemPrompt) {
-		const { roleDefinition, baseInstructions: baseInstructionsForFile } = getModeSelection(
-			mode,
-			promptComponent,
-			customModes,
-		)
+		const { roleDefinition } = getModeSelection(mode, promptComponent, customModes)
 
-		const customInstructions = await addCustomInstructions(
-			baseInstructionsForFile,
-			globalCustomInstructions || "",
-			cwd,
-			mode,
-			{
-				language: language ?? formatLanguage(vscode.env.language),
-				rooIgnoreInstructions,
-				settings,
-			},
-		)
+		const projectContext = await getProjectContext(cwd, mode, {
+			language: language ?? formatLanguage(vscode.env.language),
+			rooIgnoreInstructions,
+			settings,
+		})
 
 		// For file-based prompts, don't include the tool sections
 		return `${roleDefinition}
 
 ${fileCustomSystemPrompt}
-
-${customInstructions}`
+${projectContext}`
 	}
 
 	// If diff is disabled, don't pass the diffStrategy

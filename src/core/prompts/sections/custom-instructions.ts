@@ -345,6 +345,115 @@ async function loadAllAgentRulesFiles(cwd: string, enableSubfolderRules: boolean
 	return agentRules.join("\n\n")
 }
 
+/**
+ * 获取项目规则和语言偏好
+ *
+ * 这是新的简化版本，只加载：
+ * - 语言偏好
+ * - 项目规则（.roorules, AGENTS.md 等）
+ *
+ * 不再加载模式特定的 Custom Instructions，这些应该通过用户消息传递。
+ */
+export async function getProjectContext(
+	cwd: string,
+	mode: string,
+	options: {
+		language?: string
+		rooIgnoreInstructions?: string
+		settings?: SystemPromptSettings
+	} = {},
+): Promise<string> {
+	const sections: string[] = []
+
+	// Get the enableSubfolderRules setting (default: false)
+	const enableSubfolderRules = options.settings?.enableSubfolderRules ?? false
+
+	// Add language preference if provided
+	if (options.language) {
+		const languageName = isLanguage(options.language) ? LANGUAGES[options.language] : options.language
+		sections.push(`语言偏好：使用 "${languageName}" (${options.language}) 进行思考和回复。`)
+	}
+
+	// Load project rules as environment facts
+	const rules: string[] = []
+
+	// Load mode-specific rules
+	if (mode) {
+		const modeRules = await loadModeRules(cwd, mode, enableSubfolderRules)
+		if (modeRules) {
+			rules.push(modeRules)
+		}
+	}
+
+	// Add rooIgnore instructions
+	if (options.rooIgnoreInstructions) {
+		rules.push(options.rooIgnoreInstructions)
+	}
+
+	// Add AGENTS.md content if enabled
+	if (options.settings?.useAgentRules !== false) {
+		const agentRulesContent = await loadAllAgentRulesFiles(cwd, enableSubfolderRules)
+		if (agentRulesContent && agentRulesContent.trim()) {
+			rules.push(agentRulesContent.trim())
+		}
+	}
+
+	// Add generic rules
+	const genericRuleContent = await loadRuleFiles(cwd, enableSubfolderRules)
+	if (genericRuleContent && genericRuleContent.trim()) {
+		rules.push(genericRuleContent.trim())
+	}
+
+	if (rules.length > 0) {
+		sections.push(`项目规则：\n\n${rules.join("\n\n")}`)
+	}
+
+	if (sections.length === 0) {
+		return ""
+	}
+
+	return `
+====
+
+# 项目上下文 (PROJECT CONTEXT)
+
+${sections.join("\n\n")}`
+}
+
+/**
+ * 加载模式特定的规则文件
+ */
+async function loadModeRules(cwd: string, mode: string, enableSubfolderRules: boolean): Promise<string> {
+	const rooDirectories = enableSubfolderRules ? await getAllRooDirectoriesForCwd(cwd) : getRooDirectoriesForCwd(cwd)
+
+	// Check for .roo/rules-${mode}/ directories
+	for (const rooDir of rooDirectories) {
+		const modeRulesDir = path.join(rooDir, `rules-${mode}`)
+		if (await directoryExists(modeRulesDir)) {
+			const files = await readTextFilesFromDirectory(modeRulesDir)
+			if (files.length > 0) {
+				return formatDirectoryContent(files, cwd)
+			}
+		}
+	}
+
+	// Fall back to legacy files
+	const legacyFiles = [`.roorules-${mode}`, `.clinerules-${mode}`]
+	for (const file of legacyFiles) {
+		const content = await safeReadFile(path.join(cwd, file))
+		if (content) {
+			return `# Rules from ${file}:\n${content}`
+		}
+	}
+
+	return ""
+}
+
+/**
+ * @deprecated 使用 getProjectContext 替代
+ *
+ * 保留此函数以兼容现有代码和测试
+ */
 export async function addCustomInstructions(
 	modeCustomInstructions: string,
 	globalCustomInstructions: string,
