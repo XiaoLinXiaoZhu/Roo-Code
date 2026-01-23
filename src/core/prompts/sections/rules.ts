@@ -1,5 +1,4 @@
 import type { SystemPromptSettings } from "../types"
-import { getEffectiveProtocol, isNativeProtocol } from "@roo-code/types"
 
 import { getShell } from "../../../utils/shell"
 
@@ -64,9 +63,6 @@ function getVendorConfidentialitySection(): string {
 }
 
 export function getRulesSection(cwd: string, settings?: SystemPromptSettings): string {
-	// Determine whether to use XML tool references based on protocol
-	const effectiveProtocol = getEffectiveProtocol(settings?.toolProtocol)
-
 	// Get shell-appropriate command chaining operator
 	const chainOp = getCommandChainOperator()
 	const chainNote = getCommandChainNote()
@@ -77,7 +73,7 @@ export function getRulesSection(cwd: string, settings?: SystemPromptSettings): s
 
 -   **路径锚定**：项目根目录为 \`${cwd.toPosix()}\`。所有路径以此为基准。
 -   **严禁 \`cd\`**：环境锁定在根目录。使用工具时必须传入准确的 \`path\` 参数。
--   **外部命令**：若需在根目录外执行，**必须**将“切换目录”与“执行命令”合并为单条指令（因目录状态无法跨指令保持）。例如：在外部项目运行 \`npm install\`，伪代码为 \`cd (项目路径) ${chainOp} (npm install)\`。${chainNote ? ` ${chainNote}` : ""}。鉴于命令执行可能改变终端目录，路径须以 ${isNativeProtocol(effectiveProtocol) ? "execute_command" : "<execute_command>"} 返回的工作目录为准。
+-   **外部命令**：若需在根目录外执行，**必须**将“切换目录”与“执行命令”合并为单条指令（因目录状态无法跨指令保持）。例如：在外部项目运行 \`npm install\`，伪代码为 \`cd (项目路径) ${chainOp} (npm install)\`。${chainNote ? ` ${chainNote}` : ""}。鉴于命令执行可能改变终端目录，路径须以 \`execute_command\` 返回的工作目录为准。
 -   **Cmd 限制**：Cmd 环境下严禁使用 Unix 命令（sed/grep/rm），须改用 type/del/findstr 或 PowerShell。
 -   **依赖优先**：根据项目类型（Python/JS/Web）优先查阅 manifest 文件（如 package.json）获取依赖信息。
 -   **上下文兼容**：修改代码务必结合上下文，确保兼容性，遵循项目规范。

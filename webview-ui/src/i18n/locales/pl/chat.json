@@ -335,9 +335,9 @@
 		},
 		"release": {
 			"heading": "Co nowego:",
-			"openaiCodexProvider": "Dodano dostawcę OpenAI - ChatGPT Plus/Pro, który zapewnia dostęp oparty na subskrypcji do modeli Codex bez kosztów per-token.",
-			"gpt52codexModel": "Nowy model gpt-5.2-codex został dodany do Roo Code Router, standardowego dostawcy OpenAI i więcej.",
-			"bugFixes": "Naprawiono wycieki pamięci powodujące szare ekrany, problemy z podpisami myśli Gemini i inne ulepszenia stabilności."
+			"chatGptUsageLimits": "Dodano interfejs użytkownika do śledzenia limitów użycia ChatGPT w dostawcy OpenAI Codex.",
+			"claudeCodeRemoved": "Usunięto przestarzałego dostawcę Claude Code.",
+			"grokCodeFastFreeEnds": "Grok Code Fast już nie jest darmowy - dziękujemy xAI za hojną promocję!"
 		},
 		"cloudAgents": {
 			"heading": "Nowości w chmurze:",
@@ -347,8 +347,14 @@
 		},
 		"careers": "Dodatkowo, <careersLink>zatrudniamy!</careersLink>"
 	},
+	"costs": {
+		"totalWithSubtasks": "Całkowity koszt (w tym podzadania): ${{cost}}",
+		"total": "Całkowity koszt: ${{cost}}",
+		"includesSubtasks": "Zawiera koszty podzadań"
+	},
 	"browser": {
 		"session": "Sesja przeglądarki",
+		"active": "Aktywna",
 		"rooWantsToUse": "Roo chce użyć przeglądarki",
 		"consoleLogs": "Logi konsoli",
 		"noNewLogs": "(Brak nowych logów)",
@@ -486,5 +492,14 @@
 		"updated": "Zaktualizowano listę zadań do wykonania",
 		"completed": "Ukończono",
 		"started": "Rozpoczęto"
+	},
+	"tooManyTools": {
+		"title": "Włączono zbyt wiele narzędzi",
+		"toolsPart_one": "{{count}} narzędzie",
+		"toolsPart_other": "{{count}} narzędzi",
+		"serversPart_one": "{{count}} serwer MCP",
+		"serversPart_other": "{{count}} serwerów MCP",
+		"messageTemplate": "Masz {{tools}} włączonych przez {{servers}}. Taka duża liczba może zamieszać model i prowadzić do błędów. Staraj się, aby była poniżej {{threshold}}.",
+		"openMcpSettings": "Otwórz ustawienia MCP"
 	}
 }

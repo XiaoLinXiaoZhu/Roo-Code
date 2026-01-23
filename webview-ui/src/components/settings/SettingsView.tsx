@@ -197,8 +197,6 @@ const SettingsView = forwardRef<SettingsViewRef, SettingsViewProps>(({ onDone, t
 		maxTotalImageSize,
 		terminalCompressProgressBar,
 		maxConcurrentFileReads,
-		condensingApiConfigId,
-		customCondensingPrompt,
 		customSupportPrompts,
 		profileThresholds,
 		alwaysAllowFollowupQuestions,
@@ -420,7 +418,6 @@ const SettingsView = forwardRef<SettingsViewRef, SettingsViewProps>(({ onDone, t
 					alwaysAllowSubtasks,
 					alwaysAllowFollowupQuestions: alwaysAllowFollowupQuestions ?? false,
 					followupAutoApproveTimeoutMs,
-					condensingApiConfigId: condensingApiConfigId || "",
 					includeTaskHistoryInEnhance: includeTaskHistoryInEnhance ?? true,
 					reasoningBlockCollapsed: reasoningBlockCollapsed ?? true,
 					enterBehavior: enterBehavior ?? "send",
@@ -438,7 +435,6 @@ const SettingsView = forwardRef<SettingsViewRef, SettingsViewProps>(({ onDone, t
 
 			// These have more complex logic so they aren't (yet) handled
 			// by the `updateSettings` message.
-			vscode.postMessage({ type: "updateCondensingPrompt", text: customCondensingPrompt || "" })
 			vscode.postMessage({ type: "upsertApiConfiguration", text: currentApiConfigName, apiConfiguration })
 			vscode.postMessage({ type: "telemetrySetting", text: telemetrySetting })
 			vscode.postMessage({ type: "debugSetting", bool: cachedState.debug })
@@ -588,18 +584,33 @@ const SettingsView = forwardRef<SettingsViewRef, SettingsViewProps>(({ onDone, t
 	const initialTab = useRef<SectionName>(activeTab)
 	const isIndexing = indexingTabIndex < sectionNames.length
 	const isIndexingComplete = !isIndexing
+	const tabTitlesRegistered = useRef(false)
 
 	// Index all tabs by cycling through them on mount
 	useLayoutEffect(() => {
 		if (indexingTabIndex >= sectionNames.length) {
-			// All tabs indexed, return to initial tab
-			setActiveTab(initialTab.current)
+			// All tabs indexed, now register tab titles as searchable items
+			if (!tabTitlesRegistered.current && searchContextValue) {
+				sections.forEach(({ id }) => {
+					const tabTitle = t(`settings:sections.${id}`)
+					// Register each tab title as a searchable item
+					// Using a special naming convention for tab titles: "tab-{sectionName}"
+					searchContextValue.registerSetting({
+						settingId: `tab-${id}`,
+						section: id,
+						label: tabTitle,
+					})
+				})
+				tabTitlesRegistered.current = true
+				// Return to initial tab
+				setActiveTab(initialTab.current)
+			}
 			return
 		}
 
 		// Move to the next tab on next render
 		setIndexingTabIndex((prev) => prev + 1)
-	}, [indexingTabIndex])
+	}, [indexingTabIndex, searchContextValue, sections, t])
 
 	// Determine which tab content to render (for indexing or active display)
 	const renderTab = isIndexing ? sectionNames[indexingTabIndex] : activeTab
@@ -852,6 +863,8 @@ const SettingsView = forwardRef<SettingsViewRef, SettingsViewProps>(({ onDone, t
 								includeCurrentTime={includeCurrentTime}
 								includeCurrentCost={includeCurrentCost}
 								maxGitStatusFiles={maxGitStatusFiles}
+								customSupportPrompts={customSupportPrompts || {}}
+								setCustomSupportPrompts={setCustomSupportPromptsField}
 								setCachedStateField={setCachedStateField}
 							/>
 						)}

@@ -1,15 +1,7 @@
 import * as vscode from "vscode"
 import * as os from "os"
 
-import {
-	type ModeConfig,
-	type PromptComponent,
-	type CustomModePrompts,
-	type TodoItem,
-	getEffectiveProtocol,
-	isNativeProtocol,
-} from "@roo-code/types"
-import { customToolRegistry, formatXml } from "@roo-code/core"
+import { type ModeConfig, type PromptComponent, type CustomModePrompts, type TodoItem } from "@roo-code/types"
 
 import { Mode, modes, defaultModeSlug, getModeBySlug, getGroupName, getModeSelection } from "../../shared/modes"
 import { DiffStrategy } from "../../shared/tools"
@@ -23,7 +15,6 @@ import { SkillsManager } from "../../services/skills/SkillsManager"
 import { PromptVariables, loadSystemPromptFile } from "./sections/custom-system-prompt"
 
 import type { SystemPromptSettings } from "./types"
-import { getToolDescriptionsForMode } from "./tools"
 import {
 	getSpiritSection,
 	getSystemInfoSection,
@@ -87,51 +78,15 @@ async function generatePrompt(
 
 	const codeIndexManager = CodeIndexManager.getInstance(context, cwd)
 
-	// Determine the effective protocol (defaults to 'xml')
-	const effectiveProtocol = getEffectiveProtocol(settings?.toolProtocol)
-
 	const [mcpServersSection, skillsSection] = await Promise.all([
 		shouldIncludeMcp
-			? getMcpServersSection(
-					mcpHub,
-					effectiveDiffStrategy,
-					enableMcpServerCreation,
-					!isNativeProtocol(effectiveProtocol),
-				)
+			? getMcpServersSection(mcpHub, effectiveDiffStrategy, enableMcpServerCreation, false)
 			: Promise.resolve(""),
 		getSkillsSection(skillsManager, mode as string),
 	])
 
-	// Build tools catalog section only for XML protocol
-	const builtInToolsCatalog = isNativeProtocol(effectiveProtocol)
-		? ""
-		: `\n\n${getToolDescriptionsForMode(
-				mode,
-				cwd,
-				supportsComputerUse,
-				codeIndexManager,
-				effectiveDiffStrategy,
-				browserViewportSize,
-				shouldIncludeMcp ? mcpHub : undefined,
-				customModeConfigs,
-				experiments,
-				partialReadsEnabled,
-				settings,
-				enableMcpServerCreation,
-				modelId,
-			)}`
-
-	let customToolsSection = ""
-
-	if (experiments?.customTools && !isNativeProtocol(effectiveProtocol)) {
-		const customTools = customToolRegistry.getAllSerialized()
-
-		if (customTools.length > 0) {
-			customToolsSection = `\n\n${formatXml(customTools)}`
-		}
-	}
-
-	const toolsCatalog = builtInToolsCatalog + customToolsSection
+	// Tools catalog is not included in the system prompt.
+	const toolsCatalog = ""
 
 	// 获取项目上下文（语言偏好 + 项目规则）
 	const projectContext = await getProjectContext(cwd, mode, {
@@ -151,7 +106,7 @@ ${getSpiritSection()}
 
 ${markdownFormattingSection()}
 
-${getSharedToolUseSection(effectiveProtocol, experiments)}${toolsCatalog}
+${getSharedToolUseSection(experiments)}${toolsCatalog}
 
 ${mcpServersSection}
 ${skillsSection ? `\n${skillsSection}` : ""}

@@ -335,9 +335,9 @@
 		},
 		"release": {
 			"heading": "새로운 기능:",
-			"openaiCodexProvider": "OpenAI - ChatGPT Plus/Pro 공급자가 추가되었으며, 토큰당 비용 없이 Codex 모델에 대한 구독 기반 액세스를 제공합니다.",
-			"gpt52codexModel": "새로운 gpt-5.2-codex 모델이 Roo Code Router, 표준 OpenAI 공급자 등에 추가되었습니다.",
-			"bugFixes": "회색 화면을 유발하는 메모리 누수, Gemini 생각 서명 문제 및 추가 안정성 개선 사항을 수정했습니다."
+			"chatGptUsageLimits": "OpenAI Codex 공급자에서 ChatGPT 사용 제한을 추적하는 UI를 추가했습니다.",
+			"claudeCodeRemoved": "지원 중단된 Claude Code 공급자를 제거했습니다.",
+			"grokCodeFastFreeEnds": "Grok Code Fast는 더 이상 무료가 아닙니다 - 관대한 프로모션을 해준 xAI에 감사합니다!"
 		},
 		"cloudAgents": {
 			"heading": "클라우드의 새로운 기능:",
@@ -347,8 +347,14 @@
 		},
 		"careers": "그리고, <careersLink>채용 중입니다!</careersLink>"
 	},
+	"costs": {
+		"totalWithSubtasks": "총 비용 (하위 작업 포함): ${{cost}}",
+		"total": "총 비용: ${{cost}}",
+		"includesSubtasks": "하위 작업 비용 포함"
+	},
 	"browser": {
 		"session": "브라우저 세션",
+		"active": "활성",
 		"rooWantsToUse": "Roo가 브라우저를 사용하고 싶어합니다",
 		"consoleLogs": "콘솔 로그",
 		"noNewLogs": "(새 로그 없음)",
@@ -486,5 +492,14 @@
 		"updated": "할 일 목록을 업데이트했습니다",
 		"completed": "완료됨",
 		"started": "시작됨"
+	},
+	"tooManyTools": {
+		"title": "활성화된 도구가 너무 많습니다",
+		"toolsPart_one": "{{count}}개 도구",
+		"toolsPart_other": "{{count}}개 도구",
+		"serversPart_one": "{{count}}개 MCP 서버",
+		"serversPart_other": "{{count}}개 MCP 서버",
+		"messageTemplate": "{{servers}}를 통해 {{tools}}가 활성화되어 있습니다. 이렇게 많은 수의 도구는 모델을 혼동시키고 오류를 유발할 수 있습니다. {{threshold}} 이하로 유지하도록 노력하세요.",
+		"openMcpSettings": "MCP 설정 열기"
 	}
 }
