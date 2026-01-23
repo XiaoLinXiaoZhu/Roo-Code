@@ -569,6 +569,44 @@ export class NativeToolCallParser {
 				}
 				break
 
+			// Agent as Tools 架构的新工具
+			case "search_project":
+				if (partialArgs.query !== undefined) {
+					nativeArgs = {
+						query: partialArgs.query,
+						scope: partialArgs.scope,
+						schema: partialArgs.schema,
+					}
+				}
+				break
+
+			case "apply_edit":
+				if (partialArgs.instruction !== undefined) {
+					nativeArgs = {
+						instruction: partialArgs.instruction,
+						files: partialArgs.files,
+						context: partialArgs.context,
+						validate: partialArgs.validate,
+					}
+				}
+				break
+
+			case "consult_expert":
+				if (
+					partialArgs.domain !== undefined ||
+					partialArgs.topic !== undefined ||
+					partialArgs.question !== undefined
+				) {
+					nativeArgs = {
+						domain: partialArgs.domain,
+						topic: partialArgs.topic,
+						question: partialArgs.question,
+						attachments: partialArgs.attachments,
+						outputFormat: partialArgs.outputFormat,
+					}
+				}
+				break
+
 			default:
 				break
 		}

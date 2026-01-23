@@ -259,6 +259,24 @@ export interface GenerateImageToolUse extends ToolUse<"generate_image"> {
 	params: Partial<Pick<Record<ToolParamName, string>, "prompt" | "path" | "image">>
 }
 
+// Agent as Tools 架构的新工具接口定义
+export interface SearchProjectToolUse extends ToolUse<"search_project"> {
+	name: "search_project"
+	params: Partial<Pick<Record<ToolParamName, string>, "query" | "scope" | "schema">>
+}
+
+export interface ApplyEditToolUse extends ToolUse<"apply_edit"> {
+	name: "apply_edit"
+	params: Partial<Pick<Record<ToolParamName, string>, "instruction" | "files" | "context" | "validate">>
+}
+
+export interface ConsultExpertToolUse extends ToolUse<"consult_expert"> {
+	name: "consult_expert"
+	params: Partial<
+		Pick<Record<ToolParamName, string>, "domain" | "topic" | "question" | "attachments" | "outputFormat">
+	>
+}
+
 // Define tool group configuration
 export type ToolGroupConfig = {
 	tools: readonly string[]
