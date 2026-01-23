@@ -115,6 +115,29 @@ export type NativeToolArgs = {
 	update_todo_list: { todos: string }
 	use_mcp_tool: { server_name: string; tool_name: string; arguments?: Record<string, unknown> }
 	write_to_file: { path: string; content: string }
+	// Agent as Tools 架构的新工具
+	search_project: {
+		query: string
+		scope?: {
+			directories?: string
+			filePatterns?: string
+			excludes?: string
+		}
+		schema?: string
+	}
+	apply_edit: {
+		instruction: string
+		files?: string
+		context?: string
+		validate?: string
+	}
+	consult_expert: {
+		domain: string
+		topic: string
+		question: string
+		attachments?: string
+		outputFormat?: "analysis" | "design" | "comparison" | "recommendation"
+	}
 	// Add more tools as they are migrated to native protocol
 }
 
