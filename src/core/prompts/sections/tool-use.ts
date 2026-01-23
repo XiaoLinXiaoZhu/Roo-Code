@@ -14,5 +14,5 @@ export function getSharedToolUseSection(experimentFlags?: Record<string, boolean
 	return `====
 
 # 工具使用 (TOOL USE)
-你拥有一套工具集（需用户批准，使用原生调用，禁含 XML）。${toolUseGuidance}`
+你拥有一套工具集（需用户批准，使用原生调用）。${toolUseGuidance}`
 }
