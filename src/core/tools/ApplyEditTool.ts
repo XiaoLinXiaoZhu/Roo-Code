@@ -213,9 +213,9 @@ ${context}
 
 		const partialMessage = JSON.stringify({
 			tool: "applyEdit",
-			instruction: this.removeClosingTag("instruction", instruction, block.partial),
-			files: this.removeClosingTag("files", files, block.partial),
-			context: this.removeClosingTag("context", context, block.partial),
+			instruction: instruction,
+			files: files,
+			context: context,
 		})
 
 		await task.ask("tool", partialMessage, block.partial).catch(() => {})

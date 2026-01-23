@@ -243,8 +243,8 @@ ${schema}
 
 		const partialMessage = JSON.stringify({
 			tool: "searchProject",
-			query: this.removeClosingTag("query", query, block.partial),
-			scope: scope ? JSON.parse(this.removeClosingTag("scope", scope, block.partial)) : undefined,
+			query: query,
+			scope: scope,
 		})
 
 		await task.ask("tool", partialMessage, block.partial).catch(() => {})

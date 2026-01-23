@@ -247,10 +247,10 @@ ${attachments}
 
 		const partialMessage = JSON.stringify({
 			tool: "consultExpert",
-			domain: this.removeClosingTag("domain", domain, block.partial),
-			topic: this.removeClosingTag("topic", topic, block.partial),
-			question: this.removeClosingTag("question", question, block.partial),
-			attachments: this.removeClosingTag("attachments", attachments, block.partial),
+			domain: domain,
+			topic: topic,
+			question: question,
+			attachments: attachments,
 		})
 
 		await task.ask("tool", partialMessage, block.partial).catch(() => {})

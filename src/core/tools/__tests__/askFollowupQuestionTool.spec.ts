@@ -57,10 +57,7 @@ describe("askFollowupQuestionTool", () => {
 			},
 			nativeArgs: {
 				question: "What would you like to do?",
-				follow_up: [
-					{ text: "Write code", mode: "code" },
-					{ text: "Debug issue", mode: "debug" },
-				],
+				follow_up: [{ text: "Write code" }, { text: "Debug issue" }],
 			},
 			partial: false,
 		}
@@ -73,9 +70,7 @@ describe("askFollowupQuestionTool", () => {
 
 		expect(mockCline.ask).toHaveBeenCalledWith(
 			"followup",
-			expect.stringContaining(
-				'"suggest":[{"answer":"Write code","mode":"code"},{"answer":"Debug issue","mode":"debug"}]',
-			),
+			expect.stringContaining('"suggest":[{"answer":"Write code"},{"answer":"Debug issue"}]'),
 			false,
 		)
 	})
@@ -89,7 +84,7 @@ describe("askFollowupQuestionTool", () => {
 			},
 			nativeArgs: {
 				question: "What would you like to do?",
-				follow_up: [{ text: "Regular option" }, { text: "Plan architecture", mode: "architect" }],
+				follow_up: [{ text: "Regular option" }, { text: "Plan architecture" }],
 			},
 			partial: false,
 		}
@@ -102,9 +97,7 @@ describe("askFollowupQuestionTool", () => {
 
 		expect(mockCline.ask).toHaveBeenCalledWith(
 			"followup",
-			expect.stringContaining(
-				'"suggest":[{"answer":"Regular option"},{"answer":"Plan architecture","mode":"architect"}]',
-			),
+			expect.stringContaining('"suggest":[{"answer":"Regular option"},{"answer":"Plan architecture"}]'),
 			false,
 		)
 	})
@@ -165,7 +158,7 @@ describe("askFollowupQuestionTool", () => {
 			NativeToolCallParser.startStreamingToolCall("call_123", "ask_followup_question")
 
 			// Simulate streaming JSON chunks
-			const chunk1 = '{"question":"What would you like?","follow_up":[{"text":"Option 1","mode":"code"}'
+			const chunk1 = '{"question":"What would you like?","follow_up":[{"text":"Option 1"}'
 			const result1 = NativeToolCallParser.processStreamingChunk("call_123", chunk1)
 
 			expect(result1).not.toBeNull()
@@ -175,7 +168,7 @@ describe("askFollowupQuestionTool", () => {
 			// Use type assertion to access the specific fields
 			const nativeArgs = result1?.nativeArgs as {
 				question: string
-				follow_up?: Array<{ text: string; mode?: string }>
+				follow_up?: Array<{ text: string }>
 			}
 			expect(nativeArgs?.question).toBe("What would you like?")
 			// partial-json should parse the incomplete array
@@ -186,8 +179,7 @@ describe("askFollowupQuestionTool", () => {
 			NativeToolCallParser.startStreamingToolCall("call_456", "ask_followup_question")
 
 			// Add complete JSON
-			const completeJson =
-				'{"question":"Choose an option","follow_up":[{"text":"Yes","mode":"code"},{"text":"No","mode":null}]}'
+			const completeJson = '{"question":"Choose an option","follow_up":[{"text":"Yes"},{"text":"No"}]}'
 			NativeToolCallParser.processStreamingChunk("call_456", completeJson)
 
 			const result = NativeToolCallParser.finalizeStreamingToolCall("call_456")
@@ -200,10 +192,7 @@ describe("askFollowupQuestionTool", () => {
 			if (result?.type === "tool_use") {
 				expect(result.nativeArgs).toEqual({
 					question: "Choose an option",
-					follow_up: [
-						{ text: "Yes", mode: "code" },
-						{ text: "No", mode: null },
-					],
+					follow_up: [{ text: "Yes" }, { text: "No" }],
 				})
 			}
 		})
