@@ -207,7 +207,7 @@ export const ALWAYS_AVAILABLE_TOOLS: ToolName[] = [
 
 ### 4. 系统提示词重构为 Soul Document
 
-采用 OpenAI 推荐的提示词设计原则，将系统提示词重构为"Soul Document"架构：
+采用 Claude 使用的提示词设计原则，将系统提示词重构为"Soul Document"架构：
 
 #### 新的提示词结构
 
