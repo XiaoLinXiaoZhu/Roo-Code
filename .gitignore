@@ -54,3 +54,6 @@ qdrant_storage/
 plans/
 
 roo-cli-*.tar.gz*
+
+# Local Git hooks (don't commit personal hook customizations)
+.git/hooks.local/
