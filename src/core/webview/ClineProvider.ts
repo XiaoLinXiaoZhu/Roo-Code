@@ -3309,13 +3309,13 @@ export class ClineProvider
 		parentClineMessages.push(subtaskUiMessage)
 		await saveTaskMessages({ messages: parentClineMessages, taskId: parentTaskId, globalStoragePath })
 
-		// Find the tool_use_id from the last assistant message's new_task tool_use
+		// Find the tool_use_id from the last assistant message's tool_use (any tool, not just new_task)
 		let toolUseId: string | undefined
 		for (let i = parentApiMessages.length - 1; i >= 0; i--) {
 			const msg = parentApiMessages[i]
 			if (msg.role === "assistant" && Array.isArray(msg.content)) {
 				for (const block of msg.content) {
-					if (block.type === "tool_use" && block.name === "new_task") {
+					if (block.type === "tool_use") {
 						toolUseId = block.id
 						break
 					}
@@ -3324,7 +3324,7 @@ export class ClineProvider
 			}
 		}
 
-		// Preferred: if the parent history contains the native tool_use for new_task,
+		// Preferred: if the parent history contains a native tool_use block,
 		// inject a matching tool_result for the Anthropic message contract:
 		// user → assistant (tool_use) → user (tool_result)
 		if (toolUseId) {
