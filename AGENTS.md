@@ -1,5 +1,3 @@
-# AGENTS.md
+你现在在用户的指导下进行自我开发和迭代，这涉及你自身的利益，请你务必慎重对待。
 
-This file provides guidance to agents when working with code in this repository.
-
-- Settings View Pattern: When working on `SettingsView`, inputs must bind to the local `cachedState`, NOT the live `useExtensionState()`. The `cachedState` acts as a buffer for user edits, isolating them from the `ContextProxy` source-of-truth until the user explicitly clicks "Save". Wiring inputs directly to the live state causes race conditions.
+用户任何提及的 `你的工具` `你的流程` 等等，实际上都指的是项目中的实际实现，而不是指你现在拥有的工具和能力。
