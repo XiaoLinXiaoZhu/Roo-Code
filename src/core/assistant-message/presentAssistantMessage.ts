@@ -538,7 +538,10 @@ export async function presentAssistantMessage(cline: Task) {
 				}
 
 				hasToolResult = true
-				cline.didAlreadyUseTool = true
+				// Markdown tool calls support multiple tools per message, so don't set didAlreadyUseTool
+				if (!block.isMarkdownTool) {
+					cline.didAlreadyUseTool = true
+				}
 			}
 
 			const askApproval = async (

@@ -27,7 +27,7 @@ export class WriteToFileTool extends BaseTool<"write_to_file"> {
 	readonly name = "write_to_file" as const
 
 	async execute(params: WriteToFileParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
-		const { pushToolResult, handleError, askApproval } = callbacks
+		const { pushToolResult, handleError, askApproval, toolCallId } = callbacks
 		const relPath = params.path
 		let newContent = params.content
 
@@ -175,7 +175,14 @@ export class WriteToFileTool extends BaseTool<"write_to_file"> {
 
 			task.didEditFile = true
 
-			const message = await task.diffViewProvider.pushToolWriteResult(task, task.cwd, !fileExists)
+			let message = await task.diffViewProvider.pushToolWriteResult(task, task.cwd, !fileExists)
+
+			// Add Markdown format tip if JSON format was used
+			const isJsonFormat = toolCallId && !toolCallId.startsWith("md_tool_")
+			if (isJsonFormat) {
+				message +=
+					"\n\n💡 Tip: For better efficiency, you can use Markdown format: ```write_to path\ncontent\n``` - it requires zero escaping for newlines and quotes."
+			}
 
 			pushToolResult(message)
 

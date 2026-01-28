@@ -104,6 +104,7 @@ import { RooIgnoreController } from "../ignore/RooIgnoreController"
 import { RooProtectedController } from "../protect/RooProtectedController"
 import { type AssistantMessageContent, presentAssistantMessage } from "../assistant-message"
 import { NativeToolCallParser } from "../assistant-message/NativeToolCallParser"
+import { MarkdownToolParser } from "../assistant-message/MarkdownToolParser"
 import { manageContext, willManageContext } from "../context-management"
 import { ClineProvider } from "../webview/ClineProvider"
 import { MultiSearchReplaceDiffStrategy } from "../diff/strategies/multi-search-replace"
@@ -389,6 +390,9 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 	// Native tool call streaming state (track which index each tool is at)
 	private streamingToolCallIndices: Map<string, number> = new Map()
+
+	// Markdown tool call parser for detecting ```write_to and ```apply_diff blocks
+	private markdownToolParser: MarkdownToolParser = new MarkdownToolParser()
 
 	// Cached model info for current streaming session (set at start of each API request)
 	// This prevents excessive getModel() calls during tool execution
@@ -2639,6 +2643,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				this.presentAssistantMessageHasPendingUpdates = false
 				// No legacy text-stream tool parser.
 				this.streamingToolCallIndices.clear()
+				this.markdownToolParser.reset()
 				// Clear any leftover streaming tool call state from previous interrupted streams
 				NativeToolCallParser.clearAllStreamingToolCalls()
 				NativeToolCallParser.clearRawChunkState()
@@ -2883,19 +2888,98 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 							case "text": {
 								assistantMessage += chunk.text
 
-								// Native tool calling: text chunks are plain text.
-								// Create or update a text content block directly
-								const lastBlock = this.assistantMessageContent[this.assistantMessageContent.length - 1]
-								if (lastBlock?.type === "text" && lastBlock.partial) {
-									lastBlock.content = assistantMessage
-								} else {
-									this.assistantMessageContent.push({
-										type: "text",
-										content: assistantMessage,
-										partial: true,
-									})
-									this.userMessageContentReady = false
+								// Process text through Markdown tool parser to detect ```write_to and ```apply_diff blocks
+								const markdownEvents = this.markdownToolParser.processChunk(chunk.text)
+
+								for (const mdEvent of markdownEvents) {
+									switch (mdEvent.type) {
+										case "tool_start": {
+											// Create a new ToolUse block for the Markdown tool call
+											const toolUse: ToolUse = {
+												type: "tool_use",
+												name: mdEvent.toolName,
+												params: {
+													path: mdEvent.path,
+													content: "",
+												},
+												partial: true,
+												isMarkdownTool: true,
+											}
+											// Store the tool call ID
+											;(toolUse as any).id = mdEvent.id
+											const toolUseIndex = this.assistantMessageContent.length
+											this.streamingToolCallIndices.set(mdEvent.id, toolUseIndex)
+											this.assistantMessageContent.push(toolUse)
+											this.userMessageContentReady = false
+											break
+										}
+										case "tool_delta": {
+											// Update the ToolUse content
+											const toolUseIndex = this.streamingToolCallIndices.get(mdEvent.id)
+											if (toolUseIndex !== undefined) {
+												const toolUse = this.assistantMessageContent[toolUseIndex] as ToolUse
+												if (toolUse && toolUse.type === "tool_use") {
+													toolUse.params.content =
+														(toolUse.params.content || "") + mdEvent.contentDelta
+												}
+											}
+											break
+										}
+										case "tool_end": {
+											// Mark the ToolUse as complete and build nativeArgs
+											const toolUseIndex = this.streamingToolCallIndices.get(mdEvent.id)
+											if (toolUseIndex !== undefined) {
+												const toolUse = this.assistantMessageContent[toolUseIndex] as ToolUse
+												if (toolUse && toolUse.type === "tool_use") {
+													toolUse.partial = false
+													// Build nativeArgs based on tool type
+													const path = toolUse.params.path
+													const content = toolUse.params.content || ""
+													if (toolUse.name === "write_to_file") {
+														toolUse.nativeArgs = { path, content } as any
+													} else if (toolUse.name === "apply_diff") {
+														toolUse.nativeArgs = { path, diff: content } as any
+													}
+												}
+												this.streamingToolCallIndices.delete(mdEvent.id)
+											}
+											break
+										}
+										case "text": {
+											// Regular text content - update the text block
+											const lastBlock =
+												this.assistantMessageContent[this.assistantMessageContent.length - 1]
+											if (lastBlock?.type === "text" && lastBlock.partial) {
+												lastBlock.content += mdEvent.content
+											} else if (mdEvent.content) {
+												this.assistantMessageContent.push({
+													type: "text",
+													content: mdEvent.content,
+													partial: true,
+												})
+												this.userMessageContentReady = false
+											}
+											break
+										}
+									}
 								}
+
+								// If no markdown events were generated, fall back to regular text handling
+								if (markdownEvents.length === 0) {
+									const lastBlock =
+										this.assistantMessageContent[this.assistantMessageContent.length - 1]
+									if (lastBlock?.type === "text" && lastBlock.partial) {
+										lastBlock.content = assistantMessage
+									} else {
+										this.assistantMessageContent.push({
+											type: "text",
+											content: assistantMessage,
+											partial: true,
+										})
+										this.userMessageContentReady = false
+									}
+								}
+
 								presentAssistantMessage(this)
 								break
 							}
@@ -2981,6 +3065,61 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 								// Present the tool call - validation will handle missing params
 								presentAssistantMessage(this)
+							}
+						}
+					}
+
+					// Finalize any remaining markdown tool calls that weren't explicitly ended
+					// This handles cases where the stream ends mid-tool-call (e.g., ```write_to without closing ```)
+					const markdownFinalizeEvents = this.markdownToolParser.finalize()
+					for (const mdEvent of markdownFinalizeEvents) {
+						switch (mdEvent.type) {
+							case "tool_end": {
+								// Mark the ToolUse as complete and build nativeArgs
+								const toolUseIndex = this.streamingToolCallIndices.get(mdEvent.id)
+								if (toolUseIndex !== undefined) {
+									const toolUse = this.assistantMessageContent[toolUseIndex] as ToolUse
+									if (toolUse && toolUse.type === "tool_use") {
+										toolUse.partial = false
+										// Build nativeArgs based on tool type
+										const path = toolUse.params.path
+										const content = toolUse.params.content || ""
+										if (toolUse.name === "write_to_file") {
+											toolUse.nativeArgs = { path, content } as any
+										} else if (toolUse.name === "apply_diff") {
+											toolUse.nativeArgs = { path, diff: content } as any
+										}
+									}
+									this.streamingToolCallIndices.delete(mdEvent.id)
+									this.userMessageContentReady = false
+									presentAssistantMessage(this)
+								}
+								break
+							}
+							case "tool_delta": {
+								// Update the ToolUse content with any remaining delta
+								const toolUseIndex = this.streamingToolCallIndices.get(mdEvent.id)
+								if (toolUseIndex !== undefined) {
+									const toolUse = this.assistantMessageContent[toolUseIndex] as ToolUse
+									if (toolUse && toolUse.type === "tool_use") {
+										toolUse.params.content = (toolUse.params.content || "") + mdEvent.contentDelta
+									}
+								}
+								break
+							}
+							case "text": {
+								// Handle any remaining text content
+								const lastBlock = this.assistantMessageContent[this.assistantMessageContent.length - 1]
+								if (lastBlock?.type === "text" && lastBlock.partial) {
+									lastBlock.content += mdEvent.content
+								} else if (mdEvent.content) {
+									this.assistantMessageContent.push({
+										type: "text",
+										content: mdEvent.content,
+										partial: true,
+									})
+								}
+								break
 							}
 						}
 					}

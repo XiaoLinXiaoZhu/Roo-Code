@@ -25,7 +25,7 @@ export class ApplyDiffTool extends BaseTool<"apply_diff"> {
 	readonly name = "apply_diff" as const
 
 	async execute(params: ApplyDiffParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
-		const { askApproval, handleError, pushToolResult } = callbacks
+		const { askApproval, handleError, pushToolResult, toolCallId } = callbacks
 		let { path: relPath, diff: diffContent } = params
 
 		if (diffContent && !task.api.getModel().id.includes("claude")) {
@@ -245,10 +245,16 @@ export class ApplyDiffTool extends BaseTool<"apply_diff"> {
 					? "\n<notice>Making multiple related changes in a single apply_diff is more efficient. If other changes are needed in this file, please include them as additional SEARCH/REPLACE blocks.</notice>"
 					: ""
 
+			// Add Markdown format tip if JSON format was used
+			const isJsonFormat = toolCallId && !toolCallId.startsWith("md_tool_")
+			const markdownTip = isJsonFormat
+				? "\n\n💡 Tip: For better efficiency, you can use Markdown format: ```apply_diff path\ndiff content\n``` - it requires zero escaping for newlines and quotes."
+				: ""
+
 			if (partFailHint) {
-				pushToolResult(partFailHint + message + singleBlockNotice)
+				pushToolResult(partFailHint + message + singleBlockNotice + markdownTip)
 			} else {
-				pushToolResult(message + singleBlockNotice)
+				pushToolResult(message + singleBlockNotice + markdownTip)
 			}
 
 			await task.diffViewProvider.reset()
