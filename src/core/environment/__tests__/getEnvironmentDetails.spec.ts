@@ -8,7 +8,6 @@ import { getEnvironmentDetails } from "../getEnvironmentDetails"
 import { EXPERIMENT_IDS, experiments } from "../../../shared/experiments"
 import { getFullModeDetails } from "../../../shared/modes"
 import { isToolAllowedForMode } from "../../tools/validateToolUse"
-import { getApiMetrics } from "../../../shared/getApiMetrics"
 import { listFiles } from "../../../services/glob/list-files"
 import { TerminalRegistry } from "../../../integrations/terminal/TerminalRegistry"
 import { Terminal } from "../../../integrations/terminal/Terminal"
@@ -45,7 +44,6 @@ vi.mock("execa", () => ({
 
 vi.mock("../../../shared/experiments")
 vi.mock("../../../shared/modes")
-vi.mock("../../../shared/getApiMetrics")
 vi.mock("../../../services/glob/list-files")
 vi.mock("../../../integrations/terminal/TerminalRegistry")
 vi.mock("../../../integrations/terminal/Terminal")
@@ -127,7 +125,6 @@ describe("getEnvironmentDetails", () => {
 		}
 
 		// Mock other dependencies.
-		;(getApiMetrics as Mock).mockReturnValue({ contextTokens: 50000, totalCost: 0.25 })
 		;(getFullModeDetails as Mock).mockResolvedValue({
 			name: "💻 Code",
 			roleDefinition: "You are a code assistant",
@@ -153,9 +150,9 @@ describe("getEnvironmentDetails", () => {
 		expect(result).toContain("<environment_details>")
 		expect(result).toContain("</environment_details>")
 		// Visible Files and Open Tabs headers only appear when there's content
-		expect(result).toContain("# Current Time")
 		expect(result).not.toContain("# Git Status") // Git status is disabled by default (maxGitStatusFiles = 0)
-		expect(result).toContain("# Current Cost")
+		expect(result).not.toContain("# Current Time") // Current Time section has been removed
+		expect(result).not.toContain("# Current Cost") // Current Cost section has been removed
 
 		expect(mockProvider.getState).toHaveBeenCalled()
 
@@ -164,8 +161,6 @@ describe("getEnvironmentDetails", () => {
 			globalCustomInstructions: "test instructions",
 			language: "en",
 		})
-
-		expect(getApiMetrics).toHaveBeenCalledWith(mockCline.clineMessages)
 	})
 
 	it("should include file details when includeFileDetails is true", async () => {
