@@ -25,6 +25,28 @@ import { formatReminderSection } from "./reminder"
 export async function getEnvironmentDetails(cline: Task, includeFileDetails: boolean = false) {
 	let details = ""
 
+	// Inject markdown tool execution results at the beginning
+	// These results are from markdown-format tool calls (write_to, apply_diff, todo_list)
+	// that were executed but not converted to native tool_result format
+	if (cline.markdownToolResults && cline.markdownToolResults.length > 0) {
+		details += "\n# Markdown Tool Execution Results"
+		for (const result of cline.markdownToolResults) {
+			const icon = result.status === "success" ? "✅" : "❌"
+			let line = `\n- ${result.toolName}`
+			if (result.path) {
+				line += ` ${result.path}`
+			}
+			line += `: ${icon} ${result.status === "success" ? "Success" : "Error"}`
+			if (result.message) {
+				line += ` (${result.message})`
+			}
+			details += line
+		}
+		details += "\n"
+		// Clear the results after including them
+		cline.clearMarkdownToolResults()
+	}
+
 	const clineProvider = cline.providerRef.deref()
 	const state = await clineProvider?.getState()
 	const {

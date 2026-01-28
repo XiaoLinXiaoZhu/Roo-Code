@@ -527,19 +527,31 @@ export async function presentAssistantMessage(cline: Task) {
 					}
 				}
 
-				cline.pushToolResultToUserContent({
-					type: "tool_result",
-					tool_use_id: toolCallId,
-					content: resultContent,
-				})
+				// For markdown tools, store result in markdownToolResults for environment_details injection
+				// instead of converting to native tool_result format
+				if (block.isMarkdownTool) {
+					// Determine status based on content
+					const isError = typeof content === "string" && content.includes("Error")
+					cline.addMarkdownToolResult({
+						toolName: block.name,
+						path: block.params?.path,
+						status: isError ? "error" : "success",
+						message: typeof content === "string" ? content.substring(0, 100) : "completed",
+					})
+					hasToolResult = true
+					// Markdown tool calls support multiple tools per message, so don't set didAlreadyUseTool
+				} else {
+					cline.pushToolResultToUserContent({
+						type: "tool_result",
+						tool_use_id: toolCallId,
+						content: resultContent,
+					})
 
-				if (imageBlocks.length > 0) {
-					cline.userMessageContent.push(...imageBlocks)
-				}
+					if (imageBlocks.length > 0) {
+						cline.userMessageContent.push(...imageBlocks)
+					}
 
-				hasToolResult = true
-				// Markdown tool calls support multiple tools per message, so don't set didAlreadyUseTool
-				if (!block.isMarkdownTool) {
+					hasToolResult = true
 					cline.didAlreadyUseTool = true
 				}
 			}

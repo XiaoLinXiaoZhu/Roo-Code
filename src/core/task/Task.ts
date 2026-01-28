@@ -380,6 +380,29 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		this.userMessageContent.push(toolResult)
 		return true
 	}
+
+	/**
+	 * Clear markdown tool results after they've been included in environment_details
+	 */
+	public clearMarkdownToolResults(): void {
+		this.markdownToolResults = []
+	}
+
+	/**
+	 * Add a markdown tool execution result
+	 */
+	public addMarkdownToolResult(result: {
+		toolName: string
+		path?: string
+		status: "success" | "error"
+		message: string
+	}): void {
+		this.markdownToolResults.push({
+			...result,
+			timestamp: Date.now(),
+		})
+	}
+
 	didRejectTool = false
 	didAlreadyUseTool = false
 	didToolFailInCurrentTurn = false
@@ -393,6 +416,18 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 	// Markdown tool call parser for detecting ```write_to and ```apply_diff blocks
 	private markdownToolParser: MarkdownToolParser = new MarkdownToolParser()
+
+	/**
+	 * Stores execution results from markdown tool calls (write_to, apply_diff, todo_list)
+	 * These results will be injected into environment_details instead of being converted to native tool_result
+	 */
+	markdownToolResults: Array<{
+		toolName: string
+		path?: string
+		status: "success" | "error"
+		message: string
+		timestamp: number
+	}> = []
 
 	// Cached model info for current streaming session (set at start of each API request)
 	// This prevents excessive getModel() calls during tool execution
