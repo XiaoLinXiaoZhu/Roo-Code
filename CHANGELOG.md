@@ -1,5 +1,12 @@
 # Roo Code Changelog
 
+## [3.43.0] - 2026-01-29
+
+- Added Markdown format support for long-text tools (`write_to_file`, `apply_diff`, `update_todo_list`), reducing token consumption by 10-20% and improving model output accuracy
+- Markdown tool calls now support multiple invocations in a single message even when multi-tool mode is disabled
+- Tool results are now injected via environment_details instead of tool_result messages for better context management
+- Recommended using 6 backticks (```````) as default code block markers to avoid conflicts with common text patterns
+
 ## [3.42.0] - 2026-01-22
 
 ![3.42.0 Release - ChatGPT Usage Tracking](/releases/3.42.0-release.png)
