@@ -23,7 +23,7 @@ import type { ToolUse, NativeToolArgs } from "../../shared/tools"
  * 支持 Markdown 格式的工具列表
  * 这些工具的内容参数较长，使用 Markdown 格式可以显著减少 token 消耗
  */
-export const MARKDOWN_SUPPORTED_TOOLS = ["write_to", "apply_diff"] as const
+export const MARKDOWN_SUPPORTED_TOOLS = ["write_to", "apply_diff", "todo_list"] as const
 export type MarkdownSupportedTool = (typeof MARKDOWN_SUPPORTED_TOOLS)[number]
 
 /**
@@ -32,7 +32,14 @@ export type MarkdownSupportedTool = (typeof MARKDOWN_SUPPORTED_TOOLS)[number]
 const MARKDOWN_TOOL_NAME_MAP: Record<MarkdownSupportedTool, ToolName> = {
 	write_to: "write_to_file",
 	apply_diff: "apply_diff",
+	todo_list: "update_todo_list",
 }
+
+/**
+ * 不需要路径参数的工具列表
+ * 这些工具的 header 只有工具名，没有路径
+ */
+export const MARKDOWN_TOOLS_WITHOUT_PATH: MarkdownSupportedTool[] = ["todo_list"]
 
 /**
  * 解析器状态
@@ -397,8 +404,9 @@ export class MarkdownToolParser {
 	/**
 	 * 解析 header 行
 	 *
-	 * 格式：toolName path
-	 * 例如：write_to src/app.ts
+	 * 格式：
+	 * - 需要路径的工具：toolName path（例如：write_to src/app.ts）
+	 * - 不需要路径的工具：toolName（例如：todo_list）
 	 *
 	 * @param headerLine - header 行内容（不含换行符）
 	 * @returns 解析结果，或 null 如果格式无效
@@ -409,22 +417,38 @@ export class MarkdownToolParser {
 		const trimmed = headerLine.trim()
 		const spaceIndex = trimmed.indexOf(" ")
 
+		let toolName: MarkdownSupportedTool
+		let path: string
+
 		if (spaceIndex === -1) {
-			// 没有空格，无法分离工具名和路径
-			return null
-		}
+			// 没有空格，可能是不需要路径的工具
+			toolName = trimmed as MarkdownSupportedTool
 
-		const toolName = trimmed.substring(0, spaceIndex) as MarkdownSupportedTool
-		const path = trimmed.substring(spaceIndex + 1).trim()
+			// 验证工具名
+			if (!MARKDOWN_SUPPORTED_TOOLS.includes(toolName)) {
+				return null
+			}
 
-		// 验证工具名
-		if (!MARKDOWN_SUPPORTED_TOOLS.includes(toolName)) {
-			return null
-		}
+			// 检查是否是不需要路径的工具
+			if (!MARKDOWN_TOOLS_WITHOUT_PATH.includes(toolName)) {
+				// 需要路径但没有提供
+				return null
+			}
 
-		// 验证路径非空
-		if (!path) {
-			return null
+			path = ""
+		} else {
+			toolName = trimmed.substring(0, spaceIndex) as MarkdownSupportedTool
+			path = trimmed.substring(spaceIndex + 1).trim()
+
+			// 验证工具名
+			if (!MARKDOWN_SUPPORTED_TOOLS.includes(toolName)) {
+				return null
+			}
+
+			// 验证路径非空（对于需要路径的工具）
+			if (!path && !MARKDOWN_TOOLS_WITHOUT_PATH.includes(toolName)) {
+				return null
+			}
 		}
 
 		return {
@@ -451,24 +475,30 @@ export class MarkdownToolParser {
 		const toolName = state.canonicalToolName
 
 		// 构建 params（字符串化参数，用于显示）
-		const params: Record<string, string> = {
-			path: state.path,
-			content: state.content,
-		}
+		const params: Record<string, string> = {}
 
 		// 构建 nativeArgs（类型化参数，用于执行）
 		let nativeArgs: NativeToolArgs[keyof NativeToolArgs] | undefined
 
 		if (toolName === "write_to_file") {
+			params.path = state.path
+			params.content = state.content
 			nativeArgs = {
 				path: state.path,
 				content: state.content,
 			} as NativeToolArgs["write_to_file"]
 		} else if (toolName === "apply_diff") {
+			params.path = state.path
+			params.content = state.content
 			nativeArgs = {
 				path: state.path,
 				diff: state.content,
 			} as NativeToolArgs["apply_diff"]
+		} else if (toolName === "update_todo_list") {
+			params.todos = state.content
+			nativeArgs = {
+				todos: state.content,
+			} as NativeToolArgs["update_todo_list"]
 		}
 
 		return {
@@ -515,6 +545,13 @@ export class MarkdownToolParser {
 export function mayContainMarkdownTool(text: string): boolean {
 	// 检查是否包含支持的工具名模式
 	for (const toolName of MARKDOWN_SUPPORTED_TOOLS) {
+		// 对于不需要路径的工具，检查 "```toolName\n" 模式
+		if (MARKDOWN_TOOLS_WITHOUT_PATH.includes(toolName)) {
+			if (text.includes("```" + toolName + "\n")) {
+				return true
+			}
+		}
+		// 对于需要路径的工具，检查 "```toolName " 模式
 		if (text.includes("```" + toolName + " ")) {
 			return true
 		}
@@ -582,17 +619,20 @@ function buildToolUseFromState(
 ): ToolUse | null {
 	const { toolName, path, content } = state
 
-	const params: Record<string, string> = {
-		path,
-		content,
-	}
-
+	const params: Record<string, string> = {}
 	let nativeArgs: NativeToolArgs[keyof NativeToolArgs] | undefined
 
 	if (toolName === "write_to_file") {
+		params.path = path
+		params.content = content
 		nativeArgs = { path, content } as NativeToolArgs["write_to_file"]
 	} else if (toolName === "apply_diff") {
+		params.path = path
+		params.content = content
 		nativeArgs = { path, diff: content } as NativeToolArgs["apply_diff"]
+	} else if (toolName === "update_todo_list") {
+		params.todos = content
+		nativeArgs = { todos: content } as NativeToolArgs["update_todo_list"]
 	}
 
 	return {

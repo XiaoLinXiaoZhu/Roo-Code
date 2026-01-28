@@ -8,9 +8,9 @@ When using this tool, use it directly with the desired content. You do not need 
 
 When creating a new project, organize all new files within a dedicated project directory unless the user specifies otherwise. Structure the project logically, adhering to best practices for the specific type of project being created.
 
-**Recommended Format:** Use Markdown code block format with \`\`\`write_to path syntax. This format requires zero escaping for newlines and quotes, making it more natural and readable. **Use 6 backticks (\`\`\`\`\`\`) for maximum compatibility** - this ensures any code blocks within your content won't conflict with the tool fence. Markdown format also supports multiple tool calls in a single message.
+Use Markdown code block format with \`\`\`write_to path syntax. This format requires zero escaping for newlines and quotes, making it more natural and readable. **Use 6 backticks (\`\`\`\`\`\`) for maximum compatibility** - this ensures any code blocks within your content won't conflict with the tool fence. Markdown format also supports multiple tool calls in a single message.
 
-Example (Recommended - Markdown format with 6 backticks):
+Example (Markdown format with 6 backticks):
 \`\`\`\`\`\`write_to frontend-config.json
 {
   "apiEndpoint": "https://api.example.com",
@@ -18,10 +18,7 @@ Example (Recommended - Markdown format with 6 backticks):
     "primaryColor": "#007bff"
   }
 }
-\`\`\`\`\`\`
-
-Example (Alternative - JSON format):
-{ "path": "frontend-config.json", "content": "{\\n  \\"apiEndpoint\\": \\"https://api.example.com\\",\\n  \\"theme\\": {\\n    \\"primaryColor\\": \\"#007bff\\"\\n  }\\n}" }`
+\`\`\`\`\`\``
 
 const PATH_PARAMETER_DESCRIPTION = `The path of the file to write to (relative to the current workspace directory)`
 

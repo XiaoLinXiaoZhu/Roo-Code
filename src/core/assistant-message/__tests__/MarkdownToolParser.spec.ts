@@ -71,6 +71,40 @@ new code
 			}
 		})
 
+		it("应该解析 todo_list 工具调用（无路径参数）", () => {
+			const input = `\`\`\`todo_list
+[x] Task 1
+[-] Task 2
+[ ] Task 3
+\`\`\``
+
+			const events = parser.processChunk(input)
+			events.push(...parser.finalize())
+
+			// 验证事件序列
+			const startEvent = events.find((e) => e.type === "tool_start")
+			const endEvent = events.find((e) => e.type === "tool_end")
+			const deltaEvents = events.filter((e) => e.type === "tool_delta")
+
+			expect(startEvent).toBeDefined()
+			expect(startEvent?.type).toBe("tool_start")
+			if (startEvent?.type === "tool_start") {
+				expect(startEvent.toolName).toBe("update_todo_list")
+				expect(startEvent.path).toBe("")
+			}
+
+			expect(endEvent).toBeDefined()
+			expect(deltaEvents.length).toBeGreaterThan(0)
+
+			// 验证内容
+			const content = deltaEvents
+				.filter((e): e is Extract<MarkdownToolEvent, { type: "tool_delta" }> => e.type === "tool_delta")
+				.map((e) => e.contentDelta)
+				.join("")
+
+			expect(content).toBe("[x] Task 1\n[-] Task 2\n[ ] Task 3\n")
+		})
+
 		it("应该拒绝不支持的工具名", () => {
 			const input = `\`\`\`javascript
 console.log("hello");
@@ -234,6 +268,24 @@ function test() {
 			expect(textEvents.length).toBeGreaterThan(0)
 		})
 
+		it("应该解析 todo_list 带路径参数的情况（路径被忽略）", () => {
+			const input = `\`\`\`todo_list some/path.md
+[x] Task 1
+\`\`\``
+
+			const events = parser.processChunk(input)
+			events.push(...parser.finalize())
+
+			// todo_list 不需要路径，但带路径时仍然能解析（路径会被保留但不使用）
+			const startEvent = events.find((e) => e.type === "tool_start")
+			expect(startEvent).toBeDefined()
+			if (startEvent?.type === "tool_start") {
+				expect(startEvent.toolName).toBe("update_todo_list")
+				// 路径会被解析但在 nativeArgs 中不使用
+				expect(startEvent.path).toBe("some/path.md")
+			}
+		})
+
 		it("应该处理无效的 header 格式", () => {
 			const input = `\`\`\`write_to
 content without path
@@ -361,6 +413,20 @@ content
 			})
 		})
 
+		it("应该构建正确的 update_todo_list ToolUse", () => {
+			const todoContent = "[x] Task 1\n[-] Task 2\n[ ] Task 3\n"
+			parser.processChunk(`\`\`\`todo_list\n${todoContent}\`\`\``)
+			parser.finalize()
+
+			const toolUse = parser.buildToolUse(false)
+			expect(toolUse).toBeDefined()
+			expect(toolUse?.name).toBe("update_todo_list")
+			expect(toolUse?.params.todos).toBe(todoContent)
+			expect(toolUse?.nativeArgs).toEqual({
+				todos: todoContent,
+			})
+		})
+
 		it("应该在无状态时返回 null", () => {
 			const toolUse = parser.buildToolUse(false)
 			expect(toolUse).toBeNull()
@@ -376,6 +442,14 @@ describe("mayContainMarkdownTool", () => {
 
 	it("应该检测 apply_diff 模式", () => {
 		expect(mayContainMarkdownTool("```apply_diff file.ts")).toBe(true)
+	})
+
+	it("应该检测 todo_list 模式", () => {
+		// todo_list 不需要路径，检查 "```todo_list\n" 模式
+		expect(mayContainMarkdownTool("```todo_list\n")).toBe(true)
+		expect(mayContainMarkdownTool("some text ```todo_list\n")).toBe(true)
+		// 也支持带空格的模式（虽然 todo_list 不需要路径）
+		expect(mayContainMarkdownTool("```todo_list ")).toBe(true)
 	})
 
 	it("应该拒绝不匹配的模式", () => {
@@ -418,6 +492,26 @@ Some text after.
 	it("应该处理空文本", () => {
 		const tools = extractMarkdownTools("")
 		expect(tools.length).toBe(0)
+	})
+
+	it("应该从文本中提取 todo_list 工具调用", () => {
+		const text = `
+Some text before.
+
+\`\`\`todo_list
+[x] Task 1
+[-] Task 2
+[ ] Task 3
+\`\`\`
+
+Some text after.
+`
+
+		const tools = extractMarkdownTools(text)
+		expect(tools.length).toBe(1)
+
+		expect(tools[0].name).toBe("update_todo_list")
+		expect(tools[0].params.todos).toBe("[x] Task 1\n[-] Task 2\n[ ] Task 3\n")
 	})
 
 	it("应该处理无工具调用的文本", () => {

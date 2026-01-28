@@ -2898,10 +2898,13 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 											const toolUse: ToolUse = {
 												type: "tool_use",
 												name: mdEvent.toolName,
-												params: {
-													path: mdEvent.path,
-													content: "",
-												},
+												params:
+													mdEvent.toolName === "update_todo_list"
+														? { todos: "" }
+														: {
+																path: mdEvent.path,
+																content: "",
+															},
 												partial: true,
 												isMarkdownTool: true,
 											}
@@ -2919,8 +2922,13 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 											if (toolUseIndex !== undefined) {
 												const toolUse = this.assistantMessageContent[toolUseIndex] as ToolUse
 												if (toolUse && toolUse.type === "tool_use") {
-													toolUse.params.content =
-														(toolUse.params.content || "") + mdEvent.contentDelta
+													if (toolUse.name === "update_todo_list") {
+														toolUse.params.todos =
+															(toolUse.params.todos || "") + mdEvent.contentDelta
+													} else {
+														toolUse.params.content =
+															(toolUse.params.content || "") + mdEvent.contentDelta
+													}
 												}
 											}
 											break
@@ -2939,6 +2947,10 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 														toolUse.nativeArgs = { path, content } as any
 													} else if (toolUse.name === "apply_diff") {
 														toolUse.nativeArgs = { path, diff: content } as any
+													} else if (toolUse.name === "update_todo_list") {
+														toolUse.nativeArgs = {
+															todos: toolUse.params.todos || "",
+														} as any
 													}
 												}
 												this.streamingToolCallIndices.delete(mdEvent.id)
@@ -3088,6 +3100,8 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 											toolUse.nativeArgs = { path, content } as any
 										} else if (toolUse.name === "apply_diff") {
 											toolUse.nativeArgs = { path, diff: content } as any
+										} else if (toolUse.name === "update_todo_list") {
+											toolUse.nativeArgs = { todos: toolUse.params.todos || "" } as any
 										}
 									}
 									this.streamingToolCallIndices.delete(mdEvent.id)
@@ -3102,7 +3116,12 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 								if (toolUseIndex !== undefined) {
 									const toolUse = this.assistantMessageContent[toolUseIndex] as ToolUse
 									if (toolUse && toolUse.type === "tool_use") {
-										toolUse.params.content = (toolUse.params.content || "") + mdEvent.contentDelta
+										if (toolUse.name === "update_todo_list") {
+											toolUse.params.todos = (toolUse.params.todos || "") + mdEvent.contentDelta
+										} else {
+											toolUse.params.content =
+												(toolUse.params.content || "") + mdEvent.contentDelta
+										}
 									}
 								}
 								break
