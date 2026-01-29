@@ -68,6 +68,9 @@ import {
 	TerminalSquare,
 	MessageCircle,
 	Repeat2,
+	Split,
+	ArrowRight,
+	Check,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { PathTooltip } from "../ui/PathTooltip"
@@ -176,7 +179,8 @@ export const ChatRowContent = ({
 }: ChatRowContentProps) => {
 	const { t, i18n } = useTranslation()
 
-	const { mcpServers, alwaysAllowMcp, currentCheckpoint, mode, apiConfiguration, clineMessages } = useExtensionState()
+	const { mcpServers, alwaysAllowMcp, currentCheckpoint, mode, apiConfiguration, clineMessages, currentTaskItem } =
+		useExtensionState()
 	const { info: model } = useSelectedModel(apiConfiguration)
 	const [isEditing, setIsEditing] = useState(false)
 	const [editedContent, setEditedContent] = useState("")
@@ -385,6 +389,7 @@ export const ChatRowContent = ({
 		display: "flex",
 		alignItems: "center",
 		gap: "10px",
+		cursor: "default",
 		marginBottom: "10px",
 		wordBreak: "break-word",
 	}
@@ -815,10 +820,34 @@ export const ChatRowContent = ({
 					</>
 				)
 			case "newTask":
+				// Find all newTask messages to determine which child task ID corresponds to this message
+				const newTaskMessages = clineMessages.filter((msg) => {
+					if (msg.type === "ask" && msg.ask === "tool") {
+						const t = safeJsonParse<ClineSayTool>(msg.text)
+						return t?.tool === "newTask"
+					}
+					return false
+				})
+				const thisNewTaskIndex = newTaskMessages.findIndex((msg) => msg.ts === message.ts)
+				const childIds = currentTaskItem?.childIds || []
+
+				// Only get the child task ID if this newTask has been approved (has a corresponding entry in childIds)
+				// This prevents showing a link to a previous task when the current newTask is still awaiting approval
+				// Note: We don't use delegatedToId here because it persists after child tasks complete and would
+				// incorrectly point to the previous task when a new newTask is awaiting approval
+				const childTaskId =
+					thisNewTaskIndex >= 0 && thisNewTaskIndex < childIds.length ? childIds[thisNewTaskIndex] : undefined
+
+				// Check if the next message is a subtask_result - if so, don't show the button
+				// since the result is displayed right after this message
+				const currentMessageIndex = clineMessages.findIndex((msg) => msg.ts === message.ts)
+				const nextMessage = currentMessageIndex >= 0 ? clineMessages[currentMessageIndex + 1] : undefined
+				const isFollowedBySubtaskResult = nextMessage?.type === "say" && nextMessage?.say === "subtask_result"
+
 				return (
 					<>
 						<div style={headerStyle}>
-							{toolIcon("tasklist")}
+							<Split className="size-4" />
 							<span style={{ fontWeight: "bold" }}>
 								<Trans
 									i18nKey="chat:subtasks.wantsToCreate"
@@ -827,32 +856,19 @@ export const ChatRowContent = ({
 								/>
 							</span>
 						</div>
-						<div
-							style={{
-								marginTop: "4px",
-								backgroundColor: "var(--vscode-badge-background)",
-								border: "1px solid var(--vscode-badge-background)",
-								borderRadius: "4px 4px 0 0",
-								overflow: "hidden",
-								marginBottom: "2px",
-							}}>
-							<div
-								style={{
-									padding: "9px 10px 9px 14px",
-									backgroundColor: "var(--vscode-badge-background)",
-									borderBottom: "1px solid var(--vscode-editorGroup-border)",
-									fontWeight: "bold",
-									fontSize: "var(--vscode-font-size)",
-									color: "var(--vscode-badge-foreground)",
-									display: "flex",
-									alignItems: "center",
-									gap: "6px",
-								}}>
-								<span className="codicon codicon-arrow-right"></span>
-								{t("chat:subtasks.newTaskContent")}
-							</div>
-							<div style={{ padding: "12px 16px", backgroundColor: "var(--vscode-editor-background)" }}>
-								<MarkdownBlock markdown={tool.content} />
+						<div className="border-l border-muted-foreground/80 ml-2 pl-4 pb-1">
+							<MarkdownBlock markdown={tool.content} />
+							<div>
+								{childTaskId && !isFollowedBySubtaskResult && (
+									<button
+										className="cursor-pointer flex gap-1 items-center mt-2 text-vscode-descriptionForeground hover:text-vscode-descriptionForeground hover:underline font-normal"
+										onClick={() =>
+											vscode.postMessage({ type: "showTaskWithId", text: childTaskId })
+										}>
+										{t("chat:subtasks.goToSubtask")}
+										<ArrowRight className="size-3" />
+									</button>
+								)}
 							</div>
 						</div>
 					</>
@@ -864,33 +880,8 @@ export const ChatRowContent = ({
 							{toolIcon("check-all")}
 							<span style={{ fontWeight: "bold" }}>{t("chat:subtasks.wantsToFinish")}</span>
 						</div>
-						<div
-							style={{
-								marginTop: "4px",
-								backgroundColor: "var(--vscode-editor-background)",
-								border: "1px solid var(--vscode-badge-background)",
-								borderRadius: "4px",
-								overflow: "hidden",
-								marginBottom: "8px",
-							}}>
-							<div
-								style={{
-									padding: "9px 10px 9px 14px",
-									backgroundColor: "var(--vscode-badge-background)",
-									borderBottom: "1px solid var(--vscode-editorGroup-border)",
-									fontWeight: "bold",
-									fontSize: "var(--vscode-font-size)",
-									color: "var(--vscode-badge-foreground)",
-									display: "flex",
-									alignItems: "center",
-									gap: "6px",
-								}}>
-								<span className="codicon codicon-check"></span>
-								{t("chat:subtasks.completionContent")}
-							</div>
-							<div style={{ padding: "12px 16px", backgroundColor: "var(--vscode-editor-background)" }}>
-								<MarkdownBlock markdown={t("chat:subtasks.completionInstructions")} />
-							</div>
+						<div className="text-muted-foreground pl-6">
+							<MarkdownBlock markdown={t("chat:subtasks.completionInstructions")} />
 						</div>
 					</>
 				)
@@ -1019,40 +1010,25 @@ export const ChatRowContent = ({
 						/>
 					)
 				case "subtask_result":
+					// Get the child task ID that produced this result
+					const completedChildTaskId = currentTaskItem?.completedByChildId
 					return (
-						<div>
-							<div
-								style={{
-									marginTop: "0px",
-									backgroundColor: "var(--vscode-badge-background)",
-									border: "1px solid var(--vscode-badge-background)",
-									borderRadius: "0 0 4px 4px",
-									overflow: "hidden",
-									marginBottom: "8px",
-								}}>
-								<div
-									style={{
-										padding: "9px 10px 9px 14px",
-										backgroundColor: "var(--vscode-badge-background)",
-										borderBottom: "1px solid var(--vscode-editorGroup-border)",
-										fontWeight: "bold",
-										fontSize: "var(--vscode-font-size)",
-										color: "var(--vscode-badge-foreground)",
-										display: "flex",
-										alignItems: "center",
-										gap: "6px",
-									}}>
-									<span className="codicon codicon-arrow-left"></span>
-									{t("chat:subtasks.resultContent")}
-								</div>
-								<div
-									style={{
-										padding: "12px 16px",
-										backgroundColor: "var(--vscode-editor-background)",
-									}}>
-									<MarkdownBlock markdown={message.text} />
-								</div>
+						<div className="border-l border-muted-foreground/80 ml-2 pl-4 pt-2 pb-1 -mt-5">
+							<div style={headerStyle}>
+								<span style={{ fontWeight: "bold" }}>{t("chat:subtasks.resultContent")}</span>
+								<Check className="size-3" />
 							</div>
+							<MarkdownBlock markdown={message.text} />
+							{completedChildTaskId && (
+								<button
+									className="cursor-pointer flex gap-1 items-center mt-2 text-vscode-descriptionForeground hover:text-vscode-descriptionForeground hover:underline font-normal"
+									onClick={() =>
+										vscode.postMessage({ type: "showTaskWithId", text: completedChildTaskId })
+									}>
+									{t("chat:subtasks.goToSubtask")}
+									<ArrowRight className="size-3" />
+								</button>
+							)}
 						</div>
 					)
 				case "reasoning":
@@ -1486,6 +1462,51 @@ export const ChatRowContent = ({
 										</ToolUseBlock>
 									</div>
 								</>
+							)
+						}
+						case "readCommandOutput": {
+							const formatBytes = (bytes: number) => {
+								if (bytes < 1024) return `${bytes} B`
+								if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+								return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+							}
+
+							// Determine if this is a search operation
+							const isSearch = sayTool.searchPattern !== undefined
+
+							let infoText = ""
+							if (isSearch) {
+								// Search mode: show pattern and match count
+								const matchText =
+									sayTool.matchCount !== undefined
+										? sayTool.matchCount === 1
+											? "1 match"
+											: `${sayTool.matchCount} matches`
+										: ""
+								infoText = `search: "${sayTool.searchPattern}"${matchText ? ` • ${matchText}` : ""}`
+							} else if (
+								sayTool.readStart !== undefined &&
+								sayTool.readEnd !== undefined &&
+								sayTool.totalBytes !== undefined
+							) {
+								// Read mode: show byte range
+								infoText = `${formatBytes(sayTool.readStart)} - ${formatBytes(sayTool.readEnd)} of ${formatBytes(sayTool.totalBytes)}`
+							} else if (sayTool.totalBytes !== undefined) {
+								infoText = formatBytes(sayTool.totalBytes)
+							}
+
+							return (
+								<div style={headerStyle}>
+									<FileCode2 className="w-4 shrink-0" aria-label="Read command output icon" />
+									<span style={{ fontWeight: "bold" }}>{t("chat:readCommandOutput.title")}</span>
+									{infoText && (
+										<span
+											className="text-xs ml-1"
+											style={{ color: "var(--vscode-descriptionForeground)" }}>
+											({infoText})
+										</span>
+									)}
+								</div>
 							)
 						}
 						default:

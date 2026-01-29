@@ -10,7 +10,6 @@ import { t } from "../../i18n"
 
 import { defaultModeSlug, getModeBySlug } from "../../shared/modes"
 import type { ToolParamName, ToolResponse, ToolUse, McpToolUse } from "../../shared/tools"
-import { experiments, EXPERIMENT_IDS } from "../../shared/experiments"
 
 import { AskIgnoredError } from "../task/AskIgnoredError"
 import { Task } from "../task/Task"
@@ -18,8 +17,8 @@ import { Task } from "../task/Task"
 import { fetchInstructionsTool } from "../tools/FetchInstructionsTool"
 import { listFilesTool } from "../tools/ListFilesTool"
 import { readFileTool } from "../tools/ReadFileTool"
+import { readCommandOutputTool } from "../tools/ReadCommandOutputTool"
 import { writeToFileTool } from "../tools/WriteToFileTool"
-import { applyDiffTool } from "../tools/MultiApplyDiffTool"
 import { searchAndReplaceTool } from "../tools/SearchAndReplaceTool"
 import { searchReplaceTool } from "../tools/SearchReplaceTool"
 import { editFileTool } from "../tools/EditFileTool"
@@ -129,7 +128,11 @@ export async function presentAssistantMessage(cline: Task) {
 				break
 			}
 
-			if (cline.didAlreadyUseTool) {
+			// Get parallel tool calling state from experiments
+			const mcpState = await cline.providerRef.deref()?.getState()
+			const mcpParallelToolCallsEnabled = mcpState?.experiments?.multipleNativeToolCalls ?? false
+
+			if (!mcpParallelToolCallsEnabled && cline.didAlreadyUseTool) {
 				const toolCallId = mcpBlock.id
 				const errorMessage = `MCP tool [${mcpBlock.name}] was not executed because a tool has already been used in this message. Only one tool may be used per message.`
 
@@ -197,7 +200,10 @@ export async function presentAssistantMessage(cline: Task) {
 				}
 
 				hasToolResult = true
-				cline.didAlreadyUseTool = true
+				// Only set didAlreadyUseTool when parallel tool calling is disabled
+				if (!mcpParallelToolCallsEnabled) {
+					cline.didAlreadyUseTool = true
+				}
 			}
 
 			const toolDescription = () => `[mcp_tool: ${mcpBlock.serverName}/${mcpBlock.toolName}]`
@@ -405,6 +411,8 @@ export async function presentAssistantMessage(cline: Task) {
 						return `[${block.name} for '${block.params.instruction}']`
 					case "consult_expert":
 						return `[${block.name} on '${block.params.topic}']`
+					case "read_command_output":
+						return `[${block.name} for '${block.params.artifact_id}']`
 					case "update_todo_list":
 						return `[${block.name}]`
 					case "new_task": {
@@ -439,7 +447,10 @@ export async function presentAssistantMessage(cline: Task) {
 				break
 			}
 
-			if (cline.didAlreadyUseTool) {
+			// Get parallel tool calling state from experiments (stateExperiments already fetched above)
+			const parallelToolCallsEnabled = stateExperiments?.multipleNativeToolCalls ?? false
+
+			if (!parallelToolCallsEnabled && cline.didAlreadyUseTool) {
 				// Ignore any content after a tool has already been used.
 				// For native tool calling, we must send a tool_result for every tool_use to avoid API errors
 				const errorMessage = `Tool [${block.name}] was not executed because a tool has already been used in this message. Only one tool may be used per message. You must assess the first tool's result before proceeding to use the next tool.`
@@ -552,6 +563,12 @@ export async function presentAssistantMessage(cline: Task) {
 					}
 
 					hasToolResult = true
+					cline.didAlreadyUseTool = true
+				}
+
+				hasToolResult = true
+				// Only set didAlreadyUseTool when parallel tool calling is disabled
+				if (!parallelToolCallsEnabled) {
 					cline.didAlreadyUseTool = true
 				}
 			}
@@ -671,7 +688,7 @@ export async function presentAssistantMessage(cline: Task) {
 						block.name as ToolName,
 						mode ?? defaultModeSlug,
 						customModes ?? [],
-						{ apply_diff: cline.diffEnabled },
+						{},
 						block.params,
 						stateExperiments,
 						includedTools,
@@ -764,32 +781,14 @@ export async function presentAssistantMessage(cline: Task) {
 						pushToolResult,
 					})
 					break
-				case "apply_diff": {
+				case "apply_diff":
 					await checkpointSaveAndMark(cline)
-
-					// Get the provider and state to check experiment settings
-					const provider = cline.providerRef.deref()
-					let isMultiFileApplyDiffEnabled = false
-
-					if (provider) {
-						const state = await provider.getState()
-						isMultiFileApplyDiffEnabled = experiments.isEnabled(
-							state.experiments ?? {},
-							EXPERIMENT_IDS.MULTI_FILE_APPLY_DIFF,
-						)
-					}
-
-					if (isMultiFileApplyDiffEnabled) {
-						await applyDiffTool(cline, block, askApproval, handleError, pushToolResult)
-					} else {
-						await applyDiffToolClass.handle(cline, block as ToolUse<"apply_diff">, {
-							askApproval,
-							handleError,
-							pushToolResult,
-						})
-					}
+					await applyDiffToolClass.handle(cline, block as ToolUse<"apply_diff">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+					})
 					break
-				}
 				case "search_and_replace":
 					await checkpointSaveAndMark(cline)
 					await searchAndReplaceTool.handle(cline, block as ToolUse<"search_and_replace">, {
@@ -874,6 +873,13 @@ export async function presentAssistantMessage(cline: Task) {
 						pushToolResult,
 					})
 					break
+				case "read_command_output":
+					await readCommandOutputTool.handle(cline, block as ToolUse<"read_command_output">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+					})
+					break
 				case "use_mcp_tool":
 					await useMcpToolTool.handle(cline, block as ToolUse<"use_mcp_tool">, {
 						askApproval,
@@ -898,6 +904,7 @@ export async function presentAssistantMessage(cline: Task) {
 				// remove switch_mode tool because we use `agent as tools` architecture //xlxz 2026-01-24
 				// keep new_task tool,but don't provide it to assistant as tools
 				case "new_task":
+					await checkpointSaveAndMark(cline)
 					await newTaskTool.handle(cline, block as ToolUse<"new_task">, {
 						askApproval,
 						handleError,
@@ -1132,6 +1139,7 @@ function containsXmlToolMarkup(text: string): boolean {
 		"generate_image",
 		"list_files",
 		"new_task",
+		"read_command_output",
 		"read_file",
 		"search_and_replace",
 		"search_files",

@@ -78,7 +78,6 @@ import {
 	handleCheckBranchWorktreeInclude,
 	handleCreateWorktreeInclude,
 	handleCheckoutBranch,
-	handleMergeWorktree,
 } from "./worktree"
 
 export const webviewMessageHandler = async (
@@ -631,10 +630,6 @@ export const webviewMessageHandler = async (
 					} else if (key === "terminalZdotdir") {
 						if (value !== undefined) {
 							Terminal.setTerminalZdotdir(value as boolean)
-						}
-					} else if (key === "terminalCompressProgressBar") {
-						if (value !== undefined) {
-							Terminal.setCompressProgressBar(value as boolean)
 						}
 					} else if (key === "mcpEnabled") {
 						newValue = value ?? true
@@ -1359,7 +1354,7 @@ export const webviewMessageHandler = async (
 				const exists = await fileExistsAtPath(mcpPath)
 
 				if (!exists) {
-					await safeWriteJson(mcpPath, { mcpServers: {} })
+					await safeWriteJson(mcpPath, { mcpServers: {} }, { prettyPrint: true })
 				}
 
 				await openFile(mcpPath)
@@ -3557,33 +3552,29 @@ export const webviewMessageHandler = async (
 			break
 		}
 
-		case "mergeWorktree": {
+		case "browseForWorktreePath": {
 			try {
-				const result = await handleMergeWorktree(provider, {
-					worktreePath: message.worktreePath!,
-					targetBranch: message.worktreeTargetBranch!,
-					deleteAfterMerge: message.worktreeDeleteAfterMerge,
-				})
+				const options: vscode.OpenDialogOptions = {
+					canSelectFiles: false,
+					canSelectFolders: true,
+					canSelectMany: false,
+					openLabel: t("worktrees:selectWorktreeLocation"),
+					title: t("worktrees:selectFolderForWorktree"),
+					defaultUri: vscode.workspace.workspaceFolders?.[0]?.uri
+						? vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, "..")
+						: undefined,
+				}
 
-				await provider.postMessageToWebview({
-					type: "mergeWorktreeResult",
-					success: result.success,
-					text: result.message,
-					hasConflicts: result.hasConflicts,
-					conflictingFiles: result.conflictingFiles,
-					sourceBranch: result.sourceBranch,
-					targetBranch: result.targetBranch,
-				})
+				const result = await vscode.window.showOpenDialog(options)
+				if (result && result[0]) {
+					await provider.postMessageToWebview({
+						type: "folderSelected",
+						path: result[0].fsPath,
+					})
+				}
 			} catch (error) {
 				const errorMessage = error instanceof Error ? error.message : String(error)
-
-				await provider.postMessageToWebview({
-					type: "mergeWorktreeResult",
-					success: false,
-					text: errorMessage,
-					hasConflicts: false,
-					conflictingFiles: [],
-				})
+				provider.log(`Error opening folder picker: ${errorMessage}`)
 			}
 
 			break

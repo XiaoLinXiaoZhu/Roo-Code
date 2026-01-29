@@ -25,8 +25,6 @@ export type PushToolResult = (content: ToolResponse) => void
 
 export type AskFinishSubTaskApproval = () => Promise<boolean>
 
-export type ToolDescription = () => string
-
 export interface TextContent {
 	type: "text"
 	content: string
@@ -82,6 +80,10 @@ export const toolParamNames = [
 	"topic", // consult_expert required parameter
 	"attachments", // consult_expert optional parameter
 	"outputFormat", // consult_expert optional parameter
+	"artifact_id", // read_command_output parameter
+	"search", // read_command_output parameter for grep-like search
+	"offset", // read_command_output parameter for pagination
+	"limit", // read_command_output parameter for max bytes to return
 ] as const
 
 export type ToolParamName = (typeof toolParamNames)[number]
@@ -93,6 +95,7 @@ export type ToolParamName = (typeof toolParamNames)[number]
 export type NativeToolArgs = {
 	access_mcp_resource: { server_name: string; uri: string }
 	read_file: { files: FileEntry[] }
+	read_command_output: { artifact_id: string; search?: string; offset?: number; limit?: number }
 	attempt_completion: { result: string }
 	execute_command: { command: string; cwd?: string }
 	apply_diff: { path: string; diff: string }
@@ -292,6 +295,7 @@ export type ToolGroupConfig = {
 export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	execute_command: "run commands",
 	read_file: "read files",
+	read_command_output: "read command output",
 	fetch_instructions: "fetch instructions",
 	write_to_file: "write files",
 	apply_diff: "apply changes",
@@ -330,7 +334,7 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 		tools: [], // ! disable browser tools for now
 	},
 	command: {
-		tools: ["execute_command"],
+		tools: ["execute_command", "read_command_output"],
 	},
 	mcp: {
 		// 	tools: ["use_mcp_tool", "access_mcp_resource"],
@@ -398,13 +402,6 @@ export interface DiffStrategy {
 	 * @returns The name of the diff strategy
 	 */
 	getName(): string
-
-	/**
-	 * Get the tool description for this diff strategy
-	 * @param args The tool arguments including cwd and toolOptions
-	 * @returns The complete tool description including format requirements and examples
-	 */
-	getToolDescription(args: { cwd: string; toolOptions?: { [key: string]: string } }): string
 
 	/**
 	 * Apply a diff to the original content

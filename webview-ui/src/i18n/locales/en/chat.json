@@ -28,7 +28,8 @@
 		"openInCloud": "Open task in Roo Code Cloud",
 		"openInCloudIntro": "Keep monitoring or interacting with Roo from anywhere. Scan, click or copy to open.",
 		"openApiHistory": "Open API History",
-		"openUiHistory": "Open UI History"
+		"openUiHistory": "Open UI History",
+		"backToParentTask": "Parent task"
 	},
 	"unpin": "Unpin",
 	"pin": "Pin",
@@ -51,13 +52,16 @@
 	"tokenProgress": {
 		"availableSpace": "Available space: {{amount}} tokens",
 		"tokensUsed": "Tokens used: {{used}} of {{total}}",
-		"reservedForResponse": "Reserved for model response: {{amount}} tokens"
+		"reservedForResponse": "Reserved for model response: {{amount}} tokens",
+		"tokensUsedLabel": "Tokens used",
+		"reservedForResponseLabel": "Reserved for response",
+		"availableSpaceLabel": "Available space"
 	},
 	"reject": {
 		"title": "Deny",
 		"tooltip": "Prevent this action from occurring"
 	},
-	"completeSubtaskAndReturn": "Complete Subtask and Return",
+	"completeSubtaskAndReturn": "Complete subtask and keep going",
 	"approve": {
 		"title": "Approve",
 		"tooltip": "Allow this action to happen"
@@ -279,12 +283,12 @@
 	},
 	"subtasks": {
 		"wantsToCreate": "Roo wants to create a new subtask in {{mode}} mode",
-		"wantsToFinish": "Roo wants to finish this subtask",
+		"wantsToFinish": "Roo wants to mark this as completed",
 		"newTaskContent": "Subtask Instructions",
-		"completionContent": "Subtask Completed",
-		"resultContent": "Subtask Results",
+		"resultContent": "Subtask completed",
 		"defaultResult": "Please continue to the next task.",
-		"completionInstructions": "Subtask completed! You can review the results and suggest any corrections or next steps. If everything looks good, confirm to return the result to the parent task."
+		"completionInstructions": "You can review the results and suggest any corrections or next steps. If everything looks good, confirm to return the result to the parent task.",
+		"goToSubtask": "View task"
 	},
 	"questions": {
 		"hasQuestion": "Roo has a question"
@@ -342,9 +346,7 @@
 		},
 		"release": {
 			"heading": "What's New:",
-			"chatGptUsageLimits": "Added UI to track your ChatGPT usage limits in the OpenAI Codex provider.",
-			"claudeCodeRemoved": "Removed the deprecated Claude Code provider.",
-			"grokCodeFastFreeEnds": "Grok Code Fast is no longer free - thank you to xAI for the generous promotion!"
+			"smartCodeFolding": "Smart Code Folding: Context condensation now preserves a lightweight map of your files: function signatures, class declarations, and type definitions. This provides better continuity after condensing and smarter edits when referencing previous work."
 		},
 		"cloudAgents": {
 			"heading": "New in the Cloud:",
@@ -493,5 +495,8 @@
 		"serversPart_other": "{{count}} MCP servers",
 		"messageTemplate": "You have {{tools}} enabled via {{servers}}. Such a high number can confuse the model and lead to errors. Try to keep it below {{threshold}}.",
 		"openMcpSettings": "Open MCP Settings"
+	},
+	"readCommandOutput": {
+		"title": "Roo read command output"
 	}
 }

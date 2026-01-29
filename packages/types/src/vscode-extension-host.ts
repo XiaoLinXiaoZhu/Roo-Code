@@ -107,7 +107,7 @@ export interface ExtensionMessage {
 		| "worktreeDefaults"
 		| "worktreeIncludeStatus"
 		| "branchWorktreeIncludeResult"
-		| "mergeWorktreeResult"
+		| "folderSelected"
 	text?: string
 	payload?: any // eslint-disable-line @typescript-eslint/no-explicit-any
 	checkpointWarning?: {
@@ -120,7 +120,6 @@ export interface ExtensionMessage {
 		| "historyButtonClicked"
 		| "marketplaceButtonClicked"
 		| "cloudButtonClicked"
-		| "worktreesButtonClicked"
 		| "didBecomeVisible"
 		| "focusInput"
 		| "switchTab"
@@ -251,10 +250,6 @@ export interface ExtensionMessage {
 	worktreeIncludeStatus?: WorktreeIncludeStatus
 	hasGitignore?: boolean
 	gitignoreContent?: string
-	hasConflicts?: boolean
-	conflictingFiles?: string[]
-	sourceBranch?: string
-	targetBranch?: string
 	// branchWorktreeIncludeResult
 	branch?: string
 	hasWorktreeInclude?: boolean
@@ -262,6 +257,8 @@ export interface ExtensionMessage {
 	copyProgressBytesCopied?: number
 	copyProgressTotalBytes?: number
 	copyProgressItemName?: string
+	// folderSelected
+	path?: string
 }
 
 export interface OpenAiCodexRateLimitsMessage {
@@ -305,8 +302,7 @@ export type ExtensionState = Pick<
 	| "soundEnabled"
 	| "soundVolume"
 	| "maxConcurrentFileReads"
-	| "terminalOutputLineLimit"
-	| "terminalOutputCharacterLimit"
+	| "terminalOutputPreviewSize"
 	| "terminalShellIntegrationTimeout"
 	| "terminalShellIntegrationDisabled"
 	| "terminalCommandDelay"
@@ -315,10 +311,7 @@ export type ExtensionState = Pick<
 	| "terminalZshOhMy"
 	| "terminalZshP10k"
 	| "terminalZdotdir"
-	| "terminalCompressProgressBar"
 	| "diagnosticsEnabled"
-	| "diffEnabled"
-	| "fuzzyMatchThreshold"
 	| "language"
 	| "modeApiConfigs"
 	| "customModePrompts"
@@ -339,6 +332,7 @@ export type ExtensionState = Pick<
 	| "includeCurrentCost"
 	| "maxGitStatusFiles"
 	| "requestDelaySeconds"
+	| "showWorktreesInHomeScreen"
 > & {
 	version: string
 	clineMessages: ClineMessage[]
@@ -369,7 +363,7 @@ export type ExtensionState = Pick<
 
 	mode: string
 	customModes: ModeConfig[]
-	toolRequirements?: Record<string, boolean> // Map of tool names to their requirements (e.g. {"apply_diff": true} if diffEnabled)
+	toolRequirements?: Record<string, boolean> // Map of tool names to their requirements (e.g. {"apply_diff": true})
 
 	cwd?: string // Current working directory
 	telemetrySetting: TelemetrySetting
@@ -607,7 +601,7 @@ export interface WebviewMessage {
 		| "checkBranchWorktreeInclude"
 		| "createWorktreeInclude"
 		| "checkoutBranch"
-		| "mergeWorktree"
+		| "browseForWorktreePath"
 	text?: string
 	editedMessageContent?: string
 	tab?: "settings" | "history" | "mcp" | "modes" | "chat" | "marketplace" | "cloud"
@@ -704,8 +698,6 @@ export interface WebviewMessage {
 	worktreeCreateNewBranch?: boolean
 	worktreeForce?: boolean
 	worktreeNewWindow?: boolean
-	worktreeTargetBranch?: string
-	worktreeDeleteAfterMerge?: boolean
 	worktreeIncludeContent?: string
 }
 
@@ -786,6 +778,7 @@ export interface ClineSayTool {
 		| "newFileCreated"
 		| "codebaseSearch"
 		| "readFile"
+		| "readCommandOutput"
 		| "fetchInstructions"
 		| "listFilesTopLevel"
 		| "listFilesRecursive"
@@ -798,6 +791,12 @@ export interface ClineSayTool {
 		| "runSlashCommand"
 		| "updateTodoList"
 	path?: string
+	// For readCommandOutput
+	readStart?: number
+	readEnd?: number
+	totalBytes?: number
+	searchPattern?: string
+	matchCount?: number
 	diff?: string
 	content?: string
 	// Unified diff statistics computed by the extension

@@ -19,7 +19,6 @@ import {
 	getSpiritSection,
 	getSystemInfoSection,
 	getSharedToolUseSection,
-	getMcpServersSection,
 	getProjectContext,
 	markdownFormattingSection,
 	getSkillsSection,
@@ -71,19 +70,9 @@ async function generatePrompt(
 	const modeConfig = getModeBySlug(mode, customModeConfigs) || modes.find((m) => m.slug === mode) || modes[0]
 	const { roleDefinition } = getModeSelection(mode, promptComponent, customModeConfigs)
 
-	// Check if MCP functionality should be included
-	const hasMcpGroup = modeConfig.groups.some((groupEntry) => getGroupName(groupEntry) === "mcp")
-	const hasMcpServers = mcpHub && mcpHub.getServers().length > 0
-	const shouldIncludeMcp = hasMcpGroup && hasMcpServers
-
 	const codeIndexManager = CodeIndexManager.getInstance(context, cwd)
 
-	const [mcpServersSection, skillsSection] = await Promise.all([
-		shouldIncludeMcp
-			? getMcpServersSection(mcpHub, effectiveDiffStrategy, enableMcpServerCreation, false)
-			: Promise.resolve(""),
-		getSkillsSection(skillsManager, mode as string),
-	])
+	const skillsSection = await getSkillsSection(skillsManager, mode as string)
 
 	// Tools catalog is not included in the system prompt.
 	const toolsCatalog = ""
@@ -107,8 +96,6 @@ ${getSpiritSection()}
 ${markdownFormattingSection()}
 
 ${getSharedToolUseSection(experiments)}${toolsCatalog}
-
-${mcpServersSection}
 ${skillsSection ? `\n${skillsSection}` : ""}
 ${getSystemInfoSection(cwd)}
 ${projectContext}`
