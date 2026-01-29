@@ -18,6 +18,7 @@ import { getGitStatus } from "../../utils/git"
 
 import { Task } from "../task/Task"
 import { formatReminderSection } from "./reminder"
+import { getSpriteHint } from "./getSpriteHint"
 
 export async function getEnvironmentDetails(cline: Task, includeFileDetails: boolean = false) {
 	let details = ""
@@ -288,6 +289,8 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 		state && typeof state.apiConfiguration?.todoListEnabled === "boolean"
 			? state.apiConfiguration.todoListEnabled
 			: true
+
+	const sprite_hint = getSpriteHint()
 	const reminderSection = todoListEnabled ? formatReminderSection(cline.todoList) : ""
-	return `<environment_details>\n${details.trim()}\n${reminderSection}\n你的输出必须以🧭开头，你的最终输出应该包含全部的sprite</environment_details>`
+	return `<environment_details>\n${details.trim()}\n${reminderSection}\n${sprite_hint}</environment_details>`
 }
