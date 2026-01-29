@@ -103,6 +103,7 @@ import { getNonce } from "./getNonce"
 import { getUri } from "./getUri"
 import { REQUESTY_BASE_URL } from "../../shared/utils/requesty"
 import { validateAndFixToolResultIds } from "../task/validateToolResultIds"
+import { getSearchProjectCache } from "../tools/SearchProjectCache"
 
 /**
  * https://github.com/microsoft/vscode-webview-ui-toolkit-samples/blob/main/default/weather-webview/src/providers/WeatherViewProvider.ts
@@ -3328,6 +3329,46 @@ export class ClineProvider
 					}
 				}
 				if (toolUseId) break
+			}
+		}
+
+		// Cache search_project results for future reuse
+		if (toolUseId) {
+			// Find the tool_use block to check if it's a search_project call
+			for (let i = parentApiMessages.length - 1; i >= 0; i--) {
+				const msg = parentApiMessages[i]
+				if (msg.role === "assistant" && Array.isArray(msg.content)) {
+					for (const block of msg.content) {
+						if (block.type === "tool_use" && block.name === "search_project" && block.id === toolUseId) {
+							// Extract query and scope from the tool_use input
+							const input = block.input as { query?: string; scope?: any; schema?: string }
+							if (input?.query) {
+								try {
+									const cache = getSearchProjectCache()
+									if (cache) {
+										await cache.addCache({
+											query: input.query,
+											scope: input.scope,
+											schema: input.schema,
+											result: completionResultSummary,
+										})
+										this.log(
+											`[reopenParentFromDelegation] Cached search_project result for query: ${input.query.substring(
+												0,
+												50,
+											)}...`,
+										)
+									}
+								} catch (cacheError) {
+									this.log(
+										`[reopenParentFromDelegation] Failed to cache search_project result: ${cacheError}`,
+									)
+								}
+							}
+							break
+						}
+					}
+				}
 			}
 		}
 

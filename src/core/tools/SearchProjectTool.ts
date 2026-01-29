@@ -6,6 +6,7 @@ import { Task } from "../task/Task"
 import { formatResponse } from "../prompts/responses"
 import { BaseTool, ToolCallbacks } from "./BaseTool"
 import type { ToolUse } from "../../shared/tools"
+import { getSearchProjectCache } from "./SearchProjectCache"
 
 // crypto for UUID generation
 const crypto = globalThis.crypto
@@ -83,11 +84,11 @@ export class SearchProjectTool extends BaseTool<"search_project"> {
 
 		task.consecutiveMistakeCount = 0
 
-		// 构建任务消息（包含完整的任务要求）
-		const taskMessage = this.buildSearchMessage(query, scope, schema)
+		// 构建任务消息（包含完整的任务要求，含缓存提示）
+		const taskMessage = await this.buildSearchMessage(query, scope, schema)
 
-		// 构建 SOP 步骤
-		const todos = this.buildTodos(query, scope, schema)
+		// 构建 SOP 步骤（含缓存检查步骤）
+		const todos = await this.buildTodos(query, scope, schema)
 
 		// 获取 Provider
 		const provider = task.providerRef.deref()
@@ -129,7 +130,11 @@ export class SearchProjectTool extends BaseTool<"search_project"> {
 		}
 	}
 
-	private buildSearchMessage(query: string, scope?: SearchProjectParams["scope"], schema?: string): string {
+	private async buildSearchMessage(
+		query: string,
+		scope?: SearchProjectParams["scope"],
+		schema?: string,
+	): Promise<string> {
 		// 清晰明确的任务要求
 		let message = `<task>
 调查项目：${query}
@@ -160,6 +165,21 @@ export class SearchProjectTool extends BaseTool<"search_project"> {
 			message += `\n</scope>`
 		}
 
+		// 注入缓存提示（如果有可用缓存）
+		const cache = getSearchProjectCache()
+		if (cache) {
+			try {
+				const cacheHint = await cache.generateCacheHint()
+				if (cacheHint) {
+					message += `\n\n<cache_hint>
+${cacheHint}
+</cache_hint>`
+				}
+			} catch {
+				// 缓存读取失败，忽略
+			}
+		}
+
 		// 明确交付物格式
 		if (schema) {
 			message += `\n\n<deliverable>
@@ -180,8 +200,32 @@ ${schema}
 		return message
 	}
 
-	private buildTodos(query: string, scope?: SearchProjectParams["scope"], schema?: string): TodoItem[] {
+	private async buildTodos(
+		query: string,
+		scope?: SearchProjectParams["scope"],
+		schema?: string,
+	): Promise<TodoItem[]> {
 		const todos: TodoItem[] = []
+
+		// Step 0: 检查缓存（新增）
+		const cache = getSearchProjectCache()
+		let hasCacheHint = false
+		if (cache) {
+			try {
+				const cacheHint = await cache.generateCacheHint()
+				hasCacheHint = !!cacheHint
+			} catch {
+				// 忽略
+			}
+		}
+
+		if (hasCacheHint) {
+			todos.push({
+				id: crypto.randomUUID(),
+				content: "检查 <cache_hint> 中的可用缓存，判断是否可复用",
+				status: "pending",
+			})
+		}
 
 		// Step 1: 定位
 		if (scope?.directories) {
