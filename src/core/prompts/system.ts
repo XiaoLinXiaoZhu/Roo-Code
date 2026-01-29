@@ -48,7 +48,6 @@ async function generatePrompt(
 	promptComponent?: PromptComponent,
 	customModeConfigs?: ModeConfig[],
 	globalCustomInstructions?: string,
-	experiments?: Record<string, boolean>,
 	enableMcpServerCreation?: boolean,
 	language?: string,
 	rooIgnoreInstructions?: string,
@@ -63,15 +62,15 @@ async function generatePrompt(
 	}
 
 	// Get the full mode config to ensure we have the role definition (used for groups, etc.)
-	const modeConfig = getModeBySlug(mode, customModeConfigs) || modes.find((m) => m.slug === mode) || modes[0]
+	// const modeConfig = getModeBySlug(mode, customModeConfigs) || modes.find((m) => m.slug === mode) || modes[0]
 	const { roleDefinition } = getModeSelection(mode, promptComponent, customModeConfigs)
 
-	const codeIndexManager = CodeIndexManager.getInstance(context, cwd)
+	// const codeIndexManager = CodeIndexManager.getInstance(context, cwd)
 
 	const skillsSection = await getSkillsSection(skillsManager, mode as string)
 
 	// Tools catalog is not included in the system prompt.
-	const toolsCatalog = ""
+	// const toolsCatalog = ""
 
 	// 获取项目上下文（语言偏好 + 项目规则）
 	const projectContext = await getProjectContext(cwd, mode, {
@@ -90,8 +89,6 @@ async function generatePrompt(
 ${getSpiritSection()}
 
 ${markdownFormattingSection()}
-
-${getSharedToolUseSection(experiments)}${toolsCatalog}
 ${skillsSection ? `\n${skillsSection}` : ""}
 ${getSystemInfoSection(cwd)}
 ${projectContext}`
@@ -110,8 +107,6 @@ export const SYSTEM_PROMPT = async (
 	customModePrompts?: CustomModePrompts,
 	customModes?: ModeConfig[],
 	globalCustomInstructions?: string,
-	diffEnabled?: boolean,
-	experiments?: Record<string, boolean>,
 	enableMcpServerCreation?: boolean,
 	language?: string,
 	rooIgnoreInstructions?: string,
@@ -159,7 +154,7 @@ ${projectContext}`
 	}
 
 	// If diff is disabled, don't pass the diffStrategy
-	const effectiveDiffStrategy = diffEnabled ? diffStrategy : undefined
+	const effectiveDiffStrategy = undefined
 
 	return generatePrompt(
 		context,
@@ -172,8 +167,6 @@ ${projectContext}`
 		promptComponent,
 		customModes,
 		globalCustomInstructions,
-		diffEnabled,
-		experiments,
 		enableMcpServerCreation,
 		language,
 		rooIgnoreInstructions,

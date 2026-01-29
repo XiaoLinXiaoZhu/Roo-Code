@@ -220,7 +220,6 @@ describe("SYSTEM_PROMPT", () => {
 			undefined, // customModePrompts
 			undefined, // customModes
 			undefined, // globalCustomInstructions
-			experiments,
 			true, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions
@@ -242,7 +241,6 @@ describe("SYSTEM_PROMPT", () => {
 			undefined, // customModePrompts
 			undefined, // customModes,
 			undefined, // globalCustomInstructions
-			experiments,
 			true, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions
@@ -266,7 +264,6 @@ describe("SYSTEM_PROMPT", () => {
 			undefined, // customModePrompts
 			undefined, // customModes,
 			undefined, // globalCustomInstructions
-			experiments,
 			true, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions
@@ -288,7 +285,6 @@ describe("SYSTEM_PROMPT", () => {
 			undefined, // customModePrompts
 			undefined, // customModes,
 			undefined, // globalCustomInstructions
-			experiments,
 			true, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions
@@ -310,7 +306,6 @@ describe("SYSTEM_PROMPT", () => {
 			undefined, // customModePrompts
 			undefined, // customModes,
 			undefined, // globalCustomInstructions
-			experiments,
 			true, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions
@@ -358,7 +353,6 @@ describe("SYSTEM_PROMPT", () => {
 			undefined, // customModePrompts
 			undefined, // customModes
 			undefined, // globalCustomInstructions
-			undefined, // experiments
 			true, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions
@@ -418,7 +412,6 @@ describe("SYSTEM_PROMPT", () => {
 			undefined, // customModePrompts
 			customModes, // customModes
 			"Global instructions", // globalCustomInstructions
-			experiments,
 			true, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions
@@ -455,7 +448,6 @@ describe("SYSTEM_PROMPT", () => {
 			customModePrompts, // customModePrompts
 			undefined, // customModes
 			undefined, // globalCustomInstructions
-			undefined, // experiments
 			false, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions
@@ -487,7 +479,6 @@ describe("SYSTEM_PROMPT", () => {
 			customModePrompts, // customModePrompts
 			undefined, // customModes
 			undefined, // globalCustomInstructions
-			undefined, // experiments
 			false, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions
@@ -517,7 +508,6 @@ describe("SYSTEM_PROMPT", () => {
 			undefined, // customModePrompts
 			undefined, // customModes
 			undefined, // globalCustomInstructions
-			experiments,
 			true, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions
@@ -549,7 +539,6 @@ describe("SYSTEM_PROMPT", () => {
 			undefined, // customModePrompts
 			undefined, // customModes
 			undefined, // globalCustomInstructions
-			experiments,
 			true, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions
@@ -581,7 +570,6 @@ describe("SYSTEM_PROMPT", () => {
 			undefined, // customModePrompts
 			undefined, // customModes
 			undefined, // globalCustomInstructions
-			experiments,
 			true, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions
@@ -613,7 +601,6 @@ describe("SYSTEM_PROMPT", () => {
 			undefined, // customModePrompts
 			undefined, // customModes
 			undefined, // globalCustomInstructions
-			experiments,
 			true, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions

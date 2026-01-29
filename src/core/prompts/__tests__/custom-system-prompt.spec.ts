@@ -104,7 +104,6 @@ describe("File-Based Custom System Prompt", () => {
 				customModePrompts, // customModePrompts
 				undefined, // customModes
 				undefined, // globalCustomInstructions
-				undefined, // experiments
 				true, // enableMcpServerCreation
 				undefined, // language
 				undefined, // rooIgnoreInstructions
@@ -141,7 +140,6 @@ describe("File-Based Custom System Prompt", () => {
 			undefined, // customModePrompts
 			undefined, // customModes
 			undefined, // globalCustomInstructions
-			undefined, // experiments
 			true, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions
@@ -186,7 +184,6 @@ describe("File-Based Custom System Prompt", () => {
 			customModePrompts, // customModePrompts
 			undefined, // customModes
 			undefined, // globalCustomInstructions
-			undefined, // experiments
 			true, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions

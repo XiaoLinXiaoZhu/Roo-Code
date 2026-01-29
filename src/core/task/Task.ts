@@ -4072,7 +4072,6 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				customModePrompts,
 				customModes,
 				customInstructions,
-				experiments,
 				enableMcpServerCreation,
 				language,
 				rooIgnoreInstructions,

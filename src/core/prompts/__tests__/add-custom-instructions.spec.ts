@@ -205,7 +205,6 @@ describe("addCustomInstructions", () => {
 			undefined, // customModePrompts
 			undefined, // customModes
 			undefined, // globalCustomInstructions
-			undefined, // experiments
 			true, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions
@@ -227,7 +226,6 @@ describe("addCustomInstructions", () => {
 			undefined, // customModePrompts
 			undefined, // customModes
 			undefined, // globalCustomInstructions
-			undefined, // experiments
 			true, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions
@@ -251,7 +249,6 @@ describe("addCustomInstructions", () => {
 			undefined, // customModePrompts
 			undefined, // customModes,
 			undefined, // globalCustomInstructions
-			undefined, // experiments
 			false, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions
@@ -274,7 +271,6 @@ describe("addCustomInstructions", () => {
 			undefined, // customModePrompts
 			undefined, // customModes,
 			undefined, // globalCustomInstructions
-			undefined, // experiments
 			true, // enableMcpServerCreation
 			undefined, // language
 			undefined, // rooIgnoreInstructions

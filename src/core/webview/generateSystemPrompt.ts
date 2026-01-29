@@ -68,7 +68,6 @@ export const generateSystemPrompt = async (provider: ClineProvider, message: Web
 		customModePrompts,
 		customModes,
 		customInstructions,
-		experiments,
 		enableMcpServerCreation,
 		language,
 		rooIgnoreInstructions,
