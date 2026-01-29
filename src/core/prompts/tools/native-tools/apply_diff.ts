@@ -1,21 +1,6 @@
 import type OpenAI from "openai"
 
-const APPLY_DIFF_DESCRIPTION = `Apply precise, targeted modifications to an existing file using one or more search/replace blocks. This tool is for surgical edits only; the 'SEARCH' block must exactly match the existing content, including whitespace and indentation. To make multiple targeted changes, provide multiple SEARCH/REPLACE blocks. Use the 'read_file' tool first if you are not confident in the exact content to search for.
-
-Use Markdown code block format with \`\`\`apply_diff path syntax. This format requires zero escaping for newlines and quotes, making it more natural and readable. **Use 6 backticks (\`\`\`\`\`\`) for maximum compatibility** - this ensures any code blocks within your content won't conflict with the tool fence. Markdown format also supports multiple tool calls in a single message.
-
-Example (Markdown format with 6 backticks):
-\`\`\`\`\`\`apply_diff src/utils/config.ts
-<<<<<<< SEARCH
-:start_line:15
--------
-const defaultTimeout = 5000;
-const maxRetries = 3;
-=======
-const defaultTimeout = 10000;
-const maxRetries = 5;
->>>>>>> REPLACE
-\`\`\`\`\`\``
+const APPLY_DIFF_DESCRIPTION = `Apply precise, targeted modifications to an existing file using one or more search/replace blocks. This tool is for surgical edits only; the 'SEARCH' block must exactly match the existing content, including whitespace and indentation. To make multiple targeted changes, provide multiple SEARCH/REPLACE blocks. Use the 'read_file' tool first if you are not confident in the exact content to search for.`
 
 const DIFF_PARAMETER_DESCRIPTION = `A string containing one or more search/replace blocks defining the changes. The ':start_line:' is required and indicates the starting line number of the original content. You must not add a start line for the replacement content. Each block must follow this format:
 <<<<<<< SEARCH

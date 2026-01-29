@@ -14,27 +14,6 @@ Core Principles:
 - Only mark a task as completed when fully accomplished
 - Keep all unfinished tasks unless explicitly instructed to remove
 
-Use Markdown code block format with \`\`\`todo_list syntax. This format requires zero escaping for newlines and quotes, making it more natural and readable. **Use 6 backticks (\`\`\`\`\`\`) for maximum compatibility** - this ensures any code blocks within your content won't conflict with the tool fence.
-
-Example: Initial task list
-\`\`\`\`\`\`todo_list
-[x] Analyze requirements
-[x] Design architecture
-[-] Implement core logic
-[ ] Write tests
-[ ] Update documentation
-\`\`\`\`\`\`
-
-Example: After completing implementation
-\`\`\`\`\`\`todo_list
-[x] Analyze requirements
-[x] Design architecture
-[x] Implement core logic
-[-] Write tests
-[ ] Update documentation
-[ ] Add performance benchmarks
-\`\`\`\`\`\`
-
 When to Use:
 - Task involves multiple steps or requires ongoing tracking
 - Need to update status of several todos at once

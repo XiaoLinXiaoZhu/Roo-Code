@@ -2,18 +2,34 @@ import type OpenAI from "openai"
 
 const ASK_FOLLOWUP_QUESTION_DESCRIPTION = `Ask the user a question to gather additional information needed to complete the task. Use when you need clarification or more details to proceed effectively.
 
-Parameters:
-- question: (required) A clear, specific question addressing the information needed
-- follow_up: (required) A list of 2-4 suggested answers. Suggestions must be complete, actionable answers without placeholders.
+**When to Use (Spirit-Aligned)**:
 
-Example: Asking for file path
-{ "question": "What is the path to the frontend-config.json file?", "follow_up": [{ "text": "./src/frontend-config.json" }, { "text": "./config/frontend-config.json" }, { "text": "./frontend-config.json" }] }`
+1. **Goal Discovery (Result Orientation)**
+   - When user's request (X) is unclear about the true goal (Y)
+   - Present possible goals with their consequences to help user choose
+   - Example: "Virtual scrolling can solve several problems. Which one are you facing?"
+
+2. **Honest Uncertainty (Radical Honesty)**
+   - When you're uncertain and need user input to verify
+   - This is your "third option" - instead of guessing, ask
+   - Example: "I'm not sure if this file should be deleted. Is it still in use?"
+
+3. **Passive Verification (Certainty Pursuit)**
+   - When active verification is not possible and you need user-provided information
+   - Note: Active verification (designing experiments) is preferred when possible
+
+**How to Ask Well**:
+- Always provide 2-4 suggested answers with consequences
+- Each suggestion should be complete and actionable
+- Help user make informed decisions, don't just ask open-ended questions`
 
 const QUESTION_PARAMETER_DESCRIPTION = `Clear, specific question that captures the missing information you need`
 
 const FOLLOW_UP_PARAMETER_DESCRIPTION = `Required list of 2-4 suggested responses; each suggestion must be a complete, actionable answer`
 
-const FOLLOW_UP_TEXT_DESCRIPTION = `Suggested answer the user can pick`
+const FOLLOW_UP_CHOICE_DESCRIPTION = `The choice option the user can pick`
+
+const FOLLOW_UP_AFFECT_DESCRIPTION = `The consequence or impact of selecting this choice, helping user understand what will happen`
 
 export default {
 	type: "function",
@@ -34,12 +50,16 @@ export default {
 					items: {
 						type: "object",
 						properties: {
-							text: {
+							choice: {
 								type: "string",
-								description: FOLLOW_UP_TEXT_DESCRIPTION,
+								description: FOLLOW_UP_CHOICE_DESCRIPTION,
+							},
+							affect: {
+								type: "string",
+								description: FOLLOW_UP_AFFECT_DESCRIPTION,
 							},
 						},
-						required: ["text"],
+						required: ["choice", "affect"],
 						additionalProperties: false,
 					},
 					minItems: 2,
