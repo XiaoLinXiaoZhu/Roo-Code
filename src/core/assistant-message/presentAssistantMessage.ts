@@ -450,7 +450,7 @@ export async function presentAssistantMessage(cline: Task) {
 			// Get parallel tool calling state from experiments (stateExperiments already fetched above)
 			const parallelToolCallsEnabled = stateExperiments?.multipleNativeToolCalls ?? false
 
-			if (!parallelToolCallsEnabled && cline.didAlreadyUseTool) {
+			if (!parallelToolCallsEnabled && cline.didAlreadyUseTool && !block.isMarkdownTool) {
 				// Ignore any content after a tool has already been used.
 				// For native tool calling, we must send a tool_result for every tool_use to avoid API errors
 				const errorMessage = `Tool [${block.name}] was not executed because a tool has already been used in this message. Only one tool may be used per message. You must assess the first tool's result before proceeding to use the next tool.`
@@ -567,8 +567,9 @@ export async function presentAssistantMessage(cline: Task) {
 				}
 
 				hasToolResult = true
-				// Only set didAlreadyUseTool when parallel tool calling is disabled
-				if (!parallelToolCallsEnabled) {
+				// Only set didAlreadyUseTool when parallel tool calling is disabled.
+				// Markdown tool calls support multiple tools per message.
+				if (!parallelToolCallsEnabled && !block.isMarkdownTool) {
 					cline.didAlreadyUseTool = true
 				}
 			}
