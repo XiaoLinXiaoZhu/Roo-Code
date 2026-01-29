@@ -1,5 +1,9 @@
 # Roo Code Changelog
 
+## [3.43.3] - 2026-01-29
+
+- Improved: read_file tool now provides a clear JSON example and correct parameter guidance (line_ranges) when file truncation occurs, helping the model better understand how to read remaining content.
+
 ## [3.43.2] - 2026-01-29
 
 - Fixed: Markdown format tool calls (write_to_file, apply_diff, update_todo_list) no longer trigger false "[ERROR] You did not use a tool" messages

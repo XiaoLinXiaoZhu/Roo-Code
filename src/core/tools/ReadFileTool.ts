@@ -400,7 +400,7 @@ export class ReadFileTool extends BaseTool<"read_file"> {
 								task.rooIgnoreController,
 							)
 							if (defResult) {
-								const notice = `Showing only ${maxReadFileLine} of ${totalLines} total lines. Use line_range if you need to read more lines`
+								const notice = `Showing only ${maxReadFileLine} of ${totalLines} total lines. Use line_ranges to read specific sections. Example: {"files": [{"path": "${relPath}", "line_ranges": [[${maxReadFileLine + 1}, ${Math.min(maxReadFileLine + 500, totalLines)}]]}]}`
 								updateFileResult(relPath, {
 									nativeContent: `File: ${relPath}\nCode Definitions:\n${defResult}\n\nNote: ${notice}`,
 								})
@@ -431,7 +431,7 @@ export class ReadFileTool extends BaseTool<"read_file"> {
 								toolInfo += `\nCode Definitions:\n${truncatedDefs}\n`
 							}
 
-							const notice = `Showing only ${maxReadFileLine} of ${totalLines} total lines. Use line_range if you need to read more lines`
+							const notice = `Showing only ${maxReadFileLine} of ${totalLines} total lines. Use line_ranges to read specific sections. Example: {"files": [{"path": "${relPath}", "line_ranges": [[${maxReadFileLine + 1}, ${Math.min(maxReadFileLine + 500, totalLines)}]]}]}`
 							toolInfo += `\nNote: ${notice}`
 
 							updateFileResult(relPath, {
@@ -480,7 +480,7 @@ export class ReadFileTool extends BaseTool<"read_file"> {
 
 						if (!result.complete) {
 							// File was truncated
-							const notice = `File truncated: showing ${result.lineCount} lines (${result.tokenCount} tokens) due to context budget. Use line_range to read specific sections.`
+							const notice = `File truncated: showing ${result.lineCount} lines (${result.tokenCount} tokens) due to context budget. Use line_ranges to read specific sections. Example: {"files": [{"path": "${relPath}", "line_ranges": [[${result.lineCount + 1}, ${result.lineCount + 500}]]}]}`
 							toolInfo =
 								result.lineCount > 0
 									? `Lines 1-${result.lineCount}:\n${content}\n\nNote: ${notice}`

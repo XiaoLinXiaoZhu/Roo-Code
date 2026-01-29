@@ -159,7 +159,7 @@ export class ClineProvider
 
 	public isViewLaunched = false
 	public settingsImportedAt?: number
-	public readonly latestAnnouncementId = "jan-2026-v3.43.1-spirit-anchor" // v3.43.1 Spirit Anchor & Environment Cleanup
+	public readonly latestAnnouncementId = "jan-2026-v3.43.3-read-file-optimization" // v3.43.3 read_file tool optimization
 	public readonly providerSettingsManager: ProviderSettingsManager
 	public readonly customModesManager: CustomModesManager
 
