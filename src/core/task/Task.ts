@@ -2413,6 +2413,14 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				// the user hits max requests and denies resetting the count.
 				break
 			} else {
+				// When recursivelyMakeClineRequests returns false, it means the stack is empty
+				// and the task didn't end. This happens when:
+				// 1. The model didn't use any tools (need to prompt it to use tools)
+				// 2. The model used tools but the loop naturally ended
+				// The noToolsUsed() message is already added inside recursivelyMakeClineRequests
+				// when didToolUse is false, so we just need to provide an empty content here
+				// to continue the loop. The actual content will come from userMessageContent
+				// that was pushed to the stack.
 				nextUserContent = [{ type: "text", text: formatResponse.noToolsUsed() }]
 			}
 		}
@@ -3509,8 +3517,12 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 					// Duplicate tool_use IDs cause Anthropic API 400 errors:
 					// "tool_use ids must be unique"
 					const seenToolUseIds = new Set<string>()
+					// Filter out markdown tool calls - they should remain as text in the conversation history
+					// to maintain consistent In-Context Learning examples for the model
 					const toolUseBlocks = this.assistantMessageContent.filter(
-						(block) => block.type === "tool_use" || block.type === "mcp_tool_use",
+						(block) =>
+							(block.type === "tool_use" || block.type === "mcp_tool_use") &&
+							!(block as import("../../shared/tools").ToolUse).isMarkdownTool,
 					)
 					for (const block of toolUseBlocks) {
 						if (block.type === "mcp_tool_use") {
@@ -3594,9 +3606,12 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 					// If the model did not tool use, then we need to tell it to
 					// either use a tool or attempt_completion.
-					const didToolUse = this.assistantMessageContent.some(
-						(block) => block.type === "tool_use" || block.type === "mcp_tool_use",
-					)
+					// Check if any tool was used (including Markdown tools)
+					// Markdown tools are stored in markdownToolResults and don't appear as tool_use blocks in API history
+					const didToolUse =
+						this.assistantMessageContent.some(
+							(block) => block.type === "tool_use" || block.type === "mcp_tool_use",
+						) || this.markdownToolResults.length > 0
 
 					if (!didToolUse) {
 						// Increment consecutive no-tool-use counter
@@ -3625,6 +3640,22 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 						stack.push({
 							userContent: [...this.userMessageContent], // Create a copy to avoid mutation issues
 							includeFileDetails: false, // Subsequent iterations don't need file details
+						})
+
+						// Add periodic yielding to prevent blocking
+						await new Promise((resolve) => setImmediate(resolve))
+					} else if (didToolUse && this.markdownToolResults.length > 0) {
+						// For Markdown tools, we need to continue the loop to send the tool results
+						// via environment_details. Add a placeholder text to ensure the message is sent.
+						// The placeholder guides the model to check environment_details for results.
+						stack.push({
+							userContent: [
+								{
+									type: "text",
+									text: "[Tool execution completed. Check environment_details for results and continue with your task.]",
+								},
+							],
+							includeFileDetails: false,
 						})
 
 						// Add periodic yielding to prevent blocking

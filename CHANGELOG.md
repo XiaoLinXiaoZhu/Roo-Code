@@ -1,5 +1,10 @@
 # Roo Code Changelog
 
+## [3.43.2] - 2026-01-29
+
+- Fixed: Markdown format tool calls (write_to_file, apply_diff, update_todo_list) no longer trigger false "[ERROR] You did not use a tool" messages
+- When Markdown tools are executed, a placeholder message is now sent to continue the conversation loop, ensuring tool results in environment_details are properly delivered to the model
+
 ## [3.43.1] - 2026-01-29
 
 - Removed time and cost information from environment details to reduce context noise and improve focus
