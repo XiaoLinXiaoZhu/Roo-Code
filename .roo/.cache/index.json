@@ -1,0 +1,32 @@
+{
+	"version": "1.0",
+	"caches": [
+		{
+			"id": "1",
+			"query": "LiteLLM provider implementation, how does it fetch models and handle API requests?",
+			"tags": [
+				"litellm",
+				"provider",
+				"implementation",
+				"how",
+				"does",
+				"it",
+				"fetch",
+				"models",
+				"and",
+				"handle",
+				"api",
+				"requests"
+			],
+			"scope": {
+				"directories": "/Users/wepie/Documents/pie/project/roo-code/src",
+				"filePatterns": "*.ts",
+				"excludes": "node_modules,dist,*.test.ts"
+			},
+			"createdAt": "2026-01-29T13:23:43.005Z",
+			"gitCommit": "9b6b4ae977317223f148523684cd731ca644105b",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}}}},\"modelFetchEndpoint\":{\"type\":\"string\"},\"apiKeyHandling\":{\"type\":\"string\"}}}"
+		}
+	]
+}

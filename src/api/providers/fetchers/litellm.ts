@@ -3,6 +3,63 @@ import axios from "axios"
 import type { ModelRecord } from "@roo-code/types"
 
 import { DEFAULT_HEADERS } from "../constants"
+
+type OpenAIModelsResponse = {
+	object: "list"
+	data: Array<{
+		id: string
+		object?: string
+		created?: number
+		owned_by?: string
+	}>
+}
+
+function buildHeaders(apiKey: string): Record<string, string> {
+	const headers: Record<string, string> = {
+		"Content-Type": "application/json",
+		...DEFAULT_HEADERS,
+	}
+
+	if (apiKey) {
+		headers["Authorization"] = `Bearer ${apiKey}`
+	}
+
+	return headers
+}
+
+function joinUrl(baseUrl: string, path: string): string {
+	const urlObj = new URL(baseUrl)
+	// Normalize the pathname by removing trailing slashes and multiple slashes
+	urlObj.pathname = urlObj.pathname.replace(/\/+$/, "").replace(/\/+/g, "/") + path
+	return urlObj.href
+}
+
+async function fetchModelsFromOpenAIEndpoint(apiKey: string, baseUrl: string): Promise<ModelRecord> {
+	const headers = buildHeaders(apiKey)
+	const url = joinUrl(baseUrl, "/v1/models")
+	const response = await axios.get<OpenAIModelsResponse>(url, { headers, timeout: 5000 })
+
+	if (!response.data || !Array.isArray(response.data.data)) {
+		console.error("Error fetching LiteLLM models via /v1/models: Unexpected response format", response.data)
+		throw new Error("Failed to fetch LiteLLM models via /v1/models: Unexpected response format.")
+	}
+
+	const models: ModelRecord = {}
+	for (const model of response.data.data) {
+		if (!model?.id) continue
+		models[model.id] = {
+			// Defaults (we only have id from /v1/models)
+			maxTokens: 8192,
+			contextWindow: 200000,
+			supportsImages: false,
+			supportsPromptCache: false,
+			description: `${model.id} via LiteLLM proxy`,
+		}
+	}
+
+	return models
+}
+
 /**
  * Fetches available models from a LiteLLM server
  *
@@ -12,21 +69,12 @@ import { DEFAULT_HEADERS } from "../constants"
  * @throws Will throw an error if the request fails or the response is not as expected.
  */
 export async function getLiteLLMModels(apiKey: string, baseUrl: string): Promise<ModelRecord> {
-	try {
-		const headers: Record<string, string> = {
-			"Content-Type": "application/json",
-			...DEFAULT_HEADERS,
-		}
+	const headers = buildHeaders(apiKey)
 
-		if (apiKey) {
-			headers["Authorization"] = `Bearer ${apiKey}`
-		}
+	try {
 		// Use URL constructor to properly join base URL and path
 		// This approach handles all edge cases including paths, query params, and fragments
-		const urlObj = new URL(baseUrl)
-		// Normalize the pathname by removing trailing slashes and multiple slashes
-		urlObj.pathname = urlObj.pathname.replace(/\/+$/, "").replace(/\/+/g, "/") + "/v1/model/info"
-		const url = urlObj.href
+		const url = joinUrl(baseUrl, "/v1/model/info")
 		// Added timeout to prevent indefinite hanging
 		const response = await axios.get(url, { headers, timeout: 5000 })
 		const models: ModelRecord = {}
@@ -66,6 +114,11 @@ export async function getLiteLLMModels(apiKey: string, baseUrl: string): Promise
 
 		return models
 	} catch (error: any) {
+		// If /v1/model/info is forbidden (e.g. LiteLLM endpoint disabled), fall back to OpenAI-compatible /v1/models.
+		if (axios.isAxiosError(error) && error.response?.status === 403) {
+			return fetchModelsFromOpenAIEndpoint(apiKey, baseUrl)
+		}
+
 		console.error("Error fetching LiteLLM models:", error.message ? error.message : error)
 		if (axios.isAxiosError(error) && error.response) {
 			throw new Error(

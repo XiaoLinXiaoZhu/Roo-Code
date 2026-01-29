@@ -697,4 +697,112 @@ describe("getLiteLLMModels", () => {
 			description: "model-with-only-max-output-tokens via LiteLLM proxy",
 		})
 	})
+
+	it("falls back to /v1/models endpoint when /v1/model/info returns 403", async () => {
+		const forbiddenError = {
+			response: {
+				status: 403,
+				statusText: "Forbidden",
+			},
+			isAxiosError: true,
+		}
+
+		const openAIModelsResponse = {
+			data: {
+				object: "list",
+				data: [
+					{ id: "gpt-4o", object: "model", created: 1677610602, owned_by: "openai" },
+					{ id: "claude-3-5-sonnet", object: "model", created: 1677610602, owned_by: "anthropic" },
+				],
+			},
+		}
+
+		// First call to /v1/model/info returns 403
+		mockedAxios.get.mockRejectedValueOnce(forbiddenError)
+		// Second call to /v1/models succeeds
+		mockedAxios.get.mockResolvedValueOnce(openAIModelsResponse)
+		mockedAxios.isAxiosError.mockReturnValue(true)
+
+		const result = await getLiteLLMModels("test-api-key", "http://localhost:4000")
+
+		// Should have called both endpoints
+		expect(mockedAxios.get).toHaveBeenCalledTimes(2)
+		expect(mockedAxios.get).toHaveBeenNthCalledWith(1, "http://localhost:4000/v1/model/info", expect.any(Object))
+		expect(mockedAxios.get).toHaveBeenNthCalledWith(2, "http://localhost:4000/v1/models", expect.any(Object))
+
+		// Should return models with default values
+		expect(result).toEqual({
+			"gpt-4o": {
+				maxTokens: 8192,
+				contextWindow: 200000,
+				supportsImages: false,
+				supportsPromptCache: false,
+				description: "gpt-4o via LiteLLM proxy",
+			},
+			"claude-3-5-sonnet": {
+				maxTokens: 8192,
+				contextWindow: 200000,
+				supportsImages: false,
+				supportsPromptCache: false,
+				description: "claude-3-5-sonnet via LiteLLM proxy",
+			},
+		})
+	})
+
+	it("throws error when /v1/models fallback also fails", async () => {
+		const forbiddenError = {
+			response: {
+				status: 403,
+				statusText: "Forbidden",
+			},
+			isAxiosError: true,
+		}
+
+		const fallbackError = {
+			response: {
+				status: 500,
+				statusText: "Internal Server Error",
+			},
+			isAxiosError: true,
+		}
+
+		// First call to /v1/model/info returns 403
+		mockedAxios.get.mockRejectedValueOnce(forbiddenError)
+		// Second call to /v1/models also fails
+		mockedAxios.get.mockRejectedValueOnce(fallbackError)
+		mockedAxios.isAxiosError.mockReturnValue(true)
+
+		await expect(getLiteLLMModels("test-api-key", "http://localhost:4000")).rejects.toThrow()
+	})
+
+	it("skips models without id in /v1/models fallback response", async () => {
+		const forbiddenError = {
+			response: {
+				status: 403,
+				statusText: "Forbidden",
+			},
+			isAxiosError: true,
+		}
+
+		const openAIModelsResponse = {
+			data: {
+				object: "list",
+				data: [
+					{ id: "valid-model", object: "model" },
+					{ object: "model" }, // Missing id
+					{ id: "", object: "model" }, // Empty id
+					{ id: "another-valid-model", object: "model" },
+				],
+			},
+		}
+
+		mockedAxios.get.mockRejectedValueOnce(forbiddenError)
+		mockedAxios.get.mockResolvedValueOnce(openAIModelsResponse)
+		mockedAxios.isAxiosError.mockReturnValue(true)
+
+		const result = await getLiteLLMModels("test-api-key", "http://localhost:4000")
+
+		// Should only include models with valid ids
+		expect(Object.keys(result)).toEqual(["valid-model", "another-valid-model"])
+	})
 })
