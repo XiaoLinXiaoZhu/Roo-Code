@@ -42,6 +42,8 @@ export const toolParamNames = [
 	"url",
 	"coordinate",
 	"text",
+	"choice",
+	"affect",
 	"server_name",
 	"tool_name",
 	"arguments",
@@ -107,7 +109,7 @@ export type NativeToolArgs = {
 	new_task: { mode: string; message: string; todos?: string }
 	ask_followup_question: {
 		question: string
-		follow_up: Array<{ text: string }>
+		follow_up: Array<{ choice: string; affect: string }>
 	}
 	browser_action: BrowserActionParams
 	codebase_search: { query: string; path?: string }

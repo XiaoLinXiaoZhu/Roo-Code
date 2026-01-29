@@ -30,7 +30,10 @@ describe("askFollowupQuestionTool", () => {
 			},
 			nativeArgs: {
 				question: "What would you like to do?",
-				follow_up: [{ text: "Option 1" }, { text: "Option 2" }],
+				follow_up: [
+					{ choice: "Option 1", affect: "Does option 1" },
+					{ choice: "Option 2", affect: "Does option 2" },
+				],
 			},
 			partial: false,
 		}
@@ -43,7 +46,9 @@ describe("askFollowupQuestionTool", () => {
 
 		expect(mockCline.ask).toHaveBeenCalledWith(
 			"followup",
-			expect.stringContaining('"suggest":[{"answer":"Option 1"},{"answer":"Option 2"}]'),
+			expect.stringContaining(
+				'"suggest":[{"answer":"Option 1","affect":"Does option 1"},{"answer":"Option 2","affect":"Does option 2"}]',
+			),
 			false,
 		)
 	})
@@ -57,7 +62,10 @@ describe("askFollowupQuestionTool", () => {
 			},
 			nativeArgs: {
 				question: "What would you like to do?",
-				follow_up: [{ text: "Write code" }, { text: "Debug issue" }],
+				follow_up: [
+					{ choice: "Write code", affect: "Proceed with implementation" },
+					{ choice: "Debug issue", affect: "Investigate and diagnose the problem" },
+				],
 			},
 			partial: false,
 		}
@@ -70,7 +78,9 @@ describe("askFollowupQuestionTool", () => {
 
 		expect(mockCline.ask).toHaveBeenCalledWith(
 			"followup",
-			expect.stringContaining('"suggest":[{"answer":"Write code"},{"answer":"Debug issue"}]'),
+			expect.stringContaining(
+				'"suggest":[{"answer":"Write code","affect":"Proceed with implementation"},{"answer":"Debug issue","affect":"Investigate and diagnose the problem"}]',
+			),
 			false,
 		)
 	})
@@ -84,7 +94,10 @@ describe("askFollowupQuestionTool", () => {
 			},
 			nativeArgs: {
 				question: "What would you like to do?",
-				follow_up: [{ text: "Regular option" }, { text: "Plan architecture" }],
+				follow_up: [
+					{ choice: "Regular option", affect: "Proceed normally" },
+					{ choice: "Plan architecture", affect: "Step back and plan the architecture first" },
+				],
 			},
 			partial: false,
 		}
@@ -97,7 +110,9 @@ describe("askFollowupQuestionTool", () => {
 
 		expect(mockCline.ask).toHaveBeenCalledWith(
 			"followup",
-			expect.stringContaining('"suggest":[{"answer":"Regular option"},{"answer":"Plan architecture"}]'),
+			expect.stringContaining(
+				'"suggest":[{"answer":"Regular option","affect":"Proceed normally"},{"answer":"Plan architecture","affect":"Step back and plan the architecture first"}]',
+			),
 			false,
 		)
 	})
@@ -113,7 +128,10 @@ describe("askFollowupQuestionTool", () => {
 				partial: true,
 				nativeArgs: {
 					question: "What would you like to do?",
-					follow_up: [{ text: "Option 1" }, { text: "Option 2" }],
+					follow_up: [
+						{ choice: "Option 1", affect: "Does option 1" },
+						{ choice: "Option 2", affect: "Does option 2" },
+					],
 				},
 			}
 
@@ -158,7 +176,8 @@ describe("askFollowupQuestionTool", () => {
 			NativeToolCallParser.startStreamingToolCall("call_123", "ask_followup_question")
 
 			// Simulate streaming JSON chunks
-			const chunk1 = '{"question":"What would you like?","follow_up":[{"text":"Option 1"}'
+			const chunk1 =
+				'{"question":"What would you like?","follow_up":[{"choice":"Option 1","affect":"Does option 1"}'
 			const result1 = NativeToolCallParser.processStreamingChunk("call_123", chunk1)
 
 			expect(result1).not.toBeNull()
@@ -168,7 +187,7 @@ describe("askFollowupQuestionTool", () => {
 			// Use type assertion to access the specific fields
 			const nativeArgs = result1?.nativeArgs as {
 				question: string
-				follow_up?: Array<{ text: string }>
+				follow_up?: Array<{ choice: string; affect: string }>
 			}
 			expect(nativeArgs?.question).toBe("What would you like?")
 			// partial-json should parse the incomplete array
@@ -179,7 +198,8 @@ describe("askFollowupQuestionTool", () => {
 			NativeToolCallParser.startStreamingToolCall("call_456", "ask_followup_question")
 
 			// Add complete JSON
-			const completeJson = '{"question":"Choose an option","follow_up":[{"text":"Yes"},{"text":"No"}]}'
+			const completeJson =
+				'{"question":"Choose an option","follow_up":[{"choice":"Yes","affect":"Confirm"},{"choice":"No","affect":"Decline"}]}'
 			NativeToolCallParser.processStreamingChunk("call_456", completeJson)
 
 			const result = NativeToolCallParser.finalizeStreamingToolCall("call_456")
@@ -192,7 +212,10 @@ describe("askFollowupQuestionTool", () => {
 			if (result?.type === "tool_use") {
 				expect(result.nativeArgs).toEqual({
 					question: "Choose an option",
-					follow_up: [{ text: "Yes" }, { text: "No" }],
+					follow_up: [
+						{ choice: "Yes", affect: "Confirm" },
+						{ choice: "No", affect: "Decline" },
+					],
 				})
 			}
 		})

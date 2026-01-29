@@ -18,6 +18,8 @@ export interface FollowUpData {
 export interface SuggestionItem {
 	/** The text of the suggestion */
 	answer: string
+	/** Optional consequence or impact description for this choice */
+	affect?: string
 	/** Optional mode to switch to when selecting this suggestion */
 	mode?: string
 }
@@ -27,6 +29,7 @@ export interface SuggestionItem {
  */
 export const suggestionItemSchema = z.object({
 	answer: z.string(),
+	affect: z.string().optional(),
 	mode: z.string().optional(),
 })
 

@@ -5,7 +5,8 @@ import type { ToolUse } from "../../shared/tools"
 import { BaseTool, ToolCallbacks } from "./BaseTool"
 
 interface Suggestion {
-	text: string
+	choice: string
+	affect: string
 }
 
 interface AskFollowupQuestionParams {
@@ -32,7 +33,7 @@ export class AskFollowupQuestionTool extends BaseTool<"ask_followup_question"> {
 			// Transform follow_up suggestions to the format expected by task.ask
 			const follow_up_json = {
 				question,
-				suggest: follow_up.map((s) => ({ answer: s.text })),
+				suggest: follow_up.map((s) => ({ answer: s.choice, affect: s.affect })),
 			}
 
 			task.consecutiveMistakeCount = 0

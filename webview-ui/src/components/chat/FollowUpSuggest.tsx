@@ -126,7 +126,14 @@ export const FollowUpSuggest = ({
 							)}
 							onClick={(event) => handleSuggestionClick(suggestion, event)}
 							aria-label={suggestion.answer}>
-							{suggestion.answer}
+							<div className="flex flex-col gap-0.5">
+								<span>{suggestion.answer}</span>
+								{suggestion.affect && (
+									<span className="text-xs text-vscode-descriptionForeground opacity-80">
+										→ {suggestion.affect}
+									</span>
+								)}
+							</div>
 						</Button>
 						{isFirstSuggestion && countdown !== null && !suggestionSelected && !isAnswered && (
 							<p className="rounded-b-xl border-1 border-t-0 border-vscode-foreground/60 text-vscode-descriptionForeground text-xs m-0 mt-1 px-3 pt-2 pb-2">
