@@ -289,5 +289,5 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 			? state.apiConfiguration.todoListEnabled
 			: true
 	const reminderSection = todoListEnabled ? formatReminderSection(cline.todoList) : ""
-	return `<environment_details>\n${details.trim()}\n${reminderSection}\n</environment_details>`
+	return `<environment_details>\n${details.trim()}\n${reminderSection}\n你的输出必须以🧭开头，你的最终输出应该包含全部的sprite</environment_details>`
 }
