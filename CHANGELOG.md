@@ -1,5 +1,16 @@
 # Roo Code Changelog
 
+## [3.46.0] - 2026-01-28
+
+- 🎯 Spirit Hint System: Add diverse hint styles for user guidance with cognitive anchors (🧭CERTAINTY, 🧭VALUE, 🧭HONESTY)
+- 🔍 Search Project Cache: Add cache management for search results with creation, reading, and expiration checking
+- 📝 Suggestion Structure: Update suggestion items with impact descriptions and adjust related components
+- 🛠️ Tool Description Optimization: Simplify examples and enhance user guidance
+- 📦 Dependencies: Add ai and json-stream-stringify packages
+- Fix: Update environment details output format with prefix and content requirements
+- Fix: Update tool calling logic to support Markdown tools in parallel
+- Fix: Update tool usage logic to support multiple delegate tools
+
 ## [3.45.0] - 2026-01-27
 
 ![3.45.0 Release - Smart Code Folding](/releases/3.45.0-release.png)

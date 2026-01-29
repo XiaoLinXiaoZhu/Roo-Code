@@ -6,7 +6,19 @@ const WRITE_TO_FILE_DESCRIPTION = `Request to write content to a file. This tool
 
 When using this tool, use it directly with the desired content. You do not need to display the content before using the tool. ALWAYS provide the COMPLETE file content in your response. This is NON-NEGOTIABLE. Partial updates or placeholders like '// rest of code unchanged' are STRICTLY FORBIDDEN. Failure to do so will result in incomplete or broken code.
 
-When creating a new project, organize all new files within a dedicated project directory unless the user specifies otherwise. Structure the project logically, adhering to best practices for the specific type of project being created.`
+When creating a new project, organize all new files within a dedicated project directory unless the user specifies otherwise. Structure the project logically, adhering to best practices for the specific type of project being created.
+
+Use Markdown code block format with \`\`\`write_to path syntax. This format requires zero escaping for newlines and quotes, making it more natural and readable. **Use 6 backticks (\`\`\`\`\`\`) for maximum compatibility** - this ensures any code blocks within your content won't conflict with the tool fence. Markdown format also supports multiple tool calls in a single message.
+
+Example (Markdown format with 6 backticks):
+\`\`\`\`\`\`write_to frontend-config.json
+{
+  "apiEndpoint": "https://api.example.com",
+  "theme": {
+    "primaryColor": "#007bff"
+  }
+}
+\`\`\`\`\`\``
 
 const PATH_PARAMETER_DESCRIPTION = `The path of the file to write to (relative to the current workspace directory)`
 
