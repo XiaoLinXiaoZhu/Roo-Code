@@ -1,5 +1,10 @@
 # Roo Code Changelog
 
+## [3.43.1] - 2026-01-29
+
+- Removed time and cost information from environment details to reduce context noise and improve focus
+- Updated system prompt with "Spirit Anchor" (🧭) concept to better activate core protocols (Certainty, Result Orientation, Radical Honesty)
+
 ## [3.43.0] - 2026-01-29
 
 - Added Markdown format support for long-text tools (`write_to_file`, `apply_diff`, `update_todo_list`), reducing token consumption by 10-20% and improving model output accuracy
