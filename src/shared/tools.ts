@@ -336,14 +336,14 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 // Define available tool groups.
 export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 	read: {
-		tools: ["read_file", "fetch_instructions", "search_files", "list_files", "codebase_search"],
+		tools: ["fetch_instructions", "codebase_search"],
 	},
 	edit: {
 		tools: ["apply_diff", "write_to_file", "generate_image"],
 	},
 	browser: {
-		// tools: ["browser_action"],
-		tools: [], // ! disable browser tools for now
+		tools: ["browser_action"],
+		// tools: [], // ! disable browser tools for now
 	},
 	command: {
 		tools: ["execute_command", "read_command_output"],

@@ -115,6 +115,47 @@
 			"gitCommit": "0d1b90cbfdb7e1a8d4668051f0196e0ef2667369",
 			"ttlHours": 168,
 			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+		},
+		{
+			"id": "6",
+			"query": "mode 工具配置是如何实现的？mode 的 tools 权限是在哪里定义和处理的？",
+			"tags": ["mode", "工具配置是如何实现的", "tools", "权限是在哪里定义和处理的"],
+			"scope": null,
+			"createdAt": "2026-01-30T20:28:38.126Z",
+			"gitCommit": "b4e98d22a4a5c94d2d9de65e9d5c513fe8ed00c8",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+		},
+		{
+			"id": "7",
+			"query": "codebase_search 工具的功能是什么？它和 search_files 有什么区别？",
+			"tags": ["codebase_search", "工具的功能是什么", "它和", "search_files", "有什么区别"],
+			"scope": null,
+			"createdAt": "2026-01-30T20:32:03.386Z",
+			"gitCommit": "b4e98d22a4a5c94d2d9de65e9d5c513fe8ed00c8",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"codebase_search_definition\":{\"type\":\"string\"},\"search_files_definition\":{\"type\":\"string\"},\"differences\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+		},
+		{
+			"id": "8",
+			"query": "项目中是否已有 AST 解析、语言服务器、符号定义查找、引用查找相关的实现？是否使用了 tree-sitter 或 LSP？",
+			"tags": [
+				"项目中是否已有",
+				"ast",
+				"解析",
+				"语言服务器",
+				"符号定义查找",
+				"引用查找相关的实现",
+				"是否使用了",
+				"tree",
+				"sitter",
+				"lsp"
+			],
+			"scope": null,
+			"createdAt": "2026-01-30T20:38:01.199Z",
+			"gitCommit": "b4e98d22a4a5c94d2d9de65e9d5c513fe8ed00c8",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"existing_implementations\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"related_files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"technologies_used\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
 		}
 	]
 }
