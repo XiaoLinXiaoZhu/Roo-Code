@@ -396,3 +396,98 @@ export async function getGitStatus(cwd: string, maxFiles: number = 20): Promise<
 		return null
 	}
 }
+
+/**
+ * Represents a single file in git status with its status code and path
+ */
+export interface GitStatusFile {
+	status: string // 状态码，如 "M ", " M", "A ", "??", "UU" 等
+	path: string // 文件路径
+}
+
+/**
+ * Structured git status data including branch info and file changes
+ */
+export interface GitStatusStructured {
+	branch: string | null // 当前分支名
+	upstream: string | null // 上游分支名（如果有）
+	files: GitStatusFile[] // 文件变更列表
+	truncated: boolean // 是否被截断（文件数超过 maxFiles）
+	totalFiles: number // 总文件数
+}
+
+/**
+ * Gets structured git status data with branch and file information
+ * @param cwd The working directory to check git status in
+ * @param maxFiles Maximum number of file entries to include (default: 20)
+ * @returns Structured git status data or null if not a git repository
+ */
+export async function getGitStatusStructured(cwd: string, maxFiles: number = 20): Promise<GitStatusStructured | null> {
+	try {
+		const isInstalled = await checkGitInstalled()
+		if (!isInstalled) {
+			return null
+		}
+
+		const isRepo = await checkGitRepo(cwd)
+		if (!isRepo) {
+			return null
+		}
+
+		// Use porcelain v1 format with branch info
+		const { stdout } = await execAsync("git status --porcelain=v1 --branch", { cwd })
+
+		if (!stdout.trim()) {
+			return null
+		}
+
+		const lines = stdout.trim().split("\n")
+
+		// Parse branch line (format: ## branch...upstream or ## branch)
+		const branchLine = lines[0]
+		let branch: string | null = null
+		let upstream: string | null = null
+
+		if (branchLine.startsWith("## ")) {
+			const branchInfo = branchLine.slice(3) // Remove "## " prefix
+
+			// Check if there's upstream info (contains "...")
+			if (branchInfo.includes("...")) {
+				const [branchPart, upstreamPart] = branchInfo.split("...")
+				branch = branchPart.trim() || null
+				upstream = upstreamPart.trim() || null
+			} else {
+				branch = branchInfo.trim() || null
+			}
+		}
+
+		// Parse file lines (format: XY path, where XY is a two-character status code)
+		const fileLines = lines.slice(1)
+		const files: GitStatusFile[] = []
+
+		for (const line of fileLines) {
+			if (line.length >= 3) {
+				// Status is first 2 characters, path is the rest
+				const status = line.slice(0, 2)
+				const path = line.slice(3) // Skip the space after status
+				files.push({ status, path })
+			}
+		}
+
+		// Determine if truncated and limit files
+		const totalFiles = files.length
+		const truncated = maxFiles > 0 && totalFiles > maxFiles
+		const limitedFiles = maxFiles > 0 ? files.slice(0, maxFiles) : files
+
+		return {
+			branch,
+			upstream,
+			files: limitedFiles,
+			truncated,
+			totalFiles,
+		}
+	} catch (error) {
+		console.error("Error getting structured git status:", error)
+		return null
+	}
+}

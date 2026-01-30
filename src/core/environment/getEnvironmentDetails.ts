@@ -13,34 +13,41 @@ import { listFiles } from "../../services/glob/list-files"
 import { TerminalRegistry } from "../../integrations/terminal/TerminalRegistry"
 import { Terminal } from "../../integrations/terminal/Terminal"
 import { arePathsEqual } from "../../utils/path"
-import { formatResponse } from "../prompts/responses"
-import { getGitStatus } from "../../utils/git"
+import { getGitStatusStructured } from "../../utils/git"
+import { RooProtectedController } from "../protect/RooProtectedController"
 
 import { Task } from "../task/Task"
 import { formatReminderSection } from "./reminder"
 import { getSpriteHint } from "./getSpriteHint"
 
-export async function getEnvironmentDetails(cline: Task, includeFileDetails: boolean = false) {
-	let details = ""
+/**
+ * Escape XML special characters in a string
+ */
+function escapeXml(value: string): string {
+	return value
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/\"/g, "&quot;")
+		.replace(/'/g, "&apos;")
+}
 
-	// Inject markdown tool execution results at the beginning
-	// These results are from markdown-format tool calls (write_to, apply_diff, todo_list)
-	// that were executed but not converted to native tool_result format
+export async function getEnvironmentDetails(cline: Task, includeFileDetails: boolean = false) {
+	const currentTime = new Date().toISOString()
+	let xmlContent = ""
+
+	// ============================================================================
+	// Tool Results Section
+	// ============================================================================
 	if (cline.markdownToolResults && cline.markdownToolResults.length > 0) {
-		details += "\n# Markdown Tool Execution Results"
+		xmlContent += "\n  <tool_results>"
 		for (const result of cline.markdownToolResults) {
-			const icon = result.status === "success" ? "✅" : "❌"
-			let line = `\n- ${result.toolName}`
-			if (result.path) {
-				line += ` ${result.path}`
-			}
-			line += `: ${icon} ${result.status === "success" ? "Success" : "Error"}`
-			if (result.message) {
-				line += ` (${result.message})`
-			}
-			details += line
+			const status = result.status === "success" ? "success" : "error"
+			const pathAttr = result.path ? ` path="${escapeXml(result.path)}"` : ""
+			const messageAttr = result.message ? ` message="${escapeXml(result.message)}"` : ""
+			xmlContent += `\n    <result tool="${escapeXml(result.toolName)}"${pathAttr} status="${status}"${messageAttr}/>`
 		}
-		details += "\n"
+		xmlContent += "\n  </tool_results>"
 		// Clear the results after including them
 		cline.clearMarkdownToolResults()
 	}
@@ -49,8 +56,9 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 	const state = await clineProvider?.getState()
 	const { maxWorkspaceFiles = 200 } = state ?? {}
 
-	// It could be useful for cline to know if the user went from one or no
-	// file to another between messages, so we always include this context.
+	// ============================================================================
+	// VSCode Section (Visible Files and Open Tabs)
+	// ============================================================================
 	const visibleFilePaths = vscode.window.visibleTextEditors
 		?.map((editor) => editor.document?.uri?.fsPath)
 		.filter(Boolean)
@@ -61,11 +69,6 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 	const allowedVisibleFiles = cline.rooIgnoreController
 		? cline.rooIgnoreController.filterPaths(visibleFilePaths)
 		: visibleFilePaths.map((p) => p.toPosix()).join("\n")
-
-	if (allowedVisibleFiles) {
-		details += "\n\n# VSCode Visible Files"
-		details += `\n${allowedVisibleFiles}`
-	}
 
 	const { maxOpenTabsContext } = state ?? {}
 	const maxTabs = maxOpenTabsContext ?? 20
@@ -82,12 +85,34 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 		? cline.rooIgnoreController.filterPaths(openTabPaths)
 		: openTabPaths.map((p) => p.toPosix()).join("\n")
 
-	if (allowedOpenTabs) {
-		details += "\n\n# VSCode Open Tabs"
-		details += `\n${allowedOpenTabs}`
+	if (allowedVisibleFiles || allowedOpenTabs) {
+		xmlContent += "\n  <vscode>"
+		if (allowedVisibleFiles) {
+			const visibleFileLines = Array.isArray(allowedVisibleFiles)
+				? allowedVisibleFiles
+				: allowedVisibleFiles.split("\n").filter(Boolean)
+			xmlContent += "\n    <visible_files>"
+			for (const file of visibleFileLines) {
+				xmlContent += `\n      <file>${escapeXml(file)}</file>`
+			}
+			xmlContent += "\n    </visible_files>"
+		}
+		if (allowedOpenTabs) {
+			const openTabLines = Array.isArray(allowedOpenTabs)
+				? allowedOpenTabs
+				: allowedOpenTabs.split("\n").filter(Boolean)
+			xmlContent += "\n    <open_tabs>"
+			for (const file of openTabLines) {
+				xmlContent += `\n      <file>${escapeXml(file)}</file>`
+			}
+			xmlContent += "\n    </open_tabs>"
+		}
+		xmlContent += "\n  </vscode>"
 	}
 
-	// Get task-specific and background terminals.
+	// ============================================================================
+	// Terminals Section
+	// ============================================================================
 	const busyTerminals = [
 		...TerminalRegistry.getTerminals(true, cline.taskId),
 		...TerminalRegistry.getBackgroundTerminals(true),
@@ -113,119 +138,113 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 	// Reset, this lets us know when to wait for saved files to update terminals.
 	cline.didEditFile = false
 
-	// Waiting for updated diagnostics lets terminal output be the most
-	// up-to-date possible.
-	let terminalDetails = ""
+	let terminalsXml = ""
 
+	// Process active terminals
 	if (busyTerminals.length > 0) {
-		// Terminals are cool, let's retrieve their output.
-		terminalDetails += "\n\n# Actively Running Terminals"
-
 		for (const busyTerminal of busyTerminals) {
 			const cwd = busyTerminal.getCurrentWorkingDirectory()
-			terminalDetails += `\n## Terminal ${busyTerminal.id} (Active)`
-			terminalDetails += `\n### Working Directory: \`${cwd}\``
-			terminalDetails += `\n### Original command: \`${busyTerminal.getLastCommand()}\``
+			const command = busyTerminal.getLastCommand()
 			let newOutput = TerminalRegistry.getUnretrievedOutput(busyTerminal.id)
 
 			if (newOutput) {
 				newOutput = Terminal.compressTerminalOutput(newOutput)
-				terminalDetails += `\n### New Output\n${newOutput}`
 			}
+
+			terminalsXml += `\n    <terminal id="${busyTerminal.id}" status="active" cwd="${escapeXml(cwd)}" command="${escapeXml(command)}">`
+			if (newOutput) {
+				terminalsXml += `\n      <output>${escapeXml(newOutput)}</output>`
+			}
+			terminalsXml += "\n    </terminal>"
 		}
 	}
 
-	// First check if any inactive terminals in this task have completed
-	// processes with output.
+	// Process inactive terminals with completed processes
 	const terminalsWithOutput = inactiveTerminals.filter((terminal) => {
 		const completedProcesses = terminal.getProcessesWithOutput()
 		return completedProcesses.length > 0
 	})
 
-	// Only add the header if there are terminals with output.
 	if (terminalsWithOutput.length > 0) {
-		terminalDetails += "\n\n# Inactive Terminals with Completed Process Output"
-
-		// Process each terminal with output.
 		for (const inactiveTerminal of terminalsWithOutput) {
-			let terminalOutputs: string[] = []
-
-			// Get output from completed processes queue.
 			const completedProcesses = inactiveTerminal.getProcessesWithOutput()
 
-			for (const process of completedProcesses) {
-				let output = process.getUnretrievedOutput()
+			if (completedProcesses.length > 0) {
+				const cwd = inactiveTerminal.getCurrentWorkingDirectory()
+				terminalsXml += `\n    <terminal id="${inactiveTerminal.id}" status="completed" cwd="${escapeXml(cwd)}">`
 
-				if (output) {
-					output = Terminal.compressTerminalOutput(output)
-					terminalOutputs.push(`Command: \`${process.command}\`\n${output}`)
+				for (const process of completedProcesses) {
+					let output = process.getUnretrievedOutput()
+
+					if (output) {
+						output = Terminal.compressTerminalOutput(output)
+						terminalsXml += `\n      <process command="${escapeXml(process.command)}">`
+						terminalsXml += `\n        <output>${escapeXml(output)}</output>`
+						terminalsXml += "\n      </process>"
+					}
 				}
+
+				terminalsXml += "\n    </terminal>"
 			}
 
 			// Clean the queue after retrieving output.
 			inactiveTerminal.cleanCompletedProcessQueue()
-
-			// Add this terminal's outputs to the details.
-			if (terminalOutputs.length > 0) {
-				const cwd = inactiveTerminal.getCurrentWorkingDirectory()
-				terminalDetails += `\n## Terminal ${inactiveTerminal.id} (Inactive)`
-				terminalDetails += `\n### Working Directory: \`${cwd}\``
-				terminalOutputs.forEach((output) => {
-					terminalDetails += `\n### New Output\n${output}`
-				})
-			}
 		}
 	}
 
-	// console.log(`[Task#getEnvironmentDetails] terminalDetails: ${terminalDetails}`)
+	if (terminalsXml) {
+		xmlContent += "\n  <terminals>"
+		xmlContent += terminalsXml
+		xmlContent += "\n  </terminals>"
+	}
 
-	// Add recently modified files section.
+	// ============================================================================
+	// Recently Modified Files Section
+	// ============================================================================
 	const recentlyModifiedFiles = cline.fileContextTracker.getAndClearRecentlyModifiedFiles()
 
 	if (recentlyModifiedFiles.length > 0) {
-		details +=
-			"\n\n# Recently Modified Files\nThese files have been modified since you last accessed them (file was just edited so you may need to re-read it before editing):"
+		xmlContent += '\n  <recently_modified hint="re-read before editing">'
 		for (const filePath of recentlyModifiedFiles) {
-			details += `\n${filePath}`
+			xmlContent += `\n    <file>${escapeXml(filePath)}</file>`
 		}
+		xmlContent += "\n  </recently_modified>"
 	}
 
-	if (terminalDetails) {
-		details += terminalDetails
-	}
-
-	// Get settings for git status display
+	// ============================================================================
+	// Git Status Section
+	// ============================================================================
 	const { maxGitStatusFiles = 0 } = state ?? {}
 
-	// Add git status information (if enabled with maxGitStatusFiles > 0).
 	if (maxGitStatusFiles > 0) {
-		const gitStatus = await getGitStatus(cline.cwd, maxGitStatusFiles)
+		const gitStatus = await getGitStatusStructured(cline.cwd, maxGitStatusFiles)
 		if (gitStatus) {
-			details += `\n\n# Git Status\n${gitStatus}`
+			// Build git element with branch and upstream attributes
+			let gitElement = `\n  <git`
+			if (gitStatus.branch) {
+				gitElement += ` branch="${escapeXml(gitStatus.branch)}"`
+			}
+			if (gitStatus.upstream) {
+				gitElement += ` upstream="${escapeXml(gitStatus.upstream)}"`
+			}
+			if (gitStatus.truncated) {
+				gitElement += ` truncated="true"`
+			}
+			gitElement += `>`
+
+			// Add file changes
+			for (const file of gitStatus.files) {
+				gitElement += `\n    <change status="${escapeXml(file.status)}">${escapeXml(file.path)}</change>`
+			}
+
+			gitElement += `\n  </git>`
+			xmlContent += gitElement
 		}
 	}
 
-	const { id: modelId } = cline.api.getModel()
-
-	// Add current mode and any mode-specific warnings.
-	const {
-		mode,
-		customModes,
-		customModePrompts,
-		experiments = {} as Record<ExperimentId, boolean>,
-		customInstructions: globalCustomInstructions,
-		language,
-	} = state ?? {}
-
-	const currentMode = mode ?? defaultModeSlug
-
-	const modeDetails = await getFullModeDetails(currentMode, customModes, customModePrompts, {
-		cwd: cline.cwd,
-		globalCustomInstructions,
-		language: language ?? formatLanguage(vscode.env.language),
-	})
-
-	// Add browser session status - Only show when active to prevent cluttering context
+	// ============================================================================
+	// Browser Session Section
+	// ============================================================================
 	const isBrowserActive = cline.browserSession.isSessionActive()
 
 	if (isBrowserActive) {
@@ -249,48 +268,82 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 
 		const width = actualWidth ?? configuredWidth
 		const height = actualHeight ?? configuredHeight
-		const viewportInfo = width && height ? `\nCurrent viewport size: ${width}x${height} pixels.` : ""
+		const viewportInfo = width && height ? `${width}x${height}` : "900x600"
 
-		details += `\n# Browser Session Status\nActive - A browser session is currently open and ready for browser_action commands${viewportInfo}\n`
+		xmlContent += `\n  <browser status="active" viewport="${viewportInfo}"/>`
 	}
 
+	// ============================================================================
+	// Workspace Files Section
+	// ============================================================================
 	if (includeFileDetails) {
-		details += `\n\n# Current Workspace Directory (${cline.cwd.toPosix()}) Files\n`
 		const isDesktop = arePathsEqual(cline.cwd, path.join(os.homedir(), "Desktop"))
 
 		if (isDesktop) {
-			// Don't want to immediately access desktop since it would show
-			// permission popup.
-			details += "(Desktop files not shown automatically. Use list_files to explore if needed.)"
+			xmlContent += `\n  <workspace path="${escapeXml(cline.cwd.toPosix())}">\n    (Desktop files not shown automatically. Use list_files to explore if needed.)\n  </workspace>`
 		} else {
 			const maxFiles = maxWorkspaceFiles ?? 200
 
 			// Early return for limit of 0
 			if (maxFiles === 0) {
-				details += "(Workspace files context disabled. Use list_files to explore if needed.)"
+				xmlContent += `\n  <workspace path="${escapeXml(cline.cwd.toPosix())}">\n    (Workspace files context disabled. Use list_files to explore if needed.)\n  </workspace>`
 			} else {
 				const [files, didHitLimit] = await listFiles(cline.cwd, true, maxFiles)
-				const { showRooIgnoredFiles = false } = state ?? {}
+				const protectedController = new RooProtectedController(cline.cwd)
 
-				const result = formatResponse.formatFilesList(
-					cline.cwd,
-					files,
-					didHitLimit,
-					cline.rooIgnoreController,
-					showRooIgnoredFiles,
-				)
+				// Build workspace XML with structured file/directory entries
+				let workspaceXml = ""
+				const truncatedAttr = didHitLimit ? ' truncated="true"' : ""
 
-				details += result
+				for (const file of files) {
+					const isDirectory = file.endsWith("/")
+					const isIgnored = cline.rooIgnoreController
+						? !cline.rooIgnoreController.validateAccess(file)
+						: false
+					const isProtected = protectedController.isWriteProtected(file)
+
+					// Build attributes
+					const ignoredAttr = isIgnored ? ' ignored="true"' : ""
+					const protectedAttr = isProtected ? ' protected="true"' : ""
+
+					if (isDirectory) {
+						workspaceXml += `\n    <dir${ignoredAttr}${protectedAttr}>${escapeXml(file)}</dir>`
+					} else {
+						workspaceXml += `\n    <file${ignoredAttr}${protectedAttr}>${escapeXml(file)}</file>`
+					}
+				}
+
+				xmlContent += `\n  <workspace path="${escapeXml(cline.cwd.toPosix())}"${truncatedAttr}>${workspaceXml}\n  </workspace>`
 			}
 		}
 	}
 
+	// ============================================================================
+	// Reminder and Spirit Hint Sections
+	// ============================================================================
 	const todoListEnabled =
 		state && typeof state.apiConfiguration?.todoListEnabled === "boolean"
 			? state.apiConfiguration.todoListEnabled
 			: true
 
-	const sprite_hint = getSpriteHint()
-	const reminderSection = todoListEnabled ? formatReminderSection(cline.todoList) : ""
-	return `<environment_details>\n${details.trim()}\n${reminderSection}\n${sprite_hint}</environment_details>`
+	const reminderContent = todoListEnabled ? formatReminderSection(cline.todoList) : ""
+	const spriteHintContent = getSpriteHint()
+
+	if (todoListEnabled) {
+		if (reminderContent) {
+			// reminderContent is already XML formatted, no need to escape
+			xmlContent += `\n  <todos>\n    ${reminderContent.split("\n").join("\n    ")}\n  </todos>`
+		} else {
+			xmlContent += `\n  <todos hint="Create with update_todo_list if task is complex"/>`
+		}
+	}
+
+	if (spriteHintContent) {
+		xmlContent += `\n  <spirit_hint>${escapeXml(spriteHintContent)}</spirit_hint>`
+	}
+
+	// ============================================================================
+	// Assemble Final XML
+	// ============================================================================
+	return `<environment current_time="${currentTime}">${xmlContent}\n</environment>`
 }
