@@ -27,6 +27,34 @@
 			"gitCommit": "9b6b4ae977317223f148523684cd731ca644105b",
 			"ttlHours": 168,
 			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}}}},\"modelFetchEndpoint\":{\"type\":\"string\"},\"apiKeyHandling\":{\"type\":\"string\"}}}"
+		},
+		{
+			"id": "2",
+			"query": "Where is the LiteLLM provider implementation that handles Vertex AI requests and caching?",
+			"tags": [
+				"where",
+				"is",
+				"the",
+				"litellm",
+				"provider",
+				"implementation",
+				"that",
+				"handles",
+				"vertex",
+				"ai",
+				"requests",
+				"and",
+				"caching"
+			],
+			"scope": {
+				"directories": "/Users/wepie/Documents/pie/project/roo-code/src",
+				"filePatterns": "*.ts",
+				"excludes": "node_modules,dist,*.test.ts"
+			},
+			"createdAt": "2026-01-29T13:55:04.842Z",
+			"gitCommit": "5991ed921c0090640b342aec7d41921e4944525d",
+			"ttlHours": 168,
+			"schema": "{\"type\": \"object\", \"properties\": {\"files\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}}, \"relevantCode\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\"file\": {\"type\": \"string\"}, \"description\": {\"type\": \"string\"}}}}}}"
 		}
 	]
 }
