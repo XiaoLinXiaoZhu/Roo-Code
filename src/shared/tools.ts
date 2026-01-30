@@ -336,6 +336,8 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 // Define available tool groups.
 export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 	read: {
+		// "read_file", "search_files", "list_files", are now in command
+		// 因为模型可以直接通过命令行工具更加灵活地读取文件内容和搜索文件，所以这些工具未来使用命令行工具来替代
 		tools: ["fetch_instructions", "codebase_search"],
 	},
 	edit: {
