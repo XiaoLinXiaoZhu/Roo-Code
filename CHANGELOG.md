@@ -1,5 +1,15 @@
 # Roo Code Changelog
 
+## [3.46.3] - 2026-01-30
+
+- 🧠 AST Code Intelligence: Add go-to-definition and find-references support using VS Code's built-in language services
+- 🔧 Command Interceptor: Add optimized handlers for `head`, `tail`, `ls`, and `wc` commands
+    - `HeadHandler`: Output first N lines or bytes of files
+    - `TailHandler`: Output last N lines or bytes of files
+    - `LsHandler`: List directory contents with long format, hidden files, and recursion options
+    - `WcHandler`: Count lines, words, and characters in files
+- 📦 Tool Groups: Refactor tool groups structure and update codebase search implementations
+
 ## [3.46.2] - 2026-01-30
 
 - 🛠️ Tool Schema Enhancement: Refactor tool descriptions and schemas for better clarity and usability
