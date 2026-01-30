@@ -8,7 +8,8 @@
 2. [长文本工具的 Markdown 格式优化](#长文本工具的-markdown-格式优化)
 3. [专用工具 vs CLI 调用的权衡](#专用工具-vs-cli-调用的权衡)
 4. [CLI 代理层：统一解决方案](#cli-代理层统一解决方案)
-5. [实现路线图](#实现路线图)
+5. [AST 代码智能：跳转定义与查找引用](#ast-代码智能跳转定义与查找引用)
+6. [实现路线图](#实现路线图)
 
 ---
 
@@ -273,6 +274,175 @@ class GrepHandler implements CommandHandler {
 | 管道一致性 | 无法保证     | 单线程顺序执行   |
 | 调用者识别 | 需要额外机制 | 天然明确         |
 | 可测试性   | 需要集成测试 | 可单元测试       |
+
+---
+
+## AST 代码智能：跳转定义与查找引用
+
+### 问题背景
+
+当前 AI 理解代码的方式是"搜索 + 猜测"：
+
+| 场景         | 当前方案                     | 问题                     |
+| ------------ | ---------------------------- | ------------------------ |
+| 理解函数实现 | 语义搜索 (`codebase_search`) | 基于文本相似度，可能找错 |
+| 重构影响分析 | 正则搜索 (`search_files`)    | 高噪音，容易遗漏         |
+| 追踪调用链   | 多次搜索 + 推理              | 效率低，准确性差         |
+
+**核心诉求**：让 AI 能像人类使用 IDE 一样，通过"跳转到定义"和"查找引用"来精确理解代码。
+
+### 现有能力分析
+
+项目已有 tree-sitter AST 解析基础：
+
+| 能力                     | 现状                          | 局限性               |
+| ------------------------ | ----------------------------- | -------------------- |
+| **tree-sitter AST 解析** | ✅ 30+ 语言 WASM 解析器       | 仅单文件，仅提取定义 |
+| **定义提取**             | ✅ 函数/类/方法/接口等        | 无跨文件符号解析     |
+| **语义搜索**             | ✅ OpenAI Embeddings + Qdrant | 非精确符号匹配       |
+| **LSP 集成**             | ❌ 完全没有                   | —                    |
+| **引用查找**             | ❌ 完全没有                   | —                    |
+
+**关键文件**：
+
+- [`src/services/tree-sitter/index.ts`](../../src/services/tree-sitter/index.ts) - AST 解析入口
+- [`src/services/tree-sitter/queries/`](../../src/services/tree-sitter/queries/) - 30+ 语言的查询定义
+
+### 技术方案对比
+
+#### 方案 A：直接调用 VSCode LSP API（推荐）
+
+**原理**：VSCode 已经为打开的项目运行了语言服务器，直接调用其 API。
+
+```typescript
+// 跳转到定义
+const definitions = await vscode.commands.executeCommand<vscode.Location[]>(
+	"vscode.executeDefinitionProvider",
+	document.uri,
+	position,
+)
+
+// 查找所有引用
+const references = await vscode.commands.executeCommand<vscode.Location[]>(
+	"vscode.executeReferenceProvider",
+	document.uri,
+	position,
+	{ includeDeclaration: true },
+)
+```
+
+| 优点          | 说明                                   |
+| ------------- | -------------------------------------- |
+| ✅ 零维护成本 | 复用 VSCode 已有的语言服务器           |
+| ✅ 高准确性   | TypeScript/Python LSP 有完整的类型推断 |
+| ✅ 多语言支持 | 用户安装的语言扩展都可用               |
+| ✅ 实现简单   | 几百行代码即可完成                     |
+
+**实现工作量**：**1-2 周**
+
+#### 方案 B：自建符号索引（基于 tree-sitter）
+
+**原理**：扩展现有 tree-sitter 能力，添加引用查询，构建跨文件符号索引。
+
+| 缺点            | 说明                               |
+| --------------- | ---------------------------------- |
+| ❌ 工作量巨大   | 30+ 语言 × 引用查询 + 符号表       |
+| ❌ 准确性有限   | tree-sitter 是语法解析，无类型推断 |
+| ❌ 动态语言困难 | JS/Python 的动态特性难以静态分析   |
+
+**实现工作量**：**2-3 个月**（且准确性不如 LSP）
+
+### 推荐方案：VSCode LSP API + 轻量降级
+
+**策略**：
+
+- **主路径**：优先使用 VSCode LSP API
+- **降级路径**：LSP 不可用时，使用 tree-sitter + 语义搜索
+
+```typescript
+async function findDefinition(symbol: string, file: string, position: Position) {
+	// 1. 尝试 LSP
+	const lspResult = await tryLspDefinition(file, position)
+	if (lspResult) return lspResult
+
+	// 2. 降级到 tree-sitter 定义提取 + 语义搜索
+	const semanticResult = await fallbackSearch(symbol)
+	return semanticResult
+}
+```
+
+### 新增工具定义
+
+```typescript
+// 工具 1: go_to_definition
+{
+  name: "go_to_definition",
+  description: "跳转到符号的定义位置，获取定义的完整代码",
+  parameters: {
+    file: "符号所在的文件路径",
+    line: "符号所在的行号（1-based）",
+    character: "符号所在的列号（0-based）",
+    symbol: "可选，符号名称（用于结果验证）"
+  }
+}
+
+// 工具 2: find_references
+{
+  name: "find_references",
+  description: "查找符号的所有引用位置",
+  parameters: {
+    file: "符号定义所在的文件路径",
+    line: "符号所在的行号",
+    character: "符号所在的列号",
+    include_declaration: "是否包含定义本身，默认 true"
+  }
+}
+```
+
+### 实现架构
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     新增工具层                              │
+├─────────────────────────────────────────────────────────────┤
+│  go_to_definition    │  find_references    │  find_type_def │
+│  ─────────────────────────────────────────────────────────  │
+│                    SymbolNavigationService                  │
+│  ─────────────────────────────────────────────────────────  │
+│  ┌─────────────────┐  ┌─────────────────┐                   │
+│  │  VSCode LSP API │  │  Fallback       │                   │
+│  │  (Primary)      │  │  (tree-sitter)  │                   │
+│  └─────────────────┘  └─────────────────┘                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 实现步骤
+
+| 阶段     | 任务                                                | 工作量      |
+| -------- | --------------------------------------------------- | ----------- |
+| Phase 1  | 实现 `SymbolNavigationService`，封装 VSCode LSP API | 3 天        |
+| Phase 2  | 实现 `go_to_definition` 工具                        | 2 天        |
+| Phase 3  | 实现 `find_references` 工具                         | 2 天        |
+| Phase 4  | 添加降级逻辑（tree-sitter fallback）                | 2 天        |
+| Phase 5  | 测试和优化                                          | 3 天        |
+| **总计** |                                                     | **约 2 周** |
+
+### 风险和注意事项
+
+| 风险               | 概率 | 缓解措施                  |
+| ------------------ | ---- | ------------------------- |
+| LSP 响应慢         | 中   | 添加超时（5s），显示进度  |
+| 某些语言无 LSP     | 低   | 降级到 tree-sitter + 搜索 |
+| 动态语言准确性有限 | 中   | 在工具描述中说明局限性    |
+
+### 预期收益
+
+实现后，AI 将能够：
+
+- 🎯 **精确定位**：不再依赖搜索猜测，直接跳转到定义
+- 🔍 **完整分析**：找到所有引用，不遗漏任何调用点
+- ⚡ **高效理解**：减少 token 消耗，提升响应速度
+- 🛡️ **安全重构**：基于完整的引用信息进行修改
 
 ---
 
