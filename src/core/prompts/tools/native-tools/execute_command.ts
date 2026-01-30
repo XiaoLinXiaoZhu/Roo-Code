@@ -7,10 +7,20 @@ const EXECUTE_COMMAND_DESCRIPTION = `Execute a CLI command on the system. Use fo
 - cmd.exe: Use \`&&\` to chain commands. Use built-in commands: \`type\` (cat), \`del\` (rm), \`copy\` (cp), \`move\` (mv), \`findstr\` (grep). NEVER use Unix commands.
 - bash/zsh: Use \`&&\` to chain commands. All standard Unix commands available.
 
+**Optimized Commands (bash/zsh):**
+The following commands have optimized output formatting and respect .rooignore rules:
+- \`grep\`: Search with \`-i\`, \`-r\`, \`-n\`, \`-C\`, \`-A\`, \`-B\`, \`-w\`, \`-F\`, \`--include\`, \`--exclude\`
+- \`cat\`: Read files with \`-n\` for line numbers
+- \`head\`/\`tail\`: View file portions with \`-n\`, \`-c\`
+- \`find\`: Search files with \`-name\`, \`-iname\`, \`-type\`, \`-maxdepth\`
+- \`ls\`: List directories with \`-l\`, \`-a\`, \`-A\`, \`-R\`, \`-h\`
+- \`wc\`: Count lines/words/chars with \`-l\`, \`-w\`, \`-c\`
+
 **Best Practices:**
 - Prefer relative paths for terminal consistency (e.g., \`./src/\` instead of absolute paths)
 - If no output is returned, assume the command succeeded
 - Prefer executing complex commands directly over creating scripts
+- Use pipe combinations like \`grep pattern | head -20\` for filtered results
 
 **Parameters:**
 - command: (required) The CLI command to execute, tailored to the user's shell

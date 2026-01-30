@@ -69,6 +69,52 @@
 			"gitCommit": "a50966b34924e4ed9898889d795bbf11d022db71",
 			"ttlHours": 168,
 			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"definitions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"file\":{\"type\":\"string\"},\"line\":{\"type\":\"number\"},\"context\":{\"type\":\"string\"}}}},\"summary\":{\"type\":\"string\"}}}"
+		},
+		{
+			"id": "4",
+			"query": "Where is ExecuteCommandTool implemented and how does it execute shell commands?",
+			"tags": [
+				"where",
+				"is",
+				"executecommandtool",
+				"implemented",
+				"and",
+				"how",
+				"does",
+				"it",
+				"execute",
+				"shell",
+				"commands"
+			],
+			"scope": null,
+			"createdAt": "2026-01-30T19:45:14.889Z",
+			"gitCommit": "0d1b90cbfdb7e1a8d4668051f0196e0ef2667369",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+		},
+		{
+			"id": "5",
+			"query": "Where is RooIgnoreController implemented and how does it validate file access and command validation?",
+			"tags": [
+				"where",
+				"is",
+				"rooignorecontroller",
+				"implemented",
+				"and",
+				"how",
+				"does",
+				"it",
+				"validate",
+				"file",
+				"access",
+				"command",
+				"validation"
+			],
+			"scope": null,
+			"createdAt": "2026-01-30T19:46:26.413Z",
+			"gitCommit": "0d1b90cbfdb7e1a8d4668051f0196e0ef2667369",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
 		}
 	]
 }

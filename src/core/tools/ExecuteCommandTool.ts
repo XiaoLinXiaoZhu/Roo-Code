@@ -20,6 +20,7 @@ import { Package } from "../../shared/package"
 import { t } from "../../i18n"
 import { getTaskDirectoryPath } from "../../utils/storage"
 import { BaseTool, ToolCallbacks } from "./BaseTool"
+import { CommandInterceptor, createCommandInterceptor } from "../command-interceptor"
 
 class ShellIntegrationError extends Error {}
 
@@ -30,6 +31,7 @@ interface ExecuteCommandParams {
 
 export class ExecuteCommandTool extends BaseTool<"execute_command"> {
 	readonly name = "execute_command" as const
+	private interceptor = createCommandInterceptor()
 
 	async execute(params: ExecuteCommandParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
 		const { command, cwd: customCwd } = params
@@ -57,6 +59,31 @@ export class ExecuteCommandTool extends BaseTool<"execute_command"> {
 			const didApprove = await askApproval("command", unescapedCommand)
 
 			if (!didApprove) {
+				return
+			}
+
+			// 尝试使用 CLI 代理层拦截执行
+			const interceptResult = await this.interceptor.tryIntercept(unescapedCommand, {
+				cwd: customCwd ? path.resolve(task.cwd, customCwd) : task.cwd,
+				rooIgnoreController: task.rooIgnoreController,
+			})
+
+			if (interceptResult.intercepted && interceptResult.result) {
+				const { stdout, stderr, exitCode } = interceptResult.result
+
+				// 格式化输出
+				let output = stdout
+				if (stderr) {
+					output += `\n\nStderr:\n${stderr}`
+				}
+
+				const exitStatus =
+					exitCode === 0 ? "Exit code: 0" : `Command execution was not successful.\nExit code: ${exitCode}`
+
+				const workingDir = customCwd ? path.resolve(task.cwd, customCwd) : task.cwd
+				pushToolResult(
+					`Command executed (intercepted) in '${workingDir.toPosix()}'. ${exitStatus}\nOutput:\n${output}`,
+				)
 				return
 			}
 
