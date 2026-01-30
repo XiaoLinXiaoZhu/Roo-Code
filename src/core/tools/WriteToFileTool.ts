@@ -19,6 +19,7 @@ import type { ToolUse } from "../../shared/tools"
 import { BaseTool, ToolCallbacks } from "./BaseTool"
 
 interface WriteToFileParams {
+	purpose: "new_file" | "complete_rewrite" | "small_file_update"
 	path: string
 	content: string
 }

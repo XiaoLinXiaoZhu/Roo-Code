@@ -9,7 +9,10 @@ interface Suggestion {
 	affect: string
 }
 
+type AskFollowupQuestionType = "goal_discovery" | "honest_uncertainty" | "passive_verification"
+
 interface AskFollowupQuestionParams {
+	type: AskFollowupQuestionType
 	question: string
 	follow_up: Suggestion[]
 }

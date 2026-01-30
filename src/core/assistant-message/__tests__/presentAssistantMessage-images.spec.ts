@@ -86,7 +86,7 @@ describe("presentAssistantMessage - Image Handling in Native Tool Calling", () =
 				id: toolCallId, // ID indicates native tool calling
 				name: "ask_followup_question",
 				params: { question: "What do you see?" },
-				nativeArgs: { question: "What do you see?", follow_up: [] },
+				nativeArgs: { type: "goal_discovery", question: "What do you see?", follow_up: [] },
 			},
 		]
 
@@ -139,7 +139,7 @@ describe("presentAssistantMessage - Image Handling in Native Tool Calling", () =
 				id: toolCallId,
 				name: "ask_followup_question",
 				params: { question: "What is your name?" },
-				nativeArgs: { question: "What is your name?", follow_up: [] },
+				nativeArgs: { type: "honest_uncertainty", question: "What is your name?", follow_up: [] },
 			},
 		]
 

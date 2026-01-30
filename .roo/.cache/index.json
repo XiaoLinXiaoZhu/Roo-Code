@@ -55,6 +55,20 @@
 			"gitCommit": "5991ed921c0090640b342aec7d41921e4944525d",
 			"ttlHours": 168,
 			"schema": "{\"type\": \"object\", \"properties\": {\"files\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}}, \"relevantCode\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\"file\": {\"type\": \"string\"}, \"description\": {\"type\": \"string\"}}}}}}"
+		},
+		{
+			"id": "3",
+			"query": "Where is the consult_expert tool defined in the codebase?",
+			"tags": ["where", "is", "the", "consult_expert", "tool", "defined", "in", "codebase"],
+			"scope": {
+				"directories": "/Users/wepie/Documents/pie/project/roo-code",
+				"filePatterns": "*.ts,*.json",
+				"excludes": "node_modules,dist,*.test.ts"
+			},
+			"createdAt": "2026-01-30T18:30:52.083Z",
+			"gitCommit": "a50966b34924e4ed9898889d795bbf11d022db71",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"definitions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"file\":{\"type\":\"string\"},\"line\":{\"type\":\"number\"},\"context\":{\"type\":\"string\"}}}},\"summary\":{\"type\":\"string\"}}}"
 		}
 	]
 }

@@ -42,6 +42,8 @@ export const toolParamNames = [
 	"url",
 	"coordinate",
 	"text",
+	"type", // ask_followup_question parameter
+	"purpose",
 	"choice",
 	"affect",
 	"server_name",
@@ -80,8 +82,10 @@ export const toolParamNames = [
 	"validate", // apply_edit optional parameter
 	"domain", // consult_expert required parameter
 	"topic", // consult_expert required parameter
+	"knownContext", // consult_expert required parameter
+	"unknownPoints", // consult_expert required parameter
 	"attachments", // consult_expert optional parameter
-	"outputFormat", // consult_expert optional parameter
+	"consultType", // consult_expert required parameter
 	"artifact_id", // read_command_output parameter
 	"search", // read_command_output parameter for grep-like search
 	"offset", // read_command_output parameter for pagination
@@ -108,6 +112,7 @@ export type NativeToolArgs = {
 	list_files: { path: string; recursive?: boolean }
 	new_task: { mode: string; message: string; todos?: string }
 	ask_followup_question: {
+		type: "goal_discovery" | "honest_uncertainty" | "passive_verification"
 		question: string
 		follow_up: Array<{ choice: string; affect: string }>
 	}
@@ -119,7 +124,7 @@ export type NativeToolArgs = {
 	search_files: { path: string; regex: string; file_pattern?: string | null }
 	update_todo_list: { todos: string }
 	use_mcp_tool: { server_name: string; tool_name: string; arguments?: Record<string, unknown> }
-	write_to_file: { path: string; content: string }
+	write_to_file: { purpose: "new_file" | "complete_rewrite" | "small_file_update"; path: string; content: string }
 	// Agent as Tools 架构的新工具
 	search_project: {
 		query: string
@@ -140,8 +145,10 @@ export type NativeToolArgs = {
 		domain: string
 		topic: string
 		question: string
+		knownContext: string
+		unknownPoints: string
 		attachments?: string
-		outputFormat?: "analysis" | "design" | "comparison" | "recommendation"
+		consultType: "analysis" | "design" | "comparison" | "recommendation" | "exploration"
 	}
 	// Add more tools as they are migrated to native protocol
 }
@@ -211,7 +218,7 @@ export interface FetchInstructionsToolUse extends ToolUse<"fetch_instructions"> 
 
 export interface WriteToFileToolUse extends ToolUse<"write_to_file"> {
 	name: "write_to_file"
-	params: Partial<Pick<Record<ToolParamName, string>, "path" | "content">>
+	params: Partial<Pick<Record<ToolParamName, string>, "purpose" | "path" | "content">>
 }
 
 export interface CodebaseSearchToolUse extends ToolUse<"codebase_search"> {
@@ -246,7 +253,7 @@ export interface AccessMcpResourceToolUse extends ToolUse<"access_mcp_resource">
 
 export interface AskFollowupQuestionToolUse extends ToolUse<"ask_followup_question"> {
 	name: "ask_followup_question"
-	params: Partial<Pick<Record<ToolParamName, string>, "question" | "follow_up">>
+	params: Partial<Pick<Record<ToolParamName, string>, "type" | "question" | "follow_up">>
 }
 
 export interface AttemptCompletionToolUse extends ToolUse<"attempt_completion"> {
@@ -283,7 +290,10 @@ export interface ApplyEditToolUse extends ToolUse<"apply_edit"> {
 export interface ConsultExpertToolUse extends ToolUse<"consult_expert"> {
 	name: "consult_expert"
 	params: Partial<
-		Pick<Record<ToolParamName, string>, "domain" | "topic" | "question" | "attachments" | "outputFormat">
+		Pick<
+			Record<ToolParamName, string>,
+			"domain" | "topic" | "question" | "knownContext" | "unknownPoints" | "attachments" | "consultType"
+		>
 	>
 }
 

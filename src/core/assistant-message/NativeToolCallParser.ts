@@ -401,8 +401,9 @@ export class NativeToolCallParser {
 				break
 
 			case "write_to_file":
-				if (partialArgs.path || partialArgs.content) {
+				if (partialArgs.purpose || partialArgs.path || partialArgs.content) {
 					nativeArgs = {
+						purpose: partialArgs.purpose,
 						path: partialArgs.path,
 						content: partialArgs.content,
 					}
@@ -410,8 +411,13 @@ export class NativeToolCallParser {
 				break
 
 			case "ask_followup_question":
-				if (partialArgs.question !== undefined || partialArgs.follow_up !== undefined) {
+				if (
+					partialArgs.type !== undefined ||
+					partialArgs.question !== undefined ||
+					partialArgs.follow_up !== undefined
+				) {
 					nativeArgs = {
+						type: partialArgs.type,
 						question: partialArgs.question,
 						follow_up: Array.isArray(partialArgs.follow_up) ? partialArgs.follow_up : undefined,
 					}
@@ -601,8 +607,10 @@ export class NativeToolCallParser {
 						domain: partialArgs.domain,
 						topic: partialArgs.topic,
 						question: partialArgs.question,
+						knownContext: partialArgs.knownContext,
+						unknownPoints: partialArgs.unknownPoints,
 						attachments: partialArgs.attachments,
-						outputFormat: partialArgs.outputFormat,
+						consultType: partialArgs.consultType,
 					}
 				}
 				break
@@ -735,8 +743,9 @@ export class NativeToolCallParser {
 					break
 
 				case "ask_followup_question":
-					if (args.question !== undefined && args.follow_up !== undefined) {
+					if (args.type !== undefined && args.question !== undefined && args.follow_up !== undefined) {
 						nativeArgs = {
+							type: args.type,
 							question: args.question,
 							follow_up: args.follow_up,
 						} as NativeArgsFor<TName>
@@ -822,8 +831,9 @@ export class NativeToolCallParser {
 					break
 
 				case "write_to_file":
-					if (args.path !== undefined && args.content !== undefined) {
+					if (args.purpose !== undefined && args.path !== undefined && args.content !== undefined) {
 						nativeArgs = {
+							purpose: args.purpose,
 							path: args.path,
 							content: args.content,
 						} as NativeArgsFor<TName>

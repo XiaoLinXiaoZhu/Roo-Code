@@ -28,11 +28,20 @@ const DOMAIN_PARAMETER_DESCRIPTION = `Expert domain or specialty (e.g., "UI/UX d
 
 const TOPIC_PARAMETER_DESCRIPTION = `Brief topic or title of the consultation. Should be concise but descriptive.`
 
-const QUESTION_PARAMETER_DESCRIPTION = `Detailed question or description of what you need expert advice on. Follow the good question guidelines: identify the problem type, clarify your request, provide context (what you know, what you don't know), and construct focused, open-ended questions. Break complex questions into smaller, specific ones.`
+const QUESTION_PARAMETER_DESCRIPTION = `Detailed question or description of what you need expert advice on. Ask "how" and "why" more than "is this correct?" Avoid assumptions: Don't ask "how to use X to do Y" (X might be wrong). Instead ask "how to solve Y".`
+
+const KNOWN_CONTEXT_PARAMETER_DESCRIPTION = `What you already know about this problem: current state, what you've tried, where you're stuck, relevant code/files you've examined. This helps the expert understand your starting point and avoid repeating information you already have.`
+
+const UNKNOWN_POINTS_PARAMETER_DESCRIPTION = `Specific points causing confusion or uncertainty: what you don't understand, what you need help deciding, what risks you're unsure about. This helps the expert focus on the gaps in your knowledge.`
 
 const ATTACHMENTS_PARAMETER_DESCRIPTION = `Optional: File paths or content to provide as context for the expert. Use absolute paths when possible.`
 
-const OUTPUT_FORMAT_PARAMETER_DESCRIPTION = `Optional: Desired output format - "analysis" for detailed analysis, "design" for architectural designs, "comparison" for comparing options, "recommendation" for actionable recommendations. Specify your expected output clearly.`
+const CONSULT_TYPE_PARAMETER_DESCRIPTION = `Type of consultation that determines the approach and deliverable format:
+- "analysis": Deep analysis report - for understanding root causes, impact assessment, and detailed examination of issues
+- "design": Architecture design proposal - for system design, API design, and technical architecture decisions
+- "comparison": Option comparison evaluation - for comparing multiple solutions with pros/cons analysis
+- "recommendation": Actionable recommendations - for specific action steps with cost-benefit analysis
+- "exploration": Executable script + documentation - for expanding capability boundaries (e.g., accessing system APIs, window handles, debugging tools). Deliverable includes: capability boundary analysis, exploration paths, verification experiments, and ready-to-run scripts with usage instructions.`
 
 export default {
 	type: "function",
@@ -55,17 +64,25 @@ export default {
 					type: "string",
 					description: QUESTION_PARAMETER_DESCRIPTION,
 				},
+				knownContext: {
+					type: "string",
+					description: KNOWN_CONTEXT_PARAMETER_DESCRIPTION,
+				},
+				unknownPoints: {
+					type: "string",
+					description: UNKNOWN_POINTS_PARAMETER_DESCRIPTION,
+				},
 				attachments: {
 					type: ["string", "null"],
 					description: ATTACHMENTS_PARAMETER_DESCRIPTION,
 				},
-				outputFormat: {
-					type: ["string", "null"],
-					enum: ["analysis", "design", "comparison", "recommendation"],
-					description: OUTPUT_FORMAT_PARAMETER_DESCRIPTION,
+				consultType: {
+					type: "string",
+					enum: ["analysis", "design", "comparison", "recommendation", "exploration"],
+					description: CONSULT_TYPE_PARAMETER_DESCRIPTION,
 				},
 			},
-			required: ["domain", "topic", "question"],
+			required: ["domain", "topic", "question", "knownContext", "unknownPoints", "consultType"],
 			additionalProperties: false,
 		},
 	},

@@ -1,6 +1,22 @@
 import type OpenAI from "openai"
 
-const SEARCH_PROJECT_DESCRIPTION = `Search and investigate the project codebase. This tool performs read-only exploration of the codebase to answer specific questions about project structure, dependencies, or implementation details. Always use complete questions rather than keywords, and provide absolute paths when possible. It is highly recommended to provide a schema parameter to structure the output format, which ensures the investigation aligns with your requirements and yields results in the exact format you need for subsequent operations.`
+const SEARCH_PROJECT_DESCRIPTION = `Search and investigate the project codebase to answer questions about project structure, dependencies, or implementation details.
+
+When to Use:
+- Need to understand project structure or implementation details
+- Need to locate where specific functionality is implemented
+- Need to understand dependencies or data flow
+
+When NOT to Use:
+- Already know the file path → use read_file directly
+- Simple text search → use search_files instead
+
+Example:
+{
+  "query": "Where is the user authentication flow implemented?",
+  "scope": null,
+  "schema": "{\\"type\\":\\"object\\",\\"properties\\":{\\"files\\":{\\"type\\":\\"array\\",\\"items\\":{\\"type\\":\\"string\\"}}}}"
+}`
 
 const QUERY_PARAMETER_DESCRIPTION = `A complete question describing what you want to investigate (e.g., "Where is the user authentication flow implemented?", "How are database connections initialized in the application?", "Which files define the API endpoints for the authentication service?"). Avoid keywords or incomplete phrases - always form a clear, complete question.`
 
@@ -27,21 +43,23 @@ export default {
 				},
 				scope: {
 					type: ["object", "null"],
-					description: "Optional search scope configuration",
+					description:
+						"Optional search scope configuration. Pass null to search the entire project, or provide an object with directories, filePatterns, and/or excludes to limit the search scope.",
 					properties: {
 						directories: {
-							type: "string",
+							type: ["string", "null"],
 							description: SCOPE_DIRECTORIES_DESCRIPTION,
 						},
 						filePatterns: {
-							type: "string",
+							type: ["string", "null"],
 							description: SCOPE_FILE_PATTERNS_DESCRIPTION,
 						},
 						excludes: {
-							type: "string",
+							type: ["string", "null"],
 							description: SCOPE_EXCLUDES_DESCRIPTION,
 						},
 					},
+					required: ["directories", "filePatterns", "excludes"],
 					additionalProperties: false,
 				},
 				schema: {
@@ -49,7 +67,7 @@ export default {
 					description: SCHEMA_PARAMETER_DESCRIPTION,
 				},
 			},
-			required: ["query"],
+			required: ["query", "scope", "schema"],
 			additionalProperties: false,
 		},
 	},

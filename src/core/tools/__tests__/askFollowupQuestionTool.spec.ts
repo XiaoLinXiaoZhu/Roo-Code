@@ -29,6 +29,7 @@ describe("askFollowupQuestionTool", () => {
 				question: "What would you like to do?",
 			},
 			nativeArgs: {
+				type: "goal_discovery",
 				question: "What would you like to do?",
 				follow_up: [
 					{ choice: "Option 1", affect: "Does option 1" },
@@ -61,6 +62,7 @@ describe("askFollowupQuestionTool", () => {
 				question: "What would you like to do?",
 			},
 			nativeArgs: {
+				type: "honest_uncertainty",
 				question: "What would you like to do?",
 				follow_up: [
 					{ choice: "Write code", affect: "Proceed with implementation" },
@@ -93,6 +95,7 @@ describe("askFollowupQuestionTool", () => {
 				question: "What would you like to do?",
 			},
 			nativeArgs: {
+				type: "passive_verification",
 				question: "What would you like to do?",
 				follow_up: [
 					{ choice: "Regular option", affect: "Proceed normally" },
@@ -127,6 +130,7 @@ describe("askFollowupQuestionTool", () => {
 				},
 				partial: true,
 				nativeArgs: {
+					type: "goal_discovery",
 					question: "What would you like to do?",
 					follow_up: [
 						{ choice: "Option 1", affect: "Does option 1" },
@@ -177,7 +181,7 @@ describe("askFollowupQuestionTool", () => {
 
 			// Simulate streaming JSON chunks
 			const chunk1 =
-				'{"question":"What would you like?","follow_up":[{"choice":"Option 1","affect":"Does option 1"}'
+				'{"type":"goal_discovery","question":"What would you like?","follow_up":[{"choice":"Option 1","affect":"Does option 1"}'
 			const result1 = NativeToolCallParser.processStreamingChunk("call_123", chunk1)
 
 			expect(result1).not.toBeNull()
@@ -186,9 +190,11 @@ describe("askFollowupQuestionTool", () => {
 			expect(result1?.nativeArgs).toBeDefined()
 			// Use type assertion to access the specific fields
 			const nativeArgs = result1?.nativeArgs as {
+				type: string
 				question: string
 				follow_up?: Array<{ choice: string; affect: string }>
 			}
+			expect(nativeArgs?.type).toBe("goal_discovery")
 			expect(nativeArgs?.question).toBe("What would you like?")
 			// partial-json should parse the incomplete array
 			expect(nativeArgs?.follow_up).toBeDefined()
@@ -199,7 +205,7 @@ describe("askFollowupQuestionTool", () => {
 
 			// Add complete JSON
 			const completeJson =
-				'{"question":"Choose an option","follow_up":[{"choice":"Yes","affect":"Confirm"},{"choice":"No","affect":"Decline"}]}'
+				'{"type":"goal_discovery","question":"Choose an option","follow_up":[{"choice":"Yes","affect":"Confirm"},{"choice":"No","affect":"Decline"}]}'
 			NativeToolCallParser.processStreamingChunk("call_456", completeJson)
 
 			const result = NativeToolCallParser.finalizeStreamingToolCall("call_456")
@@ -211,6 +217,7 @@ describe("askFollowupQuestionTool", () => {
 			// Type guard: regular tools have type 'tool_use', MCP tools have type 'mcp_tool_use'
 			if (result?.type === "tool_use") {
 				expect(result.nativeArgs).toEqual({
+					type: "goal_discovery",
 					question: "Choose an option",
 					follow_up: [
 						{ choice: "Yes", affect: "Confirm" },
