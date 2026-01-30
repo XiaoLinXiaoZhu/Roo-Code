@@ -72,6 +72,15 @@
 
 ## Custom Fork Changes (agent-as-tool-experiment)
 
+## [3.46.1] - 2026-01-30
+
+- Refactored environment details to pure XML format (replacing XML+Markdown hybrid)
+- Added `current_time` attribute to `<environment>` tag for temporal context
+- Optimized terminals structure: simplified 3-level nesting to flat `<terminal status="active|completed">`
+- Structured workspace files as `<file>` and `<dir>` elements with `ignored` and `protected` attributes
+- Added structured git status parsing with `<git branch="..." upstream="...">` and `<change status="XY">` elements
+- Added `getGitStatusStructured()` function in `src/utils/git.ts` for structured git data
+
 ## [3.43.3] - 2026-01-29
 
 - Improved: read_file tool now provides a clear JSON example and correct parameter guidance (line_ranges) when file truncation occurs, helping the model better understand how to read remaining content.
