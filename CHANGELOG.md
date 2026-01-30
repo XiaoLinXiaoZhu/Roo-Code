@@ -1,5 +1,16 @@
 # Roo Code Changelog
 
+## [3.46.2] - 2026-01-30
+
+- 🛠️ Tool Schema Enhancement: Refactor tool descriptions and schemas for better clarity and usability
+    - `ask_followup_question`: Add `type` parameter for structured reasoning
+    - `consult_expert`: Require `knownContext` and `unknownPoints` for higher quality consultations
+    - `write_to_file`: Add `purpose` parameter to clarify intent
+    - `search_project`: Enhanced schema documentation
+    - `update_todo_list`: Improved usage guidelines
+- 🔧 Parser Update: Update `NativeToolCallParser` to handle new tool parameters
+- 📝 Documentation: Add tool description optimization guidelines
+
 ## [3.46.0] - 2026-01-28
 
 - 🎯 Spirit Hint System: Add diverse hint styles for user guidance with cognitive anchors (🧭CERTAINTY, 🧭VALUE, 🧭HONESTY)
