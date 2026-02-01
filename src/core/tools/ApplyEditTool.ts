@@ -38,8 +38,10 @@ interface ApplyEditParams {
 	context?: string
 
 	/**
-	 * 可选:是否运行校验
-	 * @default true
+	 * 可选:校验命令
+	 * - "none" - 跳过校验
+	 * - 具体命令如 "npm run typecheck"、"pytest tests/"
+	 * - 不传则由子代理根据项目类型自行判断
 	 */
 	validate?: string
 }
@@ -71,7 +73,7 @@ export class ApplyEditTool extends BaseTool<"apply_edit"> {
 		task.consecutiveMistakeCount = 0
 
 		// 构建任务消息
-		const taskMessage = this.buildEditMessage(instruction, files, context)
+		const taskMessage = this.buildEditMessage(instruction, files, context, validate)
 
 		// 获取 Provider
 		const provider = task.providerRef.deref()
@@ -122,7 +124,7 @@ export class ApplyEditTool extends BaseTool<"apply_edit"> {
 		}
 	}
 
-	private buildEditMessage(instruction: string, files?: string, context?: string): string {
+	private buildEditMessage(instruction: string, files?: string, context?: string, validate?: string): string {
 		// 清晰明确的任务要求
 		let message = `<task>
 编辑代码：${instruction}
@@ -143,11 +145,32 @@ ${context}
 		message += `\n\n<deliverable>
 完成后使用 attempt_completion 提交：
 - 修改了哪些文件
-- 每个文件的变更摘要
-- 验证结果（lint/type-check）
-</deliverable>`
+- 每个文件的变更摘要`
+
+		// 根据 validate 参数生成验证要求
+		const validationInstruction = this.buildValidationInstruction(validate)
+		if (validationInstruction) {
+			message += `\n- ${validationInstruction}`
+		}
+
+		message += `\n</deliverable>`
 
 		return message
+	}
+
+	private buildValidationInstruction(validate?: string): string {
+		// 无需校验
+		if (validate === "none" || validate === "false") {
+			return "无需校验"
+		}
+
+		// 如果用户传入了具体命令，直接使用
+		if (validate) {
+			return `验证：运行 \`${validate}\` 并报告结果`
+		}
+
+		// 默认：让子代理自行判断合适的校验方式
+		return "验证：根据项目类型运行合适的校验（如类型检查、lint、测试等）"
 	}
 
 	private buildTodos(instruction: string, files?: string): TodoItem[] {

@@ -1,14 +1,35 @@
 import type OpenAI from "openai"
 
-const APPLY_EDIT_DESCRIPTION = `Edit and modify code in the project. This tool performs code changes based on clear, specific natural language instructions. Always use small, focused edits rather than broad refactoring tasks. Provide absolute file paths when possible. Break down large tasks into multiple smaller, targeted edits. IMPORTANT: After receiving the edit result, you MUST proactively verify the actual changes by reading the modified files to confirm the edits were applied correctly. Do not assume the edit was successful without verification.`
+const APPLY_EDIT_DESCRIPTION = `Edit and modify code using natural language instructions. Performs batch modifications with automatic validation (tsc, lint, tests).
 
-const INSTRUCTION_PARAMETER_DESCRIPTION = `A clear, specific instruction for a single focused change (e.g., "Replace the error handling in /workspace/project/src/utils/api.ts line 45-50 with a try-catch block", "Add an async keyword to the fetchUser function in /workspace/project/src/services/user.ts", "Update the return type from 'any' to 'User[]' in getUsers function"). Avoid broad instructions like "refactor the authentication module" - instead, break down into specific, actionable changes.`
+**When to Use (vs apply_diff)**:
+- Batch/multi-location changes in one instruction
+- Need automatic validation after changes
+- Complex changes requiring context understanding
+- Don't want to manually track exact code content
 
-const FILES_PARAMETER_DESCRIPTION = `Optional: Comma-separated list of absolute file paths or glob patterns to limit which files can be modified (e.g., "/workspace/project/src/components/Button.tsx,/workspace/project/src/auth/*.ts"). Use absolute paths instead of relative paths for clarity.`
+**Example**:
+{
+  "instruction": "Add null checks to all database query functions in /workspace/src/db/queries.ts",
+  "files": "/workspace/src/db/queries.ts",
+  "context": "Use early return pattern, throw DatabaseError for null results",
+  "validate": "true"
+}`
 
-const CONTEXT_PARAMETER_DESCRIPTION = `Optional: Additional context to help the subtask understand the edit (e.g., specific error messages, exact line numbers, code snippets showing the current implementation, design requirements, constraints)`
+const INSTRUCTION_PARAMETER_DESCRIPTION = `Clear, specific instruction describing the change. Include file paths and line numbers when known. Examples:
+- "Add error handling to fetchUser function in /workspace/src/api.ts"
+- "Replace all console.log with logger.debug in /workspace/src/utils/*.ts"
+- "Update return type from 'any' to 'User[]' in getUsers function"`
 
-const VALIDATE_PARAMETER_DESCRIPTION = `Optional: Whether to run validation (lint, type-check) after the edit. Default is true. Set to false to skip validation for quick changes.`
+const FILES_PARAMETER_DESCRIPTION = `Optional: Comma-separated absolute file paths or glob patterns to limit scope (e.g., "/workspace/src/auth/*.ts"). Helps focus the edit and improves accuracy.`
+
+const CONTEXT_PARAMETER_DESCRIPTION = `Optional: Additional context for the edit - error messages, code snippets, design requirements, or constraints that help understand the intent.`
+
+const VALIDATE_PARAMETER_DESCRIPTION = `Optional: Validation command to run after edit. Examples:
+- "none" - skip validation
+- "npm run typecheck" - run specific command
+- "pytest tests/" - run tests
+If not specified, sub-agent will choose appropriate validation based on project type.`
 
 export default {
 	type: "function",
@@ -36,7 +57,7 @@ export default {
 					description: VALIDATE_PARAMETER_DESCRIPTION,
 				},
 			},
-			required: ["instruction"],
+			required: ["instruction", "files", "context", "validate"],
 			additionalProperties: false,
 		},
 	},

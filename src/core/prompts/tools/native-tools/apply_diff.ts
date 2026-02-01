@@ -1,10 +1,15 @@
 import type OpenAI from "openai"
 
-const APPLY_DIFF_DESCRIPTION = `Apply precise, targeted modifications to an existing file using one or more search/replace blocks. This tool is for surgical edits only; the 'SEARCH' block must exactly match the existing content, including whitespace and indentation. To make multiple targeted changes, provide multiple SEARCH/REPLACE blocks. Use the 'read_file' tool first if you are not confident in the exact content to search for.
+const APPLY_DIFF_DESCRIPTION = `Apply precise, surgical text replacements to a file. Requires exact content matching.
 
-Use Markdown code block format with \`\`\`apply_diff path syntax. This format requires zero escaping for newlines and quotes, making it more natural and readable. **Use 6 backticks (\`\`\`\`\`\`) for maximum compatibility** - this ensures any code blocks within your content won't conflict with the tool fence. Markdown format also supports multiple tool calls in a single message.
+**When to Use (vs apply_edit)**:
+- Single-point precise modification with known content
+- Simple insert/replace where you have exact code
+- Quick changes without validation overhead
 
-Example (Markdown format with 6 backticks):
+Use Markdown code block format with \`\`\`apply_diff path syntax. **Use 6 backticks for maximum compatibility**.
+
+**Example**:
 \`\`\`\`\`\`apply_diff src/utils/config.ts
 <<<<<<< SEARCH
 :start_line:15
@@ -17,13 +22,15 @@ const maxRetries = 5;
 >>>>>>> REPLACE
 \`\`\`\`\`\``
 
-const DIFF_PARAMETER_DESCRIPTION = `A string containing one or more search/replace blocks defining the changes. The ':start_line:' is required and indicates the starting line number of the original content. You must not add a start line for the replacement content. Each block must follow this format:
+const DIFF_PARAMETER_DESCRIPTION = `One or more search/replace blocks. The ':start_line:' is required. SEARCH content must exactly match existing code including whitespace.
+
+Format:
 <<<<<<< SEARCH
 :start_line:[line_number]
 -------
 [exact content to find]
 =======
-[new content to replace with]
+[new content]
 >>>>>>> REPLACE`
 
 export const apply_diff = {
@@ -36,7 +43,7 @@ export const apply_diff = {
 			properties: {
 				path: {
 					type: "string",
-					description: "The path of the file to modify, relative to the current workspace directory.",
+					description: "File path relative to workspace directory.",
 				},
 				diff: {
 					type: "string",
