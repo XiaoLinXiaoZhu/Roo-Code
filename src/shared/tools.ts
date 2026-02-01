@@ -90,6 +90,12 @@ export const toolParamNames = [
 	"search", // read_command_output parameter for grep-like search
 	"offset", // read_command_output parameter for pagination
 	"limit", // read_command_output parameter for max bytes to return
+	// AST 代码智能工具参数
+	"symbol", // go_to_definition, find_references required parameter
+	"surrounding_code", // go_to_definition, find_references optional parameter
+	"start_line", // go_to_definition, find_references optional parameter
+	"include_declaration", // find_references optional parameter
+	"max_results", // find_references optional parameter
 ] as const
 
 export type ToolParamName = (typeof toolParamNames)[number]
@@ -149,6 +155,23 @@ export type NativeToolArgs = {
 		unknownPoints: string
 		attachments?: string
 		consultType: "analysis" | "design" | "comparison" | "recommendation" | "exploration"
+	}
+	// AST 代码智能工具
+	go_to_definition: {
+		purpose: "understand_implementation" | "trace_import" | "verify_signature"
+		path: string
+		symbol: string
+		surrounding_code?: string
+		start_line?: number
+	}
+	find_references: {
+		purpose: "impact_analysis" | "usage_patterns" | "dead_code_check"
+		path: string
+		symbol: string
+		surrounding_code?: string
+		start_line?: number
+		include_declaration?: boolean
+		max_results?: number
 	}
 	// Add more tools as they are migrated to native protocol
 }
@@ -331,6 +354,8 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	search_project: "search project",
 	apply_edit: "apply edit",
 	consult_expert: "consult expert",
+	go_to_definition: "go to definition",
+	find_references: "find references",
 } as const
 
 // Define available tool groups.
@@ -338,7 +363,7 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 	read: {
 		// "read_file", "search_files", "list_files", are now in command
 		// 因为模型可以直接通过命令行工具更加灵活地读取文件内容和搜索文件，所以这些工具未来使用命令行工具来替代
-		tools: ["fetch_instructions", "codebase_search"],
+		tools: ["fetch_instructions", "codebase_search", "go_to_definition", "find_references"],
 	},
 	edit: {
 		tools: ["apply_diff", "write_to_file", "generate_image"],

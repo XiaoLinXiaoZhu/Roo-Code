@@ -790,7 +790,15 @@ export interface ClineSayTool {
 		| "imageGenerated"
 		| "runSlashCommand"
 		| "updateTodoList"
+		| "goToDefinition"
+		| "findReferences"
 	path?: string
+	// For goToDefinition and findReferences
+	symbol?: string
+	pattern?: string
+	startLine?: number
+	includeDeclaration?: boolean
+	maxResults?: number
 	// For readCommandOutput
 	readStart?: number
 	readEnd?: number

@@ -23,6 +23,8 @@ import writeToFile from "./write_to_file"
 import searchProject from "./search_project"
 import applyEdit from "./apply_edit"
 import consultExpert from "./consult_expert"
+import goToDefinition from "./go_to_definition"
+import findReferences from "./find_references"
 
 export { getMcpServerTools } from "./mcp_server"
 export { convertOpenAIToolToAnthropic, convertOpenAIToolsToAnthropic } from "./converters"
@@ -81,6 +83,9 @@ export function getNativeTools(options: NativeToolsOptions = {}): OpenAI.Chat.Ch
 		searchProject,
 		applyEdit,
 		consultExpert,
+		// AST 代码智能工具
+		goToDefinition,
+		findReferences,
 	] satisfies OpenAI.Chat.ChatCompletionTool[]
 }
 

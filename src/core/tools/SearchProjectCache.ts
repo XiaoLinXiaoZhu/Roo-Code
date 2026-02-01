@@ -39,7 +39,7 @@ export interface CacheIndex {
 	caches: CacheEntry[]
 }
 
-const CACHE_DIR = ".roo/.cache"
+const CACHE_DIR = ".roo/cache/search"
 const INDEX_FILE = "index.json"
 const DEFAULT_TTL_HOURS = 168 // 7 天
 

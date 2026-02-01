@@ -156,6 +156,107 @@
 			"gitCommit": "b4e98d22a4a5c94d2d9de65e9d5c513fe8ed00c8",
 			"ttlHours": 168,
 			"schema": "{\"type\":\"object\",\"properties\":{\"existing_implementations\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"related_files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"technologies_used\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+		},
+		{
+			"id": "9",
+			"query": "tree-sitter 服务是如何实现的？入口文件和主要功能是什么？",
+			"tags": ["tree", "sitter", "服务是如何实现的", "入口文件和主要功能是什么"],
+			"scope": {
+				"directories": "/Users/wepie/Documents/pie/project/roo-code/src/services/tree-sitter",
+				"filePatterns": "*.ts",
+				"excludes": null
+			},
+			"createdAt": "2026-01-30T21:03:11.212Z",
+			"gitCommit": "4f9644c41345fd67fb38824b53339d6d8b9e24b6",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"mainFile\":{\"type\":\"string\"},\"exports\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"capabilities\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+		},
+		{
+			"id": "10",
+			"query": "工具是如何定义和注册的？Tool 类的结构是什么？",
+			"tags": ["工具是如何定义和注册的", "tool", "类的结构是什么"],
+			"scope": {
+				"directories": "/Users/wepie/Documents/pie/project/roo-code/src/core/tools",
+				"excludes": "*.test.ts",
+				"filePatterns": "*.ts"
+			},
+			"createdAt": "2026-01-30T21:05:20.680Z",
+			"gitCommit": "4f9644c41345fd67fb38824b53339d6d8b9e24b6",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"toolBaseClass\":{\"type\":\"string\"},\"toolRegistration\":{\"type\":\"string\"},\"exampleTools\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+		},
+		{
+			"id": "11",
+			"query": "工具是如何被注册和调用的？ToolExecutor 或 handleToolUse 在哪里？",
+			"tags": ["工具是如何被注册和调用的", "toolexecutor", "handletooluse", "在哪里"],
+			"scope": {
+				"directories": "/Users/wepie/Documents/pie/project/roo-code/src/core",
+				"excludes": "*.test.ts,*.spec.ts",
+				"filePatterns": "*.ts"
+			},
+			"createdAt": "2026-01-30T21:17:39.146Z",
+			"gitCommit": "248c8cf239d033896f43ace3d429563a4eaea949",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"registrationPattern\":{\"type\":\"string\"}}}"
+		},
+		{
+			"id": "12",
+			"query": "go_to_definition 和 find_references 工具的定义和实现在哪里？特别关注 nativeArgs 的处理逻辑",
+			"tags": [
+				"go_to_definition",
+				"find_references",
+				"工具的定义和实现在哪里",
+				"特别关注",
+				"nativeargs",
+				"的处理逻辑"
+			],
+			"scope": {
+				"directories": null,
+				"filePatterns": "*.ts",
+				"excludes": "node_modules,dist,*.test.ts"
+			},
+			"createdAt": "2026-02-01T16:00:01.277Z",
+			"gitCommit": "248c8cf239d033896f43ace3d429563a4eaea949",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}}}},\"nativeArgsUsage\":{\"type\":\"string\"}}}"
+		},
+		{
+			"id": "13",
+			"query": "tool_use 的 nativeArgs 是在哪里被解析和构造的？特别是流式场景下如何从模型输出构造 nativeArgs",
+			"tags": ["tool_use", "nativeargs", "是在哪里被解析和构造的", "特别是流式场景下如何从模型输出构造"],
+			"scope": {
+				"directories": null,
+				"excludes": "node_modules,dist,*.test.ts",
+				"filePatterns": "*.ts"
+			},
+			"createdAt": "2026-02-01T16:02:46.282Z",
+			"gitCommit": "248c8cf239d033896f43ace3d429563a4eaea949",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"parsingLogic\":{\"type\":\"string\"},\"relevantFiles\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"role\":{\"type\":\"string\"}}}}}}"
+		},
+		{
+			"id": "14",
+			"query": "工具的自动批准组（auto approve group）是如何定义的？read_file 等读取工具属于哪个组？如何将新工具添加到 read 组？",
+			"tags": [
+				"工具的自动批准组",
+				"auto",
+				"approve",
+				"group",
+				"是如何定义的",
+				"read_file",
+				"等读取工具属于哪个组",
+				"如何将新工具添加到",
+				"read"
+			],
+			"scope": {
+				"directories": null,
+				"excludes": "node_modules,dist,*.test.ts",
+				"filePatterns": "*.ts"
+			},
+			"createdAt": "2026-02-01T16:13:29.191Z",
+			"gitCommit": "248c8cf239d033896f43ace3d429563a4eaea949",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}}}},\"groupDefinition\":{\"type\":\"string\"}}}"
 		}
 	]
 }

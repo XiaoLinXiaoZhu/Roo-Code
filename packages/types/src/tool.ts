@@ -42,6 +42,9 @@ export const toolNames = [
 	"search_project",
 	"apply_edit",
 	"consult_expert",
+	// AST 代码智能工具
+	"go_to_definition",
+	"find_references",
 ] as const
 
 export const toolNamesSchema = z.enum(toolNames)

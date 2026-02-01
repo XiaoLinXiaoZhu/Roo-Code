@@ -379,10 +379,11 @@ async function findDefinition(symbol: string, file: string, position: Position) 
   name: "go_to_definition",
   description: "跳转到符号的定义位置，获取定义的完整代码",
   parameters: {
-    file: "符号所在的文件路径",
-    line: "符号所在的行号（1-based）",
-    character: "符号所在的列号（0-based）",
-    symbol: "可选，符号名称（用于结果验证）"
+    purpose: "调用目的：understand_implementation | trace_import | verify_signature",
+    path: "符号所在的文件路径",
+    symbol: "必填，要查找定义的符号名称",
+    surrounding_code: "可选，包含符号的周围代码片段（用于精确定位，字面文本匹配）",
+    start_line: "可选，从哪一行开始搜索（1-based）"
   }
 }
 
@@ -391,13 +392,22 @@ async function findDefinition(symbol: string, file: string, position: Position) 
   name: "find_references",
   description: "查找符号的所有引用位置",
   parameters: {
-    file: "符号定义所在的文件路径",
-    line: "符号所在的行号",
-    character: "符号所在的列号",
-    include_declaration: "是否包含定义本身，默认 true"
+    purpose: "调用目的：impact_analysis | usage_patterns | dead_code_check",
+    path: "符号所在的文件路径",
+    symbol: "必填，要查找引用的符号名称",
+    surrounding_code: "可选，包含符号的周围代码片段（字面文本匹配）",
+    start_line: "可选，从哪一行开始搜索（1-based）",
+    include_declaration: "可选，是否包含定义本身，默认 true",
+    max_results: "可选，最大返回数量，默认 50"
   }
 }
 ```
+
+**设计说明**：
+
+- 使用 `symbol` + `surrounding_code` + `start_line` 的模糊定位方式，而非精确的行号/列号
+- 这样设计是因为 LLM 不擅长精确计数行号和列号
+- `surrounding_code` 参数允许模型提供符号周围的代码片段，服务层会自动定位符号位置
 
 ### 实现架构
 

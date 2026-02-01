@@ -13,5 +13,7 @@ export function isReadOnlyToolAction(tool: ClineSayTool): boolean {
 		"searchFiles",
 		"codebaseSearch",
 		"runSlashCommand",
+		"goToDefinition",
+		"findReferences",
 	].includes(tool.tool)
 }

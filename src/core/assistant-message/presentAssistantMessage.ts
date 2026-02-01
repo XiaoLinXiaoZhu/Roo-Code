@@ -40,6 +40,8 @@ import { codebaseSearchTool } from "../tools/CodebaseSearchTool"
 import { searchProjectTool } from "../tools/SearchProjectTool"
 import { applyEditTool } from "../tools/ApplyEditTool"
 import { consultExpertTool } from "../tools/ConsultExpertTool"
+import { goToDefinitionTool } from "../tools/GoToDefinitionTool"
+import { findReferencesTool } from "../tools/FindReferencesTool"
 
 import { formatResponse } from "../prompts/responses"
 
@@ -411,6 +413,10 @@ export async function presentAssistantMessage(cline: Task) {
 						return `[${block.name} for '${block.params.instruction}']`
 					case "consult_expert":
 						return `[${block.name} on '${block.params.topic}']`
+					case "go_to_definition":
+						return `[${block.name} at ${block.params.path}:${block.params.line}:${block.params.character}]`
+					case "find_references":
+						return `[${block.name} at ${block.params.path}:${block.params.line}:${block.params.character}]`
 					case "read_command_output":
 						return `[${block.name} for '${block.params.artifact_id}']`
 					case "update_todo_list":
@@ -960,6 +966,20 @@ export async function presentAssistantMessage(cline: Task) {
 					break
 				case "consult_expert":
 					await consultExpertTool.handle(cline, block as ToolUse<"consult_expert">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+					})
+					break
+				case "go_to_definition":
+					await goToDefinitionTool.handle(cline, block as ToolUse<"go_to_definition">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+					})
+					break
+				case "find_references":
+					await findReferencesTool.handle(cline, block as ToolUse<"find_references">, {
 						askApproval,
 						handleError,
 						pushToolResult,

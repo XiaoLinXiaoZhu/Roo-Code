@@ -615,6 +615,41 @@ export class NativeToolCallParser {
 				}
 				break
 
+			// AST 代码智能工具
+			case "go_to_definition":
+				if (
+					partialArgs.purpose !== undefined ||
+					partialArgs.path !== undefined ||
+					partialArgs.symbol !== undefined
+				) {
+					nativeArgs = {
+						purpose: partialArgs.purpose,
+						path: partialArgs.path,
+						symbol: partialArgs.symbol,
+						surrounding_code: partialArgs.surrounding_code,
+						start_line: partialArgs.start_line,
+					}
+				}
+				break
+
+			case "find_references":
+				if (
+					partialArgs.purpose !== undefined ||
+					partialArgs.path !== undefined ||
+					partialArgs.symbol !== undefined
+				) {
+					nativeArgs = {
+						purpose: partialArgs.purpose,
+						path: partialArgs.path,
+						symbol: partialArgs.symbol,
+						surrounding_code: partialArgs.surrounding_code,
+						start_line: partialArgs.start_line,
+						include_declaration: partialArgs.include_declaration,
+						max_results: partialArgs.max_results,
+					}
+				}
+				break
+
 			default:
 				break
 		}
@@ -911,6 +946,32 @@ export class NativeToolCallParser {
 							mode: args.mode,
 							message: args.message,
 							todos: args.todos,
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "go_to_definition":
+					if (args.purpose !== undefined && args.path !== undefined && args.symbol !== undefined) {
+						nativeArgs = {
+							purpose: args.purpose,
+							path: args.path,
+							symbol: args.symbol,
+							surrounding_code: args.surrounding_code,
+							start_line: args.start_line,
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "find_references":
+					if (args.purpose !== undefined && args.path !== undefined && args.symbol !== undefined) {
+						nativeArgs = {
+							purpose: args.purpose,
+							path: args.path,
+							symbol: args.symbol,
+							surrounding_code: args.surrounding_code,
+							start_line: args.start_line,
+							include_declaration: args.include_declaration,
+							max_results: args.max_results,
 						} as NativeArgsFor<TName>
 					}
 					break
