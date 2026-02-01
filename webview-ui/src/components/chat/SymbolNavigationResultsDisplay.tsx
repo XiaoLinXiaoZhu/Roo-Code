@@ -192,42 +192,47 @@ const SymbolNavigationResultsDisplay: React.FC<SymbolNavigationResultsDisplayPro
 					<Trans i18nKey="chat:symbolNavigation.noReferencesFound" />
 				</div>
 			) : (
-				refData.fileGroups.map((fileRef, fileIdx) => (
-					<div key={fileIdx} className="flex flex-col gap-1">
-						<div className="px-3 py-2 bg-[var(--vscode-editor-background)] border border-[var(--vscode-editorGroup-border)] rounded text-sm font-semibold">
-							<PathTooltip content={formatPathTooltip(fileRef.filePath)}>
-								<span className="cursor-pointer hover:underline">
-									{formatPathTooltip(fileRef.filePath)}
-								</span>
-							</PathTooltip>
-							<span className="text-xs text-[var(--vscode-descriptionForeground)] ml-2">
-								({fileRef.references.length} reference{fileRef.references.length > 1 ? "s" : ""})
-							</span>
-						</div>
-
-						{fileRef.references.map((ref, refIdx) => (
-							<ToolUseBlock key={refIdx}>
-								<ToolUseBlockHeader
-									className="group cursor-pointer"
-									onClick={() => handleOpenFile(fileRef.filePath, ref.line)}>
-									<span className="text-xs text-[var(--vscode-descriptionForeground)] mr-2">
-										Line {ref.line + 1}
+				<div
+					className="flex flex-col gap-2 overflow-y-auto"
+					style={{ maxHeight: "200px" }} // ~5 items height
+				>
+					{refData.fileGroups.map((fileRef, fileIdx) => (
+						<div key={fileIdx} className="flex flex-col gap-1">
+							<div className="px-3 py-2 bg-[var(--vscode-editor-background)] border border-[var(--vscode-editorGroup-border)] rounded text-sm font-semibold sticky top-0 z-10">
+								<PathTooltip content={formatPathTooltip(fileRef.filePath)}>
+									<span className="cursor-pointer hover:underline">
+										{formatPathTooltip(fileRef.filePath)}
 									</span>
-									{ref.preview && (
-										<span className="text-xs text-[var(--vscode-descriptionForeground)] truncate">
-											{ref.preview}
+								</PathTooltip>
+								<span className="text-xs text-[var(--vscode-descriptionForeground)] ml-2">
+									({fileRef.references.length} reference{fileRef.references.length > 1 ? "s" : ""})
+								</span>
+							</div>
+
+							{fileRef.references.map((ref, refIdx) => (
+								<ToolUseBlock key={refIdx}>
+									<ToolUseBlockHeader
+										className="group cursor-pointer"
+										onClick={() => handleOpenFile(fileRef.filePath, ref.line)}>
+										<span className="text-xs text-[var(--vscode-descriptionForeground)] mr-2">
+											Line {ref.line + 1}
 										</span>
-									)}
-									<div style={{ flexGrow: 1 }}></div>
-									<SquareArrowOutUpRight
-										className="w-4 shrink-0 codicon codicon-link-external opacity-0 group-hover:opacity-100 transition-opacity"
-										style={{ fontSize: 13.5, margin: "1px 0" }}
-									/>
-								</ToolUseBlockHeader>
-							</ToolUseBlock>
-						))}
-					</div>
-				))
+										{ref.preview && (
+											<span className="text-xs text-[var(--vscode-descriptionForeground)] truncate">
+												{ref.preview}
+											</span>
+										)}
+										<div style={{ flexGrow: 1 }}></div>
+										<SquareArrowOutUpRight
+											className="w-4 shrink-0 codicon codicon-link-external opacity-0 group-hover:opacity-100 transition-opacity"
+											style={{ fontSize: 13.5, margin: "1px 0" }}
+										/>
+									</ToolUseBlockHeader>
+								</ToolUseBlock>
+							))}
+						</div>
+					))}
+				</div>
 			)}
 
 			{/* Data Source Info */}
