@@ -147,3 +147,120 @@ export interface ISymbolNavigationService {
 		options?: FindReferencesOptions,
 	): Promise<ReferencesResult>
 }
+
+// ============================================================================
+// UI Structured Types (for frontend rendering)
+// ============================================================================
+
+/**
+ * Location information for UI display
+ */
+export interface LocationUI {
+	/** Relative file path from workspace root */
+	filePath: string
+	/** 1-based line number */
+	line: number
+	/** 1-based column number */
+	column: number
+	/** Code preview snippet */
+	preview: string
+	/** Language identifier for syntax highlighting */
+	language?: string
+}
+
+/**
+ * Metadata for UI display
+ */
+export interface SymbolMetadataUI {
+	/** Symbol type (function, class, etc.) */
+	type: SymbolType
+	/** Whether the symbol is exported */
+	exported: boolean
+	/** Whether the symbol is async (for functions/methods) */
+	async: boolean
+	/** Documentation/JSDoc comment if available */
+	documentation?: string
+}
+
+/**
+ * Data source information for UI display
+ */
+export interface DataSourceUI {
+	/** Primary data source used */
+	source: DataSource
+	/** Confidence level of the result */
+	confidence: ConfidenceLevel
+	/** Fallback reason if applicable */
+	fallbackReason?: FallbackReason
+	/** Human-readable description of the data source */
+	description: string
+}
+
+/**
+ * Structured result for definition lookup (UI rendering)
+ */
+export interface DefinitionResultUI {
+	/** The symbol name that was looked up */
+	symbol: string
+	/** Whether the lookup was successful */
+	success: boolean
+	/** Error message if lookup failed */
+	error?: string
+	/** Definition locations */
+	definitions: LocationUI[]
+	/** Symbol metadata */
+	metadata?: SymbolMetadataUI
+	/** Data source information */
+	dataSource: DataSourceUI
+}
+
+/**
+ * Reference location grouped by file for UI display
+ */
+export interface FileReferencesUI {
+	/** Relative file path */
+	filePath: string
+	/** Language identifier for syntax highlighting */
+	language?: string
+	/** References in this file */
+	references: Array<{
+		/** 1-based line number */
+		line: number
+		/** 1-based column number */
+		column: number
+		/** Code preview snippet */
+		preview: string
+	}>
+}
+
+/**
+ * Pagination information for references
+ */
+export interface ReferencesPaginationUI {
+	/** Total number of references found */
+	totalCount: number
+	/** Number of references returned */
+	returnedCount: number
+	/** Whether results were truncated */
+	truncated: boolean
+	/** Maximum results that were requested */
+	maxResults?: number
+}
+
+/**
+ * Structured result for references lookup (UI rendering)
+ */
+export interface ReferencesResultUI {
+	/** The symbol name that was looked up */
+	symbol: string
+	/** Whether the lookup was successful */
+	success: boolean
+	/** Error message if lookup failed */
+	error?: string
+	/** References grouped by file */
+	fileGroups: FileReferencesUI[]
+	/** Pagination information */
+	pagination: ReferencesPaginationUI
+	/** Data source information */
+	dataSource: DataSourceUI
+}

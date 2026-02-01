@@ -1,11 +1,25 @@
 /**
  * Output Formatters for Symbol Navigation
  *
- * Formats definition and reference results into LLM-friendly Markdown.
+ * Formats definition and reference results into LLM-friendly Markdown
+ * and structured UI formats.
  */
 
 import * as path from "path"
-import type { DefinitionResult, ReferencesResult, SymbolLocation, FallbackReason } from "./types"
+import type {
+	DefinitionResult,
+	ReferencesResult,
+	SymbolLocation,
+	FallbackReason,
+	DefinitionResultUI,
+	ReferencesResultUI,
+	LocationUI,
+	FileReferencesUI,
+	DataSourceUI,
+	SymbolMetadataUI,
+	DataSource,
+	ConfidenceLevel,
+} from "./types"
 
 /**
  * Get relative path from workspace root
@@ -226,4 +240,167 @@ export function formatReferencesMarkdown(result: ReferencesResult, workspaceRoot
 	}
 
 	return lines.join("\n")
+}
+
+// ============================================================================
+// UI Structured Formatters
+// ============================================================================
+
+/**
+ * Get human-readable description for data source
+ */
+function getDataSourceDescription(
+	source: DataSource,
+	confidence: ConfidenceLevel,
+	fallbackReason?: FallbackReason,
+): string {
+	if (source === "lsp") {
+		return "Language Server Protocol - accurate type-aware results"
+	}
+
+	const fallbackMessages: Record<string, string> = {
+		lsp_timeout: "LSP timed out",
+		lsp_no_result: "LSP returned no results",
+		lsp_error: "LSP encountered an error",
+		no_language_server: "No language server available",
+		file_not_in_workspace: "File is outside workspace",
+	}
+
+	const sourceDescriptions: Record<string, string> = {
+		"tree-sitter": "Syntax-based analysis",
+		"semantic-search": "Semantic search",
+		"regex-search": "Text pattern matching",
+	}
+
+	const reason = fallbackReason ? fallbackMessages[fallbackReason] || "Unknown reason" : ""
+	const sourceDesc = sourceDescriptions[source] || source
+
+	return reason ? `${sourceDesc} (${reason})` : sourceDesc
+}
+
+/**
+ * Convert SymbolLocation to LocationUI
+ */
+function toLocationUI(location: SymbolLocation, workspaceRoot?: string): LocationUI {
+	return {
+		filePath: getRelativePath(location.uri, workspaceRoot),
+		line: location.range.start.line,
+		column: location.range.start.character,
+		preview: location.preview || "",
+		language: getLanguageFromPath(location.uri) || undefined,
+	}
+}
+
+/**
+ * Build DataSourceUI from result metadata
+ */
+function buildDataSourceUI(
+	source: DataSource,
+	confidence: ConfidenceLevel,
+	fallbackReason?: FallbackReason,
+): DataSourceUI {
+	return {
+		source,
+		confidence,
+		fallbackReason,
+		description: getDataSourceDescription(source, confidence, fallbackReason),
+	}
+}
+
+/**
+ * Format a DefinitionResult into structured UI format
+ *
+ * Extracts key information (file paths, line numbers, code previews, metadata)
+ * into a structured object suitable for UI rendering.
+ */
+export function formatDefinitionUI(result: DefinitionResult, workspaceRoot?: string): DefinitionResultUI {
+	// Handle no results case
+	if (result.definitions.length === 0) {
+		return {
+			symbol: result.symbol,
+			success: false,
+			error: "No definitions found. The symbol may be a built-in, from an external library, or the language server may not be running.",
+			definitions: [],
+			dataSource: buildDataSourceUI(result.source, result.confidence, result.fallbackReason),
+		}
+	}
+
+	// Convert definitions to LocationUI format
+	const definitions: LocationUI[] = result.definitions.map((def) => toLocationUI(def, workspaceRoot))
+
+	// Build metadata if available
+	let metadata: SymbolMetadataUI | undefined
+	if (result.metadata) {
+		metadata = {
+			type: result.metadata.type || "unknown",
+			exported: result.metadata.exported ?? false,
+			async: result.metadata.async ?? false,
+			documentation: result.metadata.documentation,
+		}
+	}
+
+	return {
+		symbol: result.symbol,
+		success: true,
+		definitions,
+		metadata,
+		dataSource: buildDataSourceUI(result.source, result.confidence, result.fallbackReason),
+	}
+}
+
+/**
+ * Format a ReferencesResult into structured UI format
+ *
+ * Extracts key information (file paths, line numbers, code previews)
+ * grouped by file, suitable for UI rendering.
+ */
+export function formatReferencesUI(result: ReferencesResult, workspaceRoot?: string): ReferencesResultUI {
+	// Handle no results case
+	if (result.references.length === 0) {
+		return {
+			symbol: result.symbol,
+			success: false,
+			error: "No references found. The symbol may not be used anywhere, or the language server may not be running.",
+			fileGroups: [],
+			pagination: {
+				totalCount: 0,
+				returnedCount: 0,
+				truncated: false,
+			},
+			dataSource: buildDataSourceUI(result.source, result.confidence, result.fallbackReason),
+		}
+	}
+
+	// Convert grouped references to FileReferencesUI format
+	const fileGroups: FileReferencesUI[] = []
+
+	for (const [filePath, locations] of result.groupedByFile) {
+		// Sort locations by line number
+		const sortedLocations = [...locations].sort((a, b) => a.range.start.line - b.range.start.line)
+
+		fileGroups.push({
+			filePath: getRelativePath(filePath, workspaceRoot),
+			language: getLanguageFromPath(filePath) || undefined,
+			references: sortedLocations.map((loc) => ({
+				line: loc.range.start.line,
+				column: loc.range.start.character,
+				preview: loc.preview?.split("\n")[0] || "",
+			})),
+		})
+	}
+
+	// Sort file groups by file path for consistent ordering
+	fileGroups.sort((a, b) => a.filePath.localeCompare(b.filePath))
+
+	return {
+		symbol: result.symbol,
+		success: true,
+		fileGroups,
+		pagination: {
+			totalCount: result.totalCount,
+			returnedCount: result.references.length,
+			truncated: result.truncated,
+		},
+		dataSource: buildDataSourceUI(result.source, result.confidence, result.fallbackReason),
+	}
 }

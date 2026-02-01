@@ -48,6 +48,7 @@ import { CommandExecutionError } from "./CommandExecutionError"
 import { AutoApprovedRequestLimitWarning } from "./AutoApprovedRequestLimitWarning"
 import { InProgressRow, CondensationResultRow, CondensationErrorRow, TruncationResultRow } from "./context-management"
 import CodebaseSearchResultsDisplay from "./CodebaseSearchResultsDisplay"
+import SymbolNavigationResultsDisplay from "./SymbolNavigationResultsDisplay"
 import { appendImages } from "@src/utils/imageUtils"
 import { McpExecution } from "./McpExecution"
 import { ChatTextArea } from "./ChatTextArea"
@@ -563,6 +564,86 @@ export const ChatRowContent = ({
 							)}
 						</span>
 					</div>
+				)
+			}
+			case "goToDefinition": {
+				// Try to parse as JSON (new format), fallback to markdown (old format)
+				let parsedResult: any = null
+				if (tool.content) {
+					try {
+						parsedResult = JSON.parse(tool.content)
+					} catch {
+						// Not JSON, will use CodeAccordian fallback
+					}
+				}
+				return (
+					<>
+						<div style={headerStyle}>
+							{toolIcon("compass")}
+							<span style={{ fontWeight: "bold" }}>
+								<Trans
+									i18nKey="chat:symbolNavigation.wantsToFindDefinition"
+									components={{ code: <code></code> }}
+									values={{ symbol: tool.symbol, path: tool.path }}
+								/>
+							</span>
+						</div>
+						{tool.content && (
+							<div className="pl-6">
+								{parsedResult ? (
+									<SymbolNavigationResultsDisplay type="definition" data={parsedResult} />
+								) : (
+									<CodeAccordian
+										code={tool.content}
+										language="markdown"
+										isLoading={message.partial}
+										isExpanded={isExpanded}
+										onToggleExpand={handleToggleExpand}
+									/>
+								)}
+							</div>
+						)}
+					</>
+				)
+			}
+			case "findReferences": {
+				// Try to parse as JSON (new format), fallback to markdown (old format)
+				let parsedResult: any = null
+				if (tool.content) {
+					try {
+						parsedResult = JSON.parse(tool.content)
+					} catch {
+						// Not JSON, will use CodeAccordian fallback
+					}
+				}
+				return (
+					<>
+						<div style={headerStyle}>
+							{toolIcon("git-pull-request")}
+							<span style={{ fontWeight: "bold" }}>
+								<Trans
+									i18nKey="chat:symbolNavigation.wantsToFindReferences"
+									components={{ code: <code></code> }}
+									values={{ symbol: tool.symbol, path: tool.path }}
+								/>
+							</span>
+						</div>
+						{tool.content && (
+							<div className="pl-6">
+								{parsedResult ? (
+									<SymbolNavigationResultsDisplay type="references" data={parsedResult} />
+								) : (
+									<CodeAccordian
+										code={tool.content}
+										language="markdown"
+										isLoading={message.partial}
+										isExpanded={isExpanded}
+										onToggleExpand={handleToggleExpand}
+									/>
+								)}
+							</div>
+						)}
+					</>
 				)
 			}
 			case "updateTodoList" as any: {

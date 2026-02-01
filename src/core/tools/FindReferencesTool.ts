@@ -11,7 +11,7 @@ import { type ClineSayTool } from "@roo-code/types"
 import { Task } from "../task/Task"
 import { getReadablePath } from "../../utils/path"
 import { isPathOutsideWorkspace } from "../../utils/pathUtils"
-import { symbolNavigationService, formatReferencesMarkdown } from "../../services/symbol-navigation"
+import { symbolNavigationService, formatReferencesUI } from "../../services/symbol-navigation"
 import type { ToolUse } from "../../shared/tools"
 
 import { BaseTool, ToolCallbacks } from "./BaseTool"
@@ -87,12 +87,13 @@ export class FindReferencesTool extends BaseTool<"find_references"> {
 				},
 			)
 
-			// Format the result as Markdown
-			const formattedResult = formatReferencesMarkdown(result, task.cwd)
+			// Format the result as structured UI data
+			const formattedResult = formatReferencesUI(result, task.cwd)
+			const contentJson = JSON.stringify(formattedResult)
 
 			const completeMessage = JSON.stringify({
 				...sharedMessageProps,
-				content: formattedResult,
+				content: contentJson,
 			} satisfies ClineSayTool)
 
 			const didApprove = await askApproval("tool", completeMessage)
@@ -101,7 +102,7 @@ export class FindReferencesTool extends BaseTool<"find_references"> {
 				return
 			}
 
-			pushToolResult(formattedResult)
+			pushToolResult(contentJson)
 		} catch (error) {
 			await handleError("finding references", error as Error)
 		}

@@ -5,7 +5,7 @@ import * as vscode from "vscode"
 /**
  * SearchProjectCache - 搜索项目缓存管理
  *
- * 管理 .roo/.cache 目录下的搜索结果缓存，支持：
+ * 管理 .roo/cache/search 目录下的搜索结果缓存，支持：
  * - 索引文件 index.json 的读写
  * - 缓存文件的创建和读取
  * - 基于 git state 的缓存有效性判断
@@ -272,7 +272,7 @@ ${result}
 			return null
 		}
 
-		let hint = `## 可用缓存（来自 .roo/.cache/）
+		let hint = `## 可用缓存（来自 ${CACHE_DIR}）
 
 以下是之前的搜索结果缓存。如果你的查询与某个缓存高度相关，可以直接使用 read_file 读取缓存文件，跳过重复调研。
 
@@ -292,7 +292,7 @@ ${result}
 
 		hint += `
 **使用方法**：
-1. 如果查询与某个缓存相关，先 \`read_file(".roo/.cache/{id}.md")\` 查看缓存内容
+1. 如果查询与某个缓存相关，先 \`read_file("${CACHE_DIR}/{id}.md")\` 查看缓存内容
 2. 检查 Git Commit 是否与当前一致（可用 \`git rev-parse HEAD\` 验证）
 3. 如果缓存有效且满足需求，可直接使用缓存结果
 4. 如果缓存过期或不完整，进行新的调研

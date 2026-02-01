@@ -11,7 +11,7 @@ import { type ClineSayTool } from "@roo-code/types"
 import { Task } from "../task/Task"
 import { getReadablePath } from "../../utils/path"
 import { isPathOutsideWorkspace } from "../../utils/pathUtils"
-import { symbolNavigationService, formatDefinitionMarkdown } from "../../services/symbol-navigation"
+import { symbolNavigationService, formatDefinitionUI } from "../../services/symbol-navigation"
 import type { ToolUse } from "../../shared/tools"
 
 import { BaseTool, ToolCallbacks } from "./BaseTool"
@@ -72,12 +72,13 @@ export class GoToDefinitionTool extends BaseTool<"go_to_definition"> {
 				start_line,
 			)
 
-			// Format the result as Markdown
-			const formattedResult = formatDefinitionMarkdown(result, task.cwd)
+			// Format the result as structured UI data
+			const formattedResult = formatDefinitionUI(result, task.cwd)
+			const contentJson = JSON.stringify(formattedResult)
 
 			const completeMessage = JSON.stringify({
 				...sharedMessageProps,
-				content: formattedResult,
+				content: contentJson,
 			} satisfies ClineSayTool)
 
 			const didApprove = await askApproval("tool", completeMessage)
@@ -86,7 +87,7 @@ export class GoToDefinitionTool extends BaseTool<"go_to_definition"> {
 				return
 			}
 
-			pushToolResult(formattedResult)
+			pushToolResult(contentJson)
 		} catch (error) {
 			await handleError("finding definition", error as Error)
 		}

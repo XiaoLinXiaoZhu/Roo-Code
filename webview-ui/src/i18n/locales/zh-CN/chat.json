@@ -427,6 +427,10 @@
 		"didSearch_other": "找到 {{count}} 个结果",
 		"resultTooltip": "相似度评分: {{score}} (点击打开文件)"
 	},
+	"symbolNavigation": {
+		"wantsToFindDefinition": "Roo 想在 <code>{{path}}</code> 中查找 <code>{{symbol}}</code> 的定义",
+		"wantsToFindReferences": "Roo 想在 <code>{{path}}</code> 中查找 <code>{{symbol}}</code> 的引用"
+	},
 	"read-batch": {
 		"approve": {
 			"title": "全部批准"

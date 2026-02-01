@@ -246,6 +246,10 @@
 		"didSearch_other": "Found {{count}} results",
 		"resultTooltip": "Similarity score: {{score}} (click to open file)"
 	},
+	"symbolNavigation": {
+		"wantsToFindDefinition": "Roo wants to find the definition of <code>{{symbol}}</code> in <code>{{path}}</code>",
+		"wantsToFindReferences": "Roo wants to find references to <code>{{symbol}}</code> in <code>{{path}}</code>"
+	},
 	"commandOutput": "Command Output",
 	"commandExecution": {
 		"abort": "Abort",
