@@ -1,5 +1,14 @@
 # Roo Code Changelog
 
+## [3.47.0] - 2026-02-01
+
+- 🧭 Symbol Navigation: Implement symbol navigation service with go-to-definition and find-references lookup
+    - Enhanced UI formatting for symbol navigation results
+    - Removed unused state management for cleaner code
+- 🔧 Tool Groups: Replace file reading and searching tools with CLI command tools for better efficiency
+- 🧠 Spirit Kernel: Update core principles and behavioral guidance structure
+- 👤 Mode Roles: Enhance solo developer and expert role definitions
+
 ## [3.46.3] - 2026-01-30
 
 - 🧠 AST Code Intelligence: Add go-to-definition and find-references support using VS Code's built-in language services
