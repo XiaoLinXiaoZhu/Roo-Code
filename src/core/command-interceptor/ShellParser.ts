@@ -26,7 +26,7 @@ const UNSUPPORTED_PATTERNS = [
 	/`[^`]+`/, // `cmd` - 命令替换（旧语法）
 	/<\([^)]+\)/, // <(cmd) - 进程替换
 	/>\([^)]+\)/, // >(cmd) - 进程替换
-	/<<\w+/, // <<EOF - Here-doc
+	/<<[-]?['"]?\w+['"]?/, // <<EOF, <<'EOF', <<"EOF", <<-EOF - Here-doc (all variants)
 	/\d+>&\d+/, // 2>&1 - 文件描述符重定向
 	/&>/, // &> - stdout+stderr 重定向
 	/\|&/, // |& - 管道 stderr

@@ -56,6 +56,30 @@ describe("FindHandler", () => {
 		it("should not handle -mtime option", () => {
 			expect(handler.canHandle(["-mtime", "+7"])).toBe(false)
 		})
+
+		it("should not handle -o (OR) option", () => {
+			expect(handler.canHandle(["-name", "*.ts", "-o", "-name", "*.js"])).toBe(false)
+		})
+
+		it("should not handle -or option", () => {
+			expect(handler.canHandle(["-name", "*.ts", "-or", "-name", "*.js"])).toBe(false)
+		})
+
+		it("should not handle -a (AND) option", () => {
+			expect(handler.canHandle(["-name", "*.ts", "-a", "-type", "f"])).toBe(false)
+		})
+
+		it("should not handle -and option", () => {
+			expect(handler.canHandle(["-name", "*.ts", "-and", "-type", "f"])).toBe(false)
+		})
+
+		it("should not handle -not option", () => {
+			expect(handler.canHandle(["-not", "-name", "*.txt"])).toBe(false)
+		})
+
+		it("should not handle ! (NOT) option", () => {
+			expect(handler.canHandle(["!", "-name", "*.txt"])).toBe(false)
+		})
 	})
 
 	describe("execute", () => {

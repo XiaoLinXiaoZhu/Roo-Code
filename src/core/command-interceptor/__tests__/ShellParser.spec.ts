@@ -77,6 +77,27 @@ describe("ShellParser", () => {
 			expect(stages[0].command).toBe("")
 		})
 
+		it("should return passthrough stage for here-doc with single quotes", () => {
+			const stages = parser.parsePipeline("cat <<'EOF'")
+
+			expect(stages).toHaveLength(1)
+			expect(stages[0].command).toBe("")
+		})
+
+		it("should return passthrough stage for here-doc with double quotes", () => {
+			const stages = parser.parsePipeline('cat <<"EOF"')
+
+			expect(stages).toHaveLength(1)
+			expect(stages[0].command).toBe("")
+		})
+
+		it("should return passthrough stage for here-doc with dash (strip tabs)", () => {
+			const stages = parser.parsePipeline("cat <<-EOF")
+
+			expect(stages).toHaveLength(1)
+			expect(stages[0].command).toBe("")
+		})
+
 		it("should return passthrough stage for fd redirection", () => {
 			const stages = parser.parsePipeline("command 2>&1")
 

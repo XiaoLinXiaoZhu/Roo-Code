@@ -161,8 +161,67 @@ export class TerminalProcess extends BaseTerminalProcess {
 		 * - OSC 633 ; E ; <commandline> [; <nonce>] ST - Explicitly set command line with optional nonce
 		 */
 
-		// Process stream data
-		for await (let data of stream) {
+		// Create abort promise that resolves when shell execution completes or user interrupts
+		// This allows us to break out of the stream loop even if the stream is stuck
+		let resolveAbort: () => void
+		const abortPromise = new Promise<IteratorResult<string, undefined>>((resolve) => {
+			resolveAbort = () => resolve({ done: true, value: undefined })
+		})
+
+		// Listen for shell_execution_complete to abort stream iteration
+		const shellCompleteHandler = () => {
+			console.warn("[TerminalProcess] shell_execution_complete received, aborting stream iteration")
+			resolveAbort()
+		}
+		this.once("shell_execution_complete", shellCompleteHandler)
+
+		// Also listen for continue event (user clicked "Continue" button)
+		const continueHandler = () => {
+			console.warn("[TerminalProcess] continue event received, aborting stream iteration")
+			resolveAbort()
+		}
+		this.once("continue", continueHandler)
+
+		// Idle timeout: if no data received for this duration, assume command completed
+		// This handles cases where VSCode shell integration doesn't fire end events (e.g., here-docs)
+		const STREAM_IDLE_TIMEOUT_MS = 3000
+		let idleTimeoutId: NodeJS.Timeout | undefined
+		const resetIdleTimeout = () => {
+			if (idleTimeoutId) {
+				clearTimeout(idleTimeoutId)
+			}
+			idleTimeoutId = setTimeout(() => {
+				console.warn(
+					`[TerminalProcess] Stream idle timeout (${STREAM_IDLE_TIMEOUT_MS}ms without data). ` +
+						"Assuming command completed.",
+				)
+				resolveAbort()
+			}, STREAM_IDLE_TIMEOUT_MS)
+		}
+		// Start the idle timeout
+		resetIdleTimeout()
+
+		// Process stream data with interruptible iteration using Promise.race
+		const iterator = stream[Symbol.asyncIterator]()
+
+		while (true) {
+			const result = await Promise.race([iterator.next(), abortPromise])
+
+			if (result.done) {
+				if (result.value === undefined) {
+					console.warn(
+						"[TerminalProcess] Breaking out of stream loop due to external signal. " +
+							"Stream may not have closed properly.",
+					)
+				}
+				break
+			}
+
+			let data = result.value
+
+			// Reset idle timeout since we received data
+			resetIdleTimeout()
+
 			// Check for command output start marker
 			if (!commandOutputStarted) {
 				preOutput += data
@@ -197,11 +256,34 @@ export class TerminalProcess extends BaseTerminalProcess {
 			this.startHotTimer(data)
 		}
 
+		// Clean up event listeners and timers
+		this.removeListener("shell_execution_complete", shellCompleteHandler)
+		this.removeListener("continue", continueHandler)
+		if (idleTimeoutId) {
+			clearTimeout(idleTimeoutId)
+		}
+
 		// Set streamClosed immediately after stream ends.
 		this.terminal.setActiveStream(undefined)
 
-		// Wait for shell execution to complete.
-		await shellExecutionComplete
+		// Wait for shell execution to complete, with a timeout fallback.
+		// VSCode shell integration may not fire onDidEndTerminalShellExecution for certain
+		// command patterns (e.g., here-docs, multi-line commands), so we add a timeout
+		// to prevent indefinite hanging after the stream has closed.
+		const SHELL_EXECUTION_TIMEOUT_MS = 5000
+
+		const shellExecutionTimeout = new Promise<ExitCodeDetails>((resolve) => {
+			setTimeout(() => {
+				console.warn(
+					"[TerminalProcess] shellExecutionComplete timeout after stream closed. " +
+						"VSCode shell integration may not support this command pattern (e.g., here-doc).",
+				)
+				// Assume success if stream completed normally but shell execution event wasn't fired
+				resolve({ exitCode: 0 })
+			}, SHELL_EXECUTION_TIMEOUT_MS)
+		})
+
+		await Promise.race([shellExecutionComplete, shellExecutionTimeout])
 
 		this.isHot = false
 
@@ -253,10 +335,17 @@ export class TerminalProcess extends BaseTerminalProcess {
 		this.emitRemainingBufferIfListening()
 		this.isListening = false
 		this.removeAllListeners("line")
+		// Emit shell_execution_complete to unblock run() if it's waiting
+		// This handles the case where user clicks "Continue" while command is stuck
+		this.emit("shell_execution_complete", { exitCode: 0 })
 		this.emit("continue")
 	}
 
 	public override abort() {
+		// Emit shell_execution_complete to unblock run() if it's waiting
+		// This handles the case where user clicks "Abort" while command is stuck
+		this.emit("shell_execution_complete", { exitCode: 130, signalName: "SIGINT" })
+
 		if (this.isListening) {
 			// Send SIGINT using CTRL+C
 			this.terminal.terminal.sendText("\x03")

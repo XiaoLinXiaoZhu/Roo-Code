@@ -373,7 +373,8 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 		// tools: [], // ! disable browser tools for now
 	},
 	command: {
-		tools: ["execute_command", "read_command_output"],
+		// 移除了  "read_command_output" ，因为 read_command_output 的功能其实可以用 grep/sed + 文件重定向替代。
+		tools: ["execute_command"],
 	},
 	mcp: {
 		// 	tools: ["use_mcp_tool", "access_mcp_resource"],

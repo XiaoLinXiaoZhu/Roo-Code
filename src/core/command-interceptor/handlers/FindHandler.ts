@@ -40,9 +40,12 @@ const UNSUPPORTED_FLAGS = new Set([
 	"group",
 	"size",
 	"empty",
-	"and",
-	"or",
-	"not",
+	"a",
+	"and", // -a, -and (AND 操作符)
+	"o",
+	"or", // -o, -or (OR 操作符)
+	"not", // -not (NOT 操作符)
+	"!", // ! (NOT 操作符的另一种形式)
 ])
 
 /**
@@ -57,6 +60,11 @@ export class FindHandler extends BaseHandler {
 	canHandle(args: string[]): boolean {
 		// 直接遍历原始参数，检查 find 风格的选项（单破折号+长名称）
 		for (const arg of args) {
+			// 检查 ! 操作符（不以 - 开头）
+			if (arg === "!") {
+				return false
+			}
+
 			// 检查是否以 `-` 开头但不是 `--`
 			if (arg.startsWith("-") && !arg.startsWith("--")) {
 				// 提取选项名称（去掉前导 `-`）

@@ -650,6 +650,26 @@ export class NativeToolCallParser {
 				}
 				break
 
+			case "read_command_output":
+				if (partialArgs.artifact_id !== undefined) {
+					nativeArgs = {
+						artifact_id: partialArgs.artifact_id,
+						search: partialArgs.search,
+						offset: partialArgs.offset,
+						limit: partialArgs.limit,
+					}
+				}
+				break
+
+			case "access_mcp_resource":
+				if (partialArgs.server_name !== undefined || partialArgs.uri !== undefined) {
+					nativeArgs = {
+						server_name: partialArgs.server_name,
+						uri: partialArgs.uri,
+					}
+				}
+				break
+
 			default:
 				break
 		}
@@ -950,6 +970,20 @@ export class NativeToolCallParser {
 					}
 					break
 
+				case "consult_expert":
+					if (args.domain !== undefined && args.topic !== undefined && args.question !== undefined) {
+						nativeArgs = {
+							domain: args.domain,
+							topic: args.topic,
+							question: args.question,
+							knownContext: args.knownContext,
+							unknownPoints: args.unknownPoints,
+							attachments: args.attachments,
+							consultType: args.consultType,
+						} as NativeArgsFor<TName>
+					}
+					break
+
 				case "go_to_definition":
 					if (args.purpose !== undefined && args.path !== undefined && args.symbol !== undefined) {
 						nativeArgs = {
@@ -972,6 +1006,27 @@ export class NativeToolCallParser {
 							start_line: args.start_line,
 							include_declaration: args.include_declaration,
 							max_results: args.max_results,
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "search_project":
+					if (args.query !== undefined) {
+						nativeArgs = {
+							query: args.query,
+							scope: args.scope,
+							schema: args.schema,
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "apply_edit":
+					if (args.instruction !== undefined) {
+						nativeArgs = {
+							instruction: args.instruction,
+							files: args.files,
+							context: args.context,
+							validate: args.validate,
 						} as NativeArgsFor<TName>
 					}
 					break
