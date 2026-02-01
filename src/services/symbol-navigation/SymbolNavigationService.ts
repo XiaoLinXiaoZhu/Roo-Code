@@ -256,8 +256,22 @@ export class SymbolNavigationService implements ISymbolNavigationService {
 		const maxResults = options?.maxResults ?? 50
 		const includeDeclaration = options?.includeDeclaration ?? true
 
-		// Try LSP
-		const lspResult = await this.tryLspReferences(uri, position, includeDeclaration)
+		// Try LSP at current position
+		let lspResult = await this.tryLspReferences(uri, position, includeDeclaration)
+
+		// If no results, try to find definition first and search references from there
+		if (!lspResult.success || lspResult.locations.length === 0) {
+			const definitionResult = await this.findDefinition(file, symbol, surroundingCode, startLine)
+
+			if (definitionResult.definitions.length > 0) {
+				const def = definitionResult.definitions[0]
+				const defUri = vscode.Uri.file(path.resolve(def.uri))
+				const defPosition = new vscode.Position(def.range.start.line - 1, def.range.start.character)
+
+				// Retry references from definition location
+				lspResult = await this.tryLspReferences(defUri, defPosition, includeDeclaration)
+			}
+		}
 
 		if (lspResult.success && lspResult.locations.length > 0) {
 			this.isFirstCall = false

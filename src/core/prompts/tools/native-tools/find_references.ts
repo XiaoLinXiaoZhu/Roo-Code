@@ -1,11 +1,13 @@
 import type OpenAI from "openai"
 
-const FIND_REFERENCES_DESCRIPTION = `Find all references to a symbol. Uses fuzzy matching with optional context to locate all usages.
+const FIND_REFERENCES_DESCRIPTION = `Find all references to a symbol using LSP (Language Server Protocol). More accurate than grep - semantic search that understands code structure.
 
 **When to Use**:
 - impact_analysis: Need to understand the impact of changing a symbol before refactoring
 - usage_patterns: Need to see how a function/type is used across the codebase
 - dead_code_check: Need to verify if a symbol is unused before removing it
+
+**Note**: If symbol is imported from another file, the tool will automatically trace to its definition and search from there.
 
 **Parameters**:
 - symbol: The name of the symbol to find references for (required)

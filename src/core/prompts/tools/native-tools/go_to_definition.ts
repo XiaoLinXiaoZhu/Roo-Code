@@ -1,6 +1,6 @@
 import type OpenAI from "openai"
 
-const GO_TO_DEFINITION_DESCRIPTION = `Jump to the definition of a symbol. Uses fuzzy matching with optional context to locate the symbol definition.
+const GO_TO_DEFINITION_DESCRIPTION = `Jump to the definition of a symbol using LSP (Language Server Protocol). More accurate than grep - follows imports and understands code structure.
 
 **When to Use**:
 - understand_implementation: Need to see how a function/class/type is implemented
