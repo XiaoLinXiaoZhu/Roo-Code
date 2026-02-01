@@ -1,5 +1,16 @@
 # Roo Code Changelog
 
+## [3.47.1] - 2026-02-01
+
+- 🐛 NativeToolCallParser: Fix missing tool cases for partial/non-partial modes
+    - Added `read_command_output` and `access_mcp_resource` to partial mode
+    - Added `search_project` and `apply_edit` to non-partial mode
+- ✨ apply_edit: Enhance tool description and validate parameter
+    - Simplified description to focus on selection criteria (vs apply_diff)
+    - `validate` parameter now accepts custom commands (e.g., "npm run check", "pytest")
+    - Default behavior: sub-agent chooses appropriate validation based on project type
+- ✨ apply_diff: Simplify tool description for clearer usage guidance
+
 ## [3.47.0] - 2026-02-01
 
 - 🧭 Symbol Navigation: Implement symbol navigation service with go-to-definition and find-references lookup
