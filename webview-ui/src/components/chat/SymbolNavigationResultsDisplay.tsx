@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React from "react"
 import { Trans } from "react-i18next"
 import { vscode } from "@src/utils/vscode"
 import { ToolUseBlock, ToolUseBlockHeader } from "../common/ToolUseBlock"
@@ -62,8 +62,6 @@ interface SymbolNavigationResultsDisplayProps {
 }
 
 const SymbolNavigationResultsDisplay: React.FC<SymbolNavigationResultsDisplayProps> = ({ type, data }) => {
-	const [expanded, setExpanded] = useState(true)
-
 	const handleOpenFile = (file: string, line: number) => {
 		vscode.postMessage({
 			type: "openFile",
