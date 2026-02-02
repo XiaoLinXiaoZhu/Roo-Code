@@ -189,6 +189,22 @@ CRITICAL: Built tools MUST enforce these default output limits:
 These limits prevent context overflow when the tool is used repeatedly.
 </output_limits>`
 
+		// 工具存放位置指导
+		message += `\n\n<tool_location>
+根据工具的通用性选择存放位置：
+
+**全局工具** (~/.roo/tools/):
+- 适用于：跨项目通用的工具（如截图、图片处理、格式转换等）
+- 要求：必须配备 README.md，说明用途、参数和示例
+- 命名：使用描述性名称，如 screenshot-tool、image-cropper
+
+**项目工具** (.roo/tools/):
+- 适用于：仅对当前项目有意义的工具（如特定数据格式处理、项目专用脚本）
+- README 可选
+
+请根据需求的通用性自行判断，优先考虑全局复用。
+</tool_location>`
+
 		return message
 	}
 
