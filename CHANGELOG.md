@@ -1,5 +1,13 @@
 # Roo Code Changelog
 
+## [3.48.0] - 2026-02-02
+
+- ✨ Read Media Tool: Add `read_media` tool for multimodal agent image reading
+    - Dedicated tool for reading image files (PNG, JPG, JPEG, GIF, BMP, SVG, WEBP, ICO, AVIF)
+    - Controlled by `supportsImages` model capability flag (same as read_file image support)
+    - Respects user-configured `maxImageFileSize` and `maxTotalImageSize` settings
+    - Replaces image reading functionality from removed `read_file` tool
+
 ## [3.47.2] - 2026-02-02
 
 - ✨ Delegation Tool: Introduce delegation tool support and registry for agent-as-tool workflows

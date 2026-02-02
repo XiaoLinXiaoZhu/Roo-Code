@@ -111,6 +111,7 @@ export type ToolParamName = (typeof toolParamNames)[number]
 export type NativeToolArgs = {
 	access_mcp_resource: { server_name: string; uri: string }
 	read_file: { files: FileEntry[] }
+	read_media: { files: Array<{ path: string }> }
 	read_command_output: { artifact_id: string; search?: string; offset?: number; limit?: number }
 	attempt_completion: { result: string }
 	execute_command: { command: string; cwd?: string }
@@ -346,6 +347,7 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	execute_command: "run commands",
 	read_file: "read files",
 	read_command_output: "read command output",
+	read_media: "read media files",
 	fetch_instructions: "fetch instructions",
 	write_to_file: "write files",
 	apply_diff: "apply changes",
@@ -379,7 +381,8 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 	read: {
 		// "read_file", "search_files", "list_files", are now in command
 		// 因为模型可以直接通过命令行工具更加灵活地读取文件内容和搜索文件，所以这些工具未来使用命令行工具来替代
-		tools: ["fetch_instructions", "codebase_search", "go_to_definition", "find_references"],
+		// "read_media" 用于多模态 agent 读取媒体文件（图片等），根据 supportsImages 开关控制
+		tools: ["fetch_instructions", "codebase_search", "go_to_definition", "find_references", "read_media"],
 	},
 	edit: {
 		tools: ["apply_diff", "write_to_file", "generate_image"],

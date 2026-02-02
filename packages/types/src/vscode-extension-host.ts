@@ -778,6 +778,7 @@ export interface ClineSayTool {
 		| "newFileCreated"
 		| "codebaseSearch"
 		| "readFile"
+		| "readMedia"
 		| "readCommandOutput"
 		| "fetchInstructions"
 		| "listFilesTopLevel"

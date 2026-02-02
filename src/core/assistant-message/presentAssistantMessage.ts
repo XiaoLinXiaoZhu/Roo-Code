@@ -17,6 +17,7 @@ import { Task } from "../task/Task"
 import { fetchInstructionsTool } from "../tools/FetchInstructionsTool"
 import { listFilesTool } from "../tools/ListFilesTool"
 import { readFileTool } from "../tools/ReadFileTool"
+import { readMediaTool } from "../tools/ReadMediaTool"
 import { readCommandOutputTool } from "../tools/ReadCommandOutputTool"
 import { writeToFileTool } from "../tools/WriteToFileTool"
 import { searchAndReplaceTool } from "../tools/SearchAndReplaceTool"
@@ -375,6 +376,12 @@ export async function presentAssistantMessage(cline: Task) {
 							return readFileTool.getReadFileToolDescription(block.name, block.nativeArgs)
 						}
 						return readFileTool.getReadFileToolDescription(block.name, block.params)
+					case "read_media":
+						if (block.nativeArgs?.files) {
+							const paths = block.nativeArgs.files.map((f: { path: string }) => f.path).join(", ")
+							return `[${block.name} for '${paths}']`
+						}
+						return `[${block.name}]`
 					case "fetch_instructions":
 						return `[${block.name} for '${block.params.task}']`
 					case "write_to_file":
@@ -834,6 +841,13 @@ export async function presentAssistantMessage(cline: Task) {
 				case "read_file":
 					// Type assertion is safe here because we're in the "read_file" case
 					await readFileTool.handle(cline, block as ToolUse<"read_file">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+					})
+					break
+				case "read_media":
+					await readMediaTool.handle(cline, block as ToolUse<"read_media">, {
 						askApproval,
 						handleError,
 						pushToolResult,

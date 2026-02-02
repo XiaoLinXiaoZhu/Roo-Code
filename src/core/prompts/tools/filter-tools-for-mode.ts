@@ -281,6 +281,11 @@ export function filterNativeToolsForMode(
 		allowedToolNames.delete("update_todo_list")
 	}
 
+	// Conditionally exclude read_media if model does not support images
+	if (!modelInfo?.supportsImages) {
+		allowedToolNames.delete("read_media")
+	}
+
 	// Conditionally exclude generate_image if experiment is not enabled
 	if (!experiments?.imageGeneration) {
 		allowedToolNames.delete("generate_image")

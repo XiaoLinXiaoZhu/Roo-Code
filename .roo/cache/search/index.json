@@ -599,6 +599,137 @@
       "gitCommit": "c5ec503085cc3471ea4adf60593f2543797191cd",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"toolDefinitionPattern\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "25",
+      "query": "Where are tool definitions and readfile/read-image/read-media tools implemented, and how is the image-support toggle handled (similar to tood tool)?",
+      "tags": [
+        "where",
+        "are",
+        "tool",
+        "definitions",
+        "and",
+        "readfile",
+        "read",
+        "image",
+        "media",
+        "tools",
+        "implemented",
+        "how",
+        "is",
+        "the",
+        "support",
+        "toggle",
+        "handled",
+        "similar",
+        "to",
+        "tood"
+      ],
+      "scope": {
+        "directories": "",
+        "filePatterns": "",
+        "excludes": "node_modules,dist,.git"
+      },
+      "createdAt": "2026-02-02T13:04:38.482Z",
+      "gitCommit": "bf1219a71aa3f5770d2eb29d63caa4a04e0bbe5c",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "26",
+      "query": "Where are native tool implementations registered/mapped to tool names like read_file in the core tools execution flow?",
+      "tags": [
+        "where",
+        "are",
+        "native",
+        "tool",
+        "implementations",
+        "registered",
+        "mapped",
+        "to",
+        "names",
+        "like",
+        "read_file",
+        "in",
+        "the",
+        "core",
+        "tools",
+        "execution",
+        "flow"
+      ],
+      "scope": {
+        "directories": "",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,dist"
+      },
+      "createdAt": "2026-02-02T13:09:26.500Z",
+      "gitCommit": "bf1219a71aa3f5770d2eb29d63caa4a04e0bbe5c",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}"
+    },
+    {
+      "id": "27",
+      "query": "Where is the ClineSayTool type defined?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "clinesaytool",
+        "type",
+        "defined"
+      ],
+      "scope": {
+        "directories": "",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,dist"
+      },
+      "createdAt": "2026-02-02T13:17:09.988Z",
+      "gitCommit": "bf1219a71aa3f5770d2eb29d63caa4a04e0bbe5c",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}"
+    },
+    {
+      "id": "28",
+      "query": "Where is the ClineSayTool tool value \"readFile\" handled in the webview UI or message handlers?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "clinesaytool",
+        "tool",
+        "value",
+        "readfile",
+        "handled",
+        "in",
+        "webview",
+        "ui",
+        "or",
+        "message",
+        "handlers"
+      ],
+      "scope": {
+        "directories": "",
+        "filePatterns": "*.ts,*.tsx",
+        "excludes": "node_modules,dist"
+      },
+      "createdAt": "2026-02-02T13:21:28.149Z",
+      "gitCommit": "bf1219a71aa3f5770d2eb29d63caa4a04e0bbe5c",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}"
+    },
+    {
+      "id": "29",
+      "query": "read_file 工具中图片读取功能的开关是如何实现的？在哪里根据是否支持图像来调整工具行为？",
+      "tags": [
+        "read_file",
+        "工具中图片读取功能的开关是如何实现的",
+        "在哪里根据是否支持图像来调整工具行为"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-02T13:24:33.548Z",
+      "gitCommit": "bf1219a71aa3f5770d2eb29d63caa4a04e0bbe5c",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"imageReadingSwitch\":{\"type\":\"string\"},\"switchLocation\":{\"type\":\"string\"}}}"
     }
   ]
 }
