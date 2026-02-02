@@ -159,13 +159,20 @@ export class FindHandler extends BaseHandler {
 				return context.rooIgnoreController.validateAccess(file)
 			})
 
-			const output = this.formatOutput(filteredResults, context.cwd, blocked)
+			const output = this.formatOutput(filteredResults, context.cwd)
 
-			return {
+			const result: CommandResult = {
 				stdout: output,
 				stderr: "",
 				exitCode: filteredResults.length > 0 ? 0 : 1,
 			}
+
+			// 被忽略路径提示放入 metadata
+			if (blocked.length > 0) {
+				result.truncationMessage = this.formatBlockedFilesHint(blocked)
+			}
+
+			return result
 		} catch (error) {
 			return this.failure(`find: ${error}`)
 		}
@@ -358,10 +365,9 @@ export class FindHandler extends BaseHandler {
 	/**
 	 * 格式化输出
 	 */
-	private formatOutput(results: string[], cwd: string, blockedPaths: string[]): string {
+	private formatOutput(results: string[], cwd: string): string {
 		if (results.length === 0) {
-			const hint = this.formatBlockedFilesHint(blockedPaths)
-			return `No files found.${hint}`
+			return `No files found.`
 		}
 
 		const lines: string[] = []
@@ -377,13 +383,6 @@ export class FindHandler extends BaseHandler {
 		// 文件列表
 		for (const file of results) {
 			lines.push(file)
-		}
-
-		// 添加被忽略路径提示
-		const hint = this.formatBlockedFilesHint(blockedPaths)
-		if (hint) {
-			lines.push("")
-			lines.push(hint)
 		}
 
 		return lines.join("\n")

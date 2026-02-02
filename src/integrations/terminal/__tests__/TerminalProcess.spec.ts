@@ -135,6 +135,48 @@ describe("TerminalProcess", () => {
 			consoleWarnSpy.mockRestore()
 		})
 
+		it("emits shell_execution_complete when shell integration is unavailable", async () => {
+			// Temporarily suppress the expected console.warn for this test
+			const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {})
+
+			// Create a terminal without shell integration
+			const noShellTerminal = {
+				sendText: vi.fn(),
+				shellIntegration: undefined,
+				name: "No Shell Terminal",
+				processId: Promise.resolve(456),
+				creationOptions: {},
+				exitStatus: undefined,
+				state: { isInteractedWith: true },
+				dispose: vi.fn(),
+				hide: vi.fn(),
+				show: vi.fn(),
+			} as unknown as vscode.Terminal
+
+			// Create new terminal info with the no-shell terminal
+			const noShellTerminalInfo = new Terminal(2, noShellTerminal, "./")
+
+			// Create new process with the no-shell terminal
+			const noShellProcess = new TerminalProcess(noShellTerminalInfo)
+
+			// Track shell_execution_complete event
+			let shellExecutionCompleteDetails: any = null
+			noShellProcess.once("shell_execution_complete", (details) => {
+				shellExecutionCompleteDetails = details
+			})
+
+			// Run command
+			await noShellProcess.run("test command")
+
+			// Verify shell_execution_complete was emitted with exitCode
+			expect(shellExecutionCompleteDetails).not.toBeNull()
+			expect(shellExecutionCompleteDetails).toHaveProperty("exitCode")
+			expect(shellExecutionCompleteDetails.exitCode).toBe(0)
+
+			// Restore the original console.warn
+			consoleWarnSpy.mockRestore()
+		})
+
 		it("sets hot state for compiling commands", async () => {
 			let lines: string[] = []
 

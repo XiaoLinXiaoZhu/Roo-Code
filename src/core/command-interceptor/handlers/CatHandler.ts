@@ -16,7 +16,7 @@
 import * as fs from "fs/promises"
 import * as path from "path"
 
-import { CommandContext, CommandResult, CONSTANTS } from "../types"
+import { CommandContext, CommandResult } from "../types"
 import { BaseHandler } from "./BaseHandler"
 
 /**
@@ -89,16 +89,19 @@ export class CatHandler extends BaseHandler {
 			}
 		}
 
-		// 添加被忽略文件提示
-		if (blocked.length > 0) {
-			outputs.push(this.formatBlockedFilesHint(blocked))
-		}
-
-		return {
+		// 构建结果
+		const result: CommandResult = {
 			stdout: outputs.join("\n"),
 			stderr: errors.join("\n"),
 			exitCode: errors.length > 0 ? 1 : 0,
 		}
+
+		// 被忽略文件提示放入 metadata（截断由外层 CliOutputTruncator 统一处理）
+		if (blocked.length > 0) {
+			result.truncationMessage = this.formatBlockedFilesHint(blocked)
+		}
+
+		return result
 	}
 
 	/**

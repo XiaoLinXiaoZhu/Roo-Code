@@ -125,13 +125,20 @@ export class GrepHandler extends BaseHandler {
 		// 使用 ripgrep 执行搜索
 		try {
 			const results = await this.searchWithRipgrep(context.cwd, allowed, pattern, options)
-			const output = this.formatOutput(results, context.cwd, blocked)
+			const output = this.formatOutput(results, context.cwd)
 
-			return {
+			const result: CommandResult = {
 				stdout: output,
 				stderr: "",
 				exitCode: results.length > 0 ? 0 : 1,
 			}
+
+			// 被忽略文件提示放入 metadata
+			if (blocked.length > 0) {
+				result.truncationMessage = this.formatBlockedFilesHint(blocked)
+			}
+
+			return result
 		} catch (error) {
 			return this.failure(`grep: ${error}`)
 		}
@@ -185,7 +192,9 @@ export class GrepHandler extends BaseHandler {
 		let regex: RegExp
 		try {
 			const flags = options.ignoreCase ? "gi" : "g"
-			const patternStr = options.fixedStrings ? this.escapeRegex(pattern) : pattern
+			// 先转换 BRE 语法，再处理 fixedStrings
+			const convertedPattern = options.fixedStrings ? pattern : this.convertBREtoRustRegex(pattern)
+			const patternStr = options.fixedStrings ? this.escapeRegex(convertedPattern) : convertedPattern
 			regex = new RegExp(patternStr, flags)
 		} catch (error) {
 			return this.failure(`grep: invalid regex: ${error}`)
@@ -269,7 +278,9 @@ export class GrepHandler extends BaseHandler {
 		}
 
 		// 添加模式和路径
-		args.push("-e", pattern)
+		// 将 BRE 语法转换为 Rust regex 语法
+		const convertedPattern = this.convertBREtoRustRegex(pattern)
+		args.push("-e", convertedPattern)
 		args.push("--no-messages")
 
 		for (const p of paths) {
@@ -282,10 +293,9 @@ export class GrepHandler extends BaseHandler {
 	/**
 	 * 格式化输出（与 search_files 保持一致的 LLM 友好格式）
 	 */
-	private formatOutput(results: RipgrepMatch[], cwd: string, blockedFiles: string[]): string {
+	private formatOutput(results: RipgrepMatch[], cwd: string): string {
 		if (results.length === 0) {
-			const hint = this.formatBlockedFilesHint(blockedFiles)
-			return `No results found.${hint}`
+			return `No results found.`
 		}
 
 		const lines: string[] = []
@@ -324,13 +334,6 @@ export class GrepHandler extends BaseHandler {
 		// 每个结果块后添加分隔符
 		if (currentFile !== "") {
 			lines.push("----")
-			lines.push("")
-		}
-
-		// 添加被忽略文件提示
-		const hint = this.formatBlockedFilesHint(blockedFiles)
-		if (hint) {
-			lines.push(hint)
 		}
 
 		return lines.join("\n").trim()
@@ -341,6 +344,29 @@ export class GrepHandler extends BaseHandler {
 	 */
 	private escapeRegex(str: string): string {
 		return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+	}
+
+	/**
+	 * 将 GNU grep 的 BRE (Basic Regular Expression) 语法转换为 Rust regex 语法
+	 *
+	 * BRE 中需要转义才能表示特殊含义的字符，在 Rust regex 中直接使用：
+	 * - \| → | (OR)
+	 * - \+ → + (一个或多个)
+	 * - \? → ? (零个或一个)
+	 * - \( → ( (分组开始)
+	 * - \) → ) (分组结束)
+	 * - \{ → { (量词开始)
+	 * - \} → } (量词结束)
+	 */
+	private convertBREtoRustRegex(pattern: string): string {
+		return pattern
+			.replace(/\\\|/g, "|")
+			.replace(/\\\+/g, "+")
+			.replace(/\\\?/g, "?")
+			.replace(/\\\(/g, "(")
+			.replace(/\\\)/g, ")")
+			.replace(/\\\{/g, "{")
+			.replace(/\\\}/g, "}")
 	}
 }
 

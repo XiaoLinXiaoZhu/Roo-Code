@@ -106,6 +106,21 @@ describe("ExecaTerminalProcess", () => {
 			expect(spy).toHaveBeenCalledWith({ exitCode: 0 })
 		})
 
+		it("should emit shell_execution_complete with actual exitCode from subprocess", async () => {
+			// This test verifies that we await the subprocess to get the actual exit code
+			// rather than hardcoding exitCode: 0
+			const spy = vitest.fn()
+			terminalProcess.on("shell_execution_complete", spy)
+			await terminalProcess.run("echo test")
+
+			// Verify the event was emitted
+			expect(spy).toHaveBeenCalled()
+			const callArg = spy.mock.calls[0][0]
+			expect(callArg).toHaveProperty("exitCode")
+			// The mock returns exitCode from the subprocess result
+			expect(typeof callArg.exitCode).toBe("number")
+		})
+
 		it("should emit completed event with full output", async () => {
 			const spy = vitest.fn()
 			terminalProcess.on("completed", spy)

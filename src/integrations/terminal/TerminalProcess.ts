@@ -60,6 +60,10 @@ export class TerminalProcess extends BaseTerminalProcess {
 				"<shell integration is not available, so terminal output and command execution status is unknown>",
 			)
 
+			// Emit shell_execution_complete with unknown exit code (0 as fallback)
+			// This ensures exitDetails is set even when shell integration is unavailable
+			this.terminal.shellExecutionComplete({ exitCode: 0 })
+
 			this.emit("continue")
 			return
 		}
@@ -141,7 +145,9 @@ export class TerminalProcess extends BaseTerminalProcess {
 				"<VSCE shell integration stream did not start: terminal output and command execution status is unknown>",
 			)
 
-			this.terminal.busy = false
+			// Emit shell_execution_complete with unknown exit code (0 as fallback)
+			// This ensures exitDetails is set even when stream fails to start
+			this.terminal.shellExecutionComplete({ exitCode: 0 })
 
 			// Emit continue event to allow execution to proceed
 			this.emit("continue")
@@ -279,7 +285,10 @@ export class TerminalProcess extends BaseTerminalProcess {
 						"VSCode shell integration may not support this command pattern (e.g., here-doc).",
 				)
 				// Assume success if stream completed normally but shell execution event wasn't fired
-				resolve({ exitCode: 0 })
+				// Use shellExecutionComplete to properly emit the event to all listeners
+				const fallbackExitDetails: ExitCodeDetails = { exitCode: 0 }
+				this.terminal.shellExecutionComplete(fallbackExitDetails)
+				resolve(fallbackExitDetails)
 			}, SHELL_EXECUTION_TIMEOUT_MS)
 		})
 

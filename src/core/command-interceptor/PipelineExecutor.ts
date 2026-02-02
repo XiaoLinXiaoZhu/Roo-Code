@@ -51,6 +51,7 @@ export class PipelineExecutor {
 		let currentInput = this.context.stdin || ""
 		let lastResult: CommandResult = { stdout: "", stderr: "", exitCode: 0 }
 		const allStderr: string[] = []
+		const allMetadata: string[] = [] // 收集所有阶段的元信息
 
 		for (let i = 0; i < stages.length; i++) {
 			const stage = stages[i]
@@ -72,7 +73,13 @@ export class PipelineExecutor {
 					allStderr.push(lastResult.stderr)
 				}
 
+				// 收集元信息（截断提示等），不传递给下一阶段
+				if (lastResult.truncationMessage) {
+					allMetadata.push(lastResult.truncationMessage)
+				}
+
 				// 管道语义：前一个命令的 stdout 是下一个命令的 stdin
+				// 注意：只传递 stdout，不传递 metadata
 				currentInput = lastResult.stdout
 
 				// 管道语义：非零退出码中断管道
@@ -89,11 +96,20 @@ export class PipelineExecutor {
 			}
 		}
 
-		return {
+		// 合并最终结果
+		const result: CommandResult = {
 			stdout: lastResult.stdout,
 			stderr: allStderr.join("\n"),
 			exitCode: lastResult.exitCode,
 		}
+
+		// 合并所有阶段的元信息
+		if (allMetadata.length > 0) {
+			result.truncated = true
+			result.truncationMessage = allMetadata.join("\n")
+		}
+
+		return result
 	}
 
 	/**

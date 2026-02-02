@@ -49,3 +49,6 @@ export { PipelineExecutor } from "./PipelineExecutor"
 
 // 处理器导出
 export { BaseHandler, GrepHandler, CatHandler, HeadHandler, TailHandler } from "./handlers"
+
+// 工具函数导出
+export { truncateCliOutput, cleanupOldOutputs } from "./CliOutputTruncator"

@@ -105,5 +105,20 @@ describe("CatHandler", () => {
 			expect(result.stdout).toContain("[truncated...]")
 			expect(result.stdout.length).toBeLessThan(600)
 		})
+
+		it("should output large files without internal truncation (truncation handled by CliOutputTruncator)", async () => {
+			// 创建一个超过 50KB 的大文件
+			const largeContent = "x".repeat(100) + "\n"
+			const lines = Array(600).fill(largeContent).join("") // ~60KB
+			await fs.writeFile(path.join(tempDir, "large.txt"), lines)
+
+			const result = await handler.execute(["large.txt"], context)
+
+			expect(result.exitCode).toBe(0)
+			// CatHandler 不再内部截断，完整输出由外层 CliOutputTruncator 处理
+			expect(result.stdout.length).toBeGreaterThan(50 * 1024)
+			// 不应该有内部截断标记
+			expect(result.truncated).toBeUndefined()
+		})
 	})
 })

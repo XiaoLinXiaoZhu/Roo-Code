@@ -88,16 +88,18 @@ export class LsHandler extends BaseHandler {
 				}
 			}
 
-			// 添加被忽略路径提示
-			if (blocked.length > 0) {
-				outputs.push(this.formatBlockedFilesHint(blocked))
-			}
-
-			return {
+			const result: CommandResult = {
 				stdout: outputs.join("\n").trim(),
 				stderr: errors.join("\n"),
 				exitCode: errors.length > 0 ? 1 : 0,
 			}
+
+			// 被忽略路径提示放入 metadata
+			if (blocked.length > 0) {
+				result.truncationMessage = this.formatBlockedFilesHint(blocked)
+			}
+
+			return result
 		} catch (error) {
 			return this.failure(`ls: ${error}`)
 		}

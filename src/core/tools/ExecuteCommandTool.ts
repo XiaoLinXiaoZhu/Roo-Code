@@ -21,6 +21,7 @@ import { t } from "../../i18n"
 import { getTaskDirectoryPath } from "../../utils/storage"
 import { BaseTool, ToolCallbacks } from "./BaseTool"
 import { CommandInterceptor, createCommandInterceptor } from "../command-interceptor"
+import { truncateCliOutput, cleanupOldOutputs } from "../command-interceptor/CliOutputTruncator"
 
 class ShellIntegrationError extends Error {}
 
@@ -69,21 +70,39 @@ export class ExecuteCommandTool extends BaseTool<"execute_command"> {
 			})
 
 			if (interceptResult.intercepted && interceptResult.result) {
-				const { stdout, stderr, exitCode } = interceptResult.result
+				const { stdout, stderr, exitCode, truncationMessage } = interceptResult.result
+				const workingDir = customCwd ? path.resolve(task.cwd, customCwd) : task.cwd
 
-				// 格式化输出
-				let output = stdout
+				// 格式化原始输出
+				let rawOutput = stdout
 				if (stderr) {
-					output += `\n\nStderr:\n${stderr}`
+					rawOutput += `\n\nStderr:\n${stderr}`
+				}
+
+				// 统一截断处理：超过限制时截断并保存完整输出
+				const truncResult = await truncateCliOutput(rawOutput, task.cwd, unescapedCommand)
+				let output = truncResult.output
+
+				// 添加截断提示（来自截断处理器）
+				if (truncResult.truncationMessage) {
+					output += `\n\n${truncResult.truncationMessage}`
+				}
+
+				// 添加管道元信息（来自 handler，如被忽略的文件提示）
+				if (truncationMessage) {
+					output += `\n\n${truncationMessage}`
 				}
 
 				const exitStatus =
 					exitCode === 0 ? "Exit code: 0" : `Command execution was not successful.\nExit code: ${exitCode}`
 
-				const workingDir = customCwd ? path.resolve(task.cwd, customCwd) : task.cwd
 				pushToolResult(
 					`Command executed (intercepted) in '${workingDir.toPosix()}'. ${exitStatus}\nOutput:\n${output}`,
 				)
+
+				// 异步清理旧的输出文件
+				cleanupOldOutputs(task.cwd).catch(() => {})
+
 				return
 			}
 
@@ -126,7 +145,20 @@ export class ExecuteCommandTool extends BaseTool<"execute_command"> {
 					task.didRejectTool = true
 				}
 
-				pushToolResult(result)
+				// 对原生执行结果应用截断处理（仅处理字符串类型）
+				if (typeof result === "string") {
+					const truncResult = await truncateCliOutput(result, task.cwd, unescapedCommand)
+					let finalResult = truncResult.output
+					if (truncResult.truncationMessage) {
+						finalResult += `\n\n${truncResult.truncationMessage}`
+					}
+					pushToolResult(finalResult)
+
+					// 异步清理旧的输出文件
+					cleanupOldOutputs(task.cwd).catch(() => {})
+				} else {
+					pushToolResult(result)
+				}
 			} catch (error: unknown) {
 				const status: CommandExecutionStatus = { executionId, status: "fallback" }
 				provider?.postMessageToWebview({ type: "commandExecutionStatus", text: JSON.stringify(status) })
@@ -145,7 +177,18 @@ export class ExecuteCommandTool extends BaseTool<"execute_command"> {
 						task.didRejectTool = true
 					}
 
-					pushToolResult(result)
+					// 对 fallback 执行结果也应用截断处理
+					if (typeof result === "string") {
+						const truncResult = await truncateCliOutput(result, task.cwd, unescapedCommand)
+						let finalResult = truncResult.output
+						if (truncResult.truncationMessage) {
+							finalResult += `\n\n${truncResult.truncationMessage}`
+						}
+						pushToolResult(finalResult)
+						cleanupOldOutputs(task.cwd).catch(() => {})
+					} else {
+						pushToolResult(result)
+					}
 				} else {
 					pushToolResult(`Command failed to execute in terminal due to a shell integration error.`)
 				}
