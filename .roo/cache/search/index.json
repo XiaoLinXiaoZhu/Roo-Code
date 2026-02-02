@@ -748,6 +748,39 @@
       "gitCommit": "d7d2569c66ca546659fac3b7d9b2760e63a76803",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "31",
+      "query": "read_media 工具的实现在哪里？如何处理 files 参数？",
+      "tags": [
+        "read_media",
+        "工具的实现在哪里",
+        "如何处理",
+        "files",
+        "参数"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-02T14:49:31.457Z",
+      "gitCommit": "713f75ec101cbe8e8457d09967443a9252278615",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "32",
+      "query": "nativeArgs 是如何从模型的工具调用参数中解析生成的？在哪里处理 tool_use 的 input 参数？",
+      "tags": [
+        "nativeargs",
+        "是如何从模型的工具调用参数中解析生成的",
+        "在哪里处理",
+        "tool_use",
+        "input",
+        "参数"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-02T14:51:37.916Z",
+      "gitCommit": "713f75ec101cbe8e8457d09967443a9252278615",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"parseLogic\":{\"type\":\"string\"}}}"
     }
   ]
 }

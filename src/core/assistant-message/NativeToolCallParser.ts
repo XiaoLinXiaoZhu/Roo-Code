@@ -680,6 +680,12 @@ export class NativeToolCallParser {
 				}
 				break
 
+			case "read_media":
+				if (partialArgs.files && Array.isArray(partialArgs.files)) {
+					nativeArgs = { files: partialArgs.files }
+				}
+				break
+
 			default:
 				break
 		}
@@ -1048,6 +1054,12 @@ export class NativeToolCallParser {
 							inputHint: args.inputHint,
 							outputHint: args.outputHint,
 						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "read_media":
+					if (args.files && Array.isArray(args.files)) {
+						nativeArgs = { files: args.files } as NativeArgsFor<TName>
 					}
 					break
 
