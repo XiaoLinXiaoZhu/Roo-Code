@@ -93,12 +93,25 @@ export class ExecuteCommandTool extends BaseTool<"execute_command"> {
 					output += `\n\n${truncationMessage}`
 				}
 
-				const exitStatus =
-					exitCode === 0 ? "Exit code: 0" : `Command execution was not successful.\nExit code: ${exitCode}`
-
-				pushToolResult(
-					`Command executed (intercepted) in '${workingDir.toPosix()}'. ${exitStatus}\nOutput:\n${output}`,
+				// Format as XML for LLM consumption
+				const success = exitCode === 0
+				const lines: string[] = []
+				lines.push(
+					`<command_result cwd="${workingDir.toPosix()}" exit_code="${exitCode}" success="${success}">`,
 				)
+				if (output.trim()) {
+					lines.push(`<output>`)
+					lines.push(output)
+					lines.push(`</output>`)
+				}
+				if (!success) {
+					lines.push(
+						`<notice>Command execution was not successful. Inspect the output and adjust as needed.</notice>`,
+					)
+				}
+				lines.push(`</command_result>`)
+
+				pushToolResult(lines.join("\n"))
 
 				// 异步清理旧的输出文件
 				cleanupOldOutputs(task.cwd).catch(() => {})
@@ -145,17 +158,10 @@ export class ExecuteCommandTool extends BaseTool<"execute_command"> {
 					task.didRejectTool = true
 				}
 
-				// 对原生执行结果应用截断处理（仅处理字符串类型）
+				// executeCommandInTerminal 已经返回 XML 格式的结果，直接使用
+				// 截断处理已在 executeCommandInTerminal 内部完成
 				if (typeof result === "string") {
-					const truncResult = await truncateCliOutput(result, task.cwd, unescapedCommand)
-					let finalResult = truncResult.output
-					if (truncResult.truncationMessage) {
-						finalResult += `\n\n${truncResult.truncationMessage}`
-					}
-					pushToolResult(finalResult)
-
-					// 异步清理旧的输出文件
-					cleanupOldOutputs(task.cwd).catch(() => {})
+					pushToolResult(result)
 				} else {
 					pushToolResult(result)
 				}
@@ -177,20 +183,16 @@ export class ExecuteCommandTool extends BaseTool<"execute_command"> {
 						task.didRejectTool = true
 					}
 
-					// 对 fallback 执行结果也应用截断处理
+					// executeCommandInTerminal 已经返回 XML 格式的结果，直接使用
 					if (typeof result === "string") {
-						const truncResult = await truncateCliOutput(result, task.cwd, unescapedCommand)
-						let finalResult = truncResult.output
-						if (truncResult.truncationMessage) {
-							finalResult += `\n\n${truncResult.truncationMessage}`
-						}
-						pushToolResult(finalResult)
-						cleanupOldOutputs(task.cwd).catch(() => {})
+						pushToolResult(result)
 					} else {
 						pushToolResult(result)
 					}
 				} else {
-					pushToolResult(`Command failed to execute in terminal due to a shell integration error.`)
+					pushToolResult(
+						`<command_result status="error"><error>Command failed to execute in terminal due to a shell integration error.</error></command_result>`,
+					)
 				}
 			}
 
@@ -463,44 +465,55 @@ export async function executeCommandInTerminal(
 			return [false, formatPersistedOutput(persistedResult, exitDetails, currentWorkingDir)]
 		}
 
-		// Use inline format for small outputs (original behavior with exit status)
-		let exitStatus: string = ""
+		// Format as XML for LLM consumption
+		const exitCode = exitDetails?.exitCode
+		const success = exitCode === 0
+		const lines: string[] = []
 
-		if (exitDetails !== undefined) {
-			if (exitDetails.signalName) {
-				exitStatus = `Process terminated by signal ${exitDetails.signalName}`
-
-				if (exitDetails.coreDumpPossible) {
-					exitStatus += " - core dump possible"
-				}
-			} else if (exitDetails.exitCode === undefined) {
-				result += "<VSCE exit code is undefined: terminal output and command execution status is unknown.>"
-				exitStatus = `Exit code: <undefined, notify user>`
-			} else {
-				if (exitDetails.exitCode !== 0) {
-					exitStatus += "Command execution was not successful, inspect the cause and adjust as needed.\n"
-				}
-
-				exitStatus += `Exit code: ${exitDetails.exitCode}`
-			}
+		if (exitDetails?.signalName) {
+			lines.push(
+				`<command_result cwd="${currentWorkingDir}" signal="${exitDetails.signalName}"${exitDetails.coreDumpPossible ? ' core_dump="possible"' : ""}>`,
+			)
+		} else if (exitCode !== undefined) {
+			lines.push(`<command_result cwd="${currentWorkingDir}" exit_code="${exitCode}" success="${success}">`)
 		} else {
-			result += "<VSCE exitDetails == undefined: terminal output and command execution status is unknown.>"
-			exitStatus = `Exit code: <undefined, notify user>`
+			lines.push(`<command_result cwd="${currentWorkingDir}" exit_code="undefined">`)
 		}
 
-		return [
-			false,
-			`Command executed in terminal within working directory '${currentWorkingDir}'. ${exitStatus}\nOutput:\n${result}`,
-		]
+		if (result.trim()) {
+			lines.push(`<output>`)
+			lines.push(result)
+			lines.push(`</output>`)
+		}
+
+		if (!success && exitCode !== undefined) {
+			lines.push(
+				`<notice>Command execution was not successful. Inspect the output and adjust as needed.</notice>`,
+			)
+		} else if (exitCode === undefined) {
+			lines.push(
+				`<notice>Exit code is undefined. Terminal output and command execution status is unknown.</notice>`,
+			)
+		}
+
+		lines.push(`</command_result>`)
+
+		return [false, lines.join("\n")]
 	} else {
-		return [
-			false,
-			[
-				`Command is still running in terminal ${workingDir ? ` from '${workingDir.toPosix()}'` : ""}.`,
-				result.length > 0 ? `Here's the output so far:\n${result}\n` : "\n",
-				"You will be updated on the terminal status and new output in the future.",
-			].join("\n"),
-		]
+		// Command still running
+		const lines: string[] = []
+		lines.push(`<command_result cwd="${workingDir?.toPosix() || ""}" status="running">`)
+		if (result.trim()) {
+			lines.push(`<output partial="true">`)
+			lines.push(result)
+			lines.push(`</output>`)
+		}
+		lines.push(
+			`<notice>Command is still running. You will be updated on the terminal status and new output in the future.</notice>`,
+		)
+		lines.push(`</command_result>`)
+
+		return [false, lines.join("\n")]
 	}
 }
 
@@ -540,20 +553,43 @@ function formatPersistedOutput(
 	exitDetails: ExitCodeDetails | undefined,
 	workingDir: string,
 ): string {
-	const exitStatus = formatExitStatus(exitDetails)
+	const exitCode = exitDetails?.exitCode
+	const success = exitCode === 0
 	const sizeStr = formatBytes(result.totalBytes)
 	const artifactId = result.artifactPath ? path.basename(result.artifactPath) : ""
 
-	return [
-		`Command executed in '${workingDir}'. ${exitStatus}`,
-		"",
-		`Output (${sizeStr}) persisted. Artifact ID: ${artifactId}`,
-		"",
-		"Preview:",
-		result.preview,
-		"",
-		"Use read_command_output tool to view full output if needed.",
-	].join("\n")
+	const lines: string[] = []
+
+	if (exitDetails?.signalName) {
+		lines.push(
+			`<command_result cwd="${workingDir}" signal="${exitDetails.signalName}" output_size="${sizeStr}" truncated="true">`,
+		)
+	} else if (exitCode !== undefined) {
+		lines.push(
+			`<command_result cwd="${workingDir}" exit_code="${exitCode}" success="${success}" output_size="${sizeStr}" truncated="true">`,
+		)
+	} else {
+		lines.push(
+			`<command_result cwd="${workingDir}" exit_code="undefined" output_size="${sizeStr}" truncated="true">`,
+		)
+	}
+
+	lines.push(`<artifact id="${artifactId}" />`)
+	lines.push(`<preview>`)
+	lines.push(result.preview)
+	lines.push(`</preview>`)
+
+	if (!success && exitCode !== undefined) {
+		lines.push(
+			`<notice>Command execution was not successful. Use read_command_output tool to view full output if needed.</notice>`,
+		)
+	} else {
+		lines.push(`<notice>Output truncated. Use read_command_output tool to view full output if needed.</notice>`)
+	}
+
+	lines.push(`</command_result>`)
+
+	return lines.join("\n")
 }
 
 /**

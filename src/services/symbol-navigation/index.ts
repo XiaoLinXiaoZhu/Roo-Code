@@ -6,4 +6,11 @@
 
 export * from "./types"
 export * from "./SymbolNavigationService"
-export * from "./formatters"
+export {
+	formatDefinitionMarkdown,
+	formatReferencesMarkdown,
+	formatDefinitionUI,
+	formatReferencesUI,
+	formatDefinitionForLLM,
+	formatReferencesForLLM,
+} from "./formatters"

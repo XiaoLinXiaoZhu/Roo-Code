@@ -324,38 +324,34 @@ export class DiffViewProvider {
 			await task.say("user_feedback_diff", JSON.stringify(say))
 		}
 
-		// Build notices array
-		const notices = [
-			"You do not need to re-read the file, as you have seen all changes",
-			"Proceed with the task using these changes as the new baseline.",
-			...(this.userEdits
-				? [
-						"If the user's edits have addressed part of the task or changed the requirements, adjust your approach accordingly.",
-					]
-				: []),
-		]
+		// Format as XML for LLM consumption
+		const operation = isNewFile ? "created" : "modified"
+		const lines: string[] = []
 
-		const result: {
-			path: string
-			operation: "created" | "modified"
-			notice: string
-			user_edits?: string
-			problems?: string
-		} = {
-			path: this.relPath,
-			operation: isNewFile ? "created" : "modified",
-			notice: notices.join(" "),
-		}
+		lines.push(`<file_write_result path="${this.relPath}" operation="${operation}">`)
 
 		if (this.userEdits) {
-			result.user_edits = this.userEdits
+			lines.push(`<user_edits>`)
+			lines.push(this.userEdits)
+			lines.push(`</user_edits>`)
 		}
 
 		if (this.newProblemsMessage) {
-			result.problems = this.newProblemsMessage
+			lines.push(`<problems>${this.newProblemsMessage}</problems>`)
 		}
 
-		return JSON.stringify(result)
+		// Build notice
+		const noticeLines = ["You do not need to re-read the file, as you have seen all changes."]
+		if (this.userEdits) {
+			noticeLines.push(
+				"User made edits. If these edits have addressed part of the task or changed the requirements, adjust your approach accordingly.",
+			)
+		}
+		lines.push(`<notice>${noticeLines.join(" ")}</notice>`)
+
+		lines.push(`</file_write_result>`)
+
+		return lines.join("\n")
 	}
 
 	async revertChanges(): Promise<void> {

@@ -109,20 +109,19 @@ export class CodebaseSearchTool extends BaseTool<"codebase_search"> {
 			const payload = { tool: "codebaseSearch", content: jsonResult }
 			await task.say("codebase_search_result", JSON.stringify(payload))
 
-			const output = `Query: ${query}
-Results:
+			// Format as XML for LLM consumption
+			const lines: string[] = []
+			lines.push(`<codebase_search_result query="${query}" count="${jsonResult.results.length}">`)
+			for (const result of jsonResult.results) {
+				lines.push(
+					`<match file="${result.filePath}" lines="${result.startLine}-${result.endLine}" score="${result.score.toFixed(3)}">`,
+				)
+				lines.push(result.codeChunk)
+				lines.push(`</match>`)
+			}
+			lines.push(`</codebase_search_result>`)
 
-${jsonResult.results
-	.map(
-		(result) => `File path: ${result.filePath}
-Score: ${result.score}
-Lines: ${result.startLine}-${result.endLine}
-Code Chunk: ${result.codeChunk}
-`,
-	)
-	.join("\n")}`
-
-			pushToolResult(output)
+			pushToolResult(lines.join("\n"))
 		} catch (error: any) {
 			await handleError("codebase_search", error)
 		}

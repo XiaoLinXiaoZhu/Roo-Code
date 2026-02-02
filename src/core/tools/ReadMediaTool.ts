@@ -202,8 +202,14 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 			}
 
 			// Build result
-			const resultParts: string[] = []
+			// Format as XML for LLM consumption
+			const xmlLines: string[] = []
 			const imageBlocks: Anthropic.ImageBlockParam[] = []
+
+			const loadedCount = fileResults.filter((r) => r.status === "approved" && r.imageDataUrl).length
+			const totalCount = fileResults.length
+
+			xmlLines.push(`<read_media_result loaded="${loadedCount}" total="${totalCount}">`)
 
 			for (const fileResult of fileResults) {
 				const relPath = fileResult.path
@@ -211,7 +217,9 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 				switch (fileResult.status) {
 					case "approved":
 						if (fileResult.imageDataUrl) {
-							resultParts.push(`[${relPath}]: ${fileResult.notice || "Image loaded successfully"}`)
+							xmlLines.push(
+								`<image path="${relPath}" status="loaded">${fileResult.notice || "Image loaded successfully"}</image>`,
+							)
 							const ext = path.extname(relPath).toLowerCase()
 							const mediaType = IMAGE_MIME_TYPES[ext] || "image/png"
 							imageBlocks.push({
@@ -225,30 +233,34 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 						}
 						break
 					case "denied":
-						resultParts.push(
-							`[${relPath}]: User denied access${fileResult.feedbackText ? ` - ${fileResult.feedbackText}` : ""}`,
+						xmlLines.push(
+							`<image path="${relPath}" status="denied">${fileResult.feedbackText || "User denied access"}</image>`,
 						)
 						break
 					case "blocked":
-						resultParts.push(`[${relPath}]: ${fileResult.error}`)
+						xmlLines.push(`<image path="${relPath}" status="blocked">${fileResult.error}</image>`)
 						break
 					case "error":
-						resultParts.push(`[${relPath}]: Error - ${fileResult.error || fileResult.notice}`)
+						xmlLines.push(
+							`<image path="${relPath}" status="error">${fileResult.error || fileResult.notice}</image>`,
+						)
 						break
 					default:
-						resultParts.push(`[${relPath}]: Unknown status`)
+						xmlLines.push(`<image path="${relPath}" status="unknown" />`)
 				}
 			}
+
+			xmlLines.push(`</read_media_result>`)
 
 			// Push result with images as ToolResponse
 			if (imageBlocks.length > 0) {
 				const response: Array<Anthropic.TextBlockParam | Anthropic.ImageBlockParam> = [
-					{ type: "text", text: resultParts.join("\n") },
+					{ type: "text", text: xmlLines.join("\n") },
 					...imageBlocks,
 				]
 				pushToolResult(response)
 			} else {
-				pushToolResult(resultParts.join("\n"))
+				pushToolResult(xmlLines.join("\n"))
 			}
 
 			// Reset consecutive mistake count on success

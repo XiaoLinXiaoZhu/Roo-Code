@@ -256,7 +256,8 @@ export class GenerateImageTool extends BaseTool<"generate_image"> {
 			imageUri = imageUri.includes("?") ? `${imageUri}&t=${cacheBuster}` : `${imageUri}?t=${cacheBuster}`
 
 			await task.say("image", JSON.stringify({ imageUri, imagePath: fullImagePath }))
-			pushToolResult(formatResponse.toolResult(getReadablePath(task.cwd, finalPath)))
+			// Format as XML for LLM consumption
+			pushToolResult(`<generate_image_result path="${getReadablePath(task.cwd, finalPath)}" status="success" />`)
 		} catch (error) {
 			await handleError("generating image", error as Error)
 		}

@@ -75,11 +75,14 @@ export class UpdateTodoListTool extends BaseTool<"update_todo_list"> {
 
 			await setTodoListForTask(task, normalizedTodos)
 
+			// Format as XML for LLM consumption
 			if (isTodoListChanged) {
 				const md = todoListToMarkdown(normalizedTodos)
-				pushToolResult(formatResponse.toolResult("User edits todo:\n\n" + md))
+				pushToolResult(
+					`<todo_list_result status="updated" user_edited="true">\n<todos>\n${md}\n</todos>\n<notice>User edited the todo list. Review the changes above.</notice>\n</todo_list_result>`,
+				)
 			} else {
-				pushToolResult(formatResponse.toolResult("Todo list updated successfully."))
+				pushToolResult(`<todo_list_result status="updated" user_edited="false" />`)
 			}
 		} catch (error) {
 			await handleError("update todo list", error as Error)

@@ -11,7 +11,7 @@ import { type ClineSayTool } from "@roo-code/types"
 import { Task } from "../task/Task"
 import { getReadablePath } from "../../utils/path"
 import { isPathOutsideWorkspace } from "../../utils/pathUtils"
-import { symbolNavigationService, formatDefinitionUI } from "../../services/symbol-navigation"
+import { symbolNavigationService, formatDefinitionUI, formatDefinitionForLLM } from "../../services/symbol-navigation"
 import type { ToolUse } from "../../shared/tools"
 
 import { BaseTool, ToolCallbacks } from "./BaseTool"
@@ -72,7 +72,7 @@ export class GoToDefinitionTool extends BaseTool<"go_to_definition"> {
 				start_line,
 			)
 
-			// Format the result as structured UI data
+			// Format the result as structured UI data for webview
 			const formattedResult = formatDefinitionUI(result, task.cwd)
 			const contentJson = JSON.stringify(formattedResult)
 
@@ -87,7 +87,9 @@ export class GoToDefinitionTool extends BaseTool<"go_to_definition"> {
 				return
 			}
 
-			pushToolResult(contentJson)
+			// Format the result as XML for LLM consumption
+			const llmResult = formatDefinitionForLLM(result, task.cwd)
+			pushToolResult(llmResult)
 		} catch (error) {
 			await handleError("finding definition", error as Error)
 		}

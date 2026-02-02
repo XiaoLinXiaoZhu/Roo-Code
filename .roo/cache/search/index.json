@@ -730,6 +730,24 @@
       "gitCommit": "bf1219a71aa3f5770d2eb29d63caa4a04e0bbe5c",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"imageReadingSwitch\":{\"type\":\"string\"},\"switchLocation\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "30",
+      "query": "工具返回结果格式化的实现在哪里？查找 tool result、formatResponse、formatToolResult 等相关代码",
+      "tags": [
+        "工具返回结果格式化的实现在哪里",
+        "查找",
+        "tool",
+        "result",
+        "formatresponse",
+        "formattoolresult",
+        "等相关代码"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-02T14:08:08.430Z",
+      "gitCommit": "d7d2569c66ca546659fac3b7d9b2760e63a76803",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
     }
   ]
 }

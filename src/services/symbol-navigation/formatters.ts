@@ -349,6 +349,62 @@ export function formatDefinitionUI(result: DefinitionResult, workspaceRoot?: str
 }
 
 /**
+ * Format a DefinitionResult into XML format for LLM consumption
+ *
+ * Uses self-explanatory XML tags for clear, unambiguous output.
+ */
+export function formatDefinitionForLLM(result: DefinitionResult, workspaceRoot?: string): string {
+	const lines: string[] = []
+
+	// Handle no results case
+	if (result.definitions.length === 0) {
+		lines.push(`<definition_result symbol="${result.symbol}" success="false">`)
+		lines.push(
+			`<error>No definitions found. The symbol may be a built-in, from an external library, or the language server may not be running.</error>`,
+		)
+		if (result.fallbackReason) {
+			lines.push(
+				`<data_source source="${result.source}" confidence="${result.confidence}" fallback="${result.fallbackReason}" />`,
+			)
+		}
+		lines.push(`</definition_result>`)
+		return lines.join("\n")
+	}
+
+	lines.push(`<definition_result symbol="${result.symbol}" success="true">`)
+
+	// Add metadata if available
+	if (result.metadata) {
+		const meta = result.metadata
+		const attrs = [`type="${meta.type || "unknown"}"`]
+		if (meta.exported !== undefined) attrs.push(`exported="${meta.exported}"`)
+		if (meta.async !== undefined) attrs.push(`async="${meta.async}"`)
+		lines.push(`<metadata ${attrs.join(" ")} />`)
+	}
+
+	// Format each definition
+	for (const def of result.definitions) {
+		const relativePath = getRelativePath(def.uri, workspaceRoot)
+		const line = def.range.start.line
+		lines.push(`<definition file="${relativePath}" line="${line}">`)
+		if (def.preview) {
+			lines.push(def.preview)
+		}
+		lines.push(`</definition>`)
+	}
+
+	// Add data source info only if not LSP (fallback case)
+	if (result.source !== "lsp") {
+		lines.push(
+			`<data_source source="${result.source}" confidence="${result.confidence}"${result.fallbackReason ? ` fallback="${result.fallbackReason}"` : ""} />`,
+		)
+	}
+
+	lines.push(`</definition_result>`)
+	return lines.join("\n")
+}
+
+/**
  * Format a ReferencesResult into structured UI format
  *
  * Extracts key information (file paths, line numbers, code previews)
@@ -403,4 +459,64 @@ export function formatReferencesUI(result: ReferencesResult, workspaceRoot?: str
 		},
 		dataSource: buildDataSourceUI(result.source, result.confidence, result.fallbackReason),
 	}
+}
+
+/**
+ * Format a ReferencesResult into XML format for LLM consumption
+ *
+ * Uses self-explanatory XML tags for clear, unambiguous output.
+ */
+export function formatReferencesForLLM(result: ReferencesResult, workspaceRoot?: string): string {
+	const lines: string[] = []
+
+	// Handle no results case
+	if (result.references.length === 0) {
+		lines.push(`<references_result symbol="${result.symbol}" success="false">`)
+		lines.push(
+			`<error>No references found. The symbol may not be used anywhere, or the language server may not be running.</error>`,
+		)
+		if (result.fallbackReason) {
+			lines.push(
+				`<data_source source="${result.source}" confidence="${result.confidence}" fallback="${result.fallbackReason}" />`,
+			)
+		}
+		lines.push(`</references_result>`)
+		return lines.join("\n")
+	}
+
+	// Build header with pagination info
+	const fileCount = result.groupedByFile.size
+	lines.push(
+		`<references_result symbol="${result.symbol}" success="true" total="${result.totalCount}" returned="${result.references.length}" files="${fileCount}"${result.truncated ? ' truncated="true"' : ""}>`,
+	)
+
+	// Group references by file
+	const sortedFiles = [...result.groupedByFile.entries()].sort((a, b) => a[0].localeCompare(b[0]))
+
+	for (const [filePath, locations] of sortedFiles) {
+		const relativePath = getRelativePath(filePath, workspaceRoot)
+		const sortedLocations = [...locations].sort((a, b) => a.range.start.line - b.range.start.line)
+
+		lines.push(`<file path="${relativePath}" count="${sortedLocations.length}">`)
+		for (const loc of sortedLocations) {
+			const lineNum = loc.range.start.line
+			const preview = loc.preview?.split("\n")[0]?.trim() || ""
+			if (preview) {
+				lines.push(`<ref line="${lineNum}">${preview}</ref>`)
+			} else {
+				lines.push(`<ref line="${lineNum}" />`)
+			}
+		}
+		lines.push(`</file>`)
+	}
+
+	// Add data source info only if not LSP (fallback case)
+	if (result.source !== "lsp") {
+		lines.push(
+			`<data_source source="${result.source}" confidence="${result.confidence}"${result.fallbackReason ? ` fallback="${result.fallbackReason}"` : ""} />`,
+		)
+	}
+
+	lines.push(`</references_result>`)
+	return lines.join("\n")
 }

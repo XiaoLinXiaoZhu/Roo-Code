@@ -11,7 +11,7 @@ import { type ClineSayTool } from "@roo-code/types"
 import { Task } from "../task/Task"
 import { getReadablePath } from "../../utils/path"
 import { isPathOutsideWorkspace } from "../../utils/pathUtils"
-import { symbolNavigationService, formatReferencesUI } from "../../services/symbol-navigation"
+import { symbolNavigationService, formatReferencesUI, formatReferencesForLLM } from "../../services/symbol-navigation"
 import type { ToolUse } from "../../shared/tools"
 
 import { BaseTool, ToolCallbacks } from "./BaseTool"
@@ -87,7 +87,7 @@ export class FindReferencesTool extends BaseTool<"find_references"> {
 				},
 			)
 
-			// Format the result as structured UI data
+			// Format the result as structured UI data for webview
 			const formattedResult = formatReferencesUI(result, task.cwd)
 			const contentJson = JSON.stringify(formattedResult)
 
@@ -102,7 +102,9 @@ export class FindReferencesTool extends BaseTool<"find_references"> {
 				return
 			}
 
-			pushToolResult(contentJson)
+			// Format the result as XML for LLM consumption
+			const llmResult = formatReferencesForLLM(result, task.cwd)
+			pushToolResult(llmResult)
 		} catch (error) {
 			await handleError("finding references", error as Error)
 		}
