@@ -7,6 +7,7 @@ export function isWriteToolAction(tool: ClineSayTool): boolean {
 export function isReadOnlyToolAction(tool: ClineSayTool): boolean {
 	return [
 		"readFile",
+		"readMedia",
 		"listFiles",
 		"listFilesTopLevel",
 		"listFilesRecursive",

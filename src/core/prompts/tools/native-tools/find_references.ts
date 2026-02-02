@@ -15,11 +15,14 @@ const FIND_REFERENCES_DESCRIPTION = `Find all references to a symbol using LSP (
 **Note**: If symbol is imported from another file, the tool will automatically trace to its definition and search from there.
 
 **Parameters**:
+- path: File where the symbol **appears/is used** (NOT where it's defined). The symbol text must exist in this file.
 - symbol: The name of the symbol to find references for (required)
 - surrounding_code: Optional code snippet containing the symbol (e.g., "fetchUser(") for precise disambiguation when multiple matches exist
 - start_line: Optional line number to begin search (1-based), useful when you know the approximate location
 - include_declaration: Whether to include the declaration itself in results (default: true)
 - max_results: Maximum results to return (default: 50)
+
+**Important**: The symbol text must actually exist in the file. Don't use barrel/index files that only re-export via \`export * from\` - use a file where the symbol is actually written.
 
 **Example**:
 {
@@ -48,7 +51,8 @@ export default {
 				},
 				path: {
 					type: "string",
-					description: "File path where the symbol is located (relative to workspace)",
+					description:
+						"File path where the symbol appears/is used (relative to workspace). The symbol text must exist in this file.",
 				},
 				symbol: {
 					type: "string",

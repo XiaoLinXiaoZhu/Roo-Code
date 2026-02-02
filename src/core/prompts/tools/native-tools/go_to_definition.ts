@@ -13,9 +13,12 @@ const GO_TO_DEFINITION_DESCRIPTION = `Jump to the definition of a symbol using L
 - verify_signature: Need to check the exact signature or type definition
 
 **Parameters**:
+- path: File where the symbol **appears/is used** (NOT where it's defined). The tool will find the definition location.
 - symbol: The name of the symbol to find (required)
 - surrounding_code: Optional code snippet containing the symbol (e.g., "const result = fetchUser(") for precise disambiguation when multiple matches exist
 - start_line: Optional line number to begin search (1-based), useful when you know the approximate location
+
+**Important**: The symbol text must actually exist in the file. Don't use barrel/index files that only re-export via \`export * from\` - use a file where the symbol is actually written.
 
 **Example**:
 {
@@ -42,7 +45,8 @@ export default {
 				},
 				path: {
 					type: "string",
-					description: "File path where the symbol is located (relative to workspace)",
+					description:
+						"File path where the symbol appears/is used (relative to workspace). NOT the definition file - the tool finds that for you.",
 				},
 				symbol: {
 					type: "string",

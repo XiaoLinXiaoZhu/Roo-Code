@@ -105,6 +105,11 @@ function thenableToPromise<T>(thenable: Thenable<T>): Promise<T> {
 /**
  * Convert VSCode Location to SymbolLocation
  */
+/**
+ * Number of context lines to include before and after the definition
+ */
+const CONTEXT_LINES = 5
+
 async function locationToSymbolLocation(location: vscode.Location): Promise<SymbolLocation> {
 	const uri = location.uri.fsPath
 	const range = {
@@ -112,15 +117,21 @@ async function locationToSymbolLocation(location: vscode.Location): Promise<Symb
 		end: { line: location.range.end.line + 1, character: location.range.end.character },
 	}
 
-	// Try to get code preview
+	// Try to get code preview with context lines before and after
 	let preview: string | undefined
 	try {
 		const document = await vscode.workspace.openTextDocument(location.uri)
-		const startLine = location.range.start.line
-		const endLine = Math.min(location.range.end.line + 5, document.lineCount - 1) // Include a few extra lines
+		// Include CONTEXT_LINES before the definition start
+		const contextStartLine = Math.max(0, location.range.start.line - CONTEXT_LINES)
+		// Include CONTEXT_LINES after the definition end
+		const contextEndLine = Math.min(location.range.end.line + CONTEXT_LINES, document.lineCount - 1)
+
 		const lines: string[] = []
-		for (let i = startLine; i <= endLine; i++) {
-			lines.push(document.lineAt(i).text)
+		for (let i = contextStartLine; i <= contextEndLine; i++) {
+			// Add line number prefix for clarity
+			const lineNum = i + 1 // Convert to 1-based
+			const lineText = document.lineAt(i).text
+			lines.push(`${lineNum.toString().padStart(4, " ")} | ${lineText}`)
 		}
 		preview = lines.join("\n")
 	} catch {

@@ -6,7 +6,13 @@
     - Dedicated tool for reading image files (PNG, JPG, JPEG, GIF, BMP, SVG, WEBP, ICO, AVIF)
     - Controlled by `supportsImages` model capability flag (same as read_file image support)
     - Respects user-configured `maxImageFileSize` and `maxTotalImageSize` settings
+    - Added to `read` tool group for proper mode filtering
+    - Added to `isReadOnlyToolAction` for auto-approval support with "Always Allow Read-Only" setting
     - Replaces image reading functionality from removed `read_file` tool
+- 🔧 Symbol Navigation: Enhance `go_to_definition` with better context and re-export tracing
+    - Now includes 5 lines before and after the definition for better context
+    - Added line numbers to preview for easier navigation
+    - Auto-trace re-exports: when definition lands in a barrel/index file, automatically follow the export chain to find the actual source definition
 
 ## [3.47.2] - 2026-02-02
 
