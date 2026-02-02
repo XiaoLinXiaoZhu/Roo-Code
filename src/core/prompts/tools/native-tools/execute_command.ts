@@ -9,7 +9,7 @@ const EXECUTE_COMMAND_DESCRIPTION = `Execute a CLI command on the system. Use fo
 
 **Optimized Commands (bash/zsh):**
 The following commands have optimized output formatting and respect .rooignore rules:
-- \`grep\`: Search with \`-i\`, \`-r\`, \`-n\`, \`-C\`, \`-A\`, \`-B\`, \`-w\`, \`-F\`, \`--include\`, \`--exclude\`
+- \`grep\`: Text pattern search with \`-i\`, \`-r\`, \`-n\`, \`-C\`, \`-A\`, \`-B\`, \`-w\`, \`-F\`, \`--include\`, \`--exclude\`. **For symbol/code navigation (finding definitions or references), use go_to_definition/find_references instead.**
 - \`cat\`: Read files with \`-n\` for line numbers
 - \`head\`/\`tail\`: View file portions with \`-n\`, \`-c\`
 - \`find\`: Search files with \`-name\`, \`-iname\`, \`-type\`, \`-maxdepth\`

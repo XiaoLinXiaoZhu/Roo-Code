@@ -181,6 +181,14 @@ ${requirement}
 			message += `\n\n<existing_tools>\n${existingToolsInfo}\n</existing_tools>`
 		}
 
+		// 强调输出限制要求
+		message += `\n\n<output_limits>
+CRITICAL: Built tools MUST enforce these default output limits:
+- Text: max 2000 chars to stdout. If exceeded, truncate with '[TRUNCATED, full output: /path/to/file]' and write complete result to file.
+- Images: default 800x600. Support --focus x,y (0-1 normalized coords) for progressive exploration, and --scale factor for zoom.
+These limits prevent context overflow when the tool is used repeatedly.
+</output_limits>`
+
 		return message
 	}
 

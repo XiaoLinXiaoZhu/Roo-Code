@@ -1,536 +1,604 @@
 {
-	"version": "1.0",
-	"caches": [
-		{
-			"id": "1",
-			"query": "LiteLLM provider implementation, how does it fetch models and handle API requests?",
-			"tags": [
-				"litellm",
-				"provider",
-				"implementation",
-				"how",
-				"does",
-				"it",
-				"fetch",
-				"models",
-				"and",
-				"handle",
-				"api",
-				"requests"
-			],
-			"scope": {
-				"directories": "/Users/wepie/Documents/pie/project/roo-code/src",
-				"filePatterns": "*.ts",
-				"excludes": "node_modules,dist,*.test.ts"
-			},
-			"createdAt": "2026-01-29T13:23:43.005Z",
-			"gitCommit": "9b6b4ae977317223f148523684cd731ca644105b",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}}}},\"modelFetchEndpoint\":{\"type\":\"string\"},\"apiKeyHandling\":{\"type\":\"string\"}}}"
-		},
-		{
-			"id": "2",
-			"query": "Where is the LiteLLM provider implementation that handles Vertex AI requests and caching?",
-			"tags": [
-				"where",
-				"is",
-				"the",
-				"litellm",
-				"provider",
-				"implementation",
-				"that",
-				"handles",
-				"vertex",
-				"ai",
-				"requests",
-				"and",
-				"caching"
-			],
-			"scope": {
-				"directories": "/Users/wepie/Documents/pie/project/roo-code/src",
-				"filePatterns": "*.ts",
-				"excludes": "node_modules,dist,*.test.ts"
-			},
-			"createdAt": "2026-01-29T13:55:04.842Z",
-			"gitCommit": "5991ed921c0090640b342aec7d41921e4944525d",
-			"ttlHours": 168,
-			"schema": "{\"type\": \"object\", \"properties\": {\"files\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}}, \"relevantCode\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\"file\": {\"type\": \"string\"}, \"description\": {\"type\": \"string\"}}}}}}"
-		},
-		{
-			"id": "3",
-			"query": "Where is the consult_expert tool defined in the codebase?",
-			"tags": ["where", "is", "the", "consult_expert", "tool", "defined", "in", "codebase"],
-			"scope": {
-				"directories": "/Users/wepie/Documents/pie/project/roo-code",
-				"filePatterns": "*.ts,*.json",
-				"excludes": "node_modules,dist,*.test.ts"
-			},
-			"createdAt": "2026-01-30T18:30:52.083Z",
-			"gitCommit": "a50966b34924e4ed9898889d795bbf11d022db71",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"definitions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"file\":{\"type\":\"string\"},\"line\":{\"type\":\"number\"},\"context\":{\"type\":\"string\"}}}},\"summary\":{\"type\":\"string\"}}}"
-		},
-		{
-			"id": "4",
-			"query": "Where is ExecuteCommandTool implemented and how does it execute shell commands?",
-			"tags": [
-				"where",
-				"is",
-				"executecommandtool",
-				"implemented",
-				"and",
-				"how",
-				"does",
-				"it",
-				"execute",
-				"shell",
-				"commands"
-			],
-			"scope": null,
-			"createdAt": "2026-01-30T19:45:14.889Z",
-			"gitCommit": "0d1b90cbfdb7e1a8d4668051f0196e0ef2667369",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
-		},
-		{
-			"id": "5",
-			"query": "Where is RooIgnoreController implemented and how does it validate file access and command validation?",
-			"tags": [
-				"where",
-				"is",
-				"rooignorecontroller",
-				"implemented",
-				"and",
-				"how",
-				"does",
-				"it",
-				"validate",
-				"file",
-				"access",
-				"command",
-				"validation"
-			],
-			"scope": null,
-			"createdAt": "2026-01-30T19:46:26.413Z",
-			"gitCommit": "0d1b90cbfdb7e1a8d4668051f0196e0ef2667369",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
-		},
-		{
-			"id": "6",
-			"query": "mode 工具配置是如何实现的？mode 的 tools 权限是在哪里定义和处理的？",
-			"tags": ["mode", "工具配置是如何实现的", "tools", "权限是在哪里定义和处理的"],
-			"scope": null,
-			"createdAt": "2026-01-30T20:28:38.126Z",
-			"gitCommit": "b4e98d22a4a5c94d2d9de65e9d5c513fe8ed00c8",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
-		},
-		{
-			"id": "7",
-			"query": "codebase_search 工具的功能是什么？它和 search_files 有什么区别？",
-			"tags": ["codebase_search", "工具的功能是什么", "它和", "search_files", "有什么区别"],
-			"scope": null,
-			"createdAt": "2026-01-30T20:32:03.386Z",
-			"gitCommit": "b4e98d22a4a5c94d2d9de65e9d5c513fe8ed00c8",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"codebase_search_definition\":{\"type\":\"string\"},\"search_files_definition\":{\"type\":\"string\"},\"differences\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
-		},
-		{
-			"id": "8",
-			"query": "项目中是否已有 AST 解析、语言服务器、符号定义查找、引用查找相关的实现？是否使用了 tree-sitter 或 LSP？",
-			"tags": [
-				"项目中是否已有",
-				"ast",
-				"解析",
-				"语言服务器",
-				"符号定义查找",
-				"引用查找相关的实现",
-				"是否使用了",
-				"tree",
-				"sitter",
-				"lsp"
-			],
-			"scope": null,
-			"createdAt": "2026-01-30T20:38:01.199Z",
-			"gitCommit": "b4e98d22a4a5c94d2d9de65e9d5c513fe8ed00c8",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"existing_implementations\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"related_files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"technologies_used\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
-		},
-		{
-			"id": "9",
-			"query": "tree-sitter 服务是如何实现的？入口文件和主要功能是什么？",
-			"tags": ["tree", "sitter", "服务是如何实现的", "入口文件和主要功能是什么"],
-			"scope": {
-				"directories": "/Users/wepie/Documents/pie/project/roo-code/src/services/tree-sitter",
-				"filePatterns": "*.ts",
-				"excludes": null
-			},
-			"createdAt": "2026-01-30T21:03:11.212Z",
-			"gitCommit": "4f9644c41345fd67fb38824b53339d6d8b9e24b6",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"mainFile\":{\"type\":\"string\"},\"exports\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"capabilities\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
-		},
-		{
-			"id": "10",
-			"query": "工具是如何定义和注册的？Tool 类的结构是什么？",
-			"tags": ["工具是如何定义和注册的", "tool", "类的结构是什么"],
-			"scope": {
-				"directories": "/Users/wepie/Documents/pie/project/roo-code/src/core/tools",
-				"excludes": "*.test.ts",
-				"filePatterns": "*.ts"
-			},
-			"createdAt": "2026-01-30T21:05:20.680Z",
-			"gitCommit": "4f9644c41345fd67fb38824b53339d6d8b9e24b6",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"toolBaseClass\":{\"type\":\"string\"},\"toolRegistration\":{\"type\":\"string\"},\"exampleTools\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
-		},
-		{
-			"id": "11",
-			"query": "工具是如何被注册和调用的？ToolExecutor 或 handleToolUse 在哪里？",
-			"tags": ["工具是如何被注册和调用的", "toolexecutor", "handletooluse", "在哪里"],
-			"scope": {
-				"directories": "/Users/wepie/Documents/pie/project/roo-code/src/core",
-				"excludes": "*.test.ts,*.spec.ts",
-				"filePatterns": "*.ts"
-			},
-			"createdAt": "2026-01-30T21:17:39.146Z",
-			"gitCommit": "248c8cf239d033896f43ace3d429563a4eaea949",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"registrationPattern\":{\"type\":\"string\"}}}"
-		},
-		{
-			"id": "12",
-			"query": "go_to_definition 和 find_references 工具的定义和实现在哪里？特别关注 nativeArgs 的处理逻辑",
-			"tags": [
-				"go_to_definition",
-				"find_references",
-				"工具的定义和实现在哪里",
-				"特别关注",
-				"nativeargs",
-				"的处理逻辑"
-			],
-			"scope": {
-				"directories": null,
-				"filePatterns": "*.ts",
-				"excludes": "node_modules,dist,*.test.ts"
-			},
-			"createdAt": "2026-02-01T16:00:01.277Z",
-			"gitCommit": "248c8cf239d033896f43ace3d429563a4eaea949",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}}}},\"nativeArgsUsage\":{\"type\":\"string\"}}}"
-		},
-		{
-			"id": "13",
-			"query": "tool_use 的 nativeArgs 是在哪里被解析和构造的？特别是流式场景下如何从模型输出构造 nativeArgs",
-			"tags": ["tool_use", "nativeargs", "是在哪里被解析和构造的", "特别是流式场景下如何从模型输出构造"],
-			"scope": {
-				"directories": null,
-				"excludes": "node_modules,dist,*.test.ts",
-				"filePatterns": "*.ts"
-			},
-			"createdAt": "2026-02-01T16:02:46.282Z",
-			"gitCommit": "248c8cf239d033896f43ace3d429563a4eaea949",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"parsingLogic\":{\"type\":\"string\"},\"relevantFiles\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"role\":{\"type\":\"string\"}}}}}}"
-		},
-		{
-			"id": "14",
-			"query": "工具的自动批准组（auto approve group）是如何定义的？read_file 等读取工具属于哪个组？如何将新工具添加到 read 组？",
-			"tags": [
-				"工具的自动批准组",
-				"auto",
-				"approve",
-				"group",
-				"是如何定义的",
-				"read_file",
-				"等读取工具属于哪个组",
-				"如何将新工具添加到",
-				"read"
-			],
-			"scope": {
-				"directories": null,
-				"excludes": "node_modules,dist,*.test.ts",
-				"filePatterns": "*.ts"
-			},
-			"createdAt": "2026-02-01T16:13:29.191Z",
-			"gitCommit": "248c8cf239d033896f43ace3d429563a4eaea949",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}}}},\"groupDefinition\":{\"type\":\"string\"}}}"
-		},
-		{
-			"id": "15",
-			"query": "工具调用在 UI 中是如何显示的？特别是 ClineSayTool 相关的渲染逻辑在哪里？",
-			"tags": ["工具调用在", "ui", "中是如何显示的", "特别是", "clinesaytool", "相关的渲染逻辑在哪里"],
-			"scope": null,
-			"createdAt": "2026-02-01T16:38:44.107Z",
-			"gitCommit": "32f477668e3efae7811cd41fdf22fd7f2880674d",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
-		},
-		{
-			"id": "16",
-			"query": "Where are the UI renderers/components for go_to_definition and find_references tool results implemented? Find the webview/UI code that renders tool output cards or markdown, especially for symbol definition/reference results.",
-			"tags": [
-				"where",
-				"are",
-				"the",
-				"ui",
-				"renderers",
-				"components",
-				"for",
-				"go_to_definition",
-				"and",
-				"find_references",
-				"tool",
-				"results",
-				"implemented",
-				"find",
-				"webview",
-				"code",
-				"that",
-				"renders",
-				"output",
-				"cards",
-				"or",
-				"markdown",
-				"especially",
-				"symbol",
-				"definition",
-				"reference"
-			],
-			"scope": {
-				"directories": "",
-				"excludes": "node_modules",
-				"filePatterns": "*.ts,*.tsx,*.css,*.md"
-			},
-			"createdAt": "2026-02-01T16:57:45.801Z",
-			"gitCommit": "32f477668e3efae7811cd41fdf22fd7f2880674d",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
-		},
-		{
-			"id": "17",
-			"query": "Where are goToDefinition and findReferences tools defined/typed on the extension/backend side, and where is their output content constructed? Search for tool names \"goToDefinition\" and \"findReferences\" in non-UI code (src/ and packages/).",
-			"tags": [
-				"where",
-				"are",
-				"gotodefinition",
-				"and",
-				"findreferences",
-				"tools",
-				"defined",
-				"typed",
-				"on",
-				"the",
-				"extension",
-				"backend",
-				"side",
-				"is",
-				"their",
-				"output",
-				"content",
-				"constructed",
-				"search",
-				"for",
-				"tool",
-				"names",
-				"in",
-				"non",
-				"ui",
-				"code",
-				"src",
-				"packages"
-			],
-			"scope": {
-				"directories": "",
-				"excludes": "node_modules,webview-ui",
-				"filePatterns": "*.ts,*.tsx,*.js"
-			},
-			"createdAt": "2026-02-01T17:03:16.990Z",
-			"gitCommit": "32f477668e3efae7811cd41fdf22fd7f2880674d",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}"
-		},
-		{
-			"id": "18",
-			"query": "How are tools defined and implemented in this project? Where is the tool system architecture?",
-			"tags": [
-				"how",
-				"are",
-				"tools",
-				"defined",
-				"and",
-				"implemented",
-				"in",
-				"this",
-				"project",
-				"where",
-				"is",
-				"the",
-				"tool",
-				"system",
-				"architecture"
-			],
-			"scope": null,
-			"createdAt": "2026-02-02T05:35:24.070Z",
-			"gitCommit": "0689eb5e5667f2808ba659482e3a3aa11f28ea43",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"toolDefinitions\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"toolImplementations\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"agentSystem\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
-		},
-		{
-			"id": "19",
-			"query": "How is image input handled in Roo Code? Where is the image upload or attachment functionality implemented?",
-			"tags": [
-				"how",
-				"is",
-				"image",
-				"input",
-				"handled",
-				"in",
-				"roo",
-				"code",
-				"where",
-				"the",
-				"upload",
-				"or",
-				"attachment",
-				"functionality",
-				"implemented"
-			],
-			"scope": null,
-			"createdAt": "2026-02-02T09:22:27.186Z",
-			"gitCommit": "b098bd25908e53fc562408b447072dcc99a7448e",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"implementation_details\":{\"type\":\"string\"}}}"
-		},
-		{
-			"id": "20",
-			"query": "What video formats or video processing capabilities exist in the codebase? Are there any video-related constants, MIME types, or handling logic?",
-			"tags": [
-				"what",
-				"video",
-				"formats",
-				"or",
-				"processing",
-				"capabilities",
-				"exist",
-				"in",
-				"the",
-				"codebase",
-				"are",
-				"there",
-				"any",
-				"related",
-				"constants",
-				"mime",
-				"types",
-				"handling",
-				"logic"
-			],
-			"scope": null,
-			"createdAt": "2026-02-02T09:24:58.284Z",
-			"gitCommit": "b098bd25908e53fc562408b447072dcc99a7448e",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"video_support_exists\":{\"type\":\"boolean\"},\"related_files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"details\":{\"type\":\"string\"}}}"
-		},
-		{
-			"id": "21",
-			"query": "Where are the mode definitions (like code, architect, ask modes) defined in the project? How is the mode slug and name configured?",
-			"tags": [
-				"where",
-				"are",
-				"the",
-				"mode",
-				"definitions",
-				"like",
-				"code",
-				"architect",
-				"ask",
-				"modes",
-				"defined",
-				"in",
-				"project",
-				"how",
-				"is",
-				"slug",
-				"and",
-				"name",
-				"configured"
-			],
-			"scope": null,
-			"createdAt": "2026-02-02T10:08:57.860Z",
-			"gitCommit": "16a1c266fbfd767a8d8f8cd647b01e9aa40d2281",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"modeDefinitionPattern\":{\"type\":\"string\"},\"summary\":{\"type\":\"string\"}}}"
-		},
-		{
-			"id": "22",
-			"query": "How is pushToolResult callback created and how does it add tool_result to userMessageContent? Where is the tool execution flow that creates ToolCallbacks?",
-			"tags": [
-				"how",
-				"is",
-				"pushtoolresult",
-				"callback",
-				"created",
-				"and",
-				"does",
-				"it",
-				"add",
-				"tool_result",
-				"to",
-				"usermessagecontent",
-				"where",
-				"the",
-				"tool",
-				"execution",
-				"flow",
-				"that",
-				"creates",
-				"toolcallbacks"
-			],
-			"scope": {
-				"directories": "/Users/wepie/Documents/pie/project/roo-code/src/core",
-				"filePatterns": "*.ts",
-				"excludes": "__tests__"
-			},
-			"createdAt": "2026-02-02T10:53:54.601Z",
-			"gitCommit": "16a1c266fbfd767a8d8f8cd647b01e9aa40d2281",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"pushToolResultCreation\":{\"type\":\"string\"},\"toolExecutionFlow\":{\"type\":\"string\"}}}"
-		},
-		{
-			"id": "23",
-			"query": "How are tool instances (like applyEditTool, newTaskTool) imported and executed? Where is the central place that dispatches tool calls?",
-			"tags": [
-				"how",
-				"are",
-				"tool",
-				"instances",
-				"like",
-				"applyedittool",
-				"newtasktool",
-				"imported",
-				"and",
-				"executed",
-				"where",
-				"is",
-				"the",
-				"central",
-				"place",
-				"that",
-				"dispatches",
-				"calls"
-			],
-			"scope": {
-				"directories": "/Users/wepie/Documents/pie/project/roo-code/src/core",
-				"filePatterns": "*.ts",
-				"excludes": "*.test.ts"
-			},
-			"createdAt": "2026-02-02T11:12:39.277Z",
-			"gitCommit": "16a1c266fbfd767a8d8f8cd647b01e9aa40d2281",
-			"ttlHours": 168,
-			"schema": "{\"type\":\"object\",\"properties\":{\"toolDispatchFile\":{\"type\":\"string\"},\"toolImportPattern\":{\"type\":\"string\"},\"toolExecutionMethod\":{\"type\":\"string\"}}}"
-		}
-	]
+  "version": "1.0",
+  "caches": [
+    {
+      "id": "1",
+      "query": "LiteLLM provider implementation, how does it fetch models and handle API requests?",
+      "tags": [
+        "litellm",
+        "provider",
+        "implementation",
+        "how",
+        "does",
+        "it",
+        "fetch",
+        "models",
+        "and",
+        "handle",
+        "api",
+        "requests"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,dist,*.test.ts"
+      },
+      "createdAt": "2026-01-29T13:23:43.005Z",
+      "gitCommit": "9b6b4ae977317223f148523684cd731ca644105b",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}}}},\"modelFetchEndpoint\":{\"type\":\"string\"},\"apiKeyHandling\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "2",
+      "query": "Where is the LiteLLM provider implementation that handles Vertex AI requests and caching?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "litellm",
+        "provider",
+        "implementation",
+        "that",
+        "handles",
+        "vertex",
+        "ai",
+        "requests",
+        "and",
+        "caching"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,dist,*.test.ts"
+      },
+      "createdAt": "2026-01-29T13:55:04.842Z",
+      "gitCommit": "5991ed921c0090640b342aec7d41921e4944525d",
+      "ttlHours": 168,
+      "schema": "{\"type\": \"object\", \"properties\": {\"files\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}}, \"relevantCode\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\"file\": {\"type\": \"string\"}, \"description\": {\"type\": \"string\"}}}}}}"
+    },
+    {
+      "id": "3",
+      "query": "Where is the consult_expert tool defined in the codebase?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "consult_expert",
+        "tool",
+        "defined",
+        "in",
+        "codebase"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code",
+        "filePatterns": "*.ts,*.json",
+        "excludes": "node_modules,dist,*.test.ts"
+      },
+      "createdAt": "2026-01-30T18:30:52.083Z",
+      "gitCommit": "a50966b34924e4ed9898889d795bbf11d022db71",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"definitions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"file\":{\"type\":\"string\"},\"line\":{\"type\":\"number\"},\"context\":{\"type\":\"string\"}}}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "4",
+      "query": "Where is ExecuteCommandTool implemented and how does it execute shell commands?",
+      "tags": [
+        "where",
+        "is",
+        "executecommandtool",
+        "implemented",
+        "and",
+        "how",
+        "does",
+        "it",
+        "execute",
+        "shell",
+        "commands"
+      ],
+      "scope": null,
+      "createdAt": "2026-01-30T19:45:14.889Z",
+      "gitCommit": "0d1b90cbfdb7e1a8d4668051f0196e0ef2667369",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "5",
+      "query": "Where is RooIgnoreController implemented and how does it validate file access and command validation?",
+      "tags": [
+        "where",
+        "is",
+        "rooignorecontroller",
+        "implemented",
+        "and",
+        "how",
+        "does",
+        "it",
+        "validate",
+        "file",
+        "access",
+        "command",
+        "validation"
+      ],
+      "scope": null,
+      "createdAt": "2026-01-30T19:46:26.413Z",
+      "gitCommit": "0d1b90cbfdb7e1a8d4668051f0196e0ef2667369",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "6",
+      "query": "mode 工具配置是如何实现的？mode 的 tools 权限是在哪里定义和处理的？",
+      "tags": [
+        "mode",
+        "工具配置是如何实现的",
+        "tools",
+        "权限是在哪里定义和处理的"
+      ],
+      "scope": null,
+      "createdAt": "2026-01-30T20:28:38.126Z",
+      "gitCommit": "b4e98d22a4a5c94d2d9de65e9d5c513fe8ed00c8",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "7",
+      "query": "codebase_search 工具的功能是什么？它和 search_files 有什么区别？",
+      "tags": [
+        "codebase_search",
+        "工具的功能是什么",
+        "它和",
+        "search_files",
+        "有什么区别"
+      ],
+      "scope": null,
+      "createdAt": "2026-01-30T20:32:03.386Z",
+      "gitCommit": "b4e98d22a4a5c94d2d9de65e9d5c513fe8ed00c8",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"codebase_search_definition\":{\"type\":\"string\"},\"search_files_definition\":{\"type\":\"string\"},\"differences\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+    },
+    {
+      "id": "8",
+      "query": "项目中是否已有 AST 解析、语言服务器、符号定义查找、引用查找相关的实现？是否使用了 tree-sitter 或 LSP？",
+      "tags": [
+        "项目中是否已有",
+        "ast",
+        "解析",
+        "语言服务器",
+        "符号定义查找",
+        "引用查找相关的实现",
+        "是否使用了",
+        "tree",
+        "sitter",
+        "lsp"
+      ],
+      "scope": null,
+      "createdAt": "2026-01-30T20:38:01.199Z",
+      "gitCommit": "b4e98d22a4a5c94d2d9de65e9d5c513fe8ed00c8",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"existing_implementations\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"related_files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"technologies_used\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+    },
+    {
+      "id": "9",
+      "query": "tree-sitter 服务是如何实现的？入口文件和主要功能是什么？",
+      "tags": [
+        "tree",
+        "sitter",
+        "服务是如何实现的",
+        "入口文件和主要功能是什么"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src/services/tree-sitter",
+        "filePatterns": "*.ts",
+        "excludes": null
+      },
+      "createdAt": "2026-01-30T21:03:11.212Z",
+      "gitCommit": "4f9644c41345fd67fb38824b53339d6d8b9e24b6",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"mainFile\":{\"type\":\"string\"},\"exports\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"capabilities\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+    },
+    {
+      "id": "10",
+      "query": "工具是如何定义和注册的？Tool 类的结构是什么？",
+      "tags": [
+        "工具是如何定义和注册的",
+        "tool",
+        "类的结构是什么"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src/core/tools",
+        "excludes": "*.test.ts",
+        "filePatterns": "*.ts"
+      },
+      "createdAt": "2026-01-30T21:05:20.680Z",
+      "gitCommit": "4f9644c41345fd67fb38824b53339d6d8b9e24b6",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"toolBaseClass\":{\"type\":\"string\"},\"toolRegistration\":{\"type\":\"string\"},\"exampleTools\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+    },
+    {
+      "id": "11",
+      "query": "工具是如何被注册和调用的？ToolExecutor 或 handleToolUse 在哪里？",
+      "tags": [
+        "工具是如何被注册和调用的",
+        "toolexecutor",
+        "handletooluse",
+        "在哪里"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src/core",
+        "excludes": "*.test.ts,*.spec.ts",
+        "filePatterns": "*.ts"
+      },
+      "createdAt": "2026-01-30T21:17:39.146Z",
+      "gitCommit": "248c8cf239d033896f43ace3d429563a4eaea949",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"registrationPattern\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "12",
+      "query": "go_to_definition 和 find_references 工具的定义和实现在哪里？特别关注 nativeArgs 的处理逻辑",
+      "tags": [
+        "go_to_definition",
+        "find_references",
+        "工具的定义和实现在哪里",
+        "特别关注",
+        "nativeargs",
+        "的处理逻辑"
+      ],
+      "scope": {
+        "directories": null,
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,dist,*.test.ts"
+      },
+      "createdAt": "2026-02-01T16:00:01.277Z",
+      "gitCommit": "248c8cf239d033896f43ace3d429563a4eaea949",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}}}},\"nativeArgsUsage\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "13",
+      "query": "tool_use 的 nativeArgs 是在哪里被解析和构造的？特别是流式场景下如何从模型输出构造 nativeArgs",
+      "tags": [
+        "tool_use",
+        "nativeargs",
+        "是在哪里被解析和构造的",
+        "特别是流式场景下如何从模型输出构造"
+      ],
+      "scope": {
+        "directories": null,
+        "excludes": "node_modules,dist,*.test.ts",
+        "filePatterns": "*.ts"
+      },
+      "createdAt": "2026-02-01T16:02:46.282Z",
+      "gitCommit": "248c8cf239d033896f43ace3d429563a4eaea949",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"parsingLogic\":{\"type\":\"string\"},\"relevantFiles\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"role\":{\"type\":\"string\"}}}}}}"
+    },
+    {
+      "id": "14",
+      "query": "工具的自动批准组（auto approve group）是如何定义的？read_file 等读取工具属于哪个组？如何将新工具添加到 read 组？",
+      "tags": [
+        "工具的自动批准组",
+        "auto",
+        "approve",
+        "group",
+        "是如何定义的",
+        "read_file",
+        "等读取工具属于哪个组",
+        "如何将新工具添加到",
+        "read"
+      ],
+      "scope": {
+        "directories": null,
+        "excludes": "node_modules,dist,*.test.ts",
+        "filePatterns": "*.ts"
+      },
+      "createdAt": "2026-02-01T16:13:29.191Z",
+      "gitCommit": "248c8cf239d033896f43ace3d429563a4eaea949",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}}}},\"groupDefinition\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "15",
+      "query": "工具调用在 UI 中是如何显示的？特别是 ClineSayTool 相关的渲染逻辑在哪里？",
+      "tags": [
+        "工具调用在",
+        "ui",
+        "中是如何显示的",
+        "特别是",
+        "clinesaytool",
+        "相关的渲染逻辑在哪里"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-01T16:38:44.107Z",
+      "gitCommit": "32f477668e3efae7811cd41fdf22fd7f2880674d",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "16",
+      "query": "Where are the UI renderers/components for go_to_definition and find_references tool results implemented? Find the webview/UI code that renders tool output cards or markdown, especially for symbol definition/reference results.",
+      "tags": [
+        "where",
+        "are",
+        "the",
+        "ui",
+        "renderers",
+        "components",
+        "for",
+        "go_to_definition",
+        "and",
+        "find_references",
+        "tool",
+        "results",
+        "implemented",
+        "find",
+        "webview",
+        "code",
+        "that",
+        "renders",
+        "output",
+        "cards",
+        "or",
+        "markdown",
+        "especially",
+        "symbol",
+        "definition",
+        "reference"
+      ],
+      "scope": {
+        "directories": "",
+        "excludes": "node_modules",
+        "filePatterns": "*.ts,*.tsx,*.css,*.md"
+      },
+      "createdAt": "2026-02-01T16:57:45.801Z",
+      "gitCommit": "32f477668e3efae7811cd41fdf22fd7f2880674d",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "17",
+      "query": "Where are goToDefinition and findReferences tools defined/typed on the extension/backend side, and where is their output content constructed? Search for tool names \"goToDefinition\" and \"findReferences\" in non-UI code (src/ and packages/).",
+      "tags": [
+        "where",
+        "are",
+        "gotodefinition",
+        "and",
+        "findreferences",
+        "tools",
+        "defined",
+        "typed",
+        "on",
+        "the",
+        "extension",
+        "backend",
+        "side",
+        "is",
+        "their",
+        "output",
+        "content",
+        "constructed",
+        "search",
+        "for",
+        "tool",
+        "names",
+        "in",
+        "non",
+        "ui",
+        "code",
+        "src",
+        "packages"
+      ],
+      "scope": {
+        "directories": "",
+        "excludes": "node_modules,webview-ui",
+        "filePatterns": "*.ts,*.tsx,*.js"
+      },
+      "createdAt": "2026-02-01T17:03:16.990Z",
+      "gitCommit": "32f477668e3efae7811cd41fdf22fd7f2880674d",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}"
+    },
+    {
+      "id": "18",
+      "query": "How are tools defined and implemented in this project? Where is the tool system architecture?",
+      "tags": [
+        "how",
+        "are",
+        "tools",
+        "defined",
+        "and",
+        "implemented",
+        "in",
+        "this",
+        "project",
+        "where",
+        "is",
+        "the",
+        "tool",
+        "system",
+        "architecture"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-02T05:35:24.070Z",
+      "gitCommit": "0689eb5e5667f2808ba659482e3a3aa11f28ea43",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"toolDefinitions\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"toolImplementations\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"agentSystem\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "19",
+      "query": "How is image input handled in Roo Code? Where is the image upload or attachment functionality implemented?",
+      "tags": [
+        "how",
+        "is",
+        "image",
+        "input",
+        "handled",
+        "in",
+        "roo",
+        "code",
+        "where",
+        "the",
+        "upload",
+        "or",
+        "attachment",
+        "functionality",
+        "implemented"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-02T09:22:27.186Z",
+      "gitCommit": "b098bd25908e53fc562408b447072dcc99a7448e",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"implementation_details\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "20",
+      "query": "What video formats or video processing capabilities exist in the codebase? Are there any video-related constants, MIME types, or handling logic?",
+      "tags": [
+        "what",
+        "video",
+        "formats",
+        "or",
+        "processing",
+        "capabilities",
+        "exist",
+        "in",
+        "the",
+        "codebase",
+        "are",
+        "there",
+        "any",
+        "related",
+        "constants",
+        "mime",
+        "types",
+        "handling",
+        "logic"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-02T09:24:58.284Z",
+      "gitCommit": "b098bd25908e53fc562408b447072dcc99a7448e",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"video_support_exists\":{\"type\":\"boolean\"},\"related_files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"details\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "21",
+      "query": "Where are the mode definitions (like code, architect, ask modes) defined in the project? How is the mode slug and name configured?",
+      "tags": [
+        "where",
+        "are",
+        "the",
+        "mode",
+        "definitions",
+        "like",
+        "code",
+        "architect",
+        "ask",
+        "modes",
+        "defined",
+        "in",
+        "project",
+        "how",
+        "is",
+        "slug",
+        "and",
+        "name",
+        "configured"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-02T10:08:57.860Z",
+      "gitCommit": "16a1c266fbfd767a8d8f8cd647b01e9aa40d2281",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"modeDefinitionPattern\":{\"type\":\"string\"},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "22",
+      "query": "How is pushToolResult callback created and how does it add tool_result to userMessageContent? Where is the tool execution flow that creates ToolCallbacks?",
+      "tags": [
+        "how",
+        "is",
+        "pushtoolresult",
+        "callback",
+        "created",
+        "and",
+        "does",
+        "it",
+        "add",
+        "tool_result",
+        "to",
+        "usermessagecontent",
+        "where",
+        "the",
+        "tool",
+        "execution",
+        "flow",
+        "that",
+        "creates",
+        "toolcallbacks"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src/core",
+        "filePatterns": "*.ts",
+        "excludes": "__tests__"
+      },
+      "createdAt": "2026-02-02T10:53:54.601Z",
+      "gitCommit": "16a1c266fbfd767a8d8f8cd647b01e9aa40d2281",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"pushToolResultCreation\":{\"type\":\"string\"},\"toolExecutionFlow\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "23",
+      "query": "How are tool instances (like applyEditTool, newTaskTool) imported and executed? Where is the central place that dispatches tool calls?",
+      "tags": [
+        "how",
+        "are",
+        "tool",
+        "instances",
+        "like",
+        "applyedittool",
+        "newtasktool",
+        "imported",
+        "and",
+        "executed",
+        "where",
+        "is",
+        "the",
+        "central",
+        "place",
+        "that",
+        "dispatches",
+        "calls"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src/core",
+        "filePatterns": "*.ts",
+        "excludes": "*.test.ts"
+      },
+      "createdAt": "2026-02-02T11:12:39.277Z",
+      "gitCommit": "16a1c266fbfd767a8d8f8cd647b01e9aa40d2281",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"toolDispatchFile\":{\"type\":\"string\"},\"toolImportPattern\":{\"type\":\"string\"},\"toolExecutionMethod\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "24",
+      "query": "Where are the tool descriptions defined for go_to_definition, find_references, and execute_command?",
+      "tags": [
+        "where",
+        "are",
+        "the",
+        "tool",
+        "descriptions",
+        "defined",
+        "for",
+        "go_to_definition",
+        "find_references",
+        "and",
+        "execute_command"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-02T12:37:48.672Z",
+      "gitCommit": "c5ec503085cc3471ea4adf60593f2543797191cd",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"toolDefinitionPattern\":{\"type\":\"string\"}}}"
+    }
+  ]
 }

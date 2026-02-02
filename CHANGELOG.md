@@ -1,5 +1,24 @@
 # Roo Code Changelog
 
+## [3.47.2] - 2026-02-02
+
+- ✨ Delegation Tool: Introduce delegation tool support and registry for agent-as-tool workflows
+- ✨ Build Tool: Add build_tool functionality for creating reusable CLI tools
+- ✨ CLI Output Truncation: Add truncation handler and integrate with command execution
+- 🔧 .gitignore: Add entries for roo cache, temp files, and CLI output
+- 🐛 Symbol Navigation: Auto-trace to definition when finding references from import
+- 💄 Symbol Navigation: Add max-height and scroll to references list
+- 📝 Tool Descriptions: Clarify priority of symbol navigation tools over grep
+    - `go_to_definition`: Add "Priority over grep" section for clearer tool selection
+    - `find_references`: Add "Priority over grep" section for clearer tool selection
+    - `execute_command`: Add note that grep is for text patterns, symbol navigation should use dedicated tools
+- 🔧 build_tool: Apply "Agent as Tool" principle - remove agent/delegate semantics from description
+    - Tool now presents as a capability that "handles automatically" rather than "delegates to agent"
+    - Added "Returns" section to clarify expected output format
+- 🔧 BuildToolTool: Add explicit output limits reminder in task message
+    - Emphasize text truncation (2000 chars) and image size limits (800x600)
+    - Include --focus and --scale parameters for progressive exploration
+
 ## [3.47.1] - 2026-02-01
 
 - 🐛 NativeToolCallParser: Fix missing tool cases for partial/non-partial modes
