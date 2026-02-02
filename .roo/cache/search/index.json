@@ -377,6 +377,62 @@
 			"gitCommit": "0689eb5e5667f2808ba659482e3a3aa11f28ea43",
 			"ttlHours": 168,
 			"schema": "{\"type\":\"object\",\"properties\":{\"toolDefinitions\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"toolImplementations\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"agentSystem\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+		},
+		{
+			"id": "19",
+			"query": "How is image input handled in Roo Code? Where is the image upload or attachment functionality implemented?",
+			"tags": [
+				"how",
+				"is",
+				"image",
+				"input",
+				"handled",
+				"in",
+				"roo",
+				"code",
+				"where",
+				"the",
+				"upload",
+				"or",
+				"attachment",
+				"functionality",
+				"implemented"
+			],
+			"scope": null,
+			"createdAt": "2026-02-02T09:22:27.186Z",
+			"gitCommit": "b098bd25908e53fc562408b447072dcc99a7448e",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"implementation_details\":{\"type\":\"string\"}}}"
+		},
+		{
+			"id": "20",
+			"query": "What video formats or video processing capabilities exist in the codebase? Are there any video-related constants, MIME types, or handling logic?",
+			"tags": [
+				"what",
+				"video",
+				"formats",
+				"or",
+				"processing",
+				"capabilities",
+				"exist",
+				"in",
+				"the",
+				"codebase",
+				"are",
+				"there",
+				"any",
+				"related",
+				"constants",
+				"mime",
+				"types",
+				"handling",
+				"logic"
+			],
+			"scope": null,
+			"createdAt": "2026-02-02T09:24:58.284Z",
+			"gitCommit": "b098bd25908e53fc562408b447072dcc99a7448e",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"video_support_exists\":{\"type\":\"boolean\"},\"related_files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"details\":{\"type\":\"string\"}}}"
 		}
 	]
 }
