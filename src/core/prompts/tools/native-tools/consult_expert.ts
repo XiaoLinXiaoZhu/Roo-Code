@@ -40,8 +40,7 @@ const CONSULT_TYPE_PARAMETER_DESCRIPTION = `Type of consultation that determines
 - "analysis": Deep analysis report - for understanding root causes, impact assessment, and detailed examination of issues
 - "design": Architecture design proposal - for system design, API design, and technical architecture decisions
 - "comparison": Option comparison evaluation - for comparing multiple solutions with pros/cons analysis
-- "recommendation": Actionable recommendations - for specific action steps with cost-benefit analysis
-- "exploration": Executable script + documentation - for expanding capability boundaries (e.g., accessing system APIs, window handles, debugging tools). Deliverable includes: capability boundary analysis, exploration paths, verification experiments, and ready-to-run scripts with usage instructions.`
+- "recommendation": Actionable recommendations - for specific action steps with cost-benefit analysis`
 
 export default {
 	type: "function",
@@ -78,7 +77,7 @@ export default {
 				},
 				consultType: {
 					type: "string",
-					enum: ["analysis", "design", "comparison", "recommendation", "exploration"],
+					enum: ["analysis", "design", "comparison", "recommendation"],
 					description: CONSULT_TYPE_PARAMETER_DESCRIPTION,
 				},
 			},

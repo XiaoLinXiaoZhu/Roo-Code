@@ -17,7 +17,7 @@ import { TodoItem } from "@roo-code/types"
  * - 返回专家意见和建议
  */
 
-type ConsultType = "analysis" | "design" | "comparison" | "recommendation" | "exploration"
+type ConsultType = "analysis" | "design" | "comparison" | "recommendation"
 
 interface ConsultTypeConfig {
 	approach: string[]
@@ -68,25 +68,6 @@ const CONSULT_TYPE_CONFIGS: Record<ConsultType, ConsultTypeConfig> = {
 		],
 		deliverable: "具体行动建议",
 		todoTemplate: ["理解现状和目标", "识别行动路径", "评估成本收益", "制定行动步骤"],
-	},
-	exploration: {
-		approach: [
-			"探索可行路径：系统 API、第三方工具、脚本方案",
-			"设计验证实验：最小可行的 PoC 脚本",
-			"测试并记录结果：成功路径 + 失败原因",
-			"封装为可复用方案：脚本 + 使用说明",
-		],
-		deliverable: `可执行脚本 + 使用说明
-
-交付物结构：
-1. 可直接执行的脚本（bash/python/applescript等）
-2. 使用说明（前置条件、执行方式、预期结果、注意事项）`,
-		todoTemplate: [
-			"明确能力边界",
-			"探索可行路径（系统API、第三方工具、脚本）",
-			"设计并执行验证实验",
-			"封装最终方案（脚本 + 说明）",
-		],
 	},
 }
 

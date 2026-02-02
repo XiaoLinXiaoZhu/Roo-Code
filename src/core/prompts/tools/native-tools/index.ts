@@ -25,6 +25,7 @@ import applyEdit from "./apply_edit"
 import consultExpert from "./consult_expert"
 import goToDefinition from "./go_to_definition"
 import findReferences from "./find_references"
+import buildTool from "./build_tool"
 
 export { getMcpServerTools } from "./mcp_server"
 export { convertOpenAIToolToAnthropic, convertOpenAIToolsToAnthropic } from "./converters"
@@ -86,6 +87,8 @@ export function getNativeTools(options: NativeToolsOptions = {}): OpenAI.Chat.Ch
 		// AST 代码智能工具
 		goToDefinition,
 		findReferences,
+		// 工具构建工具
+		buildTool,
 	] satisfies OpenAI.Chat.ChatCompletionTool[]
 }
 

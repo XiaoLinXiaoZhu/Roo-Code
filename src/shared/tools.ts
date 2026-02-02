@@ -96,6 +96,10 @@ export const toolParamNames = [
 	"start_line", // go_to_definition, find_references optional parameter
 	"include_declaration", // find_references optional parameter
 	"max_results", // find_references optional parameter
+	// build_tool 参数
+	"requirement", // build_tool required parameter
+	"inputHint", // build_tool optional parameter
+	"outputHint", // build_tool optional parameter
 ] as const
 
 export type ToolParamName = (typeof toolParamNames)[number]
@@ -154,7 +158,7 @@ export type NativeToolArgs = {
 		knownContext: string
 		unknownPoints: string
 		attachments?: string
-		consultType: "analysis" | "design" | "comparison" | "recommendation" | "exploration"
+		consultType: "analysis" | "design" | "comparison" | "recommendation"
 	}
 	// AST 代码智能工具
 	go_to_definition: {
@@ -172,6 +176,12 @@ export type NativeToolArgs = {
 		start_line?: number
 		include_declaration?: boolean
 		max_results?: number
+	}
+	// 工具构建工具
+	build_tool: {
+		requirement: string
+		inputHint?: string
+		outputHint?: string
 	}
 	// Add more tools as they are migrated to native protocol
 }
@@ -320,6 +330,11 @@ export interface ConsultExpertToolUse extends ToolUse<"consult_expert"> {
 	>
 }
 
+export interface BuildToolToolUse extends ToolUse<"build_tool"> {
+	name: "build_tool"
+	params: Partial<Pick<Record<ToolParamName, string>, "requirement" | "inputHint" | "outputHint">>
+}
+
 // Define tool group configuration
 export type ToolGroupConfig = {
 	tools: readonly string[]
@@ -356,6 +371,7 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	consult_expert: "consult expert",
 	go_to_definition: "go to definition",
 	find_references: "find references",
+	build_tool: "build tool",
 } as const
 
 // Define available tool groups.
@@ -382,8 +398,8 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 	},
 	modes: {
 		// 	tools: ["switch_mode", "new_task"],
-		// ! disable modes tools,because we move all modes tools to agent as tools,like search_project, apply_edit, consult_expert
-		tools: ["search_project", "apply_edit", "consult_expert"],
+		// ! disable modes tools,because we move all modes tools to agent as tools,like search_project, apply_edit, consult_expert, build_tool
+		tools: ["search_project", "apply_edit", "consult_expert", "build_tool"],
 		alwaysAvailable: true,
 	},
 }

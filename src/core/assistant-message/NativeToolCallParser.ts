@@ -650,6 +650,16 @@ export class NativeToolCallParser {
 				}
 				break
 
+			case "build_tool":
+				if (partialArgs.requirement !== undefined) {
+					nativeArgs = {
+						requirement: partialArgs.requirement,
+						inputHint: partialArgs.inputHint,
+						outputHint: partialArgs.outputHint,
+					}
+				}
+				break
+
 			case "read_command_output":
 				if (partialArgs.artifact_id !== undefined) {
 					nativeArgs = {
@@ -1027,6 +1037,16 @@ export class NativeToolCallParser {
 							files: args.files,
 							context: args.context,
 							validate: args.validate,
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "build_tool":
+					if (args.requirement !== undefined) {
+						nativeArgs = {
+							requirement: args.requirement,
+							inputHint: args.inputHint,
+							outputHint: args.outputHint,
 						} as NativeArgsFor<TName>
 					}
 					break

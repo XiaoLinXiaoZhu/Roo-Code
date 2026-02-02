@@ -351,6 +351,32 @@
 			"gitCommit": "32f477668e3efae7811cd41fdf22fd7f2880674d",
 			"ttlHours": 168,
 			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}"
+		},
+		{
+			"id": "18",
+			"query": "How are tools defined and implemented in this project? Where is the tool system architecture?",
+			"tags": [
+				"how",
+				"are",
+				"tools",
+				"defined",
+				"and",
+				"implemented",
+				"in",
+				"this",
+				"project",
+				"where",
+				"is",
+				"the",
+				"tool",
+				"system",
+				"architecture"
+			],
+			"scope": null,
+			"createdAt": "2026-02-02T05:35:24.070Z",
+			"gitCommit": "0689eb5e5667f2808ba659482e3a3aa11f28ea43",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"toolDefinitions\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"toolImplementations\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"agentSystem\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
 		}
 	]
 }

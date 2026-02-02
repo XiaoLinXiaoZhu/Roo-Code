@@ -42,6 +42,7 @@ import { applyEditTool } from "../tools/ApplyEditTool"
 import { consultExpertTool } from "../tools/ConsultExpertTool"
 import { goToDefinitionTool } from "../tools/GoToDefinitionTool"
 import { findReferencesTool } from "../tools/FindReferencesTool"
+import { buildToolTool } from "../tools/BuildToolTool"
 
 import { formatResponse } from "../prompts/responses"
 
@@ -417,6 +418,8 @@ export async function presentAssistantMessage(cline: Task) {
 						return `[${block.name} at ${block.params.path}:${block.params.line}:${block.params.character}]`
 					case "find_references":
 						return `[${block.name} at ${block.params.path}:${block.params.line}:${block.params.character}]`
+					case "build_tool":
+						return `[${block.name} '${block.params.requirement}']`
 					case "read_command_output":
 						return `[${block.name} for '${block.params.artifact_id}']`
 					case "update_todo_list":
@@ -980,6 +983,13 @@ export async function presentAssistantMessage(cline: Task) {
 					break
 				case "find_references":
 					await findReferencesTool.handle(cline, block as ToolUse<"find_references">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+					})
+					break
+				case "build_tool":
+					await buildToolTool.handle(cline, block as ToolUse<"build_tool">, {
 						askApproval,
 						handleError,
 						pushToolResult,
