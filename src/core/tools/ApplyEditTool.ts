@@ -48,6 +48,7 @@ interface ApplyEditParams {
 
 export class ApplyEditTool extends BaseTool<"apply_edit"> {
 	readonly name = "apply_edit" as const
+	override readonly isDelegationTool = true
 
 	parseLegacy(params: Partial<Record<string, string>>): ApplyEditParams {
 		return {

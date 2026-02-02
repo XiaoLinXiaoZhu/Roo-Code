@@ -112,6 +112,7 @@ interface ConsultExpertParams {
 
 export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 	readonly name = "consult_expert" as const
+	override readonly isDelegationTool = true
 
 	parseLegacy(params: Partial<Record<string, string>>): ConsultExpertParams {
 		return {

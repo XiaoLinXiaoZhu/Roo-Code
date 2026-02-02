@@ -33,6 +33,17 @@ export abstract class BaseTool<TName extends ToolName> {
 	abstract readonly name: TName
 
 	/**
+	 * Whether this tool is a delegation tool.
+	 * Delegation tools create child tasks and pause the parent task.
+	 * When the child task completes, the parent task is resumed.
+	 *
+	 * Tools that call `delegateParentAndOpenChild` should set this to `true`.
+	 *
+	 * @default false
+	 */
+	readonly isDelegationTool: boolean = false
+
+	/**
 	 * Track the last seen path during streaming to detect when the path has stabilized.
 	 * Used by hasPathStabilized() to prevent displaying truncated paths from partial-json parsing.
 	 */

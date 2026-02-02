@@ -61,6 +61,7 @@ interface SearchProjectParams {
 
 export class SearchProjectTool extends BaseTool<"search_project"> {
 	readonly name = "search_project" as const
+	override readonly isDelegationTool = true
 
 	parseLegacy(params: Partial<Record<string, string>>): SearchProjectParams {
 		return {

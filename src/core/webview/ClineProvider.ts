@@ -104,6 +104,7 @@ import { getUri } from "./getUri"
 import { REQUESTY_BASE_URL } from "../../shared/utils/requesty"
 import { validateAndFixToolResultIds } from "../task/validateToolResultIds"
 import { getSearchProjectCache } from "../tools/SearchProjectCache"
+import { toolRegistry } from "../tools/toolRegistry"
 
 /**
  * https://github.com/microsoft/vscode-webview-ui-toolkit-samples/blob/main/default/weather-webview/src/providers/WeatherViewProvider.ts
@@ -3316,14 +3317,13 @@ export class ClineProvider
 		await saveTaskMessages({ messages: parentClineMessages, taskId: parentTaskId, globalStoragePath })
 
 		// Find the tool_use_id from the last assistant message's delegation tool_use
-		// (new_task, apply_edit, search_project, consult_expert are all delegation tools)
-		const delegationTools = ["new_task", "apply_edit", "search_project", "consult_expert"]
+		// Delegation tools are identified by their isDelegationTool property in toolRegistry
 		let toolUseId: string | undefined
 		for (let i = parentApiMessages.length - 1; i >= 0; i--) {
 			const msg = parentApiMessages[i]
 			if (msg.role === "assistant" && Array.isArray(msg.content)) {
 				for (const block of msg.content) {
-					if (block.type === "tool_use" && delegationTools.includes(block.name)) {
+					if (block.type === "tool_use" && toolRegistry.isDelegationTool(block.name)) {
 						toolUseId = block.id
 						break
 					}

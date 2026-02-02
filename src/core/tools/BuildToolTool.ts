@@ -44,6 +44,7 @@ interface BuildToolParams {
 
 export class BuildToolTool extends BaseTool<"build_tool"> {
 	readonly name = "build_tool" as const
+	override readonly isDelegationTool = true
 
 	parseLegacy(params: Partial<Record<string, string>>): BuildToolParams {
 		return {

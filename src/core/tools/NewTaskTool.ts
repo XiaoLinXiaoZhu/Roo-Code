@@ -19,6 +19,7 @@ interface NewTaskParams {
 
 export class NewTaskTool extends BaseTool<"new_task"> {
 	readonly name = "new_task" as const
+	override readonly isDelegationTool = true
 
 	async execute(params: NewTaskParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
 		const { mode, message, todos } = params

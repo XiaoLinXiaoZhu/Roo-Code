@@ -433,6 +433,104 @@
 			"gitCommit": "b098bd25908e53fc562408b447072dcc99a7448e",
 			"ttlHours": 168,
 			"schema": "{\"type\":\"object\",\"properties\":{\"video_support_exists\":{\"type\":\"boolean\"},\"related_files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"details\":{\"type\":\"string\"}}}"
+		},
+		{
+			"id": "21",
+			"query": "Where are the mode definitions (like code, architect, ask modes) defined in the project? How is the mode slug and name configured?",
+			"tags": [
+				"where",
+				"are",
+				"the",
+				"mode",
+				"definitions",
+				"like",
+				"code",
+				"architect",
+				"ask",
+				"modes",
+				"defined",
+				"in",
+				"project",
+				"how",
+				"is",
+				"slug",
+				"and",
+				"name",
+				"configured"
+			],
+			"scope": null,
+			"createdAt": "2026-02-02T10:08:57.860Z",
+			"gitCommit": "16a1c266fbfd767a8d8f8cd647b01e9aa40d2281",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"modeDefinitionPattern\":{\"type\":\"string\"},\"summary\":{\"type\":\"string\"}}}"
+		},
+		{
+			"id": "22",
+			"query": "How is pushToolResult callback created and how does it add tool_result to userMessageContent? Where is the tool execution flow that creates ToolCallbacks?",
+			"tags": [
+				"how",
+				"is",
+				"pushtoolresult",
+				"callback",
+				"created",
+				"and",
+				"does",
+				"it",
+				"add",
+				"tool_result",
+				"to",
+				"usermessagecontent",
+				"where",
+				"the",
+				"tool",
+				"execution",
+				"flow",
+				"that",
+				"creates",
+				"toolcallbacks"
+			],
+			"scope": {
+				"directories": "/Users/wepie/Documents/pie/project/roo-code/src/core",
+				"filePatterns": "*.ts",
+				"excludes": "__tests__"
+			},
+			"createdAt": "2026-02-02T10:53:54.601Z",
+			"gitCommit": "16a1c266fbfd767a8d8f8cd647b01e9aa40d2281",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"pushToolResultCreation\":{\"type\":\"string\"},\"toolExecutionFlow\":{\"type\":\"string\"}}}"
+		},
+		{
+			"id": "23",
+			"query": "How are tool instances (like applyEditTool, newTaskTool) imported and executed? Where is the central place that dispatches tool calls?",
+			"tags": [
+				"how",
+				"are",
+				"tool",
+				"instances",
+				"like",
+				"applyedittool",
+				"newtasktool",
+				"imported",
+				"and",
+				"executed",
+				"where",
+				"is",
+				"the",
+				"central",
+				"place",
+				"that",
+				"dispatches",
+				"calls"
+			],
+			"scope": {
+				"directories": "/Users/wepie/Documents/pie/project/roo-code/src/core",
+				"filePatterns": "*.ts",
+				"excludes": "*.test.ts"
+			},
+			"createdAt": "2026-02-02T11:12:39.277Z",
+			"gitCommit": "16a1c266fbfd767a8d8f8cd647b01e9aa40d2281",
+			"ttlHours": 168,
+			"schema": "{\"type\":\"object\",\"properties\":{\"toolDispatchFile\":{\"type\":\"string\"},\"toolImportPattern\":{\"type\":\"string\"},\"toolExecutionMethod\":{\"type\":\"string\"}}}"
 		}
 	]
 }
