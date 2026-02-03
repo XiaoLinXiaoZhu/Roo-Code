@@ -168,9 +168,10 @@ export class SkillsManager {
 		const resolvedSkills = new Map<string, SkillMetadata>()
 
 		// First, add built-in skills (lowest priority)
-		for (const skill of getBuiltInSkills()) {
-			resolvedSkills.set(skill.name, skill)
-		}
+		// XLXZ： fuck you, DON'T POOP SHIT IN MY SYSTEM PROMPT
+		// for (const skill of getBuiltInSkills()) {
+		// 	resolvedSkills.set(skill.name, skill)
+		// }
 
 		// Then, add discovered skills (will override built-in skills with same name)
 		for (const skill of this.skills.values()) {
