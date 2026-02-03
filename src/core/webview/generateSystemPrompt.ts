@@ -17,11 +17,8 @@ export const generateSystemPrompt = async (provider: ClineProvider, message: Web
 		browserViewportSize,
 		mcpEnabled,
 		experiments,
-		enableMcpServerCreation,
 		browserToolEnabled,
 		language,
-		maxReadFileLine,
-		maxConcurrentFileReads,
 		enableSubfolderRules,
 	} = await provider.getState()
 
@@ -68,12 +65,10 @@ export const generateSystemPrompt = async (provider: ClineProvider, message: Web
 		customModePrompts,
 		customModes,
 		customInstructions,
-		enableMcpServerCreation,
+		experiments,
 		language,
 		rooIgnoreInstructions,
-		maxReadFileLine !== -1,
 		{
-			maxConcurrentFileReads: maxConcurrentFileReads ?? 5,
 			todoListEnabled: apiConfiguration?.todoListEnabled ?? true,
 			useAgentRules: vscode.workspace.getConfiguration(Package.name).get<boolean>("useAgentRules") ?? true,
 			enableSubfolderRules: enableSubfolderRules ?? false,

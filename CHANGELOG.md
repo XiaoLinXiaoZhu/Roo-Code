@@ -1,6 +1,20 @@
 # Roo Code Changelog
 
-## [3.48.0] - 2026-02-02
+# Roo Code Changelog
+
+## [1.107.0]
+
+- feat: Add cli support for linux (#11167)
+- feat: migrate xAI provider to use dedicated @ai-sdk/xai package (#11158)
+- feat: use custom Base URL for OpenRouter model list fetch (#11154)
+- feat: migrate SambaNova provider to AI SDK (#11153)
+- fix: transform tool blocks to text before condensing (EXT-624) (#10975)
+- fix(code-index): remove deprecated text-embedding-004 and migrate to gemini-embedding-001 (#11038)
+- feat(api): migrate Mistral provider to AI SDK (#11089)
+- fix: queue messages during command execution instead of losing them (#11140)
+- IPC fixes for task cancellation and queued messages (#11162)
+
+## [3.46.1-local-3.48.0] - 2026-02-02
 
 - ✨ Read Media Tool: Add `read_media` tool for multimodal agent image reading
     - Dedicated tool for reading image files (PNG, JPG, JPEG, GIF, BMP, SVG, WEBP, ICO, AVIF)
@@ -14,7 +28,7 @@
     - Added line numbers to preview for easier navigation
     - Auto-trace re-exports: when definition lands in a barrel/index file, automatically follow the export chain to find the actual source definition
 
-## [3.47.2] - 2026-02-02
+## [3.46.1-local-3.47.2] - 2026-02-02
 
 - ✨ Delegation Tool: Introduce delegation tool support and registry for agent-as-tool workflows
 - ✨ Build Tool: Add build_tool functionality for creating reusable CLI tools
@@ -33,7 +47,7 @@
     - Emphasize text truncation (2000 chars) and image size limits (800x600)
     - Include --focus and --scale parameters for progressive exploration
 
-## [3.47.1] - 2026-02-01
+## [3.46.1-local-3.47.1] - 2026-02-01
 
 - 🐛 NativeToolCallParser: Fix missing tool cases for partial/non-partial modes
     - Added `read_command_output` and `access_mcp_resource` to partial mode
@@ -44,7 +58,7 @@
     - Default behavior: sub-agent chooses appropriate validation based on project type
 - ✨ apply_diff: Simplify tool description for clearer usage guidance
 
-## [3.47.0] - 2026-02-01
+## [3.46.1-local-3.47.0] - 2026-02-01
 
 - 🧭 Symbol Navigation: Implement symbol navigation service with go-to-definition and find-references lookup
     - Enhanced UI formatting for symbol navigation results
@@ -53,7 +67,7 @@
 - 🧠 Spirit Kernel: Update core principles and behavioral guidance structure
 - 👤 Mode Roles: Enhance solo developer and expert role definitions
 
-## [3.46.3] - 2026-01-30
+## [3.46.1-local-3.46.3] - 2026-01-30
 
 - 🧠 AST Code Intelligence: Add go-to-definition and find-references support using VS Code's built-in language services
 - 🔧 Command Interceptor: Add optimized handlers for `head`, `tail`, `ls`, and `wc` commands
@@ -63,7 +77,7 @@
     - `WcHandler`: Count lines, words, and characters in files
 - 📦 Tool Groups: Refactor tool groups structure and update codebase search implementations
 
-## [3.46.2] - 2026-01-30
+## [3.46.1-local-3.46.2] - 2026-01-30
 
 - 🛠️ Tool Schema Enhancement: Refactor tool descriptions and schemas for better clarity and usability
     - `ask_followup_question`: Add `type` parameter for structured reasoning
@@ -74,7 +88,7 @@
 - 🔧 Parser Update: Update `NativeToolCallParser` to handle new tool parameters
 - 📝 Documentation: Add tool description optimization guidelines
 
-## [3.46.0] - 2026-01-28
+## [3.46.1-local-3.46.0] - 2026-01-28
 
 - 🎯 Spirit Hint System: Add diverse hint styles for user guidance with cognitive anchors (🧭CERTAINTY, 🧭VALUE, 🧭HONESTY)
 - 🔍 Search Project Cache: Add cache management for search results with creation, reading, and expiration checking
@@ -84,6 +98,21 @@
 - Fix: Update environment details output format with prefix and content requirements
 - Fix: Update tool calling logic to support Markdown tools in parallel
 - Fix: Update tool usage logic to support multiple delegate tools
+
+## [3.46.1] - 2026-01-30
+
+- Fix: Sanitize tool_use_id in tool_result blocks to match API history, preventing message format errors (PR #11131 by @daniel-lxs)
+- Add: Mode dropdown to change skill mode dynamically, allowing more flexible skill configuration (PR #11102 by @SannidhyaSah)
+- Add: Import settings option in the initial welcome screen for easier onboarding (#10992 by @emeraldcheshire, PR #10994 by @roomote)
+- Chore: Treat extension .env as optional to simplify development setup (PR #11116 by @hannesrudolph)
+
+## [3.46.0] - 2026-01-30
+
+![3.46.0 Release - Parallel Processing Power](/releases/3.46.0-release.png)
+
+- Parallel tool calls enabled by default for improved performance (PR #11031 by @daniel-lxs)
+- Codex-inspired read_file refactor introduces indentation mode for extracting complete semantic code blocks without mid-function truncation, ideal when targeting specific lines from search results or errors (#10239 by @pwilkin, PR #10981 by @hannesrudolph)
+- Loss
 
 ## [3.45.0] - 2026-01-27
 

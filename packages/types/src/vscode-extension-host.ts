@@ -18,6 +18,7 @@ import type { CloudUserInfo, CloudOrganizationMembership, OrganizationAllowList,
 import type { SerializedCustomToolDefinition } from "./custom-tool.js"
 import type { GitCommit } from "./git.js"
 import type { McpServer } from "./mcp.js"
+import type { SkillMetadata } from "./skills.js"
 import type { ModelRecord, RouterModels } from "./model.js"
 import type { OpenAiCodexRateLimitInfo } from "./providers/openai-codex-rate-limits.js"
 import type { WorktreeIncludeStatus } from "./worktree.js"
@@ -64,7 +65,6 @@ export interface ExtensionMessage {
 		| "remoteBrowserEnabled"
 		| "ttsStart"
 		| "ttsStop"
-		| "maxReadFileLine"
 		| "fileSearchResults"
 		| "toggleApiConfigPin"
 		| "acceptInput"
@@ -108,6 +108,7 @@ export interface ExtensionMessage {
 		| "worktreeIncludeStatus"
 		| "branchWorktreeIncludeResult"
 		| "folderSelected"
+		| "skills"
 	text?: string
 	payload?: any // eslint-disable-line @typescript-eslint/no-explicit-any
 	checkpointWarning?: {
@@ -202,6 +203,7 @@ export interface ExtensionMessage {
 	stepIndex?: number // For browserSessionNavigate: the target step index to display
 	tools?: SerializedCustomToolDefinition[] // For customToolsResult
 	modes?: { slug: string; name: string }[] // For modes response
+	skills?: SkillMetadata[] // For skills response
 	aggregatedCosts?: {
 		// For taskWithAggregatedCosts response
 		totalCost: number
@@ -301,7 +303,6 @@ export type ExtensionState = Pick<
 	| "ttsSpeed"
 	| "soundEnabled"
 	| "soundVolume"
-	| "maxConcurrentFileReads"
 	| "terminalOutputPreviewSize"
 	| "terminalShellIntegrationTimeout"
 	| "terminalShellIntegrationDisabled"
@@ -352,14 +353,12 @@ export type ExtensionState = Pick<
 	maxWorkspaceFiles: number // Maximum number of files to include in current working directory details (0-500)
 	showRooIgnoredFiles: boolean // Whether to show .rooignore'd files in listings
 	enableSubfolderRules: boolean // Whether to load rules from subdirectories
-	maxReadFileLine: number // Maximum number of lines to read from a file before truncating
 	maxImageFileSize: number // Maximum size of image files to process in MB
 	maxTotalImageSize: number // Maximum total size for all images in a single read operation in MB
 
 	experiments: Experiments // Map of experiment IDs to their enabled state
 
 	mcpEnabled: boolean
-	enableMcpServerCreation: boolean
 
 	mode: string
 	customModes: ModeConfig[]
@@ -499,7 +498,6 @@ export interface WebviewMessage {
 		| "deleteMessageConfirm"
 		| "submitEditedMessage"
 		| "editMessageConfirm"
-		| "enableMcpServerCreation"
 		| "remoteControlEnabled"
 		| "taskSyncEnabled"
 		| "searchCommits"
@@ -602,6 +600,12 @@ export interface WebviewMessage {
 		| "createWorktreeInclude"
 		| "checkoutBranch"
 		| "browseForWorktreePath"
+		// Skills messages
+		| "requestSkills"
+		| "createSkill"
+		| "deleteSkill"
+		| "moveSkill"
+		| "openSkillFile"
 	text?: string
 	editedMessageContent?: string
 	tab?: "settings" | "history" | "mcp" | "modes" | "chat" | "marketplace" | "cloud"
@@ -635,7 +639,11 @@ export interface WebviewMessage {
 	modeConfig?: ModeConfig
 	timeout?: number
 	payload?: WebViewMessagePayload
-	source?: "global" | "project"
+	source?: "global" | "project" | "built-in"
+	skillName?: string // For skill operations (createSkill, deleteSkill, moveSkill, openSkillFile)
+	skillMode?: string // For skill operations (current mode restriction)
+	newSkillMode?: string // For moveSkill (target mode)
+	skillDescription?: string // For createSkill (skill description)
 	requestId?: string
 	ids?: string[]
 	hasSystemPromptOverride?: boolean
@@ -780,7 +788,6 @@ export interface ClineSayTool {
 		| "readFile"
 		| "readMedia"
 		| "readCommandOutput"
-		| "fetchInstructions"
 		| "listFilesTopLevel"
 		| "listFilesRecursive"
 		| "searchFiles"
@@ -793,6 +800,7 @@ export interface ClineSayTool {
 		| "updateTodoList"
 		| "goToDefinition"
 		| "findReferences"
+		| "skill"
 	path?: string
 	// For goToDefinition and findReferences
 	symbol?: string
@@ -845,6 +853,8 @@ export interface ClineSayTool {
 	args?: string
 	source?: string
 	description?: string
+	// Properties for skill tool
+	skill?: string
 }
 
 // Must keep in sync with system prompt.

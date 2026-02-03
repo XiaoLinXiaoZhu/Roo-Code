@@ -33,10 +33,10 @@ export const toolNames = [
 	"ask_followup_question",
 	"attempt_completion",
 	"new_task",
-	"fetch_instructions",
 	"codebase_search",
 	"update_todo_list",
 	"run_slash_command",
+	"skill",
 	"generate_image",
 	"custom_tool",
 	// Agent as Tools 架构的新工具

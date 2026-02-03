@@ -187,7 +187,6 @@ describe("mergeExtensionState", () => {
 		const baseState: ExtensionState = {
 			version: "",
 			mcpEnabled: false,
-			enableMcpServerCreation: false,
 			clineMessages: [],
 			taskHistory: [],
 			shouldShowAnnouncement: false,
@@ -203,7 +202,6 @@ describe("mergeExtensionState", () => {
 			showRooIgnoredFiles: true,
 			enableSubfolderRules: false,
 			renderContext: "sidebar",
-			maxReadFileLine: 500,
 			cloudUserInfo: null,
 			organizationAllowList: { allowAll: true, providers: {} },
 			autoCondenseContext: true,
@@ -236,7 +234,6 @@ describe("mergeExtensionState", () => {
 				preventFocusDisruption: false,
 				imageGeneration: false,
 				runSlashCommand: false,
-				multipleNativeToolCalls: false,
 				customTools: false,
 			} as Record<ExperimentId, boolean>,
 			checkpointTimeout: DEFAULT_CHECKPOINT_TIMEOUT_SECONDS + 5,
@@ -253,7 +250,6 @@ describe("mergeExtensionState", () => {
 			preventFocusDisruption: false,
 			imageGeneration: false,
 			runSlashCommand: false,
-			multipleNativeToolCalls: false,
 			customTools: false,
 		})
 	})

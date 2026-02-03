@@ -160,7 +160,7 @@ export class ClineProvider
 
 	public isViewLaunched = false
 	public settingsImportedAt?: number
-	public readonly latestAnnouncementId = "jan-2026-v3.45.0-smart-code-folding" // v3.45.0 Smart Code Folding
+	public readonly latestAnnouncementId = "jan-2026-v3.46.0-parallel-tools" // v3.46.0 Parallel Tools & Smarter Reading
 	public readonly providerSettingsManager: ProviderSettingsManager
 	public readonly customModesManager: CustomModesManager
 
@@ -2026,7 +2026,6 @@ export class ClineProvider
 			terminalZshP10k,
 			terminalZdotdir,
 			mcpEnabled,
-			enableMcpServerCreation,
 			currentApiConfigName,
 			listApiConfigMeta,
 			pinnedApiConfigs,
@@ -2044,7 +2043,6 @@ export class ClineProvider
 			showRooIgnoredFiles,
 			enableSubfolderRules,
 			language,
-			maxReadFileLine,
 			maxImageFileSize,
 			maxTotalImageSize,
 			historyPreviewCollapsed,
@@ -2056,7 +2054,6 @@ export class ClineProvider
 			publicSharingEnabled,
 			organizationAllowList,
 			organizationSettingsVersion,
-			maxConcurrentFileReads,
 			customCondensingPrompt,
 			codebaseIndexConfig,
 			codebaseIndexModels,
@@ -2164,7 +2161,6 @@ export class ClineProvider
 			terminalZshP10k: terminalZshP10k ?? false,
 			terminalZdotdir: terminalZdotdir ?? false,
 			mcpEnabled: mcpEnabled ?? true,
-			enableMcpServerCreation: enableMcpServerCreation ?? true,
 			currentApiConfigName: currentApiConfigName ?? "default",
 			listApiConfigMeta: listApiConfigMeta ?? [],
 			pinnedApiConfigs: pinnedApiConfigs ?? {},
@@ -2187,10 +2183,8 @@ export class ClineProvider
 			enableSubfolderRules: enableSubfolderRules ?? false,
 			language: language ?? formatLanguage(vscode.env.language),
 			renderContext: this.renderContext,
-			maxReadFileLine: maxReadFileLine ?? -1,
 			maxImageFileSize: maxImageFileSize ?? 5,
 			maxTotalImageSize: maxTotalImageSize ?? 20,
-			maxConcurrentFileReads: maxConcurrentFileReads ?? 5,
 			settingsImportedAt: this.settingsImportedAt,
 			hasSystemPromptOverride,
 			historyPreviewCollapsed: historyPreviewCollapsed ?? false,
@@ -2410,7 +2404,6 @@ export class ClineProvider
 			mode: stateValues.mode ?? defaultModeSlug,
 			language: stateValues.language ?? formatLanguage(vscode.env.language),
 			mcpEnabled: stateValues.mcpEnabled ?? true,
-			enableMcpServerCreation: stateValues.enableMcpServerCreation ?? true,
 			mcpServers: this.mcpHub?.getAllServers() ?? [],
 			currentApiConfigName: stateValues.currentApiConfigName ?? "default",
 			listApiConfigMeta: stateValues.listApiConfigMeta ?? [],
@@ -2428,10 +2421,8 @@ export class ClineProvider
 			telemetrySetting: stateValues.telemetrySetting || "unset",
 			showRooIgnoredFiles: stateValues.showRooIgnoredFiles ?? false,
 			enableSubfolderRules: stateValues.enableSubfolderRules ?? false,
-			maxReadFileLine: stateValues.maxReadFileLine ?? -1,
 			maxImageFileSize: stateValues.maxImageFileSize ?? 5,
 			maxTotalImageSize: stateValues.maxTotalImageSize ?? 20,
-			maxConcurrentFileReads: stateValues.maxConcurrentFileReads ?? 5,
 			historyPreviewCollapsed: stateValues.historyPreviewCollapsed ?? false,
 			reasoningBlockCollapsed: stateValues.reasoningBlockCollapsed ?? true,
 			enterBehavior: stateValues.enterBehavior ?? "send",

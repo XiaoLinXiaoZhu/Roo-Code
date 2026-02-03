@@ -5,7 +5,6 @@ import type {
 	ToolProgressStatus,
 	ToolGroup,
 	ToolName,
-	FileEntry,
 	BrowserActionParams,
 	GenerateImageParams,
 } from "@roo-code/types"
@@ -62,12 +61,13 @@ export const toolParamNames = [
 	"size",
 	"query",
 	"args",
+	"skill", // skill tool parameter
 	"start_line",
 	"end_line",
 	"todos",
 	"prompt",
 	"image",
-	"files", // Native protocol parameter for read_file
+	// read_file parameters (native protocol)
 	"operations", // search_and_replace parameter for multiple operations
 	"patch", // apply_patch parameter
 	"file_path", // search_replace and edit_file parameter
@@ -88,8 +88,18 @@ export const toolParamNames = [
 	"consultType", // consult_expert required parameter
 	"artifact_id", // read_command_output parameter
 	"search", // read_command_output parameter for grep-like search
-	"offset", // read_command_output parameter for pagination
-	"limit", // read_command_output parameter for max bytes to return
+	"offset", // read_command_output and read_file parameter
+	"limit", // read_command_output and read_file parameter
+	// read_file indentation mode parameters
+	"indentation",
+	"anchor_line",
+	"max_levels",
+	"include_siblings",
+	"include_header",
+	"max_lines",
+	// read_file legacy format parameter (backward compatibility)
+	"files",
+	"line_ranges",
 	// AST 代码智能工具参数
 	"symbol", // go_to_definition, find_references required parameter
 	"surrounding_code", // go_to_definition, find_references optional parameter
@@ -110,7 +120,7 @@ export type ToolParamName = (typeof toolParamNames)[number]
  */
 export type NativeToolArgs = {
 	access_mcp_resource: { server_name: string; uri: string }
-	read_file: { files: FileEntry[] }
+	read_file: import("@roo-code/types").ReadFileToolParams
 	read_media: { files: Array<{ path: string }> }
 	read_command_output: { artifact_id: string; search?: string; offset?: number; limit?: number }
 	attempt_completion: { result: string }
@@ -129,9 +139,9 @@ export type NativeToolArgs = {
 	}
 	browser_action: BrowserActionParams
 	codebase_search: { query: string; path?: string }
-	fetch_instructions: { task: string }
 	generate_image: GenerateImageParams
 	run_slash_command: { command: string; args?: string }
+	skill: { skill: string; args?: string | null }
 	search_files: { path: string; regex: string; file_pattern?: string | null }
 	update_todo_list: { todos: string }
 	use_mcp_tool: { server_name: string; tool_name: string; arguments?: Record<string, unknown> }
@@ -212,6 +222,11 @@ export interface ToolUse<TName extends ToolName = ToolName> {
 	 * Markdown tool calls support multiple tools per message and don't interrupt the stream.
 	 */
 	isMarkdownTool?: boolean
+	/**
+	 * Flag indicating whether the tool call used a legacy/deprecated format.
+	 * Used for telemetry tracking to monitor migration from old formats.
+	 */
+	usedLegacyFormat?: boolean
 }
 
 /**
@@ -242,12 +257,23 @@ export interface ExecuteCommandToolUse extends ToolUse<"execute_command"> {
 
 export interface ReadFileToolUse extends ToolUse<"read_file"> {
 	name: "read_file"
-	params: Partial<Pick<Record<ToolParamName, string>, "args" | "path" | "start_line" | "end_line" | "files">>
-}
-
-export interface FetchInstructionsToolUse extends ToolUse<"fetch_instructions"> {
-	name: "fetch_instructions"
-	params: Partial<Pick<Record<ToolParamName, string>, "task">>
+	params: Partial<
+		Pick<
+			Record<ToolParamName, string>,
+			| "args"
+			| "path"
+			| "start_line"
+			| "end_line"
+			| "mode"
+			| "offset"
+			| "limit"
+			| "indentation"
+			| "anchor_line"
+			| "max_levels"
+			| "include_siblings"
+			| "include_header"
+		>
+	>
 }
 
 export interface WriteToFileToolUse extends ToolUse<"write_to_file"> {
@@ -305,6 +331,11 @@ export interface RunSlashCommandToolUse extends ToolUse<"run_slash_command"> {
 	params: Partial<Pick<Record<ToolParamName, string>, "command" | "args">>
 }
 
+export interface SkillToolUse extends ToolUse<"skill"> {
+	name: "skill"
+	params: Partial<Pick<Record<ToolParamName, string>, "skill" | "args">>
+}
+
 export interface GenerateImageToolUse extends ToolUse<"generate_image"> {
 	name: "generate_image"
 	params: Partial<Pick<Record<ToolParamName, string>, "prompt" | "path" | "image">>
@@ -348,7 +379,6 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	read_file: "read files",
 	read_command_output: "read command output",
 	read_media: "read media files",
-	fetch_instructions: "fetch instructions",
 	write_to_file: "write files",
 	apply_diff: "apply changes",
 	search_and_replace: "apply changes using search and replace",
@@ -366,6 +396,7 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	codebase_search: "codebase search",
 	update_todo_list: "update todo list",
 	run_slash_command: "run slash command",
+	skill: "load skill",
 	generate_image: "generate images",
 	custom_tool: "use custom tools",
 	search_project: "search project",
@@ -382,7 +413,7 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 		// "read_file", "search_files", "list_files", are now in command
 		// 因为模型可以直接通过命令行工具更加灵活地读取文件内容和搜索文件，所以这些工具未来使用命令行工具来替代
 		// "read_media" 用于多模态 agent 读取媒体文件（图片等），根据 supportsImages 开关控制
-		tools: ["fetch_instructions", "codebase_search", "go_to_definition", "find_references", "read_media"],
+		tools: ["codebase_search", "go_to_definition", "find_references", "read_media"],
 	},
 	edit: {
 		tools: ["apply_diff", "write_to_file", "generate_image"],
@@ -415,6 +446,7 @@ export const ALWAYS_AVAILABLE_TOOLS: ToolName[] = [
 	// "new_task",
 	"update_todo_list",
 	// "run_slash_command",
+	"skill",
 	// Agent as Tools 架构的新工具 - 在所有模式下都可用
 	// "search_project",
 	// "apply_edit",
