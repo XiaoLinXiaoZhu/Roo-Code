@@ -10,7 +10,6 @@ import type { BaseTool } from "./BaseTool"
 
 // Import all BaseTool instances
 // Note: browserActionTool is a function, not a BaseTool instance, so it's not included here
-import { fetchInstructionsTool } from "./FetchInstructionsTool"
 import { listFilesTool } from "./ListFilesTool"
 import { readFileTool } from "./ReadFileTool"
 import { readCommandOutputTool } from "./ReadCommandOutputTool"
@@ -46,7 +45,6 @@ import { buildToolTool } from "./BuildToolTool"
  * Those are not included here but can be queried separately if needed.
  */
 const allTools: BaseTool<ToolName>[] = [
-	fetchInstructionsTool,
 	listFilesTool,
 	readFileTool,
 	readCommandOutputTool,
