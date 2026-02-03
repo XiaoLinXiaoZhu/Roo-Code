@@ -781,6 +781,59 @@
       "gitCommit": "713f75ec101cbe8e8457d09967443a9252278615",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"parseLogic\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "33",
+      "query": "Where is the read_media tool implemented and how does it process media files?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "read_media",
+        "tool",
+        "implemented",
+        "and",
+        "how",
+        "does",
+        "it",
+        "process",
+        "media",
+        "files"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-03T08:56:16.352Z",
+      "gitCommit": "23350093705e210e1b934b13c63753e602f728a8",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"toolDefinition\":{\"type\":\"string\"},\"mediaProcessing\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "34",
+      "query": "How are different API providers configured and how to detect which API provider is being used (OpenAI, Anthropic, OpenRouter, etc)?",
+      "tags": [
+        "how",
+        "are",
+        "different",
+        "api",
+        "providers",
+        "configured",
+        "and",
+        "to",
+        "detect",
+        "which",
+        "provider",
+        "is",
+        "being",
+        "used",
+        "openai",
+        "anthropic",
+        "openrouter",
+        "etc"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-03T08:58:32.967Z",
+      "gitCommit": "23350093705e210e1b934b13c63753e602f728a8",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"apiProviderEnum\":{\"type\":\"string\"},\"providerDetection\":{\"type\":\"string\"},\"configLocation\":{\"type\":\"string\"},\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
     }
   ]
 }

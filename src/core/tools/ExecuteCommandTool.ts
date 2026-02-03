@@ -462,7 +462,7 @@ export async function executeCommandInTerminal(
 
 		// Use persisted output format when output was truncated and spilled to disk
 		if (persistedResult?.truncated) {
-			return [false, formatPersistedOutput(persistedResult, exitDetails, currentWorkingDir)]
+			return [false, formatPersistedOutput(persistedResult, exitDetails, currentWorkingDir, task.cwd)]
 		}
 
 		// Format as XML for LLM consumption
@@ -547,16 +547,31 @@ function formatExitStatus(exitDetails: ExitCodeDetails | undefined): string {
 
 /**
  * Format persisted output result for tool response when output was truncated
+ *
+ * @param result - The persisted command output result
+ * @param exitDetails - Exit code details
+ * @param workingDir - The working directory (cwd) of the command
+ * @param cwd - The workspace root directory (for computing relative paths)
  */
 function formatPersistedOutput(
 	result: PersistedCommandOutput,
 	exitDetails: ExitCodeDetails | undefined,
 	workingDir: string,
+	cwd?: string,
 ): string {
 	const exitCode = exitDetails?.exitCode
 	const success = exitCode === 0
 	const sizeStr = formatBytes(result.totalBytes)
-	const artifactId = result.artifactPath ? path.basename(result.artifactPath) : ""
+
+	// Compute relative path from workspace root, fallback to absolute path
+	let artifactPath = result.artifactPath || ""
+	if (artifactPath && cwd) {
+		const relativePath = path.relative(cwd, artifactPath)
+		// Only use relative path if it doesn't start with ".." (i.e., is within workspace)
+		if (!relativePath.startsWith("..")) {
+			artifactPath = relativePath
+		}
+	}
 
 	const lines: string[] = []
 
@@ -574,18 +589,22 @@ function formatPersistedOutput(
 		)
 	}
 
-	lines.push(`<artifact id="${artifactId}" />`)
 	lines.push(`<preview>`)
 	lines.push(result.preview)
 	lines.push(`</preview>`)
 
+	// Build detailed notice with file path and usage suggestions
+	const noticeLines: string[] = []
 	if (!success && exitCode !== undefined) {
-		lines.push(
-			`<notice>Command execution was not successful. Use read_command_output tool to view full output if needed.</notice>`,
-		)
-	} else {
-		lines.push(`<notice>Output truncated. Use read_command_output tool to view full output if needed.</notice>`)
+		noticeLines.push(`Command execution was not successful. Inspect the output and adjust as needed.`)
 	}
+	noticeLines.push(`Output truncated (${sizeStr} total). Full output saved to: ${artifactPath}`)
+	noticeLines.push(`To investigate, use grep or sed to read the file selectively:`)
+	noticeLines.push(`  grep -n "keyword" "${artifactPath}"`)
+	noticeLines.push(`  sed -n '1,100p' "${artifactPath}"`)
+	noticeLines.push(`  tail -n 200 "${artifactPath}"`)
+
+	lines.push(`<notice>${noticeLines.join("\n")}</notice>`)
 
 	lines.push(`</command_result>`)
 

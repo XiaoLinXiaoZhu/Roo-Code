@@ -9,14 +9,19 @@ import { isPathOutsideWorkspace } from "../../utils/pathUtils"
 import { getReadablePath } from "../../utils/path"
 
 import {
-	DEFAULT_MAX_IMAGE_FILE_SIZE_MB,
-	DEFAULT_MAX_TOTAL_IMAGE_SIZE_MB,
-	isSupportedImageFormat,
-	validateImageForProcessing,
-	processImageFile,
-	ImageMemoryTracker,
+	DEFAULT_MAX_MEDIA_FILE_SIZE_MB,
+	DEFAULT_MAX_TOTAL_MEDIA_SIZE_MB,
+	isSupportedMediaFormat,
+	isSupportedVideoFormat,
+	validateMediaForProcessing,
+	processMediaFile,
+	MediaMemoryTracker,
 	IMAGE_MIME_TYPES,
-} from "./helpers/imageHelpers"
+	VIDEO_MIME_TYPES,
+	getSupportedFormatsDescription,
+	type MediaType,
+	type VideoProcessingMethod,
+} from "./helpers/mediaHelpers"
 import { BaseTool, ToolCallbacks } from "./BaseTool"
 
 interface MediaFileResult {
@@ -24,15 +29,80 @@ interface MediaFileResult {
 	status: "approved" | "denied" | "blocked" | "error" | "pending"
 	error?: string
 	notice?: string
-	imageDataUrl?: string
+	mediaDataUrl?: string
 	feedbackText?: string
+	mediaType?: MediaType
+	mimeType?: string
 }
 
 /**
- * ReadMediaTool - Reads media files (images) for multimodal analysis.
+ * Providers that support video_url type for video upload
+ * These providers use a dedicated video_url content type
+ */
+const VIDEO_URL_PROVIDERS = ["moonshot"] as const
+
+/**
+ * Providers that support video via image_url type (using video data URL)
+ * These providers accept video data URLs in the image_url content type
+ */
+const IMAGE_URL_VIDEO_PROVIDERS: string[] = []
+
+/**
+ * Determines the video processing method based on the API provider
+ * Can be overridden via environment variable ROO_VIDEO_METHOD
+ */
+function getVideoProcessingMethod(apiProvider: string | undefined): VideoProcessingMethod {
+	// Check for environment variable override
+	const envMethod = process.env.ROO_VIDEO_METHOD
+	if (envMethod) {
+		if (envMethod === "video_url" || envMethod === "image_url_video") {
+			return envMethod
+		}
+	}
+
+	if (!apiProvider) {
+		return "unsupported"
+	}
+
+	// Check if provider supports video_url type
+	if (VIDEO_URL_PROVIDERS.includes(apiProvider as (typeof VIDEO_URL_PROVIDERS)[number])) {
+		return "video_url"
+	}
+
+	// Check if provider supports video via image_url
+	if (IMAGE_URL_VIDEO_PROVIDERS.includes(apiProvider)) {
+		return "image_url_video"
+	}
+
+	return "unsupported"
+}
+
+/**
+ * Check if video is supported for the given provider
+ * Can be enabled via environment variable ROO_VIDEO_ENABLED=true
+ */
+function isVideoSupportedForProvider(apiProvider: string | undefined, modelSupportsVideo: boolean): boolean {
+	// Environment variable can force-enable video support
+	if (process.env.ROO_VIDEO_ENABLED === "true") {
+		return true
+	}
+
+	// Check model capability first
+	if (modelSupportsVideo) {
+		return true
+	}
+
+	// Check provider-level support
+	return getVideoProcessingMethod(apiProvider) !== "unsupported"
+}
+
+/**
+ * ReadMediaTool - Reads media files (images and videos) for multimodal analysis.
  *
  * This tool is conditionally available based on model's multimodal capabilities (supportsImages).
- * It provides a dedicated interface for reading media files, separate from CLI-based file reading.
+ * Video support depends on the API provider and can be configured via environment variables:
+ * - ROO_VIDEO_ENABLED=true: Force enable video support
+ * - ROO_VIDEO_METHOD=video_url|image_url_video: Override video processing method
  */
 export class ReadMediaTool extends BaseTool<"read_media"> {
 	readonly name = "read_media" as const
@@ -41,6 +111,7 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 		const { handleError, pushToolResult } = callbacks
 		const fileEntries = params.files
 		const modelInfo = task.api.getModel().info
+		const apiProvider = task.apiConfiguration.apiProvider
 
 		if (!fileEntries || fileEntries.length === 0) {
 			task.consecutiveMistakeCount++
@@ -62,6 +133,11 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 			pushToolResult(`Error: ${errorMsg}`)
 			return
 		}
+
+		// Check video support
+		const modelSupportsVideo = modelInfo.supportsVideo ?? false
+		const supportsVideo = isVideoSupportedForProvider(apiProvider, modelSupportsVideo)
+		const videoMethod = getVideoProcessingMethod(apiProvider)
 
 		// Initialize results
 		const fileResults: MediaFileResult[] = fileEntries.map((entry) => ({
@@ -114,12 +190,24 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 					continue
 				}
 
-				// Check if it's a supported image format
+				// Check if it's a supported media format
 				const ext = path.extname(relPath).toLowerCase()
-				if (!isSupportedImageFormat(ext)) {
+				if (!isSupportedMediaFormat(ext)) {
 					updateFileResult(relPath, {
 						status: "error",
-						error: `Unsupported media format: ${ext}. Supported formats: PNG, JPG, JPEG, GIF, BMP, SVG, WEBP, ICO, AVIF`,
+						error: `Unsupported media format: ${ext}. ${getSupportedFormatsDescription()}`,
+					})
+					continue
+				}
+
+				// Check video support for video files
+				if (isSupportedVideoFormat(ext) && !supportsVideo) {
+					updateFileResult(relPath, {
+						status: "error",
+						error:
+							`Video format detected (${ext}) but current provider "${apiProvider || "unknown"}" does not support video. ` +
+							`Supported video providers: ${VIDEO_URL_PROVIDERS.join(", ")}. ` +
+							`You can also set ROO_VIDEO_ENABLED=true in .env to force enable video support.`,
 					})
 					continue
 				}
@@ -151,13 +239,13 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 						})
 					}
 				} else {
-					// User approved - process images
-					const imageMemoryTracker = new ImageMemoryTracker()
-					// Get image size limits from user settings
+					// User approved - process media files
+					const mediaMemoryTracker = new MediaMemoryTracker()
+					// Get media size limits from user settings
 					const state = await task.providerRef.deref()?.getState()
 					const {
-						maxImageFileSize = DEFAULT_MAX_IMAGE_FILE_SIZE_MB,
-						maxTotalImageSize = DEFAULT_MAX_TOTAL_IMAGE_SIZE_MB,
+						maxImageFileSize = DEFAULT_MAX_MEDIA_FILE_SIZE_MB,
+						maxTotalImageSize = DEFAULT_MAX_TOTAL_MEDIA_SIZE_MB,
 					} = state ?? {}
 
 					for (const fileResult of filesToApprove) {
@@ -165,36 +253,40 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 						const fullPath = path.resolve(task.cwd, relPath)
 
 						try {
-							// Validate image size
-							const validationResult = await validateImageForProcessing(
+							// Validate media size
+							const validationResult = await validateMediaForProcessing(
 								fullPath,
 								supportsImages,
 								maxImageFileSize,
 								maxTotalImageSize,
-								imageMemoryTracker.getTotalMemoryUsed(),
+								mediaMemoryTracker.getTotalMemoryUsed(),
+								supportsVideo,
 							)
 
 							if (!validationResult.isValid) {
 								updateFileResult(relPath, {
 									status: "error",
 									notice: validationResult.notice,
+									mediaType: validationResult.mediaType,
 								})
 								continue
 							}
 
-							// Process image
-							const imageResult = await processImageFile(fullPath)
-							imageMemoryTracker.addMemoryUsage(imageResult.sizeInMB)
+							// Process media
+							const mediaResult = await processMediaFile(fullPath)
+							mediaMemoryTracker.addMemoryUsage(mediaResult.sizeInMB)
 
 							updateFileResult(relPath, {
 								status: "approved",
-								imageDataUrl: imageResult.dataUrl,
-								notice: imageResult.notice,
+								mediaDataUrl: mediaResult.dataUrl,
+								notice: mediaResult.notice,
+								mediaType: mediaResult.mediaType,
+								mimeType: mediaResult.mimeType,
 							})
 						} catch (error) {
 							updateFileResult(relPath, {
 								status: "error",
-								error: `Failed to process image: ${error instanceof Error ? error.message : String(error)}`,
+								error: `Failed to process media: ${error instanceof Error ? error.message : String(error)}`,
 							})
 						}
 					}
@@ -204,9 +296,9 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 			// Build result
 			// Format as XML for LLM consumption
 			const xmlLines: string[] = []
-			const imageBlocks: Anthropic.ImageBlockParam[] = []
+			const mediaBlocks: Array<Anthropic.ImageBlockParam | Record<string, unknown>> = []
 
-			const loadedCount = fileResults.filter((r) => r.status === "approved" && r.imageDataUrl).length
+			const loadedCount = fileResults.filter((r) => r.status === "approved" && r.mediaDataUrl).length
 			const totalCount = fileResults.length
 
 			xmlLines.push(`<read_media_result loaded="${loadedCount}" total="${totalCount}">`)
@@ -216,49 +308,77 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 
 				switch (fileResult.status) {
 					case "approved":
-						if (fileResult.imageDataUrl) {
-							xmlLines.push(
-								`<image path="${relPath}" status="loaded">${fileResult.notice || "Image loaded successfully"}</image>`,
-							)
+						if (fileResult.mediaDataUrl) {
 							const ext = path.extname(relPath).toLowerCase()
-							const mediaType = IMAGE_MIME_TYPES[ext] || "image/png"
-							imageBlocks.push({
-								type: "image",
-								source: {
-									type: "base64",
-									media_type: mediaType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
-									data: fileResult.imageDataUrl.split(",")[1],
-								},
-							})
+							const isVideo = isSupportedVideoFormat(ext)
+							const tagName = isVideo ? "video" : "image"
+
+							xmlLines.push(
+								`<${tagName} path="${relPath}" status="loaded">${fileResult.notice || "Media loaded successfully"}</${tagName}>`,
+							)
+
+							if (isVideo) {
+								// Handle video based on processing method
+								const mimeType = fileResult.mimeType || VIDEO_MIME_TYPES[ext] || "video/mp4"
+								const base64Data = fileResult.mediaDataUrl.split(",")[1]
+
+								if (videoMethod === "video_url") {
+									// Use video_url type (e.g., Moonshot/Kimi style)
+									mediaBlocks.push({
+										type: "video_url",
+										video_url: {
+											url: fileResult.mediaDataUrl,
+										},
+									})
+								} else if (videoMethod === "image_url_video") {
+									// Use image_url type with video data URL
+									mediaBlocks.push({
+										type: "image_url",
+										image_url: {
+											url: fileResult.mediaDataUrl,
+										},
+									})
+								}
+								// If unsupported, we shouldn't reach here due to earlier validation
+							} else {
+								// Handle image
+								const mimeType = fileResult.mimeType || IMAGE_MIME_TYPES[ext] || "image/png"
+								mediaBlocks.push({
+									type: "image",
+									source: {
+										type: "base64",
+										media_type: mimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+										data: fileResult.mediaDataUrl.split(",")[1],
+									},
+								})
+							}
 						}
 						break
 					case "denied":
 						xmlLines.push(
-							`<image path="${relPath}" status="denied">${fileResult.feedbackText || "User denied access"}</image>`,
+							`<media path="${relPath}" status="denied">${fileResult.feedbackText || "User denied access"}</media>`,
 						)
 						break
 					case "blocked":
-						xmlLines.push(`<image path="${relPath}" status="blocked">${fileResult.error}</image>`)
+						xmlLines.push(`<media path="${relPath}" status="blocked">${fileResult.error}</media>`)
 						break
 					case "error":
 						xmlLines.push(
-							`<image path="${relPath}" status="error">${fileResult.error || fileResult.notice}</image>`,
+							`<media path="${relPath}" status="error">${fileResult.error || fileResult.notice}</media>`,
 						)
 						break
 					default:
-						xmlLines.push(`<image path="${relPath}" status="unknown" />`)
+						xmlLines.push(`<media path="${relPath}" status="unknown" />`)
 				}
 			}
 
 			xmlLines.push(`</read_media_result>`)
 
-			// Push result with images as ToolResponse
-			if (imageBlocks.length > 0) {
-				const response: Array<Anthropic.TextBlockParam | Anthropic.ImageBlockParam> = [
-					{ type: "text", text: xmlLines.join("\n") },
-					...imageBlocks,
-				]
-				pushToolResult(response)
+			// Push result with media as ToolResponse
+			if (mediaBlocks.length > 0) {
+				const response: Array<Anthropic.TextBlockParam | Anthropic.ImageBlockParam | Record<string, unknown>> =
+					[{ type: "text", text: xmlLines.join("\n") }, ...mediaBlocks]
+				pushToolResult(response as Array<Anthropic.TextBlockParam | Anthropic.ImageBlockParam>)
 			} else {
 				pushToolResult(xmlLines.join("\n"))
 			}
