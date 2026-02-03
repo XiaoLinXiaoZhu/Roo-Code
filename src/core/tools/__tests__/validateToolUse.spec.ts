@@ -15,11 +15,14 @@ describe("mode-validator", () => {
 	describe("isToolAllowedForMode", () => {
 		describe("code mode", () => {
 			it("allows all code mode tools", () => {
-				// Code mode has all groups
-				Object.entries(TOOL_GROUPS).forEach(([_, config]) => {
-					config.tools.forEach((tool: string) => {
-						expect(isToolAllowedForMode(tool, codeMode, [])).toBe(true)
-					})
+				// Code mode has read, edit, command, mcp groups
+				const codeModeTools = [
+					...TOOL_GROUPS.read.tools,
+					...TOOL_GROUPS.edit.tools,
+					...TOOL_GROUPS.command.tools,
+				]
+				codeModeTools.forEach((tool: string) => {
+					expect(isToolAllowedForMode(tool, codeMode, [])).toBe(true)
 				})
 			})
 
@@ -30,11 +33,12 @@ describe("mode-validator", () => {
 
 		describe("architect mode", () => {
 			it("allows configured tools", () => {
-				// Architect mode has read, browser, and mcp groups
+				// Architect mode has read, edit, command, mcp, modes groups
 				const architectTools = [
 					...TOOL_GROUPS.read.tools,
-					...TOOL_GROUPS.browser.tools,
-					...TOOL_GROUPS.mcp.tools,
+					...TOOL_GROUPS.edit.tools,
+					...TOOL_GROUPS.command.tools,
+					...TOOL_GROUPS.modes.tools,
 				]
 				architectTools.forEach((tool) => {
 					expect(isToolAllowedForMode(tool, architectMode, [])).toBe(true)
@@ -44,8 +48,8 @@ describe("mode-validator", () => {
 
 		describe("ask mode", () => {
 			it("allows configured tools", () => {
-				// Ask mode has read, browser, and mcp groups
-				const askTools = [...TOOL_GROUPS.read.tools, ...TOOL_GROUPS.browser.tools, ...TOOL_GROUPS.mcp.tools]
+				// Ask mode has read, command, mcp groups
+				const askTools = [...TOOL_GROUPS.read.tools, ...TOOL_GROUPS.command.tools]
 				askTools.forEach((tool) => {
 					expect(isToolAllowedForMode(tool, askMode, [])).toBe(true)
 				})
@@ -63,7 +67,7 @@ describe("mode-validator", () => {
 					},
 				]
 				// Should allow tools from read and edit groups
-				expect(isToolAllowedForMode("read_file", "custom-mode", customModes)).toBe(true)
+				expect(isToolAllowedForMode("codebase_search", "custom-mode", customModes)).toBe(true)
 				expect(isToolAllowedForMode("write_to_file", "custom-mode", customModes)).toBe(true)
 				// Should not allow tools from other groups
 				expect(isToolAllowedForMode("execute_command", "custom-mode", customModes)).toBe(false)
@@ -79,7 +83,7 @@ describe("mode-validator", () => {
 					},
 				]
 				// Should allow tools from read group
-				expect(isToolAllowedForMode("read_file", codeMode, customModes)).toBe(true)
+				expect(isToolAllowedForMode("codebase_search", codeMode, customModes)).toBe(true)
 				// Should not allow tools from other groups
 				expect(isToolAllowedForMode("write_to_file", codeMode, customModes)).toBe(false)
 			})
@@ -175,14 +179,15 @@ describe("mode-validator", () => {
 		})
 
 		it("throws error for disallowed tools in architect mode", () => {
-			// execute_command is a valid tool but not allowed in architect mode
-			expect(() => validateToolUse("execute_command", "architect", [])).toThrow(
-				'Tool "execute_command" is not allowed in architect mode.',
+			// browser_action is a valid tool but not allowed in architect mode (browser group not included)
+			expect(() => validateToolUse("browser_action", "architect", [])).toThrow(
+				'Tool "browser_action" is not allowed in architect mode.',
 			)
 		})
 
 		it("does not throw for allowed tools in architect mode", () => {
-			expect(() => validateToolUse("read_file", "architect", [])).not.toThrow()
+			// execute_command is in the command group which is included in architect mode
+			expect(() => validateToolUse("execute_command", "architect", [])).not.toThrow()
 		})
 
 		it("throws error when tool requirement is not met", () => {

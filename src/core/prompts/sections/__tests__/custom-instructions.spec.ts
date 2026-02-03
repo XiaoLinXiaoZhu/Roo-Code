@@ -509,7 +509,7 @@ describe("addCustomInstructions", () => {
 		expect(result).toContain("Español") // Check for language name
 		expect(result).toContain("(es)") // Check for language code in parentheses
 		expect(result).toContain("Global Instructions:\nglobal instructions")
-		expect(result).toContain("Mode-specific Instructions:\nmode instructions")
+		expect(result).toContain("Custom Instructions:\nmode instructions")
 		expect(result).toContain("Rules from .roorules-test-mode:\nmode specific rules")
 	})
 
@@ -642,7 +642,7 @@ describe("addCustomInstructions", () => {
 		)
 
 		expect(result).toContain("Global Instructions:\nglobal instructions")
-		expect(result).toContain("Mode-specific Instructions:\nmode instructions")
+		expect(result).toContain("Custom Instructions:\nmode instructions")
 		expect(result).not.toContain("# Agent Rules Standard (AGENTS.md):")
 	})
 
@@ -933,7 +933,7 @@ describe("addCustomInstructions", () => {
 		)
 
 		expect(result).toContain("Global Instructions:")
-		expect(result).toContain("Mode-specific Instructions:")
+		expect(result).toContain("Custom Instructions:")
 		expect(result).not.toContain("Rules from .clinerules-test-mode")
 	})
 
@@ -988,7 +988,7 @@ describe("addCustomInstructions", () => {
 		)
 
 		expect(result).toContain("Global Instructions:\nglobal instructions")
-		expect(result).toContain("Mode-specific Instructions:\nmode instructions")
+		expect(result).toContain("Custom Instructions:\nmode instructions")
 		expect(result).not.toContain("Rules from .clinerules-test-mode")
 	})
 
