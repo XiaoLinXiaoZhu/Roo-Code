@@ -162,7 +162,7 @@ export function Run({ run, taskMetrics, toolColumns, toolGroups }: RunProps) {
 		const breakdown: Array<{ tool: string; attempts: number; rate: string }> = []
 
 		for (const toolName of group.tools) {
-			const usage = taskMetrics.toolUsage[toolName as ToolName]
+			const usage = (taskMetrics.toolUsage as Record<string, { attempts: number; failures: number }>)[toolName]
 			if (usage) {
 				totalAttempts += usage.attempts
 				totalFailures += usage.failures
@@ -241,7 +241,9 @@ export function Run({ run, taskMetrics, toolColumns, toolGroups }: RunProps) {
 					</TableCell>
 				))}
 				{toolColumns.map((toolName) => {
-					const usage = taskMetrics?.toolUsage?.[toolName]
+					const usage = (
+						taskMetrics?.toolUsage as Record<string, { attempts: number; failures: number }> | undefined
+					)?.[toolName]
 					const successRate =
 						usage && usage.attempts > 0 ? ((usage.attempts - usage.failures) / usage.attempts) * 100 : 100
 					const rateColor =
