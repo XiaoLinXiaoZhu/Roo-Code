@@ -36,64 +36,23 @@ interface MediaFileResult {
 }
 
 /**
- * Providers that support video_url type for video upload
- * These providers use a dedicated video_url content type
- */
-const VIDEO_URL_PROVIDERS = ["moonshot"] as const
-
-/**
- * Providers that support video via image_url type (using video data URL)
- * These providers accept video data URLs in the image_url content type
- */
-const IMAGE_URL_VIDEO_PROVIDERS: string[] = []
-
-/**
  * Determines the video processing method based on the API provider
- * Can be overridden via environment variable ROO_VIDEO_METHOD
+ * Default to video_url for all providers that support images
  */
-function getVideoProcessingMethod(apiProvider: string | undefined): VideoProcessingMethod {
-	// Check for environment variable override
-	const envMethod = process.env.ROO_VIDEO_METHOD
-	if (envMethod) {
-		if (envMethod === "video_url" || envMethod === "image_url_video") {
-			return envMethod
-		}
-	}
-
-	if (!apiProvider) {
-		return "unsupported"
-	}
-
-	// Check if provider supports video_url type
-	if (VIDEO_URL_PROVIDERS.includes(apiProvider as (typeof VIDEO_URL_PROVIDERS)[number])) {
-		return "video_url"
-	}
-
-	// Check if provider supports video via image_url
-	if (IMAGE_URL_VIDEO_PROVIDERS.includes(apiProvider)) {
-		return "image_url_video"
-	}
-
-	return "unsupported"
+function getVideoProcessingMethod(_apiProvider: string | undefined): VideoProcessingMethod {
+	// Default to video_url type for all providers
+	// This is the most common format (used by Moonshot/Kimi, etc.)
+	return "video_url"
 }
 
 /**
  * Check if video is supported for the given provider
- * Can be enabled via environment variable ROO_VIDEO_ENABLED=true
+ * Default: enabled for all providers that support images
  */
-function isVideoSupportedForProvider(apiProvider: string | undefined, modelSupportsVideo: boolean): boolean {
-	// Environment variable can force-enable video support
-	if (process.env.ROO_VIDEO_ENABLED === "true") {
-		return true
-	}
-
-	// Check model capability first
-	if (modelSupportsVideo) {
-		return true
-	}
-
-	// Check provider-level support
-	return getVideoProcessingMethod(apiProvider) !== "unsupported"
+function isVideoSupportedForProvider(_apiProvider: string | undefined, _modelSupportsVideo: boolean): boolean {
+	// Default to enabled - if the provider supports images, we try video too
+	// The actual API call will fail gracefully if the provider doesn't support video
+	return true
 }
 
 /**
@@ -196,18 +155,6 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 					updateFileResult(relPath, {
 						status: "error",
 						error: `Unsupported media format: ${ext}. ${getSupportedFormatsDescription()}`,
-					})
-					continue
-				}
-
-				// Check video support for video files
-				if (isSupportedVideoFormat(ext) && !supportsVideo) {
-					updateFileResult(relPath, {
-						status: "error",
-						error:
-							`Video format detected (${ext}) but current provider "${apiProvider || "unknown"}" does not support video. ` +
-							`Supported video providers: ${VIDEO_URL_PROVIDERS.join(", ")}. ` +
-							`You can also set ROO_VIDEO_ENABLED=true in .env to force enable video support.`,
 					})
 					continue
 				}

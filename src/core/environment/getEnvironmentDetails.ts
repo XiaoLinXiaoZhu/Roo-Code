@@ -34,6 +34,8 @@ function escapeXml(value: string): string {
 
 export async function getEnvironmentDetails(cline: Task, includeFileDetails: boolean = false) {
 	const currentTime = new Date().toISOString()
+	const isFirstMessage = cline.apiConversationHistory.length === 0
+	const messageCount = cline.apiConversationHistory.length
 	let xmlContent = ""
 
 	// ============================================================================
@@ -59,55 +61,57 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 	// ============================================================================
 	// VSCode Section (Visible Files and Open Tabs)
 	// ============================================================================
-	const visibleFilePaths = vscode.window.visibleTextEditors
-		?.map((editor) => editor.document?.uri?.fsPath)
-		.filter(Boolean)
-		.map((absolutePath) => path.relative(cline.cwd, absolutePath))
-		.slice(0, maxWorkspaceFiles)
+	if (isFirstMessage) {
+		const visibleFilePaths = vscode.window.visibleTextEditors
+			?.map((editor) => editor.document?.uri?.fsPath)
+			.filter(Boolean)
+			.map((absolutePath) => path.relative(cline.cwd, absolutePath))
+			.slice(0, maxWorkspaceFiles)
 
-	// Filter paths through rooIgnoreController
-	const allowedVisibleFiles = cline.rooIgnoreController
-		? cline.rooIgnoreController.filterPaths(visibleFilePaths)
-		: visibleFilePaths.map((p) => p.toPosix()).join("\n")
+		// Filter paths through rooIgnoreController
+		const allowedVisibleFiles = cline.rooIgnoreController
+			? cline.rooIgnoreController.filterPaths(visibleFilePaths)
+			: visibleFilePaths.map((p) => p.toPosix()).join("\n")
 
-	const { maxOpenTabsContext } = state ?? {}
-	const maxTabs = maxOpenTabsContext ?? 20
-	const openTabPaths = vscode.window.tabGroups.all
-		.flatMap((group) => group.tabs)
-		.filter((tab) => tab.input instanceof vscode.TabInputText)
-		.map((tab) => (tab.input as vscode.TabInputText).uri.fsPath)
-		.filter(Boolean)
-		.map((absolutePath) => path.relative(cline.cwd, absolutePath).toPosix())
-		.slice(0, maxTabs)
+		const { maxOpenTabsContext } = state ?? {}
+		const maxTabs = maxOpenTabsContext ?? 20
+		const openTabPaths = vscode.window.tabGroups.all
+			.flatMap((group) => group.tabs)
+			.filter((tab) => tab.input instanceof vscode.TabInputText)
+			.map((tab) => (tab.input as vscode.TabInputText).uri.fsPath)
+			.filter(Boolean)
+			.map((absolutePath) => path.relative(cline.cwd, absolutePath).toPosix())
+			.slice(0, maxTabs)
 
-	// Filter paths through rooIgnoreController
-	const allowedOpenTabs = cline.rooIgnoreController
-		? cline.rooIgnoreController.filterPaths(openTabPaths)
-		: openTabPaths.map((p) => p.toPosix()).join("\n")
+		// Filter paths through rooIgnoreController
+		const allowedOpenTabs = cline.rooIgnoreController
+			? cline.rooIgnoreController.filterPaths(openTabPaths)
+			: openTabPaths.map((p) => p.toPosix()).join("\n")
 
-	if (allowedVisibleFiles || allowedOpenTabs) {
-		xmlContent += "\n  <vscode>"
-		if (allowedVisibleFiles) {
-			const visibleFileLines = Array.isArray(allowedVisibleFiles)
-				? allowedVisibleFiles
-				: allowedVisibleFiles.split("\n").filter(Boolean)
-			xmlContent += "\n    <visible_files>"
-			for (const file of visibleFileLines) {
-				xmlContent += `\n      <file>${escapeXml(file)}</file>`
+		if (allowedVisibleFiles || allowedOpenTabs) {
+			xmlContent += "\n  <vscode>"
+			if (allowedVisibleFiles) {
+				const visibleFileLines = Array.isArray(allowedVisibleFiles)
+					? allowedVisibleFiles
+					: allowedVisibleFiles.split("\n").filter(Boolean)
+				xmlContent += "\n    <visible_files>"
+				for (const file of visibleFileLines) {
+					xmlContent += `\n      <file>${escapeXml(file)}</file>`
+				}
+				xmlContent += "\n    </visible_files>"
 			}
-			xmlContent += "\n    </visible_files>"
-		}
-		if (allowedOpenTabs) {
-			const openTabLines = Array.isArray(allowedOpenTabs)
-				? allowedOpenTabs
-				: allowedOpenTabs.split("\n").filter(Boolean)
-			xmlContent += "\n    <open_tabs>"
-			for (const file of openTabLines) {
-				xmlContent += `\n      <file>${escapeXml(file)}</file>`
+			if (allowedOpenTabs) {
+				const openTabLines = Array.isArray(allowedOpenTabs)
+					? allowedOpenTabs
+					: allowedOpenTabs.split("\n").filter(Boolean)
+				xmlContent += "\n    <open_tabs>"
+				for (const file of openTabLines) {
+					xmlContent += `\n      <file>${escapeXml(file)}</file>`
+				}
+				xmlContent += "\n    </open_tabs>"
 			}
-			xmlContent += "\n    </open_tabs>"
+			xmlContent += "\n  </vscode>"
 		}
-		xmlContent += "\n  </vscode>"
 	}
 
 	// ============================================================================
@@ -214,31 +218,33 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 	// ============================================================================
 	// Git Status Section
 	// ============================================================================
-	const { maxGitStatusFiles = 0 } = state ?? {}
+	if (isFirstMessage) {
+		const { maxGitStatusFiles = 0 } = state ?? {}
 
-	if (maxGitStatusFiles > 0) {
-		const gitStatus = await getGitStatusStructured(cline.cwd, maxGitStatusFiles)
-		if (gitStatus) {
-			// Build git element with branch and upstream attributes
-			let gitElement = `\n  <git`
-			if (gitStatus.branch) {
-				gitElement += ` branch="${escapeXml(gitStatus.branch)}"`
-			}
-			if (gitStatus.upstream) {
-				gitElement += ` upstream="${escapeXml(gitStatus.upstream)}"`
-			}
-			if (gitStatus.truncated) {
-				gitElement += ` truncated="true"`
-			}
-			gitElement += `>`
+		if (maxGitStatusFiles > 0) {
+			const gitStatus = await getGitStatusStructured(cline.cwd, maxGitStatusFiles)
+			if (gitStatus) {
+				// Build git element with branch and upstream attributes
+				let gitElement = `\n  <git`
+				if (gitStatus.branch) {
+					gitElement += ` branch="${escapeXml(gitStatus.branch)}"`
+				}
+				if (gitStatus.upstream) {
+					gitElement += ` upstream="${escapeXml(gitStatus.upstream)}"`
+				}
+				if (gitStatus.truncated) {
+					gitElement += ` truncated="true"`
+				}
+				gitElement += `>`
 
-			// Add file changes
-			for (const file of gitStatus.files) {
-				gitElement += `\n    <change status="${escapeXml(file.status)}">${escapeXml(file.path)}</change>`
-			}
+				// Add file changes
+				for (const file of gitStatus.files) {
+					gitElement += `\n    <change status="${escapeXml(file.status)}">${escapeXml(file.path)}</change>`
+				}
 
-			gitElement += `\n  </git>`
-			xmlContent += gitElement
+				gitElement += `\n  </git>`
+				xmlContent += gitElement
+			}
 		}
 	}
 
@@ -321,6 +327,7 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 	// ============================================================================
 	// Reminder and Spirit Hint Sections
 	// ============================================================================
+	const shouldIncludeReminder = isFirstMessage || messageCount % 5 === 0
 	const todoListEnabled =
 		state && typeof state.apiConfiguration?.todoListEnabled === "boolean"
 			? state.apiConfiguration.todoListEnabled
@@ -329,7 +336,7 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 	const reminderContent = todoListEnabled ? formatReminderSection(cline.todoList) : ""
 	const spriteHintContent = getSpriteHint()
 
-	if (todoListEnabled) {
+	if (shouldIncludeReminder && todoListEnabled) {
 		if (reminderContent) {
 			// reminderContent is already XML formatted, no need to escape
 			xmlContent += `\n  <todos>\n    ${reminderContent.split("\n").join("\n    ")}\n  </todos>`
@@ -338,7 +345,7 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 		}
 	}
 
-	if (spriteHintContent) {
+	if (shouldIncludeReminder && spriteHintContent) {
 		xmlContent += `\n  <spirit_hint>${escapeXml(spriteHintContent)}</spirit_hint>`
 	}
 
