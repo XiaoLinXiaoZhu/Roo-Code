@@ -2,6 +2,43 @@
 
 # Roo Code Changelog
 
+## [3.50.0] - 2026-02-05
+
+### ✨ Enhanced Read Media Tool with Focus & Scale Support
+
+The `read_media` tool has been completely redesigned to support dynamic multi-pass image examination, allowing the model to zoom into specific regions for detailed analysis.
+
+#### New Features
+
+- **Single-file interface**: Simplified from `files: Array<{path}>` to `path: string` for cleaner tool calls
+- **Focus parameters**: New `focusX` (0-1) and `focusY` (0-1) parameters to specify the center point of interest
+- **Scale parameter**: New `scale` (1-8) parameter to zoom into regions (e.g., scale=4 shows 25% of the image)
+- **Automatic compression**: All images are compressed to 1024px max dimension to optimize token usage
+- **Guided exploration**: Tool returns now include recommendations to examine images with at least 10 focused observations
+
+#### UI Improvements
+
+- **Parameter display**: Shows path, focus coordinates, and scale level in the chat UI
+- **Size information**: Displays original size, output size, and cropped region coordinates
+- **Image preview**: Shows the actual cropped/processed image that was sent to the model
+
+#### Technical Changes
+
+- Replaced `sharp` (native module) with `jimp` (pure JS) for better VSCode extension compatibility
+- Added `calculateCropRegion()` and `processImageWithFocus()` helper functions
+- Updated `NativeToolCallParser` to handle new parameter structure
+- Added comprehensive test coverage for new functionality
+
+#### Usage Example
+
+```typescript
+// 1. Get overview
+read_media({ path: "diagram.png" })
+
+// 2. Zoom into bottom-left corner
+read_media({ path: "diagram.png", focusX: 0.3, focusY: 0.7, scale: 4 })
+```
+
 ## [1.107.0]
 
 - feat: Add cli support for linux (#11167)

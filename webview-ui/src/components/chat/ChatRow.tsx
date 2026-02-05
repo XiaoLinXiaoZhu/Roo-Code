@@ -646,6 +646,80 @@ export const ChatRowContent = ({
 					</>
 				)
 			}
+			case "readMedia": {
+				const hasResult = tool.croppedImageData || tool.originalSize
+				const isOverview = !tool.scale || tool.scale === 1
+
+				return (
+					<>
+						<div style={headerStyle}>
+							{toolIcon("file-media")}
+							<span style={{ fontWeight: "bold" }}>
+								{hasResult
+									? isOverview
+										? t("chat:mediaOperations.didReadMediaOverview", "Read media (overview)")
+										: t("chat:mediaOperations.didReadMediaDetail", "Read media (detail view)")
+									: t("chat:mediaOperations.wantsToReadMedia", "Wants to read media")}
+							</span>
+						</div>
+						<div className="pl-6">
+							<div className="rounded border border-vscode-editorGroup-border bg-vscode-editor-background p-3">
+								{/* Parameters section */}
+								<div className="mb-2 text-xs text-vscode-descriptionForeground">
+									<div className="flex flex-wrap gap-x-4 gap-y-1">
+										<span>
+											<strong>Path:</strong> {tool.path}
+										</span>
+										{tool.scale && tool.scale > 1 && (
+											<>
+												<span>
+													<strong>Focus:</strong> ({((tool.focusX ?? 0.5) * 100).toFixed(0)}%,{" "}
+													{((tool.focusY ?? 0.5) * 100).toFixed(0)}%)
+												</span>
+												<span>
+													<strong>Scale:</strong> {tool.scale}x
+												</span>
+											</>
+										)}
+									</div>
+									{tool.originalSize && (
+										<div className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+											<span>
+												<strong>Original:</strong> {tool.originalSize.width}x
+												{tool.originalSize.height}
+											</span>
+											{tool.processedSize && (
+												<span>
+													<strong>Output:</strong> {tool.processedSize.width}x
+													{tool.processedSize.height}
+												</span>
+											)}
+											{tool.region && (
+												<span>
+													<strong>Region:</strong> {(tool.region.x * 100).toFixed(0)}%-
+													{((tool.region.x + tool.region.width) * 100).toFixed(0)}% x{" "}
+													{(tool.region.y * 100).toFixed(0)}%-
+													{((tool.region.y + tool.region.height) * 100).toFixed(0)}%
+												</span>
+											)}
+										</div>
+									)}
+								</div>
+								{/* Image preview */}
+								{tool.croppedImageData && (
+									<div className="mt-2">
+										<img
+											src={tool.croppedImageData}
+											alt="Cropped media preview"
+											className="max-h-64 max-w-full rounded border border-vscode-editorGroup-border object-contain"
+										/>
+									</div>
+								)}
+							</div>
+						</div>
+					</>
+				)
+			}
 			case "updateTodoList" as any: {
 				const todos = (tool as any).todos || []
 				// Get previous todos from the latest todos in the task context
@@ -1645,6 +1719,94 @@ export const ChatRowContent = ({
 										</span>
 									)}
 								</div>
+							)
+						}
+						case "readMedia": {
+							const isOverview = !sayTool.scale || sayTool.scale === 1
+							return (
+								<>
+									<div style={headerStyle}>
+										<span
+											className="codicon codicon-file-media"
+											style={{ color: "var(--vscode-foreground)", marginBottom: "-1.5px" }}
+										/>
+										<span style={{ fontWeight: "bold" }}>
+											{isOverview
+												? t(
+														"chat:mediaOperations.didReadMediaOverview",
+														"Read media (overview)",
+													)
+												: t(
+														"chat:mediaOperations.didReadMediaDetail",
+														"Read media (detail view)",
+													)}
+										</span>
+									</div>
+									<div className="pl-6">
+										<div className="rounded border border-vscode-editorGroup-border bg-vscode-editor-background p-3">
+											{/* Parameters section */}
+											<div className="mb-2 text-xs text-vscode-descriptionForeground">
+												<div className="flex flex-wrap gap-x-4 gap-y-1">
+													<span>
+														<strong>Path:</strong> {sayTool.path}
+													</span>
+													{sayTool.scale && sayTool.scale > 1 && (
+														<>
+															<span>
+																<strong>Focus:</strong> (
+																{((sayTool.focusX ?? 0.5) * 100).toFixed(0)}%,{" "}
+																{((sayTool.focusY ?? 0.5) * 100).toFixed(0)}%)
+															</span>
+															<span>
+																<strong>Scale:</strong> {sayTool.scale}x
+															</span>
+														</>
+													)}
+												</div>
+												{sayTool.originalSize && (
+													<div className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+														<span>
+															<strong>Original:</strong> {sayTool.originalSize.width}x
+															{sayTool.originalSize.height}
+														</span>
+														{sayTool.processedSize && (
+															<span>
+																<strong>Output:</strong> {sayTool.processedSize.width}x
+																{sayTool.processedSize.height}
+															</span>
+														)}
+														{sayTool.region && (
+															<span>
+																<strong>Region:</strong>{" "}
+																{(sayTool.region.x * 100).toFixed(0)}%-
+																{(
+																	(sayTool.region.x + sayTool.region.width) *
+																	100
+																).toFixed(0)}
+																% x {(sayTool.region.y * 100).toFixed(0)}%-
+																{(
+																	(sayTool.region.y + sayTool.region.height) *
+																	100
+																).toFixed(0)}
+																%
+															</span>
+														)}
+													</div>
+												)}
+											</div>
+											{/* Image preview */}
+											{sayTool.croppedImageData && (
+												<div className="mt-2">
+													<img
+														src={sayTool.croppedImageData}
+														alt="Cropped media preview"
+														className="max-h-64 max-w-full rounded border border-vscode-editorGroup-border object-contain"
+													/>
+												</div>
+											)}
+										</div>
+									</div>
+								</>
 							)
 						}
 						default:

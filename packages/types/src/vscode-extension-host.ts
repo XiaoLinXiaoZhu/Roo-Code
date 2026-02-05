@@ -802,6 +802,14 @@ export interface ClineSayTool {
 		| "findReferences"
 		| "skill"
 	path?: string
+	// For readMedia
+	focusX?: number
+	focusY?: number
+	scale?: number
+	originalSize?: { width: number; height: number }
+	processedSize?: { width: number; height: number }
+	region?: { x: number; y: number; width: number; height: number }
+	croppedImageData?: string // Base64 encoded cropped image for preview
 	// For goToDefinition and findReferences
 	symbol?: string
 	pattern?: string

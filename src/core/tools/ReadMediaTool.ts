@@ -156,20 +156,12 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 
 			// Request approval if file is valid
 			if (fileResult.status === "pending") {
-				const focusInfo =
-					scale && scale > 1
-						? ` (focus: ${((focusX ?? 0.5) * 100).toFixed(0)}%, ${((focusY ?? 0.5) * 100).toFixed(0)}%, scale: ${scale}x)`
-						: ""
-
 				const completeMessage = JSON.stringify({
 					tool: "readMedia",
-					batchFiles: [
-						{
-							path: relPath,
-							lineSnippet: getReadablePath(task.cwd, relPath) + focusInfo,
-							key: "media-0",
-						},
-					],
+					path: relPath,
+					focusX: focusX ?? 0.5,
+					focusY: focusY ?? 0.5,
+					scale: scale ?? 1,
 				} satisfies ClineSayTool)
 
 				const { response, text } = await task.ask("tool", completeMessage, false)
@@ -218,6 +210,20 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 						fileResult.originalSize = mediaResult.originalSize
 						fileResult.processedSize = mediaResult.processedSize
 						fileResult.region = mediaResult.region
+
+						// Send result message with cropped image preview for UI
+						const resultMessage = JSON.stringify({
+							tool: "readMedia",
+							path: relPath,
+							focusX: focusX ?? 0.5,
+							focusY: focusY ?? 0.5,
+							scale: scale ?? 1,
+							originalSize: mediaResult.originalSize,
+							processedSize: mediaResult.processedSize,
+							region: mediaResult.region,
+							croppedImageData: mediaResult.dataUrl,
+						} satisfies ClineSayTool)
+						await task.say("tool", resultMessage)
 					}
 				}
 			}
