@@ -2,7 +2,7 @@ import path from "path"
 import * as fs from "fs/promises"
 import { t } from "../../../i18n"
 import prettyBytes from "pretty-bytes"
-import sharp from "sharp"
+import { Jimp } from "jimp"
 
 /**
  * Default maximum allowed media file size in bytes (5MB)
@@ -187,11 +187,18 @@ export function generateProcessingNotice(
 	origWidth: number,
 	origHeight: number,
 ): string {
+	const recommendation =
+		`\n\n💡 Recommendation: Examine the image thoroughly with at least 10 focused observations. ` +
+		`Reading images costs minimal tokens, but careful multi-pass examination often reveals ` +
+		`important details missed in a single glance. Consider scanning: corners, edges, text areas, ` +
+		`diagrams, annotations, and any regions that seem information-dense.`
+
 	if (scale === 1) {
 		return (
 			`Overview of full image (${origWidth}x${origHeight}). ` +
 			`Image has been compressed to optimize token usage. ` +
-			`Use focusX/focusY/scale parameters to examine specific regions in detail.`
+			`Use focusX/focusY/scale parameters to examine specific regions in detail.` +
+			recommendation
 		)
 	}
 
@@ -203,7 +210,8 @@ export function generateProcessingNotice(
 	return (
 		`Zoomed ${scale}x into region [${regionDesc}] of ${origWidth}x${origHeight} image. ` +
 		`This view shows approximately ${areaPercent}% of the original image area. ` +
-		`To see other areas, adjust focusX/focusY. To zoom out, reduce scale.`
+		`To see other areas, adjust focusX/focusY. To zoom out, reduce scale.` +
+		recommendation
 	)
 }
 
@@ -223,10 +231,10 @@ export async function processImageWithFocus(
 	const clampedFocusX = Math.max(0, Math.min(focusX, 1))
 	const clampedFocusY = Math.max(0, Math.min(focusY, 1))
 
-	// Read original image metadata
-	const image = sharp(filePath)
-	const metadata = await image.metadata()
-	const { width: origWidth, height: origHeight } = metadata
+	// Read original image using Jimp
+	const image = await Jimp.read(filePath)
+	const origWidth = image.width
+	const origHeight = image.height
 
 	if (!origWidth || !origHeight) {
 		throw new Error("Unable to read image dimensions")
@@ -246,20 +254,15 @@ export async function processImageWithFocus(
 		outputWidth = Math.round(outputHeight * aspectRatio)
 	}
 
-	// Execute crop and resize
-	const processedBuffer = await image
-		.extract({
-			left: cropRegion.x,
-			top: cropRegion.y,
-			width: cropRegion.width,
-			height: cropRegion.height,
-		})
-		.resize(outputWidth, outputHeight, {
-			fit: "inside",
-			withoutEnlargement: true,
-		})
-		.jpeg({ quality })
-		.toBuffer()
+	// Execute crop and resize using Jimp
+	// Note: Jimp modifies the image in place, so we clone first
+	const processedImage = image
+		.clone()
+		.crop({ x: cropRegion.x, y: cropRegion.y, w: cropRegion.width, h: cropRegion.height })
+		.resize({ w: outputWidth, h: outputHeight })
+
+	// Get buffer as JPEG with specified quality
+	const processedBuffer = await processedImage.getBuffer("image/jpeg", { quality })
 
 	// Generate data URL
 	const base64 = processedBuffer.toString("base64")

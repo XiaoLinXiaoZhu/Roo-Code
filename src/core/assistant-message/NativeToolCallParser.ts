@@ -747,8 +747,13 @@ export class NativeToolCallParser {
 				break
 
 			case "read_media":
-				if (partialArgs.files && Array.isArray(partialArgs.files)) {
-					nativeArgs = { files: partialArgs.files }
+				if (partialArgs.path) {
+					nativeArgs = {
+						path: partialArgs.path,
+						focusX: partialArgs.focusX,
+						focusY: partialArgs.focusY,
+						scale: partialArgs.scale,
+					}
 				}
 				break
 
@@ -1171,8 +1176,13 @@ export class NativeToolCallParser {
 					break
 
 				case "read_media":
-					if (args.files && Array.isArray(args.files)) {
-						nativeArgs = { files: args.files } as NativeArgsFor<TName>
+					if (args.path) {
+						nativeArgs = {
+							path: args.path,
+							focusX: args.focusX,
+							focusY: args.focusY,
+							scale: args.scale,
+						} as NativeArgsFor<TName>
 					}
 					break
 
