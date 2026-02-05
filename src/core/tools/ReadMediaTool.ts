@@ -21,8 +21,19 @@ import {
 	getSupportedFormatsDescription,
 	type MediaType,
 	type VideoProcessingMethod,
+	type FocusParams,
 } from "./helpers/mediaHelpers"
 import { BaseTool, ToolCallbacks } from "./BaseTool"
+
+/**
+ * Parameters for read_media tool
+ */
+interface ReadMediaParams {
+	path: string
+	focusX?: number
+	focusY?: number
+	scale?: number
+}
 
 interface MediaFileResult {
 	path: string
@@ -33,6 +44,10 @@ interface MediaFileResult {
 	feedbackText?: string
 	mediaType?: MediaType
 	mimeType?: string
+	originalSize?: { width: number; height: number }
+	processedSize?: { width: number; height: number }
+	region?: { x: number; y: number; width: number; height: number }
+	scale?: number
 }
 
 /**
@@ -58,26 +73,28 @@ function isVideoSupportedForProvider(_apiProvider: string | undefined, _modelSup
 /**
  * ReadMediaTool - Reads media files (images and videos) for multimodal analysis.
  *
- * This tool is conditionally available based on model's multimodal capabilities (supportsImages).
- * Video support depends on the API provider and can be configured via environment variables:
- * - ROO_VIDEO_ENABLED=true: Force enable video support
- * - ROO_VIDEO_METHOD=video_url|image_url_video: Override video processing method
+ * This tool supports dynamic multi-pass reading with focus and scale parameters,
+ * allowing the model to examine specific regions in detail through multiple calls.
+ *
+ * Workflow:
+ * 1. First call without focus/scale to get an overview (compressed to 1024px)
+ * 2. Call again with focusX/focusY/scale to zoom into specific regions
  */
 export class ReadMediaTool extends BaseTool<"read_media"> {
 	readonly name = "read_media" as const
 
-	async execute(params: { files: Array<{ path: string }> }, task: Task, callbacks: ToolCallbacks): Promise<void> {
+	async execute(params: ReadMediaParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
 		const { handleError, pushToolResult } = callbacks
-		const fileEntries = params.files
+		const { path: relPath, focusX, focusY, scale } = params
 		const modelInfo = task.api.getModel().info
 		const apiProvider = task.apiConfiguration.apiProvider
 
-		if (!fileEntries || fileEntries.length === 0) {
+		// Validate required parameter
+		if (!relPath) {
 			task.consecutiveMistakeCount++
 			task.recordToolError("read_media")
-			const errorMsg = await task.sayAndCreateMissingParamError("read_media", "files")
-			const errorResult = `Error: ${errorMsg}`
-			pushToolResult(errorResult)
+			const errorMsg = await task.sayAndCreateMissingParamError("read_media", "path")
+			pushToolResult(`Error: ${errorMsg}`)
 			return
 		}
 
@@ -98,225 +115,204 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 		const supportsVideo = isVideoSupportedForProvider(apiProvider, modelSupportsVideo)
 		const videoMethod = getVideoProcessingMethod(apiProvider)
 
-		// Initialize results
-		const fileResults: MediaFileResult[] = fileEntries.map((entry) => ({
-			path: entry.path,
-			status: "pending" as const,
-		}))
-
-		const updateFileResult = (filePath: string, updates: Partial<MediaFileResult>) => {
-			const index = fileResults.findIndex((result) => result.path === filePath)
-			if (index !== -1) {
-				fileResults[index] = { ...fileResults[index], ...updates }
-			}
+		// Initialize result
+		const fileResult: MediaFileResult = {
+			path: relPath,
+			status: "pending",
+			scale: scale ?? 1,
 		}
 
 		try {
-			const filesToApprove: MediaFileResult[] = []
+			const fullPath = path.resolve(task.cwd, relPath)
 
-			// Validate all files first
-			for (const fileResult of fileResults) {
-				const relPath = fileResult.path
-				const fullPath = path.resolve(task.cwd, relPath)
-
-				// Check if path is outside workspace
-				if (isPathOutsideWorkspace(fullPath)) {
-					updateFileResult(relPath, {
-						status: "blocked",
-						error: `Cannot read files outside workspace: ${relPath}`,
-					})
-					continue
-				}
-
-				// Check .rooignore
-				const rooIgnoreController = task.rooIgnoreController
-				if (rooIgnoreController && !rooIgnoreController.validateAccess(relPath)) {
-					updateFileResult(relPath, {
-						status: "blocked",
-						error: `File is blocked by .rooignore: ${relPath}`,
-					})
-					continue
-				}
-
-				// Check if file exists
+			// Check if path is outside workspace
+			if (isPathOutsideWorkspace(fullPath)) {
+				fileResult.status = "blocked"
+				fileResult.error = `Cannot read files outside workspace: ${relPath}`
+			}
+			// Check .rooignore
+			else if (task.rooIgnoreController && !task.rooIgnoreController.validateAccess(relPath)) {
+				fileResult.status = "blocked"
+				fileResult.error = `File is blocked by .rooignore: ${relPath}`
+			}
+			// Check if file exists
+			else {
 				try {
 					await fs.access(fullPath)
 				} catch {
-					updateFileResult(relPath, {
-						status: "error",
-						error: `File not found: ${relPath}`,
-					})
-					continue
+					fileResult.status = "error"
+					fileResult.error = `File not found: ${relPath}`
 				}
-
-				// Check if it's a supported media format
-				const ext = path.extname(relPath).toLowerCase()
-				if (!isSupportedMediaFormat(ext)) {
-					updateFileResult(relPath, {
-						status: "error",
-						error: `Unsupported media format: ${ext}. ${getSupportedFormatsDescription()}`,
-					})
-					continue
-				}
-
-				filesToApprove.push(fileResult)
 			}
 
-			// Request approval for valid files
-			if (filesToApprove.length > 0) {
-				const batchFiles = filesToApprove.map((f, index) => ({
-					path: f.path,
-					lineSnippet: getReadablePath(task.cwd, f.path),
-					key: `media-${index}`,
-				}))
+			// Check if it's a supported media format
+			if (fileResult.status === "pending") {
+				const ext = path.extname(relPath).toLowerCase()
+				if (!isSupportedMediaFormat(ext)) {
+					fileResult.status = "error"
+					fileResult.error = `Unsupported media format: ${ext}. ${getSupportedFormatsDescription()}`
+				}
+			}
+
+			// Request approval if file is valid
+			if (fileResult.status === "pending") {
+				const focusInfo =
+					scale && scale > 1
+						? ` (focus: ${((focusX ?? 0.5) * 100).toFixed(0)}%, ${((focusY ?? 0.5) * 100).toFixed(0)}%, scale: ${scale}x)`
+						: ""
 
 				const completeMessage = JSON.stringify({
 					tool: "readMedia",
-					batchFiles,
+					batchFiles: [
+						{
+							path: relPath,
+							lineSnippet: getReadablePath(task.cwd, relPath) + focusInfo,
+							key: "media-0",
+						},
+					],
 				} satisfies ClineSayTool)
 
 				const { response, text } = await task.ask("tool", completeMessage, false)
 
 				if (response !== "yesButtonClicked") {
-					// User denied
-					for (const fileResult of filesToApprove) {
-						updateFileResult(fileResult.path, {
-							status: "denied",
-							feedbackText: text,
-						})
-					}
+					fileResult.status = "denied"
+					fileResult.feedbackText = text
 				} else {
-					// User approved - process media files
+					// User approved - process media file
 					const mediaMemoryTracker = new MediaMemoryTracker()
-					// Get media size limits from user settings
 					const state = await task.providerRef.deref()?.getState()
 					const {
 						maxImageFileSize = DEFAULT_MAX_MEDIA_FILE_SIZE_MB,
 						maxTotalImageSize = DEFAULT_MAX_TOTAL_MEDIA_SIZE_MB,
 					} = state ?? {}
 
-					for (const fileResult of filesToApprove) {
-						const relPath = fileResult.path
-						const fullPath = path.resolve(task.cwd, relPath)
+					// Validate media size
+					const validationResult = await validateMediaForProcessing(
+						fullPath,
+						supportsImages,
+						maxImageFileSize,
+						maxTotalImageSize,
+						mediaMemoryTracker.getTotalMemoryUsed(),
+						supportsVideo,
+					)
 
-						try {
-							// Validate media size
-							const validationResult = await validateMediaForProcessing(
-								fullPath,
-								supportsImages,
-								maxImageFileSize,
-								maxTotalImageSize,
-								mediaMemoryTracker.getTotalMemoryUsed(),
-								supportsVideo,
-							)
-
-							if (!validationResult.isValid) {
-								updateFileResult(relPath, {
-									status: "error",
-									notice: validationResult.notice,
-									mediaType: validationResult.mediaType,
-								})
-								continue
-							}
-
-							// Process media
-							const mediaResult = await processMediaFile(fullPath)
-							mediaMemoryTracker.addMemoryUsage(mediaResult.sizeInMB)
-
-							updateFileResult(relPath, {
-								status: "approved",
-								mediaDataUrl: mediaResult.dataUrl,
-								notice: mediaResult.notice,
-								mediaType: mediaResult.mediaType,
-								mimeType: mediaResult.mimeType,
-							})
-						} catch (error) {
-							updateFileResult(relPath, {
-								status: "error",
-								error: `Failed to process media: ${error instanceof Error ? error.message : String(error)}`,
-							})
+					if (!validationResult.isValid) {
+						fileResult.status = "error"
+						fileResult.notice = validationResult.notice
+						fileResult.mediaType = validationResult.mediaType
+					} else {
+						// Process media with focus parameters
+						const focusParams: FocusParams = {
+							focusX: focusX ?? 0.5,
+							focusY: focusY ?? 0.5,
+							scale: scale ?? 1,
 						}
+
+						const mediaResult = await processMediaFile(fullPath, { focus: focusParams })
+
+						fileResult.status = "approved"
+						fileResult.mediaDataUrl = mediaResult.dataUrl
+						fileResult.notice = mediaResult.notice
+						fileResult.mediaType = mediaResult.mediaType
+						fileResult.mimeType = mediaResult.mimeType
+						fileResult.originalSize = mediaResult.originalSize
+						fileResult.processedSize = mediaResult.processedSize
+						fileResult.region = mediaResult.region
 					}
 				}
 			}
 
 			// Build result
-			// Format as XML for LLM consumption
 			const xmlLines: string[] = []
 			const mediaBlocks: Array<Anthropic.ImageBlockParam | Record<string, unknown>> = []
 
-			const loadedCount = fileResults.filter((r) => r.status === "approved" && r.mediaDataUrl).length
-			const totalCount = fileResults.length
+			const isLoaded = fileResult.status === "approved" && fileResult.mediaDataUrl
 
-			xmlLines.push(`<read_media_result loaded="${loadedCount}" total="${totalCount}">`)
+			xmlLines.push(`<read_media_result status="${isLoaded ? "loaded" : fileResult.status}">`)
 
-			for (const fileResult of fileResults) {
-				const relPath = fileResult.path
+			switch (fileResult.status) {
+				case "approved":
+					if (fileResult.mediaDataUrl) {
+						const ext = path.extname(relPath).toLowerCase()
+						const isVideo = isSupportedVideoFormat(ext)
+						const tagName = isVideo ? "video" : "image"
 
-				switch (fileResult.status) {
-					case "approved":
-						if (fileResult.mediaDataUrl) {
-							const ext = path.extname(relPath).toLowerCase()
-							const isVideo = isSupportedVideoFormat(ext)
-							const tagName = isVideo ? "video" : "image"
+						// Build attributes
+						const attrs: string[] = [`path="${relPath}"`, `status="loaded"`]
 
-							xmlLines.push(
-								`<${tagName} path="${relPath}" status="loaded">${fileResult.notice || "Media loaded successfully"}</${tagName}>`,
+						if (fileResult.originalSize) {
+							attrs.push(
+								`original_size="${fileResult.originalSize.width}x${fileResult.originalSize.height}"`,
 							)
+						}
 
-							if (isVideo) {
-								// Handle video based on processing method
-								const mimeType = fileResult.mimeType || VIDEO_MIME_TYPES[ext] || "video/mp4"
-								const base64Data = fileResult.mediaDataUrl.split(",")[1]
+						if (fileResult.scale && fileResult.scale > 1) {
+							attrs.push(`view="detail"`)
+							attrs.push(`scale="${fileResult.scale}"`)
+							if (focusX !== undefined || focusY !== undefined) {
+								attrs.push(`focus="${(focusX ?? 0.5).toFixed(2)},${(focusY ?? 0.5).toFixed(2)}"`)
+							}
+						} else {
+							attrs.push(`view="overview"`)
+						}
 
-								if (videoMethod === "video_url") {
-									// Use video_url type (e.g., Moonshot/Kimi style)
-									mediaBlocks.push({
-										type: "video_url",
-										video_url: {
-											url: fileResult.mediaDataUrl,
-										},
-									})
-								} else if (videoMethod === "image_url_video") {
-									// Use image_url type with video data URL
-									mediaBlocks.push({
-										type: "image_url",
-										image_url: {
-											url: fileResult.mediaDataUrl,
-										},
-									})
-								}
-								// If unsupported, we shouldn't reach here due to earlier validation
-							} else {
-								// Handle image
-								const mimeType = fileResult.mimeType || IMAGE_MIME_TYPES[ext] || "image/png"
+						if (fileResult.region) {
+							const r = fileResult.region
+							attrs.push(
+								`region="${(r.x * 100).toFixed(0)}%-${((r.x + r.width) * 100).toFixed(0)}% x ${(r.y * 100).toFixed(0)}%-${((r.y + r.height) * 100).toFixed(0)}%"`,
+							)
+						}
+
+						xmlLines.push(`<${tagName} ${attrs.join(" ")}>`)
+						xmlLines.push(fileResult.notice || "Media loaded successfully")
+						xmlLines.push(`</${tagName}>`)
+
+						if (isVideo) {
+							// Handle video based on processing method
+							if (videoMethod === "video_url") {
 								mediaBlocks.push({
-									type: "image",
-									source: {
-										type: "base64",
-										media_type: mimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
-										data: fileResult.mediaDataUrl.split(",")[1],
+									type: "video_url",
+									video_url: {
+										url: fileResult.mediaDataUrl,
+									},
+								})
+							} else if (videoMethod === "image_url_video") {
+								mediaBlocks.push({
+									type: "image_url",
+									image_url: {
+										url: fileResult.mediaDataUrl,
 									},
 								})
 							}
+						} else {
+							// Handle image
+							const mimeType = fileResult.mimeType || IMAGE_MIME_TYPES[ext] || "image/jpeg"
+							mediaBlocks.push({
+								type: "image",
+								source: {
+									type: "base64",
+									media_type: mimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+									data: fileResult.mediaDataUrl.split(",")[1],
+								},
+							})
 						}
-						break
-					case "denied":
-						xmlLines.push(
-							`<media path="${relPath}" status="denied">${fileResult.feedbackText || "User denied access"}</media>`,
-						)
-						break
-					case "blocked":
-						xmlLines.push(`<media path="${relPath}" status="blocked">${fileResult.error}</media>`)
-						break
-					case "error":
-						xmlLines.push(
-							`<media path="${relPath}" status="error">${fileResult.error || fileResult.notice}</media>`,
-						)
-						break
-					default:
-						xmlLines.push(`<media path="${relPath}" status="unknown" />`)
-				}
+					}
+					break
+				case "denied":
+					xmlLines.push(
+						`<media path="${relPath}" status="denied">${fileResult.feedbackText || "User denied access"}</media>`,
+					)
+					break
+				case "blocked":
+					xmlLines.push(`<media path="${relPath}" status="blocked">${fileResult.error}</media>`)
+					break
+				case "error":
+					xmlLines.push(
+						`<media path="${relPath}" status="error">${fileResult.error || fileResult.notice}</media>`,
+					)
+					break
+				default:
+					xmlLines.push(`<media path="${relPath}" status="unknown" />`)
 			}
 
 			xmlLines.push(`</read_media_result>`)
@@ -331,12 +327,11 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 			}
 
 			// Reset consecutive mistake count on success
-			const hasSuccess = fileResults.some((r) => r.status === "approved")
-			if (hasSuccess) {
+			if (fileResult.status === "approved") {
 				task.consecutiveMistakeCount = 0
 			}
 		} catch (error) {
-			await handleError("reading media files", error instanceof Error ? error : new Error(String(error)))
+			await handleError("reading media file", error instanceof Error ? error : new Error(String(error)))
 		} finally {
 			this.resetPartialState()
 		}

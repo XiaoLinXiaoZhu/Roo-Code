@@ -2,6 +2,7 @@ import path from "path"
 import * as fs from "fs/promises"
 import { t } from "../../../i18n"
 import prettyBytes from "pretty-bytes"
+import sharp from "sharp"
 
 /**
  * Default maximum allowed media file size in bytes (5MB)
@@ -15,6 +16,22 @@ export const DEFAULT_MAX_MEDIA_FILE_SIZE_MB = 5
  * If including another media would exceed this limit, it will be skipped with a notice.
  */
 export const DEFAULT_MAX_TOTAL_MEDIA_SIZE_MB = 20
+
+/**
+ * Default output size for processed images (longest edge in pixels)
+ * Images are compressed to this size to optimize token usage
+ */
+export const DEFAULT_OUTPUT_SIZE = 1024
+
+/**
+ * Default JPEG quality for compressed output
+ */
+export const DEFAULT_QUALITY = 85
+
+/**
+ * Maximum allowed scale factor
+ */
+export const MAX_SCALE = 8
 
 /**
  * Supported image formats that can be displayed
@@ -77,6 +94,25 @@ export type MediaType = "image" | "video"
 export type VideoProcessingMethod = "video_url" | "image_url_video" | "unsupported"
 
 /**
+ * Focus parameters for zooming into specific regions
+ */
+export interface FocusParams {
+	focusX?: number // 0-1, default 0.5
+	focusY?: number // 0-1, default 0.5
+	scale?: number // 1-8, default 1
+}
+
+/**
+ * Processed region information (normalized coordinates)
+ */
+export interface ProcessedRegion {
+	x: number // 0-1, start x
+	y: number // 0-1, start y
+	width: number // 0-1, region width
+	height: number // 0-1, region height
+}
+
+/**
  * Result of media validation
  */
 export interface MediaValidationResult {
@@ -98,10 +134,165 @@ export interface MediaProcessingResult {
 	notice: string
 	mediaType: MediaType
 	mimeType: string
+	originalSize?: { width: number; height: number }
+	processedSize?: { width: number; height: number }
+	region?: ProcessedRegion
+}
+
+/**
+ * Options for media processing with focus support
+ */
+export interface MediaProcessingOptions {
+	focus?: FocusParams
+	maxOutputSize?: number // default 1024
+	quality?: number // JPEG quality, default 85
+}
+
+/**
+ * Calculate crop region based on focus point and scale
+ */
+export function calculateCropRegion(
+	imageWidth: number,
+	imageHeight: number,
+	focusX: number = 0.5,
+	focusY: number = 0.5,
+	scale: number = 1,
+): { x: number; y: number; width: number; height: number } {
+	// Crop region size = original / scale
+	const cropWidth = imageWidth / scale
+	const cropHeight = imageHeight / scale
+
+	// Calculate crop start point centered on focus
+	let x = focusX * imageWidth - cropWidth / 2
+	let y = focusY * imageHeight - cropHeight / 2
+
+	// Boundary constraints: ensure we don't exceed image bounds
+	x = Math.max(0, Math.min(x, imageWidth - cropWidth))
+	y = Math.max(0, Math.min(y, imageHeight - cropHeight))
+
+	return {
+		x: Math.round(x),
+		y: Math.round(y),
+		width: Math.round(cropWidth),
+		height: Math.round(cropHeight),
+	}
+}
+
+/**
+ * Generate processing notice for the result
+ */
+export function generateProcessingNotice(
+	scale: number,
+	region: ProcessedRegion,
+	origWidth: number,
+	origHeight: number,
+): string {
+	if (scale === 1) {
+		return (
+			`Overview of full image (${origWidth}x${origHeight}). ` +
+			`Image has been compressed to optimize token usage. ` +
+			`Use focusX/focusY/scale parameters to examine specific regions in detail.`
+		)
+	}
+
+	const regionDesc =
+		`x:${(region.x * 100).toFixed(0)}%-${((region.x + region.width) * 100).toFixed(0)}%, ` +
+		`y:${(region.y * 100).toFixed(0)}%-${((region.y + region.height) * 100).toFixed(0)}%`
+	const areaPercent = (region.width * region.height * 100).toFixed(1)
+
+	return (
+		`Zoomed ${scale}x into region [${regionDesc}] of ${origWidth}x${origHeight} image. ` +
+		`This view shows approximately ${areaPercent}% of the original image area. ` +
+		`To see other areas, adjust focusX/focusY. To zoom out, reduce scale.`
+	)
+}
+
+/**
+ * Process an image file with focus and scale support
+ * Images are automatically compressed to optimize token usage
+ */
+export async function processImageWithFocus(
+	filePath: string,
+	options: MediaProcessingOptions = {},
+): Promise<MediaProcessingResult> {
+	const { focus = {}, maxOutputSize = DEFAULT_OUTPUT_SIZE, quality = DEFAULT_QUALITY } = options
+	const { focusX = 0.5, focusY = 0.5, scale = 1 } = focus
+
+	// Clamp parameters to valid ranges
+	const clampedScale = Math.max(1, Math.min(scale, MAX_SCALE))
+	const clampedFocusX = Math.max(0, Math.min(focusX, 1))
+	const clampedFocusY = Math.max(0, Math.min(focusY, 1))
+
+	// Read original image metadata
+	const image = sharp(filePath)
+	const metadata = await image.metadata()
+	const { width: origWidth, height: origHeight } = metadata
+
+	if (!origWidth || !origHeight) {
+		throw new Error("Unable to read image dimensions")
+	}
+
+	// Calculate crop region
+	const cropRegion = calculateCropRegion(origWidth, origHeight, clampedFocusX, clampedFocusY, clampedScale)
+
+	// Calculate output size (maintain aspect ratio, longest edge <= maxOutputSize)
+	const aspectRatio = cropRegion.width / cropRegion.height
+	let outputWidth: number, outputHeight: number
+	if (aspectRatio >= 1) {
+		outputWidth = Math.min(cropRegion.width, maxOutputSize)
+		outputHeight = Math.round(outputWidth / aspectRatio)
+	} else {
+		outputHeight = Math.min(cropRegion.height, maxOutputSize)
+		outputWidth = Math.round(outputHeight * aspectRatio)
+	}
+
+	// Execute crop and resize
+	const processedBuffer = await image
+		.extract({
+			left: cropRegion.x,
+			top: cropRegion.y,
+			width: cropRegion.width,
+			height: cropRegion.height,
+		})
+		.resize(outputWidth, outputHeight, {
+			fit: "inside",
+			withoutEnlargement: true,
+		})
+		.jpeg({ quality })
+		.toBuffer()
+
+	// Generate data URL
+	const base64 = processedBuffer.toString("base64")
+	const dataUrl = `data:image/jpeg;base64,${base64}`
+
+	// Calculate normalized region (for returning to LLM)
+	const region: ProcessedRegion = {
+		x: cropRegion.x / origWidth,
+		y: cropRegion.y / origHeight,
+		width: cropRegion.width / origWidth,
+		height: cropRegion.height / origHeight,
+	}
+
+	const sizeInKB = Math.round(processedBuffer.length / 1024)
+	const sizeInMB = processedBuffer.length / (1024 * 1024)
+
+	return {
+		dataUrl,
+		buffer: processedBuffer,
+		sizeInKB,
+		sizeInMB,
+		notice: generateProcessingNotice(clampedScale, region, origWidth, origHeight),
+		mediaType: "image",
+		mimeType: "image/jpeg",
+		originalSize: { width: origWidth, height: origHeight },
+		processedSize: { width: outputWidth, height: outputHeight },
+		region,
+	}
 }
 
 /**
  * Reads a media file and returns both the data URL and buffer
+ * For videos, returns the raw file without processing
  */
 export async function readMediaAsDataUrlWithBuffer(filePath: string): Promise<{
 	dataUrl: string
@@ -276,27 +467,36 @@ export async function validateMediaForProcessing(
 
 /**
  * Processes a media file and returns the result
+ * For images, uses focus-aware processing with automatic compression
+ * For videos, returns raw file data
  */
-export async function processMediaFile(fullPath: string): Promise<MediaProcessingResult> {
-	const mediaStats = await fs.stat(fullPath)
-	const { dataUrl, buffer, mediaType, mimeType } = await readMediaAsDataUrlWithBuffer(fullPath)
-	const mediaSizeInKB = Math.round(mediaStats.size / 1024)
-	const mediaSizeInMB = mediaStats.size / (1024 * 1024)
+export async function processMediaFile(
+	fullPath: string,
+	options: MediaProcessingOptions = {},
+): Promise<MediaProcessingResult> {
+	const ext = path.extname(fullPath).toLowerCase()
+	const isVideo = isSupportedVideoFormat(ext)
 
-	const noticeText =
-		mediaType === "video"
-			? `Video loaded successfully (${prettyBytes(mediaStats.size)})`
-			: t("tools:readFile.imageWithSize", { size: mediaSizeInKB })
+	if (isVideo) {
+		// Videos are returned as-is (no focus/scale support for videos)
+		const mediaStats = await fs.stat(fullPath)
+		const { dataUrl, buffer, mediaType, mimeType } = await readMediaAsDataUrlWithBuffer(fullPath)
+		const mediaSizeInKB = Math.round(mediaStats.size / 1024)
+		const mediaSizeInMB = mediaStats.size / (1024 * 1024)
 
-	return {
-		dataUrl,
-		buffer,
-		sizeInKB: mediaSizeInKB,
-		sizeInMB: mediaSizeInMB,
-		notice: noticeText,
-		mediaType,
-		mimeType,
+		return {
+			dataUrl,
+			buffer,
+			sizeInKB: mediaSizeInKB,
+			sizeInMB: mediaSizeInMB,
+			notice: `Video loaded successfully (${prettyBytes(mediaStats.size)})`,
+			mediaType,
+			mimeType,
+		}
 	}
+
+	// For images, use focus-aware processing
+	return processImageWithFocus(fullPath, options)
 }
 
 /**

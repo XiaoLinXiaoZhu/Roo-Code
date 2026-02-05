@@ -834,6 +834,61 @@
       "gitCommit": "23350093705e210e1b934b13c63753e602f728a8",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"apiProviderEnum\":{\"type\":\"string\"},\"providerDetection\":{\"type\":\"string\"},\"configLocation\":{\"type\":\"string\"},\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+    },
+    {
+      "id": "35",
+      "query": "Where is the read_media tool implemented? Looking for the tool definition and execution logic for reading media files like images and videos.",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "read_media",
+        "tool",
+        "implemented",
+        "looking",
+        "for",
+        "definition",
+        "and",
+        "execution",
+        "logic",
+        "reading",
+        "media",
+        "files",
+        "like",
+        "images",
+        "videos"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-05T09:13:31.176Z",
+      "gitCommit": "092a831ef2b642508a850c2ce1b706deef46c559",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "36",
+      "query": "Where is the read_media tool implemented? How does it read and process image and video files?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "read_media",
+        "tool",
+        "implemented",
+        "how",
+        "does",
+        "it",
+        "read",
+        "and",
+        "process",
+        "image",
+        "video",
+        "files"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-05T09:16:35.167Z",
+      "gitCommit": "092a831ef2b642508a850c2ce1b706deef46c559",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
     }
   ]
 }

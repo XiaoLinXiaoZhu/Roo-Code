@@ -14,6 +14,10 @@ import {
 	SUPPORTED_VIDEO_FORMATS,
 	IMAGE_MIME_TYPES,
 	VIDEO_MIME_TYPES,
+	calculateCropRegion,
+	generateProcessingNotice,
+	DEFAULT_OUTPUT_SIZE,
+	MAX_SCALE,
 } from "../mediaHelpers"
 
 // Mock fs/promises at the module level
@@ -245,6 +249,94 @@ describe("mediaHelpers", () => {
 			expect(VIDEO_MIME_TYPES[".mov"]).toBe("video/quicktime")
 			expect(VIDEO_MIME_TYPES[".avi"]).toBe("video/x-msvideo")
 			expect(VIDEO_MIME_TYPES[".mkv"]).toBe("video/x-matroska")
+		})
+	})
+
+	describe("calculateCropRegion", () => {
+		it("should return full image when scale is 1", () => {
+			const region = calculateCropRegion(1000, 800, 0.5, 0.5, 1)
+			expect(region.x).toBe(0)
+			expect(region.y).toBe(0)
+			expect(region.width).toBe(1000)
+			expect(region.height).toBe(800)
+		})
+
+		it("should crop to center with scale 2", () => {
+			const region = calculateCropRegion(1000, 800, 0.5, 0.5, 2)
+			expect(region.width).toBe(500)
+			expect(region.height).toBe(400)
+			expect(region.x).toBe(250) // centered
+			expect(region.y).toBe(200) // centered
+		})
+
+		it("should crop to top-left corner", () => {
+			const region = calculateCropRegion(1000, 800, 0, 0, 2)
+			expect(region.x).toBe(0)
+			expect(region.y).toBe(0)
+			expect(region.width).toBe(500)
+			expect(region.height).toBe(400)
+		})
+
+		it("should crop to bottom-right corner", () => {
+			const region = calculateCropRegion(1000, 800, 1, 1, 2)
+			expect(region.x).toBe(500)
+			expect(region.y).toBe(400)
+			expect(region.width).toBe(500)
+			expect(region.height).toBe(400)
+		})
+
+		it("should constrain region within image bounds", () => {
+			// Focus at 0.9, 0.9 with scale 2 would try to go outside bounds
+			const region = calculateCropRegion(1000, 800, 0.9, 0.9, 2)
+			// Region should be constrained to not exceed image bounds
+			expect(region.x + region.width).toBeLessThanOrEqual(1000)
+			expect(region.y + region.height).toBeLessThanOrEqual(800)
+			expect(region.x).toBeGreaterThanOrEqual(0)
+			expect(region.y).toBeGreaterThanOrEqual(0)
+		})
+
+		it("should handle high scale values", () => {
+			const region = calculateCropRegion(1000, 800, 0.5, 0.5, 8)
+			expect(region.width).toBe(125) // 1000 / 8
+			expect(region.height).toBe(100) // 800 / 8
+		})
+
+		it("should use default focus (center) when not specified", () => {
+			const region = calculateCropRegion(1000, 800, undefined, undefined, 2)
+			expect(region.x).toBe(250)
+			expect(region.y).toBe(200)
+		})
+	})
+
+	describe("generateProcessingNotice", () => {
+		it("should generate overview notice for scale 1", () => {
+			const notice = generateProcessingNotice(1, { x: 0, y: 0, width: 1, height: 1 }, 2000, 1500)
+			expect(notice).toContain("Overview")
+			expect(notice).toContain("2000x1500")
+			expect(notice).toContain("focusX/focusY/scale")
+		})
+
+		it("should generate detail notice for scale > 1", () => {
+			const notice = generateProcessingNotice(4, { x: 0.25, y: 0.25, width: 0.25, height: 0.25 }, 2000, 1500)
+			expect(notice).toContain("Zoomed 4x")
+			expect(notice).toContain("2000x1500")
+			expect(notice).toContain("region")
+		})
+
+		it("should show approximate area percentage", () => {
+			// scale 4 means 1/4 width and 1/4 height = 1/16 area = 6.25%
+			const notice = generateProcessingNotice(4, { x: 0, y: 0, width: 0.25, height: 0.25 }, 1000, 1000)
+			expect(notice).toMatch(/6\.\d%/) // 6.2% or 6.3% depending on rounding
+		})
+	})
+
+	describe("constants", () => {
+		it("should have correct default output size", () => {
+			expect(DEFAULT_OUTPUT_SIZE).toBe(1024)
+		})
+
+		it("should have correct max scale", () => {
+			expect(MAX_SCALE).toBe(8)
 		})
 	})
 })
