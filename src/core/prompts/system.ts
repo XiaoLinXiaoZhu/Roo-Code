@@ -62,7 +62,7 @@ async function generatePrompt(
 
 	// Get the full mode config to ensure we have the role definition (used for groups, etc.)
 	// const modeConfig = getModeBySlug(mode, customModeConfigs) || modes.find((m) => m.slug === mode) || modes[0]
-	const { roleDefinition } = getModeSelection(mode, promptComponent, customModeConfigs)
+	const { roleDefinition, baseInstructions } = getModeSelection(mode, promptComponent, customModeConfigs)
 
 	// const codeIndexManager = CodeIndexManager.getInstance(context, cwd)
 
@@ -90,7 +90,8 @@ ${getSpiritSection()}
 ${markdownFormattingSection()}
 ${skillsSection ? `\n${skillsSection}` : ""}
 ${getSystemInfoSection(cwd)}
-${projectContext}`
+${projectContext}
+${baseInstructions ? `\n${baseInstructions}` : ""}`
 
 	return basePrompt
 }
