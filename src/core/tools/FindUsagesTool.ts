@@ -1,7 +1,7 @@
 /**
- * Find References Tool
+ * Find Usages Tool
  *
- * Provides the ability to find all references to a symbol at a given position.
+ * Provides the ability to find all usages of a symbol at a given position.
  * Uses VSCode LSP API with fallback to regex search.
  */
 
@@ -16,7 +16,7 @@ import type { ToolUse } from "../../shared/tools"
 
 import { BaseTool, ToolCallbacks } from "./BaseTool"
 
-interface FindReferencesParams {
+interface FindUsagesParams {
 	purpose: "impact_analysis" | "usage_patterns" | "dead_code_check"
 	path: string
 	symbol: string
@@ -26,10 +26,10 @@ interface FindReferencesParams {
 	max_results?: number
 }
 
-export class FindReferencesTool extends BaseTool<"find_references"> {
-	readonly name = "find_references" as const
+export class FindUsagesTool extends BaseTool<"find_usages"> {
+	readonly name = "find_usages" as const
 
-	async execute(params: FindReferencesParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
+	async execute(params: FindUsagesParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
 		const { askApproval, handleError, pushToolResult } = callbacks
 
 		const {
@@ -44,17 +44,17 @@ export class FindReferencesTool extends BaseTool<"find_references"> {
 		// Validate required parameters
 		if (!filePath) {
 			task.consecutiveMistakeCount++
-			task.recordToolError("find_references")
+			task.recordToolError("find_usages")
 			task.didToolFailInCurrentTurn = true
-			pushToolResult(await task.sayAndCreateMissingParamError("find_references", "path"))
+			pushToolResult(await task.sayAndCreateMissingParamError("find_usages", "path"))
 			return
 		}
 
 		if (!symbol) {
 			task.consecutiveMistakeCount++
-			task.recordToolError("find_references")
+			task.recordToolError("find_usages")
 			task.didToolFailInCurrentTurn = true
-			pushToolResult(await task.sayAndCreateMissingParamError("find_references", "symbol"))
+			pushToolResult(await task.sayAndCreateMissingParamError("find_usages", "symbol"))
 			return
 		}
 
@@ -64,7 +64,7 @@ export class FindReferencesTool extends BaseTool<"find_references"> {
 		const isOutsideWorkspace = isPathOutsideWorkspace(absolutePath)
 
 		const sharedMessageProps: ClineSayTool = {
-			tool: "findReferences",
+			tool: "findUsages",
 			path: getReadablePath(task.cwd, filePath),
 			symbol: symbol,
 			pattern: surroundingCode,
@@ -106,11 +106,11 @@ export class FindReferencesTool extends BaseTool<"find_references"> {
 			const llmResult = formatReferencesForLLM(result, task.cwd)
 			pushToolResult(llmResult)
 		} catch (error) {
-			await handleError("finding references", error as Error)
+			await handleError("finding usages", error as Error)
 		}
 	}
 
-	override async handlePartial(task: Task, block: ToolUse<"find_references">): Promise<void> {
+	override async handlePartial(task: Task, block: ToolUse<"find_usages">): Promise<void> {
 		const filePath = block.params.path
 		const symbol = block.params.symbol
 		const surroundingCode = block.params.surrounding_code
@@ -120,7 +120,7 @@ export class FindReferencesTool extends BaseTool<"find_references"> {
 		const isOutsideWorkspace = isPathOutsideWorkspace(absolutePath)
 
 		const sharedMessageProps: ClineSayTool = {
-			tool: "findReferences",
+			tool: "findUsages",
 			path: getReadablePath(task.cwd, filePath ?? ""),
 			symbol: symbol,
 			pattern: surroundingCode,
@@ -133,4 +133,4 @@ export class FindReferencesTool extends BaseTool<"find_references"> {
 	}
 }
 
-export const findReferencesTool = new FindReferencesTool()
+export const findUsagesTool = new FindUsagesTool()

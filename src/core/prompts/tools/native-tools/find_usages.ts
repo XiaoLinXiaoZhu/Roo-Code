@@ -33,7 +33,7 @@ const FIND_REFERENCES_DESCRIPTION = `Find all usages of a function, class, type,
 export default {
 	type: "function",
 	function: {
-		name: "find_references",
+		name: "find_usages",
 		description: FIND_REFERENCES_DESCRIPTION,
 		strict: true,
 		parameters: {

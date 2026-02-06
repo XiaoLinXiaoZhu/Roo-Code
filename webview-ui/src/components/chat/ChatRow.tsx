@@ -566,7 +566,7 @@ export const ChatRowContent = ({
 					</div>
 				)
 			}
-			case "goToDefinition": {
+			case "findDefinition": {
 				// Try to parse as JSON (new format), fallback to markdown (old format)
 				let parsedResult: any = null
 				if (tool.content) {
@@ -606,7 +606,7 @@ export const ChatRowContent = ({
 					</>
 				)
 			}
-			case "findReferences": {
+			case "findUsages": {
 				// Try to parse as JSON (new format), fallback to markdown (old format)
 				let parsedResult: any = null
 				if (tool.content) {

@@ -21,44 +21,33 @@
 - [x] `find_references` 描述重写：第一句从 "Find all references using LSP" 改为 "Find all usages of..."
 - [x] `execute_command` 描述开头添加反向引导
 
+### P0: LSP 工具改名 ✅
+
+- [x] `go_to_definition` → `find_definition`（ToolName、工具描述、实现、解析器、UI 全部同步）
+- [x] `find_references` → `find_usages`（ToolName、工具描述、实现、解析器、UI 全部同步）
+- [x] 文件重命名：`go_to_definition.ts` → `find_definition.ts`，`find_references.ts` → `find_usages.ts`
+- [x] 文件重命名：`GoToDefinitionTool.ts` → `FindDefinitionTool.ts`，`FindReferencesTool.ts` → `FindUsagesTool.ts`
+- [x] 所有引用点更新（16+ 文件），TypeScript 编译通过，测试通过
+
+### P2: 运行时 spirit_hint 改为上下文感知 ✅
+
+- [x] 调查 spirit_hint 实现位置：`src/core/environment/getSpriteHint.ts`
+- [x] 调查注入逻辑：`src/core/environment/getEnvironmentDetails.ts`
+- [x] 实现 `HintContext` 接口和 `getContextualSpriteHint()` 函数
+- [x] 按主题（certainty/resultOrientation/honesty/efficiency）索引 hints
+- [x] 根据上下文信号（consecutiveMistakeCount、lastToolFailed、messageCount、hasRecentlyModifiedFiles）选择主题
+- [x] 保留 20% 随机概率避免可预测性
+- [x] 修改 `getEnvironmentDetails.ts` 调用点
+
+### P3: 笔记同步 ✅
+
+- [x] 改造结果同步到 `docs/提示词优化.md`
+
 ---
 
-## 待完成 📋
-
-### P0: LSP 工具改名
-
-**目标**：让工具名称匹配模型的思维语言
-
-| 当前名称           | 建议新名称           | 理由                                  |
-| ------------------ | -------------------- | ------------------------------------- |
-| `go_to_definition` | `find_definition`    | 模型想"查找定义"而非"跳转到定义"      |
-| `find_references`  | `find_usages` 或保留 | 当前名称尚可，但 `find_usages` 更直觉 |
-
-**涉及的文件**（需要全部同步修改）：
-
-- `src/core/prompts/tools/native-tools/go_to_definition.ts` — 工具描述
-- `src/core/tools/GoToDefinitionTool.ts` — 工具实现
-- `src/core/tools/toolRegistry.ts` — 工具注册
-- `src/core/task/build-tools.ts` — 工具构建（如果有引用）
-- `src/shared/tools.ts` — 共享工具类型（如果有 ToolName 枚举）
-- `webview-ui/` — UI 显示（如果工具名出现在 UI 中）
-- `packages/types/` — 类型定义（如果有）
-- 所有测试文件
-- Spirit v4.0 中引用了 `go_to_definition` 的地方
-
-**方法**：用 `find_references` 工具（讽刺地）找到所有引用点，批量替换。
+## 不适用 ⚠️
 
 ### P1: tool-builder 的 CRITICAL OUTPUT LIMITS
 
-- [ ] 将 "CRITICAL OUTPUT LIMITS" 从 roleDefinition 搬到 `customInstructions`
-- 文件：`packages/types/src/mode.ts` tool-builder mode
-
-### P2: 运行时 spirit_hint 改为上下文感知
-
-- [ ] 当前 spirit_hint 是随机选择一条规则注入 `environment_details`
-- [ ] 应改为根据当前操作类型（文件修改/调试/搜索等）选择相关的规则提醒
-- 需要调查 spirit_hint 的实现位置和注入逻辑
-
-### P3: 笔记同步
-
-- [ ] 将最终的改造结果同步回 `e:/myNote/myNote/提示词设计：spirit？.md`
+- [x] ~~将 "CRITICAL OUTPUT LIMITS" 从 roleDefinition 搬到 `customInstructions`~~
+- **状态**: 目标对象不存在——`packages/types/src/mode.ts` 中 tool-builder mode 的 roleDefinition 只有一行简短描述，没有 "CRITICAL OUTPUT LIMITS" 文本。此 TODO 已过时。

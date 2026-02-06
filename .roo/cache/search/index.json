@@ -918,6 +918,34 @@
       "gitCommit": "e5d094c271ed532d3de7e0cc9698df3b00d32a75",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"codeRoleDefinition\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "38",
+      "query": "Where is the ToolName enum or type defined that includes go_to_definition and find_references?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "toolname",
+        "enum",
+        "or",
+        "type",
+        "defined",
+        "that",
+        "includes",
+        "go_to_definition",
+        "and",
+        "find_references"
+      ],
+      "scope": {
+        "directories": "e:/_Project/Roo-Code/src,e:/_Project/Roo-Code/packages",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,dist"
+      },
+      "createdAt": "2026-02-06T13:33:41.624Z",
+      "gitCommit": "18550e2dbed6928ac939ff777ffe1f6346731f00",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"relevance\":{\"type\":\"string\"}}}},\"enumLocation\":{\"type\":\"string\"}}}"
     }
   ]
 }

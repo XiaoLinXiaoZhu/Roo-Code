@@ -33,8 +33,8 @@ import { codebaseSearchTool } from "./CodebaseSearchTool"
 import { searchProjectTool } from "./SearchProjectTool"
 import { applyEditTool } from "./ApplyEditTool"
 import { consultExpertTool } from "./ConsultExpertTool"
-import { goToDefinitionTool } from "./GoToDefinitionTool"
-import { findReferencesTool } from "./FindReferencesTool"
+import { findDefinitionTool } from "./FindDefinitionTool"
+import { findUsagesTool } from "./FindUsagesTool"
 import { buildToolTool } from "./BuildToolTool"
 
 /**
@@ -68,8 +68,8 @@ const allTools: BaseTool<ToolName>[] = [
 	searchProjectTool,
 	applyEditTool,
 	consultExpertTool,
-	goToDefinitionTool,
-	findReferencesTool,
+	findDefinitionTool,
+	findUsagesTool,
 	buildToolTool,
 ]
 

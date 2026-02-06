@@ -1,7 +1,7 @@
 /**
  * Symbol Navigation Service Types
  *
- * Provides type definitions for go_to_definition and find_references tools.
+ * Provides type definitions for find_definition and find_usages tools.
  */
 
 /**

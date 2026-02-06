@@ -798,8 +798,8 @@ export interface ClineSayTool {
 		| "imageGenerated"
 		| "runSlashCommand"
 		| "updateTodoList"
-		| "goToDefinition"
-		| "findReferences"
+		| "findDefinition"
+		| "findUsages"
 		| "skill"
 	path?: string
 	// For readMedia
@@ -810,7 +810,7 @@ export interface ClineSayTool {
 	processedSize?: { width: number; height: number }
 	region?: { x: number; y: number; width: number; height: number }
 	croppedImageData?: string // Base64 encoded cropped image for preview
-	// For goToDefinition and findReferences
+	// For findDefinition and findUsages
 	symbol?: string
 	pattern?: string
 	startLine?: number

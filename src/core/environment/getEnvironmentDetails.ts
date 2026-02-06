@@ -18,7 +18,7 @@ import { RooProtectedController } from "../protect/RooProtectedController"
 
 import { Task } from "../task/Task"
 import { formatReminderSection } from "./reminder"
-import { getSpriteHint } from "./getSpriteHint"
+import { getContextualSpriteHint } from "./getSpriteHint"
 
 /**
  * Escape XML special characters in a string
@@ -334,7 +334,14 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 			: true
 
 	const reminderContent = todoListEnabled ? formatReminderSection(cline.todoList) : ""
-	const spriteHintContent = getSpriteHint()
+
+	// 上下文感知提示选择：根据当前操作状态选择最相关的 hint
+	const spriteHintContent = getContextualSpriteHint({
+		consecutiveMistakeCount: cline.consecutiveMistakeCount,
+		lastToolFailed: cline.didToolFailInCurrentTurn,
+		messageCount,
+		hasRecentlyModifiedFiles: recentlyModifiedFiles.length > 0,
+	})
 
 	if (shouldIncludeReminder && todoListEnabled) {
 		if (reminderContent) {

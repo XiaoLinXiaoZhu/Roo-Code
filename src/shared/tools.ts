@@ -101,11 +101,11 @@ export const toolParamNames = [
 	"files",
 	"line_ranges",
 	// AST 代码智能工具参数
-	"symbol", // go_to_definition, find_references required parameter
-	"surrounding_code", // go_to_definition, find_references optional parameter
-	"start_line", // go_to_definition, find_references optional parameter
-	"include_declaration", // find_references optional parameter
-	"max_results", // find_references optional parameter
+	"symbol", // find_definition, find_usages required parameter
+	"surrounding_code", // find_definition, find_usages optional parameter
+	"start_line", // find_definition, find_usages optional parameter
+	"include_declaration", // find_usages optional parameter
+	"max_results", // find_usages optional parameter
 	// build_tool 参数
 	"requirement", // build_tool required parameter
 	"inputHint", // build_tool optional parameter
@@ -172,14 +172,14 @@ export type NativeToolArgs = {
 		consultType: "analysis" | "design" | "comparison" | "recommendation"
 	}
 	// AST 代码智能工具
-	go_to_definition: {
+	find_definition: {
 		purpose: "understand_implementation" | "trace_import" | "verify_signature"
 		path: string
 		symbol: string
 		surrounding_code?: string
 		start_line?: number
 	}
-	find_references: {
+	find_usages: {
 		purpose: "impact_analysis" | "usage_patterns" | "dead_code_check"
 		path: string
 		symbol: string
@@ -402,8 +402,8 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	search_project: "search project",
 	apply_edit: "apply edit",
 	consult_expert: "consult expert",
-	go_to_definition: "go to definition",
-	find_references: "find references",
+	find_definition: "find definition",
+	find_usages: "find usages",
 	build_tool: "build tool",
 } as const
 
@@ -413,7 +413,7 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 		// "read_file", "search_files", "list_files", are now in command
 		// 因为模型可以直接通过命令行工具更加灵活地读取文件内容和搜索文件，所以这些工具未来使用命令行工具来替代
 		// "read_media" 用于多模态 agent 读取媒体文件（图片等），根据 supportsImages 开关控制
-		tools: ["codebase_search", "go_to_definition", "find_references", "read_media"],
+		tools: ["codebase_search", "find_definition", "find_usages", "read_media"],
 	},
 	edit: {
 		tools: ["apply_diff", "write_to_file", "generate_image"],

@@ -1,6 +1,6 @@
 import type OpenAI from "openai"
 
-const EXECUTE_COMMAND_DESCRIPTION = `Execute a CLI command on the system. Use for system operations or running commands to accomplish tasks. **For finding where a symbol is defined or finding all usages of a symbol, use go_to_definition/find_references instead of grep.**
+const EXECUTE_COMMAND_DESCRIPTION = `Execute a CLI command on the system. Use for system operations or running commands to accomplish tasks. **For finding where a symbol is defined or finding all usages of a symbol, use find_definition/find_usages instead of grep.**
 
 **Shell Compatibility:**
 - PowerShell: Use \`;\` to chain commands. Use PowerShell-native commands: \`Select-String\` (grep), \`Get-Content\` (cat), \`Remove-Item\` (rm), \`Copy-Item\` (cp), \`Move-Item\` (mv), \`-replace\` (sed). NEVER use Unix commands (sed/grep/awk/rm).
@@ -9,7 +9,7 @@ const EXECUTE_COMMAND_DESCRIPTION = `Execute a CLI command on the system. Use fo
 
 **Optimized Commands (bash/zsh):**
 The following commands have optimized output formatting and respect .rooignore rules:
-- \`grep\`: Text pattern search with \`-i\`, \`-r\`, \`-n\`, \`-C\`, \`-A\`, \`-B\`, \`-w\`, \`-F\`, \`--include\`, \`--exclude\`. **For symbol/code navigation (finding definitions or references), use go_to_definition/find_references instead.**
+- \`grep\`: Text pattern search with \`-i\`, \`-r\`, \`-n\`, \`-C\`, \`-A\`, \`-B\`, \`-w\`, \`-F\`, \`--include\`, \`--exclude\`. **For symbol/code navigation (finding definitions or references), use find_definition/find_usages instead.**
 - \`cat\`: Read files with \`-n\` for line numbers
 - \`head\`/\`tail\`: View file portions with \`-n\`, \`-c\`
 - \`find\`: Search files with \`-name\`, \`-iname\`, \`-type\`, \`-maxdepth\`

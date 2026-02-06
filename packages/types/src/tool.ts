@@ -44,8 +44,8 @@ export const toolNames = [
 	"apply_edit",
 	"consult_expert",
 	// AST 代码智能工具
-	"go_to_definition",
-	"find_references",
+	"find_definition",
+	"find_usages",
 	// 工具构建工具
 	"build_tool",
 ] as const

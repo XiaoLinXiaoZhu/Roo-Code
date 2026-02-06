@@ -1,7 +1,7 @@
 /**
  * Symbol Navigation Service
  *
- * Provides go_to_definition and find_references functionality using VSCode LSP API
+ * Provides find_definition and find_usages functionality using VSCode LSP API
  * with fallback to tree-sitter when LSP is unavailable.
  */
 

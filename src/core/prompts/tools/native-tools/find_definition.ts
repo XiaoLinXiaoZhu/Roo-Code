@@ -27,7 +27,7 @@ const GO_TO_DEFINITION_DESCRIPTION = `Find where a function, class, type, or var
 export default {
 	type: "function",
 	function: {
-		name: "go_to_definition",
+		name: "find_definition",
 		description: GO_TO_DEFINITION_DESCRIPTION,
 		strict: true,
 		parameters: {

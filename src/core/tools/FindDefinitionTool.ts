@@ -1,7 +1,7 @@
 /**
- * Go To Definition Tool
+ * Find Definition Tool
  *
- * Provides the ability to jump to the definition of a symbol at a given position.
+ * Provides the ability to find the definition of a symbol at a given position.
  * Uses VSCode LSP API with fallback to tree-sitter.
  */
 
@@ -16,7 +16,7 @@ import type { ToolUse } from "../../shared/tools"
 
 import { BaseTool, ToolCallbacks } from "./BaseTool"
 
-interface GoToDefinitionParams {
+interface FindDefinitionParams {
 	purpose: "understand_implementation" | "trace_import" | "verify_signature"
 	path: string
 	symbol: string
@@ -24,10 +24,10 @@ interface GoToDefinitionParams {
 	start_line?: number
 }
 
-export class GoToDefinitionTool extends BaseTool<"go_to_definition"> {
-	readonly name = "go_to_definition" as const
+export class FindDefinitionTool extends BaseTool<"find_definition"> {
+	readonly name = "find_definition" as const
 
-	async execute(params: GoToDefinitionParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
+	async execute(params: FindDefinitionParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
 		const { askApproval, handleError, pushToolResult } = callbacks
 
 		const { path: filePath, symbol, surrounding_code: surroundingCode, start_line } = params
@@ -35,17 +35,17 @@ export class GoToDefinitionTool extends BaseTool<"go_to_definition"> {
 		// Validate required parameters
 		if (!filePath) {
 			task.consecutiveMistakeCount++
-			task.recordToolError("go_to_definition")
+			task.recordToolError("find_definition")
 			task.didToolFailInCurrentTurn = true
-			pushToolResult(await task.sayAndCreateMissingParamError("go_to_definition", "path"))
+			pushToolResult(await task.sayAndCreateMissingParamError("find_definition", "path"))
 			return
 		}
 
 		if (!symbol) {
 			task.consecutiveMistakeCount++
-			task.recordToolError("go_to_definition")
+			task.recordToolError("find_definition")
 			task.didToolFailInCurrentTurn = true
-			pushToolResult(await task.sayAndCreateMissingParamError("go_to_definition", "symbol"))
+			pushToolResult(await task.sayAndCreateMissingParamError("find_definition", "symbol"))
 			return
 		}
 
@@ -55,7 +55,7 @@ export class GoToDefinitionTool extends BaseTool<"go_to_definition"> {
 		const isOutsideWorkspace = isPathOutsideWorkspace(absolutePath)
 
 		const sharedMessageProps: ClineSayTool = {
-			tool: "goToDefinition",
+			tool: "findDefinition",
 			path: getReadablePath(task.cwd, filePath),
 			symbol: symbol,
 			pattern: surroundingCode,
@@ -95,7 +95,7 @@ export class GoToDefinitionTool extends BaseTool<"go_to_definition"> {
 		}
 	}
 
-	override async handlePartial(task: Task, block: ToolUse<"go_to_definition">): Promise<void> {
+	override async handlePartial(task: Task, block: ToolUse<"find_definition">): Promise<void> {
 		const filePath = block.params.path
 		const symbol = block.params.symbol
 		const surroundingCode = block.params.surrounding_code as string | undefined
@@ -105,7 +105,7 @@ export class GoToDefinitionTool extends BaseTool<"go_to_definition"> {
 		const isOutsideWorkspace = isPathOutsideWorkspace(absolutePath)
 
 		const sharedMessageProps: ClineSayTool = {
-			tool: "goToDefinition",
+			tool: "findDefinition",
 			path: getReadablePath(task.cwd, filePath ?? ""),
 			symbol: symbol ?? "",
 			pattern: surroundingCode,
@@ -118,4 +118,4 @@ export class GoToDefinitionTool extends BaseTool<"go_to_definition"> {
 	}
 }
 
-export const goToDefinitionTool = new GoToDefinitionTool()
+export const findDefinitionTool = new FindDefinitionTool()

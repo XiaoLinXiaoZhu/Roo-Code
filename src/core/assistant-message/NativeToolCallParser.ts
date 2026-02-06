@@ -682,7 +682,7 @@ export class NativeToolCallParser {
 				break
 
 			// AST 代码智能工具
-			case "go_to_definition":
+			case "find_definition":
 				if (
 					partialArgs.purpose !== undefined ||
 					partialArgs.path !== undefined ||
@@ -698,7 +698,7 @@ export class NativeToolCallParser {
 				}
 				break
 
-			case "find_references":
+			case "find_usages":
 				if (
 					partialArgs.purpose !== undefined ||
 					partialArgs.path !== undefined ||
@@ -1118,7 +1118,7 @@ export class NativeToolCallParser {
 					}
 					break
 
-				case "go_to_definition":
+				case "find_definition":
 					if (args.purpose !== undefined && args.path !== undefined && args.symbol !== undefined) {
 						nativeArgs = {
 							purpose: args.purpose,
@@ -1130,7 +1130,7 @@ export class NativeToolCallParser {
 					}
 					break
 
-				case "find_references":
+				case "find_usages":
 					if (args.purpose !== undefined && args.path !== undefined && args.symbol !== undefined) {
 						nativeArgs = {
 							purpose: args.purpose,

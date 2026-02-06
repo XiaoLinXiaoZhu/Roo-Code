@@ -1,7 +1,7 @@
 /**
  * Symbol Navigation Service
  *
- * Provides go_to_definition and find_references functionality.
+ * Provides find_definition and find_usages functionality.
  */
 
 export * from "./types"
