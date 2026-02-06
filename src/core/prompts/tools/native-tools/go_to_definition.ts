@@ -1,11 +1,6 @@
 import type OpenAI from "openai"
 
-const GO_TO_DEFINITION_DESCRIPTION = `Jump to the definition of a symbol using LSP (Language Server Protocol). More accurate than grep - follows imports and understands code structure.
-
-**Priority over grep**: Always prefer this tool instead of grep when:
-- Looking for where a function/class/type is defined
-- Tracing imports across files
-- Need accurate results without false positives from comments/strings/similar names
+const GO_TO_DEFINITION_DESCRIPTION = `Find where a function, class, type, or variable is defined. **Use this instead of grep when searching for definitions or tracing imports** - it understands code structure and follows imports accurately, without false positives from comments or strings.
 
 **When to Use**:
 - understand_implementation: Need to see how a function/class/type is implemented

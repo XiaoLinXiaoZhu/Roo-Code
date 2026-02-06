@@ -1,11 +1,6 @@
 import type OpenAI from "openai"
 
-const FIND_REFERENCES_DESCRIPTION = `Find all references to a symbol using LSP (Language Server Protocol). More accurate than grep - semantic search that understands code structure.
-
-**Priority over grep**: Always prefer this tool instead of grep when:
-- Finding all usages of a function/class/type/variable
-- Analyzing impact before refactoring
-- Need accurate results without false positives from comments/strings/similar names
+const FIND_REFERENCES_DESCRIPTION = `Find all usages of a function, class, type, or variable across the codebase. **Use this instead of grep when finding usages or analyzing impact** - it understands code structure semantically, without false positives from comments or strings.
 
 **When to Use**:
 - impact_analysis: Need to understand the impact of changing a symbol before refactoring

@@ -1,6 +1,6 @@
 import type OpenAI from "openai"
 
-const EXECUTE_COMMAND_DESCRIPTION = `Execute a CLI command on the system. Use for system operations or running commands to accomplish tasks.
+const EXECUTE_COMMAND_DESCRIPTION = `Execute a CLI command on the system. Use for system operations or running commands to accomplish tasks. **For finding where a symbol is defined or finding all usages of a symbol, use go_to_definition/find_references instead of grep.**
 
 **Shell Compatibility:**
 - PowerShell: Use \`;\` to chain commands. Use PowerShell-native commands: \`Select-String\` (grep), \`Get-Content\` (cat), \`Remove-Item\` (rm), \`Copy-Item\` (cp), \`Move-Item\` (mv), \`-replace\` (sed). NEVER use Unix commands (sed/grep/awk/rm).
