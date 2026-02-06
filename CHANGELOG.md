@@ -2,6 +2,14 @@
 
 # Roo Code Changelog
 
+## [3.50.1] - 2026-02-06
+
+### 🔧 Tool Naming & Prompt Enhancements
+
+- Renamed tools to `go_to_definition` and `find_references`, updated all related references
+- Added `baseInstructions` to `generatePrompt` for enhanced prompt content
+- Optimized tool descriptions for command execution and reference finding, improving user experience
+
 ## [3.50.0] - 2026-02-05
 
 ### ✨ Enhanced Read Media Tool with Focus & Scale Support
