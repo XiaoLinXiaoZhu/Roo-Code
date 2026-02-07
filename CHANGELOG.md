@@ -2,6 +2,16 @@
 
 # Roo Code Changelog
 
+## [3.50.2] - 2026-02-07
+
+### 📁 优化 Environment Details 文件列表
+
+- 文件列表改为分层目录树格式，优先展示目录层级架构而非扁平文件列表
+- 同目录下相似文件名（≥5个）自动折叠为摘要（如 `<files pattern="*-release.png" count="60"/>`）
+- `listFiles` 默认不受 `.gitignore` 过滤，让本地重要目录（`.report/`、`.roo/` 等）出现在文件列表中
+- 首次初始化时若无 `.rooignore`，自动从 `.gitignore` 复制一份作为模板供用户调整
+- 可通过 `.env` 中 `ROO_RESPECT_GITIGNORE=1` 恢复 gitignore 过滤
+
 ## [3.50.1] - 2026-02-06
 
 ### 🔧 Tool Naming & Prompt Enhancements
