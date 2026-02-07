@@ -16,6 +16,7 @@ export class RooIgnoreController {
 	private cwd: string
 	private ignoreInstance: Ignore
 	private disposables: vscode.Disposable[] = []
+	private hasInitialized = false
 	rooIgnoreContent: string | undefined
 
 	constructor(cwd: string) {
@@ -32,6 +33,7 @@ export class RooIgnoreController {
 	 */
 	async initialize(): Promise<void> {
 		await this.loadRooIgnore()
+		this.hasInitialized = true
 	}
 
 	/**
@@ -71,6 +73,28 @@ export class RooIgnoreController {
 				this.rooIgnoreContent = content
 				this.ignoreInstance.add(content)
 				this.ignoreInstance.add(".rooignore")
+			} else if (!this.hasInitialized) {
+				// First initialization only: seed .rooignore from .gitignore if available,
+				// so the user has a starting template they can adjust.
+				const gitignorePath = path.join(this.cwd, ".gitignore")
+				if (await fileExistsAtPath(gitignorePath)) {
+					try {
+						const gitignoreContent = await fs.readFile(gitignorePath, "utf8")
+						await fs.writeFile(
+							ignorePath,
+							`# Auto-generated from .gitignore — adjust as needed.\n# This controls which files the AI cannot access.\n${gitignoreContent}`,
+							"utf8",
+						)
+						this.rooIgnoreContent = gitignoreContent
+						this.ignoreInstance.add(gitignoreContent)
+						this.ignoreInstance.add(".rooignore")
+					} catch {
+						// Non-critical: if copy fails, proceed without .rooignore
+						this.rooIgnoreContent = undefined
+					}
+				} else {
+					this.rooIgnoreContent = undefined
+				}
 			} else {
 				this.rooIgnoreContent = undefined
 			}

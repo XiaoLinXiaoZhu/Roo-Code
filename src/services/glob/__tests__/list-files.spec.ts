@@ -550,7 +550,7 @@ describe("buildRecursiveArgs edge cases", () => {
 		mockSpawn.mockReturnValue(mockProcess as any)
 
 		// Test with a path that has dots but no hidden directories
-		await listFiles("/test/file.with.dots/normal", true, 100)
+		await listFiles("/test/file.with.dots/normal", true, 100, { ignoreGitIgnore: false })
 
 		const [rgPath, args] = mockSpawn.mock.calls[0]
 		// Should NOT have the special flags for hidden directories

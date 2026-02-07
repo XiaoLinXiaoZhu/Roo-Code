@@ -19,6 +19,7 @@ import { RooProtectedController } from "../protect/RooProtectedController"
 import { Task } from "../task/Task"
 import { formatReminderSection } from "./reminder"
 import { getContextualSpriteHint } from "./getSpriteHint"
+import { formatWorkspaceTree } from "./formatWorkspaceTree"
 
 /**
  * Escape XML special characters in a string
@@ -294,30 +295,20 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 			if (maxFiles === 0) {
 				xmlContent += `\n  <workspace path="${escapeXml(cline.cwd.toPosix())}">\n    (Workspace files context disabled. Use list_files to explore if needed.)\n  </workspace>`
 			} else {
+				// ignoreGitIgnore defaults to true so locally important directories
+				// (e.g. .report/, .roo/) that are in .gitignore still appear.
+				// Set ROO_RESPECT_GITIGNORE=1 in .env to restore gitignore filtering.
 				const [files, didHitLimit] = await listFiles(cline.cwd, true, maxFiles)
 				const protectedController = new RooProtectedController(cline.cwd)
-
-				// Build workspace XML with structured file/directory entries
-				let workspaceXml = ""
 				const truncatedAttr = didHitLimit ? ' truncated="true"' : ""
 
-				for (const file of files) {
-					const isDirectory = file.endsWith("/")
-					const isIgnored = cline.rooIgnoreController
-						? !cline.rooIgnoreController.validateAccess(file)
-						: false
-					const isProtected = protectedController.isWriteProtected(file)
-
-					// Build attributes
-					const ignoredAttr = isIgnored ? ' ignored="true"' : ""
-					const protectedAttr = isProtected ? ' protected="true"' : ""
-
-					if (isDirectory) {
-						workspaceXml += `\n    <dir${ignoredAttr}${protectedAttr}>${escapeXml(file)}</dir>`
-					} else {
-						workspaceXml += `\n    <file${ignoredAttr}${protectedAttr}>${escapeXml(file)}</file>`
-					}
-				}
+				// Build structured directory tree with similar-file folding
+				const workspaceXml = formatWorkspaceTree(files, cline.cwd, {
+					foldThreshold: 5,
+					checkIgnored: (relativePath: string) =>
+						cline.rooIgnoreController ? !cline.rooIgnoreController.validateAccess(relativePath) : false,
+					checkProtected: (absolutePath: string) => protectedController.isWriteProtected(absolutePath),
+				})
 
 				xmlContent += `\n  <workspace path="${escapeXml(cline.cwd.toPosix())}"${truncatedAttr}>${workspaceXml}\n  </workspace>`
 			}

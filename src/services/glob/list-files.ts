@@ -22,19 +22,49 @@ interface ScanContext {
 	ignoreInstance: ReturnType<typeof ignore>
 }
 
+export interface ListFilesOptions {
+	/**
+	 * If true, do not respect .gitignore rules (still respects DIRS_TO_IGNORE).
+	 * Default: true — so that locally important directories (e.g. .report/, .roo/)
+	 * that are in .gitignore still appear in file listings.
+	 * Set env var ROO_RESPECT_GITIGNORE=1 in workspace .env to override back to false.
+	 */
+	ignoreGitIgnore?: boolean
+}
+
+/**
+ * Resolve the effective ignoreGitIgnore value.
+ * Default is true unless ROO_RESPECT_GITIGNORE=1 is set in .env.
+ */
+function resolveIgnoreGitIgnore(options?: ListFilesOptions): boolean {
+	if (options?.ignoreGitIgnore !== undefined) {
+		return options.ignoreGitIgnore
+	}
+	return process.env.ROO_RESPECT_GITIGNORE === "1" ? false : true
+}
+
 /**
  * List files in a directory, with optional recursive traversal
  *
  * @param dirPath - Directory path to list files from
  * @param recursive - Whether to recursively list files in subdirectories
  * @param limit - Maximum number of files to return
+ * @param options - Additional options
  * @returns Tuple of [file paths array, whether the limit was reached]
  */
-export async function listFiles(dirPath: string, recursive: boolean, limit: number): Promise<[string[], boolean]> {
+export async function listFiles(
+	dirPath: string,
+	recursive: boolean,
+	limit: number,
+	options?: ListFilesOptions,
+): Promise<[string[], boolean]> {
 	// Early return for limit of 0 - no need to scan anything
 	if (limit === 0) {
 		return [[], false]
 	}
+
+	// Resolve ignoreGitIgnore once (default: true, unless ROO_RESPECT_GITIGNORE=1)
+	const ignoreGitIgnore = resolveIgnoreGitIgnore(options)
 
 	// Handle special directories
 	const specialResult = await handleSpecialDirectories(dirPath)
@@ -48,8 +78,8 @@ export async function listFiles(dirPath: string, recursive: boolean, limit: numb
 
 	if (!recursive) {
 		// For non-recursive, use the existing approach
-		const files = await listFilesWithRipgrep(rgPath, dirPath, false, limit)
-		const ignoreInstance = await createIgnoreInstance(dirPath)
+		const files = await listFilesWithRipgrep(rgPath, dirPath, false, limit, ignoreGitIgnore)
+		const ignoreInstance = await createIgnoreInstance(dirPath, ignoreGitIgnore)
 		// Calculate remaining limit for directories
 		const remainingLimit = Math.max(0, limit - files.length)
 		const directories = await listFilteredDirectories(dirPath, false, ignoreInstance, remainingLimit)
@@ -57,8 +87,8 @@ export async function listFiles(dirPath: string, recursive: boolean, limit: numb
 	}
 
 	// For recursive mode, use the original approach but ensure first-level directories are included
-	const files = await listFilesWithRipgrep(rgPath, dirPath, true, limit)
-	const ignoreInstance = await createIgnoreInstance(dirPath)
+	const files = await listFilesWithRipgrep(rgPath, dirPath, true, limit, ignoreGitIgnore)
+	const ignoreInstance = await createIgnoreInstance(dirPath, ignoreGitIgnore)
 	// Calculate remaining limit for directories
 	const remainingLimit = Math.max(0, limit - files.length)
 	const directories = await listFilteredDirectories(dirPath, true, ignoreInstance, remainingLimit)
@@ -202,8 +232,9 @@ async function listFilesWithRipgrep(
 	dirPath: string,
 	recursive: boolean,
 	limit: number,
+	ignoreGitIgnore?: boolean,
 ): Promise<string[]> {
-	const rgArgs = buildRipgrepArgs(dirPath, recursive)
+	const rgArgs = buildRipgrepArgs(dirPath, recursive, ignoreGitIgnore)
 
 	const relativePaths = await execRipgrep(rgPath, rgArgs, limit)
 
@@ -216,22 +247,26 @@ async function listFilesWithRipgrep(
 /**
  * Build appropriate ripgrep arguments based on whether we're doing a recursive search
  */
-function buildRipgrepArgs(dirPath: string, recursive: boolean): string[] {
+function buildRipgrepArgs(dirPath: string, recursive: boolean, ignoreGitIgnore?: boolean): string[] {
 	// Base arguments to list files
 	const args = ["--files", "--hidden", "--follow"]
 
 	if (recursive) {
-		return [...args, ...buildRecursiveArgs(dirPath), dirPath]
+		return [...args, ...buildRecursiveArgs(dirPath, ignoreGitIgnore), dirPath]
 	} else {
-		return [...args, ...buildNonRecursiveArgs(), dirPath]
+		return [...args, ...buildNonRecursiveArgs(ignoreGitIgnore), dirPath]
 	}
 }
 
 /**
  * Build ripgrep arguments for recursive directory traversal
  */
-function buildRecursiveArgs(dirPath: string): string[] {
+function buildRecursiveArgs(dirPath: string, ignoreGitIgnore?: boolean): string[] {
 	const args: string[] = []
+
+	if (ignoreGitIgnore) {
+		args.push("--no-ignore-vcs")
+	}
 
 	// In recursive mode, respect .gitignore by default
 	// (ripgrep does this automatically)
@@ -295,8 +330,12 @@ function buildRecursiveArgs(dirPath: string): string[] {
 /**
  * Build ripgrep arguments for non-recursive directory listing
  */
-function buildNonRecursiveArgs(): string[] {
+function buildNonRecursiveArgs(ignoreGitIgnore?: boolean): string[] {
 	const args: string[] = []
+
+	if (ignoreGitIgnore) {
+		args.push("--no-ignore-vcs")
+	}
 
 	// For non-recursive, limit to the current directory level
 	args.push("-g", "*")
@@ -327,21 +366,23 @@ function buildNonRecursiveArgs(): string[] {
  * Create an ignore instance that handles .gitignore files properly
  * This replaces the custom gitignore parsing with the proper ignore library
  */
-async function createIgnoreInstance(dirPath: string): Promise<ReturnType<typeof ignore>> {
+async function createIgnoreInstance(dirPath: string, ignoreGitIgnore?: boolean): Promise<ReturnType<typeof ignore>> {
 	const ignoreInstance = ignore()
 	const absolutePath = path.resolve(dirPath)
 
-	// Find all .gitignore files from the target directory up to the root
-	const gitignoreFiles = await findGitignoreFiles(absolutePath)
+	if (!ignoreGitIgnore) {
+		// Find all .gitignore files from the target directory up to the root
+		const gitignoreFiles = await findGitignoreFiles(absolutePath)
 
-	// Add patterns from all .gitignore files
-	for (const gitignoreFile of gitignoreFiles) {
-		try {
-			const content = await fs.promises.readFile(gitignoreFile, "utf8")
-			ignoreInstance.add(content)
-		} catch (err) {
-			// Continue if we can't read a .gitignore file
-			console.warn(`Could not read .gitignore at ${gitignoreFile}: ${err}`)
+		// Add patterns from all .gitignore files
+		for (const gitignoreFile of gitignoreFiles) {
+			try {
+				const content = await fs.promises.readFile(gitignoreFile, "utf8")
+				ignoreInstance.add(content)
+			} catch (err) {
+				// Continue if we can't read a .gitignore file
+				console.warn(`Could not read .gitignore at ${gitignoreFile}: ${err}`)
+			}
 		}
 	}
 

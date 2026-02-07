@@ -946,6 +946,33 @@
       "gitCommit": "18550e2dbed6928ac939ff777ffe1f6346731f00",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"relevance\":{\"type\":\"string\"}}}},\"enumLocation\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "39",
+      "query": "How does the project read .env files or environment variables for configuration?",
+      "tags": [
+        "how",
+        "does",
+        "the",
+        "project",
+        "read",
+        "env",
+        "files",
+        "or",
+        "environment",
+        "variables",
+        "for",
+        "configuration"
+      ],
+      "scope": {
+        "directories": "e:/_Project/Roo-Code/src",
+        "filePatterns": "*.ts",
+        "excludes": "__tests__,*.spec.ts,*.test.ts,node_modules"
+      },
+      "createdAt": "2026-02-07T12:10:35.936Z",
+      "gitCommit": "98ba7a6608bfb529d6a1f1af12fd598d2eba6df8",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"method\":{\"type\":\"string\"}}}"
     }
   ]
 }
