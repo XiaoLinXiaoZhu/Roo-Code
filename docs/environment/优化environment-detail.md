@@ -46,9 +46,151 @@
 </related_files>
 ```
 
+## Hints 优化经验传承
+
+### 当前架构
+
+- **入口**：[`getContextualSpriteHint(context)`](../../src/core/environment/getSpriteHint.ts) 在 [`getEnvironmentDetails.ts:330`](../../src/core/environment/getEnvironmentDetails.ts) 中被调用
+- **选择逻辑**：根据 `HintContext`（连续错误次数、工具是否失败、对话轮次、是否有最近修改文件）检测主题，80% 按主题选、20% 完全随机
+- **4 个主题**：`certainty`（确定性追求）、`resultOrientation`（结果导向）、`honesty`（诚实透明）、`efficiency`（效率简洁）
+- **5 种风格**：格言（maxim）、问句（question）、场景（scenario）、对比（contrast）、链条（chain）+ 2 个身份提醒（identity）
+- **共 22 条 hints**
+
+### 已知问题（原始记录）
+
+1. **hints 内容与 Spirit Kernel v4.0 不同步**：当前 hints 基于 v3.0 编写，但系统提示词已升级到 v4.0。v4.0 的核心变化：
+
+    - 从 4 个主题（certainty/resultOrientation/honesty/efficiency）变为 4 个 Value + 10 个 Behavior
+    - Value: "Evidence over Speculation" + "Transparency over Mystery" + "User's Real Goal over Literal Request" + "Simplicity over Cleverness"
+    - Behavior 编号从 1-10，每个有明确的 When/What/Violations
+    - 需要重新对齐 hints 的主题分类和内容
+
+2. **上下文信号太少**：当前 `HintContext` 只有 4 个信号，缺少：
+
+    - 当前正在使用的工具类型（读文件 vs 写文件 vs 执行命令）
+    - 是否在调试循环中（反复修改同一文件）
+    - 用户消息的意图类型（提问 vs 指令 vs 反馈）
+    - ~~当前 mode（code vs architect vs ask）~~
+
+3. **hint 内容偏抽象**：很多 hint 是通用格言，缺少与工具使用最佳实践绑定的具体指导。比如：
+
+    - 没有提醒"使用 `find_definition`/`find_usages` 而不是 grep"
+    - 没有提醒"修改前检查是否有对应的 `.spec.ts` 测试文件"
+    - 没有提醒"从正确的工作区目录运行测试"
+
+4. **主题检测规则过于简单**：`detectTheme()` 用硬编码阈值（`messageCount <= 2` → resultOrientation），没有考虑对话的实际内容
+
+### 讨论结论与决策
+
+**代码审查发现**：
+
+- `getSpriteHintByType()` 是**死代码**，完全没有外部调用
+- `getSpriteHint()` 只在文件内部被 `getContextualSpriteHint` 作为 fallback 调用
+- 没有针对 hint 内容的测试文件，只需确保选择逻辑正确
+
+**信号评估**：
+| 信号 | 结论 | 理由 |
+|---|---|---|
+| `lastToolName` | ✅ 采纳 | 可以在用户刚用了 grep 时提醒 find_definition，或在写文件后提醒检查测试 |
+| `currentMode` | ❌ 不需要 | mode 信息已在系统提示词中，hint 再提醒没有增量价值 |
+| `isDebuggingLoop` | ⏸ 暂缓 | 有价值但实现复杂，`consecutiveMistakeCount` 已部分覆盖 |
+| `recentFileExtensions` | ❌ 不需要 | 很难基于扩展名给出有意义的差异化 hint |
+
+**方向 2 修正**：`.roo/rules/rules.md` 是项目级配置，不应硬编码到 hints。实操 hints 应聚焦于**通用的工具使用最佳实践**（如 find_definition 优先于 grep、修改前检查测试文件、竞争假设调试法），而非项目特定规则。
+
+**方向 4 修正**：hints 每 5 轮才展示一次（`shouldIncludeReminder`），重复概率已经不高，衰减机制暂缓。
+
+**最终优先级**：
+
+1. **方向 2**（通用实操 hints）— 最高 ROI，直接改善行为
+2. **方向 1**（对齐 v4.0）— 主题重命名 + hint 内容对齐 Behavior
+3. **方向 3**（只加 `lastToolName`）— 增强上下文感知
+4. **方向 4**（暂缓）— 等前三个方向落地后再评估
+5. **清理死代码** — 删除 `getSpriteHintByType`，简化 `getSpriteHint`
+
+### 优化方向详细设计
+
+#### 方向 1：对齐 Spirit Kernel v4.0
+
+将 `HintTheme` 从 4 主题改为对应 v4.0 的结构：
+
+```typescript
+type HintTheme =
+	| "evidence" // Value: Evidence over Speculation (Behavior 1-3)
+	| "transparency" // Value: Transparency over Mystery (Behavior 4-5)
+	| "realGoal" // Value: User's Real Goal (Behavior 6-8)
+	| "simplicity" // Value: Simplicity over Cleverness (Behavior 9-10)
+```
+
+#### 方向 2：增加通用实操 hints
+
+```typescript
+// 示例：工具使用提醒（通用，不绑定项目特定规则）
+const HINT_TOOL_NAVIGATION = `
+🧭 TOOL: Code Navigation
+
+**Use find_definition / find_usages instead of grep for code navigation.**
+- find_definition: trace imports, understand implementations
+- find_usages: impact analysis before refactoring
+- grep: only for text patterns that aren't code symbols
+`
+
+// 示例：测试流程提醒
+const HINT_TOOL_TESTING = `
+🧭 TOOL: Test Workflow
+
+Before completing a task:
+1. Check if a .spec.ts/.test.ts file exists for modified code
+2. Run tests from the correct workspace directory
+3. Read the test file to understand expected behavior before modifying code
+`
+
+// 示例：调试方法提醒（对齐 v4.0 Behavior 2）
+const HINT_TOOL_DEBUGGING = `
+🧭 TOOL: Competing Hypotheses
+
+**When debugging, generate 2-3 competing hypotheses.**
+For each: what evidence would confirm or rule it out?
+Design ONE experiment that distinguishes between them.
+Don't chase the first guess — eliminate systematically.
+`
+```
+
+注意：项目特定规则（如 vitest 工作区目录、Tailwind 偏好）属于 `.roo/rules/` 的职责，不应硬编码到 hints 中。
+
+#### 方向 3：丰富上下文信号
+
+```typescript
+interface HintContext {
+	// 现有
+	consecutiveMistakeCount: number
+	lastToolFailed: boolean
+	messageCount: number
+	hasRecentlyModifiedFiles: boolean
+	// 新增
+	lastToolName?: string // 最近使用的工具，用于触发工具相关 hints
+}
+```
+
+#### 方向 4：hint 去重与衰减（暂缓）
+
+当前 22 条 hints 中有不少内容重叠（比如 MAXIM_2 和 SCENARIO_3 都在说"知道何时求助"）。可以：
+
+- 合并重复内容，减少总数
+- 引入衰减机制：最近展示过的 hint 降低权重，避免短期内重复
+- **暂缓理由**：hints 每 5 轮才展示一次，重复概率已经不高
+
+### 注意事项
+
+- hints 是嵌入在 `<environment>` XML 的 `<spirit_hint>` 标签中的，每次 API 调用都会带上一条
+- 每条 hint 消耗 token，所以要控制长度——当前每条约 50-100 tokens，总共 22 条轮换
+- hints 的效果难以量化测试，主要靠主观观察 AI 行为是否符合预期
+- 修改 hints 不需要改测试（没有针对 hint 内容的测试），但要确保 `getContextualSpriteHint` 的选择逻辑测试通过
+
 ## 附录
 
 [系统提示词组装](../../src/core/prompts/system.ts)
 [hints](../../src/core/environment/getSpriteHint.ts)
 [environment details](../../src/core/environment/getEnvironmentDetails.ts)
 [文件列表格式化](../../src/core/environment/formatWorkspaceTree.ts)
+[Spirit Kernel v4.0](../../src/core/prompts/system.ts) — 搜索 "SPIRIT KERNEL"

@@ -318,7 +318,7 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 	// ============================================================================
 	// Reminder and Spirit Hint Sections
 	// ============================================================================
-	const shouldIncludeReminder = isFirstMessage || messageCount % 5 === 0
+	const shouldIncludeReminder = isFirstMessage || messageCount % 3 === 0
 	const todoListEnabled =
 		state && typeof state.apiConfiguration?.todoListEnabled === "boolean"
 			? state.apiConfiguration.todoListEnabled

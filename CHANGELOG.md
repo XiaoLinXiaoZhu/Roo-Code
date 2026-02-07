@@ -2,6 +2,16 @@
 
 # Roo Code Changelog
 
+## [3.50.3] - 2026-02-07
+
+### 🧭 优化 Spirit Hints 提示系统
+
+- 对齐 Spirit Kernel v4.0：主题从 v3.0 的 4 主题（certainty/resultOrientation/honesty/efficiency）更新为 v4.0 的 4 Values（evidence/transparency/realGoal/simplicity）
+- 新增通用实操 hints：代码导航（find_definition 优先于 grep）、竞争假设调试法、测试工作流、并行工具调用
+- 精简风格从 5 种（maxim/question/scenario/contrast/chain）为 3 种（scenario/contrast/checklist），去除重复内容
+- 提示展示频率从每 5 轮提高到每 3 轮
+- 清理死代码：删除未使用的 `getSpriteHintByType()` 和独立的 `getSpriteHint()`
+
 ## [3.50.2] - 2026-02-07
 
 ### 📁 优化 Environment Details 文件列表
