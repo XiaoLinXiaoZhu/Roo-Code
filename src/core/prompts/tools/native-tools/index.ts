@@ -61,6 +61,9 @@ export function getNativeTools(options: NativeToolsOptions = {}): OpenAI.Chat.Ch
 		attemptCompletion,
 		browserAction,
 		codebaseSearch,
+		// LSP 代码智能工具 - 优先于 grep 用于符号导航
+		findDefinition,
+		findUsages,
 		executeCommand,
 		generateImage,
 		listFiles,
@@ -80,9 +83,6 @@ export function getNativeTools(options: NativeToolsOptions = {}): OpenAI.Chat.Ch
 		searchProject,
 		applyEdit,
 		consultExpert,
-		// AST 代码智能工具
-		findDefinition,
-		findUsages,
 		// 工具构建工具
 		buildTool,
 	] satisfies OpenAI.Chat.ChatCompletionTool[]

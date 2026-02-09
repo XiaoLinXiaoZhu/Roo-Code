@@ -1,34 +1,31 @@
 import type OpenAI from "openai"
 
-const EXECUTE_COMMAND_DESCRIPTION = `Execute a CLI command on the system. Use for system operations or running commands to accomplish tasks. **For finding where a symbol is defined or finding all usages of a symbol, use find_definition/find_usages instead of grep.**
+const EXECUTE_COMMAND_DESCRIPTION = `Run shell commands for development, system operations, or invoking CLI tools. **For code navigation (finding definitions or references), use find_definition/find_usages instead of grep.**
 
-**Shell Compatibility:**
-- PowerShell: Use \`;\` to chain commands. Use PowerShell-native commands: \`Select-String\` (grep), \`Get-Content\` (cat), \`Remove-Item\` (rm), \`Copy-Item\` (cp), \`Move-Item\` (mv), \`-replace\` (sed). NEVER use Unix commands (sed/grep/awk/rm).
-- cmd.exe: Use \`&&\` to chain commands. Use built-in commands: \`type\` (cat), \`del\` (rm), \`copy\` (cp), \`move\` (mv), \`findstr\` (grep). NEVER use Unix commands.
-- bash/zsh: Use \`&&\` to chain commands. All standard Unix commands available.
+**When to Use**:
+- Development: \`npm test\`, \`npm run build\`, \`pip install\`
+- Git operations: \`git status\`, \`git diff\`, \`git log\`
+- System inspection: \`ls\`, \`cat\`, \`ps\`, \`env\`
+- Network requests: \`curl\`, \`wget\`
+- CLI tools (from build_tool): image processing, audio analysis, data conversion
+- Any operation not covered by other specialized tools
 
-**Optimized Commands (bash/zsh):**
-The following commands have optimized output formatting and respect .rooignore rules:
-- \`grep\`: Text pattern search with \`-i\`, \`-r\`, \`-n\`, \`-C\`, \`-A\`, \`-B\`, \`-w\`, \`-F\`, \`--include\`, \`--exclude\`. **For symbol/code navigation (finding definitions or references), use find_definition/find_usages instead.**
-- \`cat\`: Read files with \`-n\` for line numbers
-- \`head\`/\`tail\`: View file portions with \`-n\`, \`-c\`
-- \`find\`: Search files with \`-name\`, \`-iname\`, \`-type\`, \`-maxdepth\`
-- \`ls\`: List directories with \`-l\`, \`-a\`, \`-A\`, \`-R\`, \`-h\`
-- \`wc\`: Count lines/words/chars with \`-l\`, \`-w\`, \`-c\`
+**Example**:
+{ "command": "npm test -- --grep 'auth'", "cwd": "./backend" }`
 
-**Best Practices:**
-- Prefer relative paths for terminal consistency (e.g., \`./src/\` instead of absolute paths)
-- If no output is returned, assume the command succeeded
-- Prefer executing complex commands directly over creating scripts
-- Use pipe combinations like \`grep pattern | head -20\` for filtered results
+const COMMAND_PARAMETER_DESCRIPTION = `The CLI command to execute.
 
-**Parameters:**
-- command: (required) The CLI command to execute, tailored to the user's shell
-- cwd: (optional) Working directory for the command`
+**Shell Compatibility** (critical):
+- PowerShell: Use \`;\` to chain. Native commands: \`Select-String\`, \`Get-Content\`, \`Remove-Item\`. NEVER use Unix commands.
+- cmd.exe: Use \`&&\` to chain. Native commands: \`type\`, \`del\`, \`findstr\`. NEVER use Unix commands.
+- bash/zsh: Use \`&&\` to chain. All Unix commands available.
 
-const COMMAND_PARAMETER_DESCRIPTION = `Shell command to execute`
+**Best Practices**:
+- Use relative paths (e.g., \`./src/\` not absolute)
+- Execute complex commands directly, don't create scripts
+- Use pipes: \`grep pattern | head -20\``
 
-const CWD_PARAMETER_DESCRIPTION = `Optional working directory for the command, relative or absolute`
+const CWD_PARAMETER_DESCRIPTION = `Working directory for the command (relative or absolute). Default: workspace root.`
 
 export default {
 	type: "function",

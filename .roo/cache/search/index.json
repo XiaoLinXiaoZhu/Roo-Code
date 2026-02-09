@@ -1030,6 +1030,58 @@
       "gitCommit": "5bbfe1a127e995a838f3d6b3037f13bc12b9cede",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"implementation\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "42",
+      "query": "Where are the tool definitions for find_definition, find_usages, grep and git tools located?",
+      "tags": [
+        "where",
+        "are",
+        "the",
+        "tool",
+        "definitions",
+        "for",
+        "find_definition",
+        "find_usages",
+        "grep",
+        "and",
+        "git",
+        "tools",
+        "located"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-09T05:36:24.571Z",
+      "gitCommit": "a96412152b9fb4b8537ed6600a21aaf137341d22",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"toolDefinitionFiles\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}}}},\"relevantContent\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "43",
+      "query": "How are tools passed to the model API? Is the order of getNativeTools preserved when sending to OpenAI/Anthropic?",
+      "tags": [
+        "how",
+        "are",
+        "tools",
+        "passed",
+        "to",
+        "the",
+        "model",
+        "api",
+        "is",
+        "order",
+        "of",
+        "getnativetools",
+        "preserved",
+        "when",
+        "sending",
+        "openai",
+        "anthropic"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-09T05:39:47.815Z",
+      "gitCommit": "a96412152b9fb4b8537ed6600a21aaf137341d22",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"orderPreserved\":{\"type\":\"boolean\"},\"relevantFiles\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"explanation\":{\"type\":\"string\"}}}"
     }
   ]
 }
