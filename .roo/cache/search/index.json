@@ -1015,6 +1015,21 @@
       "gitCommit": "9f2370b767017f97fc6825984dd71318e0abd379",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"toolTrackingLocations\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"file\":{\"type\":\"string\"},\"line\":{\"type\":\"number\"},\"description\":{\"type\":\"string\"}}}},\"lastToolProperty\":{\"type\":\"string\",\"description\":\"The property name that stores the last tool used, if any\"}}}"
+    },
+    {
+      "id": "41",
+      "query": "hints 机制是如何实现的？spirit_hint 是在哪里生成和注入的？",
+      "tags": [
+        "hints",
+        "机制是如何实现的",
+        "spirit_hint",
+        "是在哪里生成和注入的"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-09T05:27:15.758Z",
+      "gitCommit": "5bbfe1a127e995a838f3d6b3037f13bc12b9cede",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"implementation\":{\"type\":\"string\"}}}"
     }
   ]
 }

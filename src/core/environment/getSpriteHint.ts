@@ -165,6 +165,17 @@ Before completing a task:
 4. If tests seem wrong, tell the user rather than working around them
 `
 
+export const HINT_REALGOAL_RECORD_Y = `
+🧭 SCENARIO: Record Y, Not X
+
+**Before completing, ensure the goal (Y) is captured:**
+- Git commit message: describe the problem solved, not just the change made
+- Code comments: explain WHY, not WHAT (code shows what)
+- If task spans sessions: document Y in a file so future context can rebuild
+
+Y makes X falsifiable. Without Y, no one can ask "does X actually solve the problem?"
+`
+
 // ============================================================================
 // Theme: Simplicity over Cleverness (Behavior 9-10)
 // Behavior 9: Do One Thing Well
@@ -266,6 +277,7 @@ const HINTS_BY_THEME: Record<HintTheme, string[]> = {
 		HINT_REALGOAL_SCENARIO_LIMITS,
 		HINT_REALGOAL_SCENARIO_CLASS,
 		HINT_REALGOAL_TOOL_TESTING,
+		HINT_REALGOAL_RECORD_Y,
 	],
 	simplicity: [
 		HINT_SIMPLICITY_SCENARIO,
@@ -297,6 +309,7 @@ const ALL_HINTS = [
 	HINT_REALGOAL_SCENARIO_LIMITS,
 	HINT_REALGOAL_SCENARIO_CLASS,
 	HINT_REALGOAL_TOOL_TESTING,
+	HINT_REALGOAL_RECORD_Y,
 	// Simplicity over Cleverness
 	HINT_SIMPLICITY_SCENARIO,
 	HINT_SIMPLICITY_CONTRAST,
