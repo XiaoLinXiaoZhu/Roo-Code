@@ -726,6 +726,44 @@ export class NativeToolCallParser {
 				}
 				break
 
+			case "add_intent":
+				if (partialArgs.type !== undefined || partialArgs.content !== undefined) {
+					nativeArgs = {
+						type: partialArgs.type,
+						content: partialArgs.content,
+						parentId: partialArgs.parentId,
+					}
+				}
+				break
+
+			case "update_intent":
+				if (partialArgs.nodeId !== undefined) {
+					nativeArgs = {
+						nodeId: partialArgs.nodeId,
+						status: partialArgs.status,
+						content: partialArgs.content,
+					}
+				}
+				break
+
+			case "prune_intent":
+				if (partialArgs.nodeId !== undefined) {
+					nativeArgs = {
+						nodeId: partialArgs.nodeId,
+						reason: partialArgs.reason,
+					}
+				}
+				break
+
+			case "commit_intent":
+				if (partialArgs.nodeId !== undefined || partialArgs.message !== undefined) {
+					nativeArgs = {
+						nodeId: partialArgs.nodeId,
+						message: partialArgs.message,
+					}
+				}
+				break
+
 			case "read_command_output":
 				if (partialArgs.artifact_id !== undefined) {
 					nativeArgs = {
@@ -1171,6 +1209,44 @@ export class NativeToolCallParser {
 							requirement: args.requirement,
 							inputHint: args.inputHint,
 							outputHint: args.outputHint,
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "add_intent":
+					if (args.type !== undefined && args.content !== undefined) {
+						nativeArgs = {
+							type: args.type,
+							content: args.content,
+							parentId: args.parentId,
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "update_intent":
+					if (args.nodeId !== undefined) {
+						nativeArgs = {
+							nodeId: args.nodeId,
+							status: args.status,
+							content: args.content,
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "prune_intent":
+					if (args.nodeId !== undefined) {
+						nativeArgs = {
+							nodeId: args.nodeId,
+							reason: args.reason,
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "commit_intent":
+					if (args.message !== undefined) {
+						nativeArgs = {
+							nodeId: args.nodeId,
+							message: args.message,
 						} as NativeArgsFor<TName>
 					}
 					break

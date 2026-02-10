@@ -1082,6 +1082,142 @@
       "gitCommit": "a96412152b9fb4b8537ed6600a21aaf137341d22",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"orderPreserved\":{\"type\":\"boolean\"},\"relevantFiles\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"explanation\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "44",
+      "query": "How are tools defined and registered for the assistant? Where is the tool list/schema defined and how does the tool dispatch work in Task?",
+      "tags": [
+        "how",
+        "are",
+        "tools",
+        "defined",
+        "and",
+        "registered",
+        "for",
+        "the",
+        "assistant",
+        "where",
+        "is",
+        "tool",
+        "list",
+        "schema",
+        "does",
+        "dispatch",
+        "work",
+        "in",
+        "task"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,dist,__tests__,*.spec.ts"
+      },
+      "createdAt": "2026-02-10T05:31:52.319Z",
+      "gitCommit": "f084c066e34288293f167f287af8eb758f1381b1",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"toolDefinitionFiles\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"toolDispatchFile\":{\"type\":\"string\"},\"toolRegistrationPattern\":{\"type\":\"string\"},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "45",
+      "query": "How does the checkpoint service perform git commits? Where is git add/commit executed in the codebase?",
+      "tags": [
+        "how",
+        "does",
+        "the",
+        "checkpoint",
+        "service",
+        "perform",
+        "git",
+        "commits",
+        "where",
+        "is",
+        "add",
+        "commit",
+        "executed",
+        "in",
+        "codebase"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src/services/checkpoints",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,dist,__tests__"
+      },
+      "createdAt": "2026-02-10T05:32:35.937Z",
+      "gitCommit": "f084c066e34288293f167f287af8eb758f1381b1",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"gitCommitFunction\":{\"type\":\"string\"},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "46",
+      "query": "Where does Task store its data directory? How does Task persist state between sessions? Where is globalStoragePath or taskDir defined?",
+      "tags": [
+        "where",
+        "does",
+        "task",
+        "store",
+        "its",
+        "data",
+        "directory",
+        "how",
+        "persist",
+        "state",
+        "between",
+        "sessions",
+        "is",
+        "globalstoragepath",
+        "or",
+        "taskdir",
+        "defined"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src/core/task",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,dist,__tests__,*.spec.ts"
+      },
+      "createdAt": "2026-02-10T05:33:46.891Z",
+      "gitCommit": "f084c066e34288293f167f287af8eb758f1381b1",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"taskStoragePath\":{\"type\":\"string\"},\"persistencePattern\":{\"type\":\"string\"},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "47",
+      "query": "Where is the user message constructed before sending to the model? How is environment details injected into user messages? Where does getEnvironmentDetails get called and its result added to conversation?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "user",
+        "message",
+        "constructed",
+        "before",
+        "sending",
+        "to",
+        "model",
+        "how",
+        "environment",
+        "details",
+        "injected",
+        "into",
+        "messages",
+        "does",
+        "getenvironmentdetails",
+        "get",
+        "called",
+        "and",
+        "its",
+        "result",
+        "added",
+        "conversation"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src/core/task",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,dist,__tests__,*.spec.ts"
+      },
+      "createdAt": "2026-02-10T05:35:14.450Z",
+      "gitCommit": "f084c066e34288293f167f287af8eb758f1381b1",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"userMessageFile\":{\"type\":\"string\"},\"injectionFunction\":{\"type\":\"string\"},\"injectionPoint\":{\"type\":\"string\"},\"summary\":{\"type\":\"string\"}}}"
     }
   ]
 }

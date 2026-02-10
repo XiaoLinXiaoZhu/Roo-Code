@@ -48,6 +48,11 @@ export const toolNames = [
 	"find_usages",
 	// 工具构建工具
 	"build_tool",
+	// 意图树工具
+	"add_intent",
+	"update_intent",
+	"prune_intent",
+	"commit_intent",
 ] as const
 
 export const toolNamesSchema = z.enum(toolNames)

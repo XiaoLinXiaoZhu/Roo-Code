@@ -27,6 +27,10 @@ import consultExpert from "./consult_expert"
 import findDefinition from "./find_definition"
 import findUsages from "./find_usages"
 import buildTool from "./build_tool"
+import addIntent from "./add_intent"
+import updateIntent from "./update_intent"
+import pruneIntent from "./prune_intent"
+import commitIntent from "./commit_intent"
 
 export { getMcpServerTools } from "./mcp_server"
 export { convertOpenAIToolToAnthropic, convertOpenAIToolsToAnthropic } from "./converters"
@@ -85,6 +89,11 @@ export function getNativeTools(options: NativeToolsOptions = {}): OpenAI.Chat.Ch
 		consultExpert,
 		// 工具构建工具
 		buildTool,
+		// 意图树工具
+		addIntent,
+		updateIntent,
+		pruneIntent,
+		commitIntent,
 	] satisfies OpenAI.Chat.ChatCompletionTool[]
 }
 

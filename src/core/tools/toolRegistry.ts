@@ -36,6 +36,10 @@ import { consultExpertTool } from "./ConsultExpertTool"
 import { findDefinitionTool } from "./FindDefinitionTool"
 import { findUsagesTool } from "./FindUsagesTool"
 import { buildToolTool } from "./BuildToolTool"
+import { addIntentTool } from "./AddIntentTool"
+import { updateIntentTool } from "./UpdateIntentTool"
+import { pruneIntentTool } from "./PruneIntentTool"
+import { commitIntentTool } from "./CommitIntentTool"
 
 /**
  * All registered BaseTool instances.
@@ -71,6 +75,10 @@ const allTools: BaseTool<ToolName>[] = [
 	findDefinitionTool,
 	findUsagesTool,
 	buildToolTool,
+	addIntentTool,
+	updateIntentTool,
+	pruneIntentTool,
+	commitIntentTool,
 ]
 
 /**

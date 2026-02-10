@@ -1,3 +1,4 @@
+import * as fs from "fs/promises"
 import * as path from "path"
 import * as vscode from "vscode"
 import os from "os"
@@ -173,6 +174,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 	readonly metadata: TaskMetadata
 
 	todoList?: TodoItem[]
+	intentTree?: import("../intent-tree").IntentTree
 
 	readonly rootTask: Task | undefined = undefined
 	readonly parentTask: Task | undefined = undefined
@@ -680,6 +682,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		this.consecutiveMistakeLimit = consecutiveMistakeLimit ?? DEFAULT_CONSECUTIVE_MISTAKE_LIMIT
 		this.providerRef = new WeakRef(provider)
 		this.globalStoragePath = provider.context.globalStorageUri.fsPath
+		this.initIntentTree()
 		this.diffViewProvider = new DiffViewProvider(this.cwd, this)
 		this.enableCheckpoints = enableCheckpoints
 		this.checkpointTimeout = checkpointTimeout
@@ -788,6 +791,26 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 	 * @param provider - The ClineProvider instance to fetch state from
 	 * @returns Promise that resolves when initialization is complete
 	 */
+
+	/**
+	 * 异步初始化意图树：从项目 .roo/ 目录加载 intent-tree.json。
+	 * 不阻塞构造函数，加载完成后挂载到 this.intentTree。
+	 * 所有 task 共享同一棵意图树，持久化在项目目录下便于版本管理。
+	 */
+	private initIntentTree(): void {
+		const rooDir = path.join(this.cwd, ".roo")
+		const treePath = path.join(rooDir, "intent-tree.json")
+		import("../intent-tree")
+			.then(async ({ IntentTree }) => {
+				// 确保 .roo 目录存在
+				await fs.mkdir(rooDir, { recursive: true })
+				this.intentTree = await IntentTree.load(treePath)
+			})
+			.catch((err) => {
+				console.error(`[Task#${this.taskId}] Failed to init intent tree:`, err)
+			})
+	}
+
 	private async initializeTaskMode(provider: ClineProvider): Promise<void> {
 		try {
 			const state = await provider.getState()

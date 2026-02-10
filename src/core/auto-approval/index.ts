@@ -151,6 +151,18 @@ export async function checkAutoApproval({
 			return { decision: "approve" }
 		}
 
+		// Intent tree tools are always auto-approved — they only record intent metadata,
+		// similar to updateTodoList. planIntent modifies the intent tree (no code changes),
+		// commitIntent creates a git commit (binding code to intent).
+		if (
+			tool.tool === "addIntent" ||
+			tool.tool === "updateIntent" ||
+			tool.tool === "pruneIntent" ||
+			tool.tool === "commitIntent"
+		) {
+			return { decision: "approve" }
+		}
+
 		// The skill tool only loads pre-defined instructions from built-in, global, or project skills.
 		// It does not read arbitrary files - skills must be explicitly installed/defined by the user.
 		// Auto-approval is intentional to provide a seamless experience when loading task instructions.

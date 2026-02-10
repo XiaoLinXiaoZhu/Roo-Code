@@ -316,6 +316,30 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 	}
 
 	// ============================================================================
+	// Intent Tree Section (意图树：跨对话的目标/实现溯源)
+	// ============================================================================
+	if (cline.intentTree) {
+		if (cline.intentTree.isEmpty()) {
+			// 空树：强制提示模型先记录目标
+			xmlContent += `\n  <intent_tree_prompt>`
+			xmlContent += `\n    ⚠️ MANDATORY FIRST STEP: No intent tree exists yet.`
+			xmlContent += `\n    Before doing ANYTHING else, analyze the user's message and call add_intent(type: "goal", content: "...") to record their goal.`
+			xmlContent += `\n    DO NOT proceed with implementation until the goal is recorded.`
+			xmlContent += `\n  </intent_tree_prompt>`
+		} else {
+			const intentSummary = cline.intentTree.toSummary()
+			if (intentSummary) {
+				xmlContent += `\n  <intent_tree hint="Analyze user message against this tree. Update nodes if needed (add_intent/update_intent/prune_intent).">`
+				xmlContent += `\n${intentSummary
+					.split("\n")
+					.map((l) => "    " + l)
+					.join("\n")}`
+				xmlContent += `\n  </intent_tree>`
+			}
+		}
+	}
+
+	// ============================================================================
 	// Reminder and Spirit Hint Sections
 	// ============================================================================
 	const shouldIncludeReminder = isFirstMessage || messageCount % 3 === 0

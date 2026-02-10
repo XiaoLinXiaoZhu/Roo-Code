@@ -110,6 +110,11 @@ export const toolParamNames = [
 	"requirement", // build_tool required parameter
 	"inputHint", // build_tool optional parameter
 	"outputHint", // build_tool optional parameter
+	// intent tree 工具参数
+	"parentId", // add_intent optional parameter
+	"nodeId", // update_intent/prune_intent/commit_intent required parameter
+	"status", // update_intent optional parameter
+	"reason", // prune_intent optional parameter
 ] as const
 
 export type ToolParamName = (typeof toolParamNames)[number]
@@ -193,6 +198,25 @@ export type NativeToolArgs = {
 		requirement: string
 		inputHint?: string
 		outputHint?: string
+	}
+	// 意图树工具
+	add_intent: {
+		type: "goal" | "subgoal" | "path" | "impl"
+		content: string
+		parentId?: string
+	}
+	update_intent: {
+		nodeId: string
+		status?: "in_progress" | "done" | "superseded"
+		content?: string
+	}
+	prune_intent: {
+		nodeId: string
+		reason?: string
+	}
+	commit_intent: {
+		nodeId?: string
+		message: string
 	}
 	// Add more tools as they are migrated to native protocol
 }
@@ -405,6 +429,10 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	find_definition: "find definition",
 	find_usages: "find usages",
 	build_tool: "build tool",
+	add_intent: "add intent",
+	update_intent: "update intent",
+	prune_intent: "prune intent",
+	commit_intent: "commit intent",
 } as const
 
 // Define available tool groups.
@@ -451,6 +479,11 @@ export const ALWAYS_AVAILABLE_TOOLS: ToolName[] = [
 	// "search_project",
 	// "apply_edit",
 	// "consult_expert",
+	// 意图树工具 - 始终可用
+	"add_intent",
+	"update_intent",
+	"prune_intent",
+	"commit_intent",
 ] as const
 
 /**

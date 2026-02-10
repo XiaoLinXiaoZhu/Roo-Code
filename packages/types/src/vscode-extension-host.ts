@@ -801,6 +801,10 @@ export interface ClineSayTool {
 		| "findDefinition"
 		| "findUsages"
 		| "skill"
+		| "addIntent"
+		| "updateIntent"
+		| "pruneIntent"
+		| "commitIntent"
 	path?: string
 	// For readMedia
 	focusX?: number

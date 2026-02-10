@@ -44,6 +44,10 @@ import { consultExpertTool } from "../tools/ConsultExpertTool"
 import { findDefinitionTool } from "../tools/FindDefinitionTool"
 import { findUsagesTool } from "../tools/FindUsagesTool"
 import { buildToolTool } from "../tools/BuildToolTool"
+import { addIntentTool } from "../tools/AddIntentTool"
+import { updateIntentTool } from "../tools/UpdateIntentTool"
+import { pruneIntentTool } from "../tools/PruneIntentTool"
+import { commitIntentTool } from "../tools/CommitIntentTool"
 
 import { formatResponse } from "../prompts/responses"
 import { sanitizeToolUseId } from "../../utils/tool-id"
@@ -405,6 +409,14 @@ export async function presentAssistantMessage(cline: Task) {
 						return `[${block.name} at ${block.params.path}:${block.params.line}:${block.params.character}]`
 					case "build_tool":
 						return `[${block.name} '${block.params.requirement}']`
+					case "add_intent":
+						return `[${block.name} ${block.params.type}: ${block.params.content}]`
+					case "update_intent":
+						return `[${block.name} ${block.params.nodeId}]`
+					case "prune_intent":
+						return `[${block.name} ${block.params.nodeId}]`
+					case "commit_intent":
+						return `[${block.name} ${block.params.nodeId}]`
 					case "read_command_output":
 						return `[${block.name} for '${block.params.artifact_id}']`
 					case "update_todo_list":
@@ -966,6 +978,34 @@ export async function presentAssistantMessage(cline: Task) {
 					break
 				case "build_tool":
 					await buildToolTool.handle(cline, block as ToolUse<"build_tool">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+					})
+					break
+				case "add_intent":
+					await addIntentTool.handle(cline, block as ToolUse<"add_intent">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+					})
+					break
+				case "update_intent":
+					await updateIntentTool.handle(cline, block as ToolUse<"update_intent">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+					})
+					break
+				case "prune_intent":
+					await pruneIntentTool.handle(cline, block as ToolUse<"prune_intent">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+					})
+					break
+				case "commit_intent":
+					await commitIntentTool.handle(cline, block as ToolUse<"commit_intent">, {
 						askApproval,
 						handleError,
 						pushToolResult,

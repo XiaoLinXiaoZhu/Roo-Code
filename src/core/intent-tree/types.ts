@@ -1,0 +1,94 @@
+/**
+ * Intent Tree - 意图树类型定义
+ *
+ * 意图树是 TodoList 的高级形态：每个节点可溯源、与代码绑定、跨对话持久化。
+ * 树状结构天然区分"约束"（上层节点）和"约束的实现"（下层节点），
+ * 防止 assistant 把历史实现误当约束，导致 patch 堆叠。
+ */
+
+/**
+ * 意图节点类型：
+ * - goal: 最终目标（稳定、主观，由用户确认）
+ * - subgoal: 可确认的子目标（Y1/Y2，可被用户验证）
+ * - path: 实现路径（A/B，用户尝试达成目标的手段）
+ * - impl: 具体实现（A1/A2，代码层面的产出）
+ */
+export type IntentNodeType = "goal" | "subgoal" | "path" | "impl"
+
+/**
+ * 意图节点状态：
+ * - planned: 已规划，尚未开始
+ * - in_progress: 正在实现
+ * - done: 已完成
+ * - superseded: 被新路径/实现替代
+ * - pruned: 已废弃/剪枝
+ */
+export type IntentNodeStatus = "planned" | "in_progress" | "done" | "superseded" | "pruned"
+
+/**
+ * 代码绑定信息：将意图节点与具体代码变更关联
+ */
+export interface IntentCodeBinding {
+	/** git commit hash */
+	commitHash: string
+	/** commit message */
+	commitMessage: string
+	/** 涉及的文件路径 */
+	files: string[]
+	/** 变更摘要（增删行数等） */
+	diffSummary?: string
+	/** 绑定时间 */
+	timestamp: string
+}
+
+/**
+ * 溯源信息：记录节点的创建/修改来源
+ */
+export interface IntentProvenance {
+	/** 对话/任务 ID */
+	taskId: string
+	/** 时间戳 */
+	timestamp: string
+	/** 操作描述 */
+	action: string
+}
+
+/**
+ * 意图树节点
+ */
+export interface IntentNode {
+	/** 内部唯一标识（UUID，用于持久化） */
+	id: string
+	/** 语义化短 ID，对模型友好（如 G1, S1.1, P1.1.1, I1.1.1.1） */
+	shortId: string
+	/** 节点类型 */
+	type: IntentNodeType
+	/** 自然语言描述 */
+	content: string
+	/** 节点状态 */
+	status: IntentNodeStatus
+	/** 父节点 ID（根节点为 null） */
+	parentId: string | null
+	/** 子节点 ID 列表 */
+	childrenIds: string[]
+	/** 代码绑定列表（一个节点可能有多次 commit） */
+	codeBindings: IntentCodeBinding[]
+	/** 创建信息 */
+	createdBy: IntentProvenance
+	/** 修改历史 */
+	modifiedBy: IntentProvenance[]
+}
+
+/**
+ * 意图树持久化格式（JSON 文件的根结构）
+ */
+export interface IntentTreeData {
+	/** 格式版本，用于未来迁移 */
+	version: 1
+	/** 所有节点，以 id 为 key */
+	nodes: Record<string, IntentNode>
+	/** 根节点 ID 列表（支持多个顶层目标） */
+	rootIds: string[]
+	/** shortId → id 的映射，用于快速查找 */
+	shortIdIndex: Record<string, string>
+}
