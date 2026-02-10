@@ -2802,7 +2802,12 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				}
 			}
 
-			const environmentDetails = await getEnvironmentDetails(this, currentIncludeFileDetails)
+			// includeFileDetails 只在第一次调用时为 true，正好对应用户消息时机
+			const environmentDetails = await getEnvironmentDetails(
+				this,
+				currentIncludeFileDetails,
+				currentIncludeFileDetails,
+			)
 
 			// Remove any existing environment_details blocks before adding fresh ones.
 			// This prevents duplicate environment details when resuming tasks,

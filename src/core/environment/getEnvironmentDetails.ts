@@ -33,7 +33,11 @@ function escapeXml(value: string): string {
 		.replace(/'/g, "&apos;")
 }
 
-export async function getEnvironmentDetails(cline: Task, includeFileDetails: boolean = false) {
+export async function getEnvironmentDetails(
+	cline: Task,
+	includeFileDetails: boolean = false,
+	isUserMessage: boolean = false,
+) {
 	const currentTime = new Date().toISOString()
 	const isFirstMessage = cline.apiConversationHistory.length === 0
 	const messageCount = cline.apiConversationHistory.length
@@ -317,8 +321,9 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 
 	// ============================================================================
 	// Intent Tree Section (意图树：跨对话的目标/实现溯源)
+	// 只在用户消息时注入，工具返回时不注入
 	// ============================================================================
-	if (cline.intentTree) {
+	if (isUserMessage && cline.intentTree) {
 		if (cline.intentTree.isEmpty()) {
 			// 空树：强制提示模型先记录目标
 			xmlContent += `\n  <intent_tree_prompt>`
