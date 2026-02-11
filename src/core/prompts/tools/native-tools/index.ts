@@ -31,6 +31,7 @@ import addIntent from "./add_intent"
 import updateIntent from "./update_intent"
 import pruneIntent from "./prune_intent"
 import commitIntent from "./commit_intent"
+import restructureIntent from "./restructure_intent"
 
 export { getMcpServerTools } from "./mcp_server"
 export { convertOpenAIToolToAnthropic, convertOpenAIToolsToAnthropic } from "./converters"
@@ -94,6 +95,7 @@ export function getNativeTools(options: NativeToolsOptions = {}): OpenAI.Chat.Ch
 		updateIntent,
 		pruneIntent,
 		commitIntent,
+		restructureIntent,
 	] satisfies OpenAI.Chat.ChatCompletionTool[]
 }
 

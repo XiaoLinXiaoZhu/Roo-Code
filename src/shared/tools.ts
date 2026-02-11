@@ -218,6 +218,13 @@ export type NativeToolArgs = {
 		nodeId?: string
 		message: string
 	}
+	restructure_intent: {
+		operation: "reparent" | "promote" | "extract_common_parent"
+		nodeId?: string
+		newParentId?: string | null
+		nodeIds?: string[]
+		commonContent?: string
+	}
 	// Add more tools as they are migrated to native protocol
 }
 
@@ -433,6 +440,7 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	update_intent: "update intent",
 	prune_intent: "prune intent",
 	commit_intent: "commit intent",
+	restructure_intent: "restructure intent tree",
 } as const
 
 // Define available tool groups.
@@ -464,6 +472,10 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 		tools: ["search_project", "apply_edit", "consult_expert", "build_tool"],
 		alwaysAvailable: true,
 	},
+	intent: {
+		// 意图树工具 - 仅在 solo_dev 模式下可用
+		tools: ["add_intent", "update_intent", "prune_intent", "commit_intent", "restructure_intent"],
+	},
 }
 
 // Tools that are always available to all modes.
@@ -479,11 +491,7 @@ export const ALWAYS_AVAILABLE_TOOLS: ToolName[] = [
 	// "search_project",
 	// "apply_edit",
 	// "consult_expert",
-	// 意图树工具 - 始终可用
-	"add_intent",
-	"update_intent",
-	"prune_intent",
-	"commit_intent",
+	// 意图树工具已移至 intent 组，仅在 solo_dev 模式下可用
 ] as const
 
 /**

@@ -77,6 +77,8 @@ export interface IntentNode {
 	createdBy: IntentProvenance
 	/** 修改历史 */
 	modifiedBy: IntentProvenance[]
+	/** 历史最大子节点序号（用于避免 shortId 复用） */
+	maxChildIndex?: number
 }
 
 /**
@@ -91,4 +93,36 @@ export interface IntentTreeData {
 	rootIds: string[]
 	/** shortId → id 的映射，用于快速查找 */
 	shortIdIndex: Record<string, string>
+	/** 根节点的历史最大子节点序号（用于避免 shortId 复用） */
+	rootMaxChildIndex?: number
+}
+
+/**
+ * addNode 的返回结果，包含类型调整信息
+ */
+export interface AddNodeResult {
+	/** 创建的节点 */
+	node: IntentNode
+	/** 是否发生了类型调整 */
+	typeAdjusted: boolean
+	/** 原始请求的类型（如果发生了调整） */
+	requestedType?: IntentNodeType
+	/** 调整原因（如果发生了调整） */
+	adjustmentReason?: string
+}
+
+/**
+ * reparentNode 的返回结果
+ */
+export interface ReparentResult {
+	success: boolean
+	node?: IntentNode
+	/** 类型是否被调整 */
+	typeAdjusted?: boolean
+	requestedType?: IntentNodeType
+	adjustmentReason?: string
+	/** shortId 变化映射 */
+	shortIdChanges: Map<string, { old: string; new: string }>
+	/** 错误信息（如果失败） */
+	error?: string
 }

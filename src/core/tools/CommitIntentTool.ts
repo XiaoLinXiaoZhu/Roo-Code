@@ -1,4 +1,5 @@
 import simpleGit from "simple-git"
+import { type ClineSayTool } from "@roo-code/types"
 
 import { Task } from "../task/Task"
 import { formatResponse } from "../prompts/responses"
@@ -24,6 +25,16 @@ export class CommitIntentTool extends BaseTool<"commit_intent"> {
 				pushToolResult(formatResponse.toolError("Intent tree is not initialized yet."))
 				return
 			}
+
+			// P0: message 必须非空
+			if (!params.message || params.message.trim() === "") {
+				task.consecutiveMistakeCount++
+				task.recordToolError("commit_intent")
+				task.didToolFailInCurrentTurn = true
+				pushToolResult(formatResponse.toolError("'message' is required and cannot be empty."))
+				return
+			}
+			const message = params.message.trim()
 
 			// Resolve nodeId: explicit or auto-detect current active node
 			let resolvedNodeId = params.nodeId
@@ -51,23 +62,14 @@ export class CommitIntentTool extends BaseTool<"commit_intent"> {
 				task.consecutiveMistakeCount++
 				task.recordToolError("commit_intent")
 				task.didToolFailInCurrentTurn = true
-				pushToolResult(formatResponse.toolError(`Node '${resolvedNodeId}' not found.`))
+				const availableNodes = task.intentTree.getAvailableNodesList()
+				pushToolResult(
+					formatResponse.toolError(`Node '${resolvedNodeId}' not found. Available nodes: ${availableNodes}`),
+				)
 				return
 			}
 
-			const commitMessage = `[intent:${node.shortId}] ${params.message}`
-
-			const approvalMsg = JSON.stringify({
-				tool: "commitIntent",
-				nodeId: node.shortId,
-				nodeContent: node.content,
-				commitMessage,
-			})
-			const didApprove = await askApproval("tool", approvalMsg)
-			if (!didApprove) {
-				pushToolResult("User declined the commit.")
-				return
-			}
+			const commitMessage = `[intent:${node.shortId}] ${message}`
 
 			const git = simpleGit({ baseDir: task.cwd })
 
@@ -105,13 +107,60 @@ export class CommitIntentTool extends BaseTool<"commit_intent"> {
 				timestamp: new Date().toISOString(),
 			}
 
-			task.intentTree.bindCode(node.shortId, binding, task.taskId)
-			task.intentTree.updateNode(node.shortId, { status: "done" }, task.taskId)
+			// If target node is not impl, auto-create an impl child node for the commit
+			let targetNode = node
+			if (node.type !== "impl") {
+				const result = task.intentTree.addNode({
+					type: "impl",
+					content: message,
+					parentId: node.id,
+					taskId: task.taskId,
+				})
+				targetNode = result.node
+			}
+
+			task.intentTree.bindCode(targetNode.shortId, binding, task.taskId)
+			task.intentTree.updateNode(targetNode.shortId, { status: "done" }, task.taskId)
 			await task.intentTree.save()
 
+			// 构建 UI 展示用的 JSON 结果
+			const uiResult = {
+				action: "commit" as const,
+				node: {
+					id: targetNode.id,
+					shortId: targetNode.shortId,
+					type: targetNode.type,
+					content: targetNode.content,
+					status: targetNode.status,
+					parentId: targetNode.parentId,
+					childrenIds: targetNode.childrenIds,
+					codeBindings: targetNode.codeBindings,
+				},
+				binding,
+				autoCreated: targetNode !== node,
+				originalNodeId: targetNode !== node ? node.shortId : undefined,
+				tree: task.intentTree.getData(),
+			}
+
+			// 构建消息，将结果放入 content 字段
+			const sharedMessageProps: ClineSayTool = {
+				tool: "commitIntent",
+				content: JSON.stringify(uiResult),
+			}
+
+			const completeMessage = JSON.stringify(sharedMessageProps)
+			const didApprove = await askApproval("tool", completeMessage)
+
+			if (!didApprove) {
+				pushToolResult("User declined the commit.")
+				return
+			}
+
+			// 构建返回给 LLM 的 XML 结果
+			const autoCreatedInfo = targetNode !== node ? ` (auto-created under ${node.shortId})` : ""
 			pushToolResult(
 				`<intent_commit_result status="committed">\n` +
-					`  <commit hash="${commitHash}" node="${node.shortId}">${commitMessage}</commit>\n` +
+					`  <commit hash="${commitHash}" node="${targetNode.shortId}"${autoCreatedInfo}>${commitMessage}</commit>\n` +
 					`  <files>${changedFiles.join(", ")}</files>\n` +
 					`  <diff_summary>${diffSummary}</diff_summary>\n` +
 					`  <tree_summary>\n${task.intentTree.toSummary()}\n  </tree_summary>\n` +

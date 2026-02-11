@@ -194,7 +194,7 @@ export const DEFAULT_MODES: readonly ModeConfig[] = [
 		whenToUse:
 			"Use this mode for independent development tasks like feature implementation, bug fixes, file creation, or code optimization. Combines research, expert consultation, and implementation tools for efficient complex task completion.",
 		description: "Full-stack developer with specialized tools",
-		groups: ["read", "edit", "browser", "command", "mcp", "modes"],
+		groups: ["read", "edit", "browser", "command", "mcp", "modes", "intent"],
 	},
 	{
 		slug: "expert",

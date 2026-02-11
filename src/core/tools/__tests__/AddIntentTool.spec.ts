@@ -58,7 +58,7 @@ describe("AddIntentTool", () => {
 		await addIntentTool.execute({ type: "path", content: "Approach A", parentId: "G1" }, task, callbacks)
 
 		const result = callbacks.pushToolResult.mock.calls[0][0]
-		expect(result).toContain('nodeId="G1.1"')
+		expect(result).toContain('nodeId="P1.1"')
 	})
 
 	test("errors when intent tree not initialized", async () => {

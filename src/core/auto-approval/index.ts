@@ -158,7 +158,8 @@ export async function checkAutoApproval({
 			tool.tool === "addIntent" ||
 			tool.tool === "updateIntent" ||
 			tool.tool === "pruneIntent" ||
-			tool.tool === "commitIntent"
+			tool.tool === "commitIntent" ||
+			tool.tool === "restructureIntent"
 		) {
 			return { decision: "approve" }
 		}

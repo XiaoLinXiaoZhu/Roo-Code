@@ -48,6 +48,7 @@ import { addIntentTool } from "../tools/AddIntentTool"
 import { updateIntentTool } from "../tools/UpdateIntentTool"
 import { pruneIntentTool } from "../tools/PruneIntentTool"
 import { commitIntentTool } from "../tools/CommitIntentTool"
+import { restructureIntentTool } from "../tools/RestructureIntentTool"
 
 import { formatResponse } from "../prompts/responses"
 import { sanitizeToolUseId } from "../../utils/tool-id"
@@ -417,6 +418,8 @@ export async function presentAssistantMessage(cline: Task) {
 						return `[${block.name} ${block.params.nodeId}]`
 					case "commit_intent":
 						return `[${block.name} ${block.params.nodeId}]`
+					case "restructure_intent":
+						return `[${block.name} ${block.params.operation} ${block.params.nodeId ?? block.params.nodeIds?.join(", ") ?? ""}]`
 					case "read_command_output":
 						return `[${block.name} for '${block.params.artifact_id}']`
 					case "update_todo_list":
@@ -1006,6 +1009,13 @@ export async function presentAssistantMessage(cline: Task) {
 					break
 				case "commit_intent":
 					await commitIntentTool.handle(cline, block as ToolUse<"commit_intent">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+					})
+					break
+				case "restructure_intent":
+					await restructureIntentTool.handle(cline, block as ToolUse<"restructure_intent">, {
 						askApproval,
 						handleError,
 						pushToolResult,

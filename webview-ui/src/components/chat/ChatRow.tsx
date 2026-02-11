@@ -26,6 +26,7 @@ import { formatPathTooltip } from "@src/utils/formatPathTooltip"
 import { ToolUseBlock, ToolUseBlockHeader } from "../common/ToolUseBlock"
 import UpdateTodoListToolBlock from "./UpdateTodoListToolBlock"
 import { TodoChangeDisplay } from "./TodoChangeDisplay"
+import { IntentTreeToolBlock } from "../intent-tree"
 import CodeAccordian from "../common/CodeAccordian"
 import MarkdownBlock from "../common/MarkdownBlock"
 import { ReasoningBlock } from "./ReasoningBlock"
@@ -726,6 +727,270 @@ export const ChatRowContent = ({
 				const previousTodos = getPreviousTodos(clineMessages, message.ts)
 
 				return <TodoChangeDisplay previousTodos={previousTodos} newTodos={todos} />
+			}
+			case "addIntent": {
+				const intentTool = tool as any
+				let parsedResult: any = null
+				if (intentTool.content) {
+					try {
+						parsedResult = JSON.parse(intentTool.content)
+					} catch {
+						// content 不是 JSON，可能是请求阶段的 intentContent
+					}
+				}
+				return (
+					<>
+						<div style={headerStyle}>
+							<span className="codicon codicon-add" style={{ color: "var(--vscode-charts-green)" }} />
+							<span style={{ fontWeight: "bold" }}>Add Intent</span>
+						</div>
+						<div className="pl-6">
+							{parsedResult ? (
+								<IntentTreeToolBlock
+									action="add"
+									result={parsedResult}
+									tree={parsedResult.tree}
+									showTree={!!parsedResult.tree}
+									error={parsedResult.error}
+									availableNodes={parsedResult.availableNodes}
+								/>
+							) : (
+								<ToolUseBlock>
+									<ToolUseBlockHeader>
+										<span
+											className="codicon codicon-target mr-1.5"
+											style={{ color: "var(--vscode-charts-purple)" }}
+										/>
+										<span
+											className="font-mono text-xs px-1.5 py-0.5 rounded mr-2"
+											style={{
+												backgroundColor: "rgba(136, 71, 255, 0.15)",
+												color: "var(--vscode-charts-purple)",
+											}}>
+											{intentTool.type}
+										</span>
+										<span>{intentTool.intentContent || "..."}</span>
+									</ToolUseBlockHeader>
+									{intentTool.parentId && (
+										<div className="mt-1 text-xs text-vscode-descriptionForeground">
+											Parent: {intentTool.parentId}
+										</div>
+									)}
+								</ToolUseBlock>
+							)}
+						</div>
+					</>
+				)
+			}
+			case "updateIntent": {
+				const intentTool = tool as any
+				let parsedResult: any = null
+				if (intentTool.content) {
+					try {
+						parsedResult = JSON.parse(intentTool.content)
+					} catch {
+						// Not JSON
+					}
+				}
+				return (
+					<>
+						<div style={headerStyle}>
+							<span className="codicon codicon-edit" style={{ color: "var(--vscode-charts-blue)" }} />
+							<span style={{ fontWeight: "bold" }}>Update Intent</span>
+						</div>
+						<div className="pl-6">
+							{parsedResult ? (
+								<IntentTreeToolBlock
+									action="update"
+									result={parsedResult}
+									tree={parsedResult.tree}
+									showTree={!!parsedResult.tree}
+									error={parsedResult.error}
+									availableNodes={parsedResult.availableNodes}
+								/>
+							) : (
+								<ToolUseBlock>
+									<ToolUseBlockHeader>
+										<span
+											className="font-mono text-xs px-1.5 py-0.5 rounded mr-2"
+											style={{
+												backgroundColor: "rgba(71, 136, 255, 0.15)",
+												color: "var(--vscode-charts-blue)",
+											}}>
+											{intentTool.nodeId}
+										</span>
+										{intentTool.status && (
+											<span className="mr-2">status → {intentTool.status}</span>
+										)}
+										{intentTool.intentContent && (
+											<span className="truncate">{intentTool.intentContent}</span>
+										)}
+									</ToolUseBlockHeader>
+								</ToolUseBlock>
+							)}
+						</div>
+					</>
+				)
+			}
+			case "pruneIntent": {
+				const intentTool = tool as any
+				let parsedResult: any = null
+				if (intentTool.content) {
+					try {
+						parsedResult = JSON.parse(intentTool.content)
+					} catch {
+						// Not JSON
+					}
+				}
+				return (
+					<>
+						<div style={headerStyle}>
+							<span
+								className="codicon codicon-trash"
+								style={{ color: "var(--vscode-errorForeground)" }}
+							/>
+							<span style={{ fontWeight: "bold" }}>Prune Intent</span>
+						</div>
+						<div className="pl-6">
+							{parsedResult ? (
+								<IntentTreeToolBlock
+									action="prune"
+									result={parsedResult}
+									tree={parsedResult.tree}
+									showTree={!!parsedResult.tree}
+									error={parsedResult.error}
+									availableNodes={parsedResult.availableNodes}
+								/>
+							) : (
+								<ToolUseBlock>
+									<ToolUseBlockHeader>
+										<span
+											className="font-mono text-xs px-1.5 py-0.5 rounded mr-2"
+											style={{
+												backgroundColor: "rgba(255, 71, 71, 0.15)",
+												color: "var(--vscode-errorForeground)",
+											}}>
+											{intentTool.nodeId}
+										</span>
+										{intentTool.reason && (
+											<span className="text-vscode-descriptionForeground">
+												{intentTool.reason}
+											</span>
+										)}
+									</ToolUseBlockHeader>
+								</ToolUseBlock>
+							)}
+						</div>
+					</>
+				)
+			}
+			case "commitIntent": {
+				const intentTool = tool as any
+				let parsedResult: any = null
+				if (intentTool.content) {
+					try {
+						parsedResult = JSON.parse(intentTool.content)
+					} catch {
+						// Not JSON
+					}
+				}
+				return (
+					<>
+						<div style={headerStyle}>
+							<span
+								className="codicon codicon-git-commit"
+								style={{ color: "var(--vscode-charts-orange)" }}
+							/>
+							<span style={{ fontWeight: "bold" }}>Commit Intent</span>
+						</div>
+						<div className="pl-6">
+							{parsedResult ? (
+								<IntentTreeToolBlock
+									action="commit"
+									result={parsedResult}
+									tree={parsedResult.tree}
+									showTree={!!parsedResult.tree}
+									error={parsedResult.error}
+									availableNodes={parsedResult.availableNodes}
+								/>
+							) : (
+								<ToolUseBlock>
+									<ToolUseBlockHeader>
+										<span
+											className="font-mono text-xs px-1.5 py-0.5 rounded mr-2"
+											style={{
+												backgroundColor: "rgba(255, 136, 71, 0.15)",
+												color: "var(--vscode-charts-orange)",
+											}}>
+											{intentTool.nodeId}
+										</span>
+										{intentTool.commitHash && (
+											<span className="font-mono text-xs">
+												{intentTool.commitHash.substring(0, 7)}
+											</span>
+										)}
+									</ToolUseBlockHeader>
+									{intentTool.commitMessage && (
+										<div className="mt-1 text-sm">{intentTool.commitMessage}</div>
+									)}
+								</ToolUseBlock>
+							)}
+						</div>
+					</>
+				)
+			}
+			case "restructureIntent": {
+				const intentTool = tool as any
+				let parsedResult: any = null
+				if (intentTool.content) {
+					try {
+						parsedResult = JSON.parse(intentTool.content)
+					} catch {
+						// Not JSON
+					}
+				}
+				return (
+					<>
+						<div style={headerStyle}>
+							<span
+								className="codicon codicon-git-merge"
+								style={{ color: "var(--vscode-charts-purple)" }}
+							/>
+							<span style={{ fontWeight: "bold" }}>Restructure Intent</span>
+						</div>
+						<div className="pl-6">
+							{parsedResult ? (
+								<IntentTreeToolBlock
+									action="restructure"
+									result={parsedResult}
+									tree={parsedResult.tree}
+									showTree={!!parsedResult.tree}
+									error={parsedResult.error}
+									availableNodes={parsedResult.availableNodes}
+								/>
+							) : (
+								<ToolUseBlock>
+									<ToolUseBlockHeader>
+										<span className="mr-2">{intentTool.operation}</span>
+										<span
+											className="font-mono text-xs px-1.5 py-0.5 rounded mr-2"
+											style={{
+												backgroundColor: "rgba(136, 71, 255, 0.15)",
+												color: "var(--vscode-charts-purple)",
+											}}>
+											{intentTool.nodeId}
+										</span>
+										{intentTool.newParentId && (
+											<span className="text-vscode-descriptionForeground">
+												→ {intentTool.newParentId}
+											</span>
+										)}
+									</ToolUseBlockHeader>
+								</ToolUseBlock>
+							)}
+						</div>
+					</>
+				)
 			}
 			case "newFileCreated":
 				return (

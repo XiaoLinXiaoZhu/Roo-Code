@@ -805,6 +805,7 @@ export interface ClineSayTool {
 		| "updateIntent"
 		| "pruneIntent"
 		| "commitIntent"
+		| "restructureIntent"
 	path?: string
 	// For readMedia
 	focusX?: number
@@ -867,6 +868,82 @@ export interface ClineSayTool {
 	description?: string
 	// Properties for skill tool
 	skill?: string
+	// Properties for intent tree tools
+	intentResult?: {
+		action: "add" | "update" | "prune" | "commit" | "restructure"
+		node?: {
+			id: string
+			shortId: string
+			type: "goal" | "subgoal" | "path" | "impl"
+			content: string
+			status: "planned" | "in_progress" | "done" | "superseded" | "pruned"
+			parentId: string | null
+			childrenIds: string[]
+			codeBindings: Array<{
+				commitHash: string
+				commitMessage: string
+				files: string[]
+				diffSummary?: string
+				timestamp: string
+			}>
+		}
+		parentNode?: {
+			id: string
+			shortId: string
+			type: "goal" | "subgoal" | "path" | "impl"
+			content: string
+		}
+		typeAdjusted?: boolean
+		requestedType?: "goal" | "subgoal" | "path" | "impl"
+		adjustmentReason?: string
+		changes?: Array<{
+			field: "content" | "status"
+			oldValue: string
+			newValue: string
+		}>
+		prunedNodes?: Array<{ shortId: string; content: string }>
+		binding?: {
+			commitHash: string
+			commitMessage: string
+			files: string[]
+			diffSummary?: string
+			timestamp: string
+		}
+		operation?: "reparent" | "promote" | "extract_common_parent"
+		newParent?: {
+			id: string
+			shortId: string
+			type: "goal" | "subgoal" | "path" | "impl"
+			content: string
+		} | null
+		shortIdChanges?: Array<{ old: string; new: string }>
+		error?: string
+		availableNodes?: string
+	}
+	intentTree?: {
+		version: 1
+		nodes: Record<
+			string,
+			{
+				id: string
+				shortId: string
+				type: "goal" | "subgoal" | "path" | "impl"
+				content: string
+				status: "planned" | "in_progress" | "done" | "superseded" | "pruned"
+				parentId: string | null
+				childrenIds: string[]
+				codeBindings: Array<{
+					commitHash: string
+					commitMessage: string
+					files: string[]
+					diffSummary?: string
+					timestamp: string
+				}>
+			}
+		>
+		rootIds: string[]
+		shortIdIndex: Record<string, string>
+	}
 }
 
 // Must keep in sync with system prompt.

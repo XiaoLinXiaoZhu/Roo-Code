@@ -764,6 +764,18 @@ export class NativeToolCallParser {
 				}
 				break
 
+			case "restructure_intent":
+				if (partialArgs.operation !== undefined) {
+					nativeArgs = {
+						operation: partialArgs.operation,
+						nodeId: partialArgs.nodeId,
+						newParentId: partialArgs.newParentId,
+						nodeIds: partialArgs.nodeIds,
+						commonContent: partialArgs.commonContent,
+					}
+				}
+				break
+
 			case "read_command_output":
 				if (partialArgs.artifact_id !== undefined) {
 					nativeArgs = {
@@ -1247,6 +1259,18 @@ export class NativeToolCallParser {
 						nativeArgs = {
 							nodeId: args.nodeId,
 							message: args.message,
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "restructure_intent":
+					if (args.operation !== undefined) {
+						nativeArgs = {
+							operation: args.operation,
+							nodeId: args.nodeId,
+							newParentId: args.newParentId,
+							nodeIds: args.nodeIds,
+							commonContent: args.commonContent,
 						} as NativeArgsFor<TName>
 					}
 					break

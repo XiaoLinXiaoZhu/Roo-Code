@@ -1,3 +1,5 @@
+import { type ClineSayTool } from "@roo-code/types"
+
 import { Task } from "../task/Task"
 import { formatResponse } from "../prompts/responses"
 import { BaseTool, ToolCallbacks } from "./BaseTool"
@@ -30,32 +32,84 @@ export class PruneIntentTool extends BaseTool<"prune_intent"> {
 				return
 			}
 
-			const approvalMsg = JSON.stringify({ tool: "pruneIntent", ...params })
-			const didApprove = await askApproval("tool", approvalMsg)
-			if (!didApprove) {
-				pushToolResult("User declined.")
+			// P3: 规范化 reason，空字符串等同于未提供
+			const reason = params.reason?.trim() || undefined
+
+			// 获取要剪枝的节点信息（用于 UI 展示）
+			const nodeToprune = task.intentTree.getNode(params.nodeId)
+			if (!nodeToprune) {
+				task.consecutiveMistakeCount++
+				task.recordToolError("prune_intent")
+				task.didToolFailInCurrentTurn = true
+				const availableNodes = task.intentTree.getAvailableNodesList()
+				pushToolResult(
+					formatResponse.toolError(`Node '${params.nodeId}' not found. Available nodes: ${availableNodes}`),
+				)
 				return
 			}
 
+			// 收集要剪枝的节点信息（包括子节点）
+			const nodesToPrune: Array<{ shortId: string; content: string }> = []
+			const collectNodes = (nodeId: string) => {
+				const node = task.intentTree!.getNode(nodeId)
+				if (node && node.status !== "pruned") {
+					nodesToPrune.push({ shortId: node.shortId, content: node.content })
+					for (const childId of node.childrenIds) {
+						collectNodes(childId)
+					}
+				}
+			}
+			collectNodes(params.nodeId)
+
+			// 执行剪枝
 			const commits = task.intentTree.getSubtreeCommits(params.nodeId)
-			const prunedIds = task.intentTree.pruneSubtree(params.nodeId, task.taskId, params.reason)
+			const prunedIds = task.intentTree.pruneSubtree(params.nodeId, task.taskId, reason)
 
 			if (prunedIds.length === 0) {
 				task.consecutiveMistakeCount++
 				task.recordToolError("prune_intent")
 				task.didToolFailInCurrentTurn = true
-				pushToolResult(formatResponse.toolError(`Node '${params.nodeId}' not found or already pruned.`))
+				const availableNodes = task.intentTree.getAvailableNodesList()
+				pushToolResult(
+					formatResponse.toolError(
+						`Node '${params.nodeId}' not found or already pruned. Available nodes: ${availableNodes}`,
+					),
+				)
 				return
 			}
 
 			await task.intentTree.save()
 
+			// 构建 UI 展示用的 JSON 结果
+			const uiResult = {
+				action: "prune" as const,
+				prunedNodes: nodesToPrune,
+				reason,
+				associatedCommits: commits,
+				tree: task.intentTree.getData(),
+			}
+
+			// 构建消息，将结果放入 content 字段
+			const sharedMessageProps: ClineSayTool = {
+				tool: "pruneIntent",
+				content: JSON.stringify(uiResult),
+			}
+
+			const completeMessage = JSON.stringify(sharedMessageProps)
+			const didApprove = await askApproval("tool", completeMessage)
+
+			if (!didApprove) {
+				pushToolResult("User declined.")
+				return
+			}
+
+			// 构建返回给 LLM 的 XML 结果
 			let result =
 				`<intent_result action="prune" prunedCount="${prunedIds.length}">\n` +
 				`  <pruned_nodes>${prunedIds.join(", ")}</pruned_nodes>\n`
 
-			if (params.reason) {
-				result += `  <reason>${params.reason}</reason>\n`
+			if (reason) {
+				result += `  <reason>${reason}</reason>\n`
 			}
 
 			if (commits.length > 0) {

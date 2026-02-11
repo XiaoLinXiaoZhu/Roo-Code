@@ -1218,6 +1218,76 @@
       "gitCommit": "f084c066e34288293f167f287af8eb758f1381b1",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"userMessageFile\":{\"type\":\"string\"},\"injectionFunction\":{\"type\":\"string\"},\"injectionPoint\":{\"type\":\"string\"},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "48",
+      "query": "intent tree 的设计和实现在哪里？包括 goal、impl 类型的定义和 commit-intent 工具的实现",
+      "tags": [
+        "intent",
+        "tree",
+        "的设计和实现在哪里",
+        "包括",
+        "goal",
+        "impl",
+        "类型的定义和",
+        "commit",
+        "工具的实现"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-10T08:40:29.994Z",
+      "gitCommit": "64fcd99fb85a4582f4b331c3e14770e2d408b5c7",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "49",
+      "query": "工具权限控制是如何实现的？哪些文件定义了工具类别和模式权限？",
+      "tags": [
+        "工具权限控制是如何实现的",
+        "哪些文件定义了工具类别和模式权限"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-10T13:30:25.675Z",
+      "gitCommit": "65c5ab7c433d7fe9b0489c97e7c9ee210cf4d76a",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "50",
+      "query": "前端如何显示工具调用结果？webview-ui 中的工具调用展示组件在哪里？",
+      "tags": [
+        "前端如何显示工具调用结果",
+        "webview",
+        "ui",
+        "中的工具调用展示组件在哪里"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/webview-ui",
+        "filePatterns": "*.tsx,*.ts",
+        "excludes": "node_modules,dist"
+      },
+      "createdAt": "2026-02-11T04:04:03.451Z",
+      "gitCommit": "65c5ab7c433d7fe9b0489c97e7c9ee210cf4d76a",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"components\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"file\":{\"type\":\"string\"},\"purpose\":{\"type\":\"string\"}}}},\"patterns\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "51",
+      "query": "ChatRow 中如何根据工具类型渲染不同的组件？工具调用的消息格式是什么？",
+      "tags": [
+        "chatrow",
+        "中如何根据工具类型渲染不同的组件",
+        "工具调用的消息格式是什么"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/webview-ui/src",
+        "filePatterns": "*.tsx",
+        "excludes": "node_modules"
+      },
+      "createdAt": "2026-02-11T05:32:21.985Z",
+      "gitCommit": "65c5ab7c433d7fe9b0489c97e7c9ee210cf4d76a",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"chatRowPath\":{\"type\":\"string\"},\"toolRenderingPattern\":{\"type\":\"string\"},\"messageTypes\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
     }
   ]
 }
