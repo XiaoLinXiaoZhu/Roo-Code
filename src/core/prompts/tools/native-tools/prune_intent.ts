@@ -1,6 +1,6 @@
 import type OpenAI from "openai"
 
-const PRUNE_INTENT_DESCRIPTION = `Abandon a path/implementation and all its descendants. Use when the user changes direction.
+const PRUNE_INTENT_DESCRIPTION = `Abandon a node in the Intent Tree (the <intent_tree> shown in environment) and all its descendants. Use when the user changes direction.
 
 This marks the node and all children as "pruned" and lists associated git commits that may need reverting.
 

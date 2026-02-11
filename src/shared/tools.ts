@@ -201,9 +201,11 @@ export type NativeToolArgs = {
 	}
 	// 意图树工具
 	add_intent: {
+		placementReason: string
+		placement: "new_root" | "child_of"
+		parentId?: string
 		type: "goal" | "subgoal" | "path" | "impl"
 		content: string
-		parentId?: string
 	}
 	update_intent: {
 		nodeId: string

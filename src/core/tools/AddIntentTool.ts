@@ -8,6 +8,8 @@ interface AddIntentParams {
 	type: "goal" | "subgoal" | "path" | "impl"
 	content: string
 	parentId?: string
+	placement: "new_root" | "child_of"
+	placementReason: string
 }
 
 export class AddIntentTool extends BaseTool<"add_intent"> {
@@ -36,6 +38,53 @@ export class AddIntentTool extends BaseTool<"add_intent"> {
 				return
 			}
 			const intentContent = params.content.trim()
+
+			// P3: 验证 placement 和 parentId 的一致性
+			if (params.placement === "new_root" && params.parentId) {
+				task.consecutiveMistakeCount++
+				task.recordToolError("add_intent")
+				task.didToolFailInCurrentTurn = true
+				pushToolResult(
+					formatResponse.toolError(
+						`Inconsistent parameters: placement is 'new_root' but parentId is provided. ` +
+							`Either use placement='child_of' with parentId, or remove parentId for new_root.`,
+					),
+				)
+				return
+			}
+
+			if (params.placement === "child_of" && !params.parentId) {
+				task.consecutiveMistakeCount++
+				task.recordToolError("add_intent")
+				task.didToolFailInCurrentTurn = true
+				const existingNodes = task.intentTree.toSummary()
+				pushToolResult(
+					formatResponse.toolError(
+						`placement is 'child_of' but parentId is missing.\n\n` +
+							`Current tree:\n${existingNodes}\n\n` +
+							`Please specify which node this should be a child of.`,
+					),
+				)
+				return
+			}
+
+			// P4: 创建 new_root 时，如果树非空，检查 placementReason 是否有意义
+			if (params.placement === "new_root" && !task.intentTree.isEmpty()) {
+				if (!params.placementReason || params.placementReason.trim().length < 10) {
+					task.consecutiveMistakeCount++
+					task.recordToolError("add_intent")
+					task.didToolFailInCurrentTurn = true
+					const existingNodes = task.intentTree.toSummary()
+					pushToolResult(
+						formatResponse.toolError(
+							`Creating a new root requires a meaningful placementReason explaining why existing nodes don't fit.\n\n` +
+								`Current tree:\n${existingNodes}\n\n` +
+								`Please provide placementReason referencing specific nodes you considered.`,
+						),
+					)
+					return
+				}
+			}
 
 			// 先执行操作获取结果
 			const result = task.intentTree.addNode({

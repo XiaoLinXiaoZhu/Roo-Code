@@ -1,18 +1,49 @@
 import type OpenAI from "openai"
 
-const ADD_INTENT_DESCRIPTION = `Add a new intent node to the Intent Tree. The intent tree is a persistent record that separates the user's goals (constraints) from implementations (variables).
+const ADD_INTENT_DESCRIPTION = `Add a new node to the Intent Tree (the <intent_tree> shown in environment).
 
-**MANDATORY**: You MUST call this at the START of every task to record the user's goal before implementing anything.
+**⚠️ BEFORE CALLING: Check <intent_tree> in environment first!**
+- If a related node exists → use update_intent or add as child, NOT a new root goal
+- If user's request is about an existing node (check, verify, continue, fix) → operate on that node
+- Only create a new root goal when the user has a genuinely NEW objective
 
-**Node types:**
-- \`goal\`: The user's ultimate objective (stable, confirmed by user)
-- \`subgoal\`: A verifiable sub-objective
-- \`path\`: An implementation approach
-- \`impl\`: A concrete code-level implementation
+**Constraint vs Implementation — the core distinction:**
+- CONSTRAINTS (goal/subgoal): What user wants. Stable. Don't change when implementation fails.
+- IMPLEMENTATIONS (path/impl): How to achieve it. Volatile. Can be replaced or abandoned.
 
-**parentId**: Use the short ID (e.g., "G1", "S1.1") of the parent node. Omit for root goals.
+Test: "If this approach fails, should we give up or try a different approach?"
+- Give up → it's a constraint (goal/subgoal)
+- Try different → it's an implementation (path/impl)
 
-Returns the new node with its short ID (e.g., G1, S1.1, P1.1.1) for future reference.`
+Example: User says "use Redis for caching"
+- If Redis fails, do we give up on performance? NO → "use Redis" is a PATH, not a goal
+- The real GOAL is "improve performance", Redis is just one path to try
+
+**Node types (hierarchy: goal > subgoal > path > impl):**
+- \`goal\`: User's ultimate objective — stable, rarely changes. Only create when truly new.
+- \`subgoal\`: Verifiable milestone — "reduce query time by 50%"
+- \`path\`: Implementation approach — "use Redis caching" (can fail and be replaced)
+- \`impl\`: Concrete code change — "add cache layer in UserService"
+
+**Decision flow:**
+1. Read <intent_tree> in environment
+2. Does user's request relate to an existing node?
+   - YES → update_intent or add child node under it
+   - NO → create new root goal
+3. Is user's request a "what" (constraint) or "how" (implementation)?
+   - "What" → goal or subgoal
+   - "How" → path or impl
+
+**⚠️ Avoid intent drift:**
+Don't patch implementations on top of failing implementations. If a path isn't working:
+1. Prune the failing path (prune_intent)
+2. Create a new sibling path under the same goal
+DON'T: Keep adding impl nodes trying to "fix" the broken path
+
+**Examples:**
+- User: "check if boss system is done" + tree has S3.4 about boss → do NOT add_intent, just check or update_intent
+- User: "I want to optimize performance" + no related node → add_intent(type: "goal", content: "optimize performance")
+- User: "try using cache for that" + G1 exists about perf → add_intent(type: "path", content: "use caching", parentId: "G1")`
 
 export default {
 	type: "function",
@@ -23,21 +54,39 @@ export default {
 		parameters: {
 			type: "object",
 			properties: {
-				type: {
+				// === THINK FIRST: Analyze placement before deciding content ===
+				placementReason: {
 					type: "string",
-					enum: ["goal", "subgoal", "path", "impl"],
-					description: "Node type",
+					description:
+						"FIRST: Analyze <intent_tree> and explain your placement decision. " +
+						"Which existing nodes did you consider? Why is this the right location? " +
+						"Example: 'Checked G1(game dev) and S1.7(Joker system). This task is about Joker bugs, so it belongs under S1.7.'",
 				},
-				content: {
+				placement: {
 					type: "string",
-					description: "Natural language description of the intent",
+					enum: ["new_root", "child_of"],
+					description:
+						"THEN: Choose placement based on your analysis. " +
+						"'new_root': genuinely unrelated to all existing nodes. " +
+						"'child_of': belongs under an existing node.",
 				},
 				parentId: {
 					type: "string",
-					description: "Parent node short ID (e.g., 'G1', 'S1.1'). Omit for root goals.",
+					description: "If placement='child_of': the parent node's short ID (e.g., 'G1', 'S1.1').",
+				},
+				// === THEN ACT: Specify the node details ===
+				type: {
+					type: "string",
+					enum: ["goal", "subgoal", "path", "impl"],
+					description:
+						"Node type: goal (stable objective), subgoal (milestone), path (approach), impl (code change).",
+				},
+				content: {
+					type: "string",
+					description: "Natural language description of the intent.",
 				},
 			},
-			required: ["type", "content"],
+			required: ["placementReason", "placement", "type", "content"],
 		},
 	},
 } satisfies OpenAI.Chat.ChatCompletionTool

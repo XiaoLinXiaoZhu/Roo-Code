@@ -1,11 +1,18 @@
 import type OpenAI from "openai"
 
-const UPDATE_INTENT_DESCRIPTION = `Update an existing intent node's status or content. Use the node's short ID (e.g., "G1", "P1.1").
+const UPDATE_INTENT_DESCRIPTION = `Update an existing node in the Intent Tree (the <intent_tree> shown in environment).
 
-Common usage:
-- Mark a node as in progress: update_intent(nodeId: "P1.1", status: "in_progress")
-- Mark a node as done: update_intent(nodeId: "I1.1.1", status: "done")
-- Revise description: update_intent(nodeId: "G1", content: "revised goal")`
+**When to use (instead of add_intent):**
+- User asks to "check/verify/continue/fix" something → find the related node and update it
+- Completing work on a node → mark as done
+- Starting work → mark as in_progress
+- Goal clarified/refined → update content
+
+**Common usage:**
+- Mark in progress: update_intent(nodeId: "P1.1", status: "in_progress")
+- Mark done: update_intent(nodeId: "I1.1.1", status: "done")
+- Revise description: update_intent(nodeId: "G1", content: "revised goal")
+- Mark superseded: update_intent(nodeId: "P1.1", status: "superseded") — when replaced by better approach`
 
 export default {
 	type: "function",

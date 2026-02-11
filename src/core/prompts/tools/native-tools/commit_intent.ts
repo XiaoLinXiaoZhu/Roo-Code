@@ -1,6 +1,6 @@
 import type OpenAI from "openai"
 
-const COMMIT_INTENT_DESCRIPTION = `Commit code changes and bind them to an intent tree node. This tool:
+const COMMIT_INTENT_DESCRIPTION = `Commit code changes and bind them to a node in the Intent Tree (the <intent_tree> shown in environment). This tool:
 1. Stages all current changes (\`git add .\`)
 2. Creates a git commit with the provided message (prefixed with the intent node ID)
 3. Records the commit hash in the intent tree node

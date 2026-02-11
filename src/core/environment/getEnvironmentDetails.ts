@@ -320,27 +320,27 @@ export async function getEnvironmentDetails(
 	}
 
 	// ============================================================================
-	// Intent Tree Section (意图树：跨对话的目标/实现溯源)
-	// 只在用户消息时注入，工具返回时不注入
+	// Intent Tree Section (意图树：项目级 OKR，跨对话的目标/实现溯源)
+	// 所有模式都可读，只有 solo_dev 可写（通过 intent 工具组）
 	// ============================================================================
 	if (isUserMessage && cline.intentTree) {
-		if (cline.intentTree.isEmpty()) {
-			// 空树：强制提示模型先记录目标
-			xmlContent += `\n  <intent_tree_prompt>`
-			xmlContent += `\n    ⚠️ MANDATORY FIRST STEP: No intent tree exists yet.`
-			xmlContent += `\n    Before doing ANYTHING else, analyze the user's message and call add_intent(type: "goal", content: "...") to record their goal.`
-			xmlContent += `\n    DO NOT proceed with implementation until the goal is recorded.`
-			xmlContent += `\n  </intent_tree_prompt>`
+		const intentSummary = cline.intentTree.toSummary()
+		// 解释 intent-tree 是什么，让所有模式都能理解上下文
+		// 管理指令（何时新建/复用）放在工具描述中，不在这里
+		const treeDescription = `Separates CONSTRAINTS (what user wants) from IMPLEMENTATIONS (how to achieve it).
+		  Constraints=[G]goal/[S]subgoal: Stable. Don't change when implementation fails.
+		  Implementations=[P]path/[I]impl: Volatile. Can be replaced or abandoned.
+		  Status: ●=in_progress, ✓=done, ✕=pruned`
+
+		if (intentSummary) {
+			xmlContent += `\n  <intent_tree description="${treeDescription}">`
+			xmlContent += `\n${intentSummary
+				.split("\n")
+				.map((l) => "    " + l)
+				.join("\n")}`
+			xmlContent += `\n  </intent_tree>`
 		} else {
-			const intentSummary = cline.intentTree.toSummary()
-			if (intentSummary) {
-				xmlContent += `\n  <intent_tree hint="Analyze user message against this tree. Update nodes if needed (add_intent/update_intent/prune_intent).">`
-				xmlContent += `\n${intentSummary
-					.split("\n")
-					.map((l) => "    " + l)
-					.join("\n")}`
-				xmlContent += `\n  </intent_tree>`
-			}
+			xmlContent += `\n  <intent_tree description="${treeDescription}" status="empty"/>`
 		}
 	}
 

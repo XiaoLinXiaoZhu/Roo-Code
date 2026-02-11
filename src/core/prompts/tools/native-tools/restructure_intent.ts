@@ -1,6 +1,17 @@
 import type OpenAI from "openai"
 
-const RESTRUCTURE_INTENT_DESCRIPTION = `Restructure the intent tree by moving nodes or extracting common patterns. Use when you discover that the tree structure needs to change.
+const RESTRUCTURE_INTENT_DESCRIPTION = `Restructure the Intent Tree (the <intent_tree> shown in environment) by moving nodes or extracting common patterns.
+
+**When to use (progressive discovery is expected!):**
+- You discover that two separate "goals" (G1, G2) actually serve a common higher goal
+  → extract_common_parent to create the real goal above them
+- User clarifies that what seemed like a goal is actually just one approach
+  → reparent it under the real goal as a path
+- User wants to try a completely different approach at a higher level
+  → promote the alternative to make it a sibling
+
+**This is normal:** The user's true goal often emerges gradually through conversation.
+Don't hesitate to restructure when you gain new understanding.
 
 **Operations:**
 

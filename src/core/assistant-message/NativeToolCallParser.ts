@@ -732,6 +732,8 @@ export class NativeToolCallParser {
 						type: partialArgs.type,
 						content: partialArgs.content,
 						parentId: partialArgs.parentId,
+						placement: partialArgs.placement,
+						placementReason: partialArgs.placementReason,
 					}
 				}
 				break
@@ -1231,6 +1233,8 @@ export class NativeToolCallParser {
 							type: args.type,
 							content: args.content,
 							parentId: args.parentId,
+							placement: args.placement,
+							placementReason: args.placementReason,
 						} as NativeArgsFor<TName>
 					}
 					break
