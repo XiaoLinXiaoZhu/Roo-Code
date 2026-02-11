@@ -16,7 +16,7 @@ import type {
 	CommitIntentResult as CommitIntentResultType,
 	RestructureIntentResult as RestructureIntentResultType,
 } from "./types"
-import { TOOL_ICONS, TOOL_TITLES } from "./constants"
+import { TOOL_TITLES } from "./constants"
 import { IntentTreeDisplay } from "./IntentTreeDisplay"
 import { AddIntentResult } from "./AddIntentResult"
 import { UpdateIntentResult } from "./UpdateIntentResult"
