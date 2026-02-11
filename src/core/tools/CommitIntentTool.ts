@@ -123,6 +123,9 @@ export class CommitIntentTool extends BaseTool<"commit_intent"> {
 			task.intentTree.updateNode(targetNode.shortId, { status: "done" }, task.taskId)
 			await task.intentTree.save()
 
+			// 标记 intent-tree 已更新，下次 environment 会包含最新树
+			task.intentTreeUpdated = true
+
 			// 构建 UI 展示用的 JSON 结果
 			const uiResult = {
 				action: "commit" as const,
@@ -156,14 +159,13 @@ export class CommitIntentTool extends BaseTool<"commit_intent"> {
 				return
 			}
 
-			// 构建返回给 LLM 的 XML 结果
+			// 构建返回给 LLM 的 XML 结果（不包含 tree_summary，通过 environment 提供）
 			const autoCreatedInfo = targetNode !== node ? ` (auto-created under ${node.shortId})` : ""
 			pushToolResult(
 				`<intent_commit_result status="committed">\n` +
 					`  <commit hash="${commitHash}" node="${targetNode.shortId}"${autoCreatedInfo}>${commitMessage}</commit>\n` +
 					`  <files>${changedFiles.join(", ")}</files>\n` +
 					`  <diff_summary>${diffSummary}</diff_summary>\n` +
-					`  <tree_summary>\n${task.intentTree.toSummary()}\n  </tree_summary>\n` +
 					`</intent_commit_result>`,
 			)
 		} catch (error) {

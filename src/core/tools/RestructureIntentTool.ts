@@ -90,6 +90,9 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 
 		await task.intentTree!.save()
 
+		// 标记 intent-tree 已更新，下次 environment 会包含最新树
+		task.intentTreeUpdated = true
+
 		// 获取新父节点信息
 		let newParentNode = null
 		if (newParentId) {
@@ -163,7 +166,8 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 			response += `  </shortid_changes>\n`
 		}
 
-		response += `  <tree_summary>\n${task.intentTree!.toSummary()}\n  </tree_summary>\n` + `</intent_result>`
+		// 不包含 tree_summary，通过 environment 提供
+		response += `</intent_result>`
 
 		pushToolResult(response)
 	}
@@ -223,6 +227,9 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 		}
 
 		await task.intentTree!.save()
+
+		// 标记 intent-tree 已更新，下次 environment 会包含最新树
+		task.intentTreeUpdated = true
 
 		// 获取新父节点信息
 		let newParentNode = null
@@ -297,7 +304,8 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 			response += `  </shortid_changes>\n`
 		}
 
-		response += `  <tree_summary>\n${task.intentTree!.toSummary()}\n  </tree_summary>\n` + `</intent_result>`
+		// 不包含 tree_summary，通过 environment 提供
+		response += `</intent_result>`
 
 		pushToolResult(response)
 	}
@@ -380,6 +388,9 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 
 		await task.intentTree!.save()
 
+		// 标记 intent-tree 已更新，下次 environment 会包含最新树
+		task.intentTreeUpdated = true
+
 		// 构建 UI 展示用的 JSON 结果
 		const shortIdChanges: Array<{ old: string; new: string }> = []
 		for (const [, change] of allShortIdChanges) {
@@ -449,7 +460,8 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 			response += `  </shortid_changes>\n`
 		}
 
-		response += `  <tree_summary>\n${task.intentTree!.toSummary()}\n  </tree_summary>\n` + `</intent_result>`
+		// 不包含 tree_summary，通过 environment 提供
+		response += `</intent_result>`
 
 		pushToolResult(response)
 	}

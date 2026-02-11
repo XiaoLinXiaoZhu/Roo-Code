@@ -96,6 +96,9 @@ export class AddIntentTool extends BaseTool<"add_intent"> {
 
 			await task.intentTree.save()
 
+			// 标记 intent-tree 已更新，下次 environment 会包含最新树
+			task.intentTreeUpdated = true
+
 			// 获取父节点信息（如果有）
 			let parentNode = null
 			if (result.node.parentId) {
@@ -145,7 +148,7 @@ export class AddIntentTool extends BaseTool<"add_intent"> {
 				return
 			}
 
-			// 构建返回给 LLM 的 XML 结果
+			// 构建返回给 LLM 的 XML 结果（不包含 tree_summary，通过 environment 提供）
 			let response =
 				`<intent_result action="add" nodeId="${result.node.shortId}" type="${result.node.type}" status="${result.node.status}">\n` +
 				`  <content>${result.node.content}</content>\n`
@@ -158,7 +161,7 @@ export class AddIntentTool extends BaseTool<"add_intent"> {
 					`  </type_adjustment>\n`
 			}
 
-			response += `  <tree_summary>\n${task.intentTree.toSummary()}\n  </tree_summary>\n` + `</intent_result>`
+			response += `</intent_result>`
 
 			pushToolResult(response)
 		} catch (error) {

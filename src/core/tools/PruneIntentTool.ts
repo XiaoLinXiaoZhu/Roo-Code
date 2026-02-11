@@ -80,6 +80,9 @@ export class PruneIntentTool extends BaseTool<"prune_intent"> {
 
 			await task.intentTree.save()
 
+			// 标记 intent-tree 已更新，下次 environment 会包含最新树
+			task.intentTreeUpdated = true
+
 			// 构建 UI 展示用的 JSON 结果
 			const uiResult = {
 				action: "prune" as const,
@@ -120,7 +123,7 @@ export class PruneIntentTool extends BaseTool<"prune_intent"> {
 				result += `  </associated_commits>\n`
 			}
 
-			result += `  <tree_summary>\n${task.intentTree.toSummary()}\n  </tree_summary>\n`
+			// 不包含 tree_summary，通过 environment 提供
 			result += `</intent_result>`
 
 			pushToolResult(result)

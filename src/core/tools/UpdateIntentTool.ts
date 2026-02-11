@@ -84,6 +84,9 @@ export class UpdateIntentTool extends BaseTool<"update_intent"> {
 
 			await task.intentTree.save()
 
+			// 标记 intent-tree 已更新，下次 environment 会包含最新树
+			task.intentTreeUpdated = true
+
 			// 构建变更列表
 			const changes: Array<{ field: "content" | "status"; oldValue: string; newValue: string }> = []
 			if (hasValidContent && oldContent !== newContent) {
@@ -124,11 +127,10 @@ export class UpdateIntentTool extends BaseTool<"update_intent"> {
 				return
 			}
 
-			// 构建返回给 LLM 的 XML 结果
+			// 构建返回给 LLM 的 XML 结果（不包含 tree_summary，通过 environment 提供）
 			pushToolResult(
 				`<intent_result action="update" nodeId="${updated.shortId}" status="${updated.status}">\n` +
 					`  <content>${updated.content}</content>\n` +
-					`  <tree_summary>\n${task.intentTree.toSummary()}\n  </tree_summary>\n` +
 					`</intent_result>`,
 			)
 		} catch (error) {

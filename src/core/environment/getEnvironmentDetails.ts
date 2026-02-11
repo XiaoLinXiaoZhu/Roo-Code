@@ -322,9 +322,13 @@ export async function getEnvironmentDetails(
 	// ============================================================================
 	// Intent Tree Section (意图树：项目级 OKR，跨对话的目标/实现溯源)
 	// 所有模式都可读，只有 solo_dev 可写（通过 intent 工具组）
+	// 优化：只在两种情况下注入 intent-tree：
+	// 1. 对话开始时（isFirstMessage）- 类似 file-list
+	// 2. intent-tree 更新后（intentTreeUpdated）- 工具操作后
 	// ============================================================================
-	if (isUserMessage && cline.intentTree) {
-		const intentSummary = cline.intentTree.toSummary()
+	const shouldIncludeIntentTree = cline.intentTree && (isFirstMessage || cline.intentTreeUpdated)
+	if (shouldIncludeIntentTree) {
+		const intentSummary = cline.intentTree!.toSummary()
 		// 解释 intent-tree 是什么，让所有模式都能理解上下文
 		// 管理指令（何时新建/复用）放在工具描述中，不在这里
 		const treeDescription = `Separates CONSTRAINTS (what user wants) from IMPLEMENTATIONS (how to achieve it).
@@ -332,16 +336,22 @@ export async function getEnvironmentDetails(
 		  Implementations=[P]path/[I]impl: Volatile. Can be replaced or abandoned.
 		  Status: ●=in_progress, ✓=done, ✕=pruned`
 
+		// 标记是否是更新触发的（帮助模型理解上下文）
+		const updateHint = cline.intentTreeUpdated ? ' hint="updated since last message"' : ""
+
 		if (intentSummary) {
-			xmlContent += `\n  <intent_tree description="${treeDescription}">`
+			xmlContent += `\n  <intent_tree description="${treeDescription}"${updateHint}>`
 			xmlContent += `\n${intentSummary
 				.split("\n")
 				.map((l) => "    " + l)
 				.join("\n")}`
 			xmlContent += `\n  </intent_tree>`
 		} else {
-			xmlContent += `\n  <intent_tree description="${treeDescription}" status="empty"/>`
+			xmlContent += `\n  <intent_tree description="${treeDescription}" status="empty"${updateHint}/>`
 		}
+
+		// 清除更新标记，避免重复注入
+		cline.intentTreeUpdated = false
 	}
 
 	// ============================================================================

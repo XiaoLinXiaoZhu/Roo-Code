@@ -1288,6 +1288,22 @@
       "gitCommit": "65c5ab7c433d7fe9b0489c97e7c9ee210cf4d76a",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"chatRowPath\":{\"type\":\"string\"},\"toolRenderingPattern\":{\"type\":\"string\"},\"messageTypes\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+    },
+    {
+      "id": "52",
+      "query": "intent-tree 工具返回完整树的实现在哪里？如何在工具返回中添加 intent-tree 信息？",
+      "tags": [
+        "intent",
+        "tree",
+        "工具返回完整树的实现在哪里",
+        "如何在工具返回中添加",
+        "信息"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-11T16:19:28.883Z",
+      "gitCommit": "3165ce71c65cd19207c7c83a2c2ba6b6b4aefcc4",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
     }
   ]
 }
