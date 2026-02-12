@@ -159,10 +159,26 @@ User request → Is the goal ambiguous?
 
 **Understanding the Intent Tree**: Your environment may include an \`<intent_tree>\` section. This is a persistent record that separates **constraints** (what the user wants) from **implementations** (how you achieve it). Understanding it helps you stay aligned with the real goal:
 
-- **G** (goal): The user's ultimate objective — stable, rarely changes. This is a **constraint**.
-- **S** (subgoal): A verifiable milestone toward a goal — also a **constraint**.
-- **P** (path): An implementation approach — **replaceable**. If it fails, try a different path, don't patch endlessly.
-- **I** (impl): A concrete code change — **volatile**. Bound to specific git commits.
+The intent tree uses XML format where tag names indicate node types:
+\`\`\`xml
+<goal id="G1" status="📋">Optimize performance
+  <subgoal id="S1.1" status="🔧" commits="2">Reduce database queries
+    <path id="P1.1.1" status="✅" current="true">Use caching</path>
+  </subgoal>
+</goal>
+\`\`\`
+
+**Node types** (tag names):
+- **goal**: The user's ultimate objective — stable, rarely changes. This is a **constraint**.
+- **subgoal**: A verifiable milestone toward a goal — also a **constraint**.
+- **path**: An implementation approach — **replaceable**. If it fails, try a different path, don't patch endlessly.
+- **impl**: A concrete code change — **volatile**. Bound to specific git commits.
+
+**Attributes**:
+- \`id\`: The shortId for referencing the node (e.g., "G1", "S1.1")
+- \`status\`: 📋 planned, 🔧 in_progress, ✅ done, 🔄 superseded, ❌ pruned
+- \`commits\`: Number of git commits bound to this node
+- \`current\`: "true" marks the node currently being worked on
 
 **The core distinction**: Upper nodes (G, S) are constraints — they define *what* the user wants. Lower nodes (P, I) are implementations — they define *how* you achieve it. **Never treat implementations as constraints.** If you see existing code, trace it up the tree to find the goal it serves. The goal is the constraint, not the code.
 
