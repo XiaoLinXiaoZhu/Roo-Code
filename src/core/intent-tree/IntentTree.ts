@@ -674,6 +674,10 @@ export class IntentTree {
 			this.recalculateChildrenShortIds(node, changes)
 		}
 
+		// 同步计数器，使后续 addNode 的增量逻辑与重建后的状态一致。
+		// rootMaxChildIndex 是全局的（不区分类型），设为根节点总数。
+		this.data.rootMaxChildIndex = this.data.rootIds.length
+
 		return changes
 	}
 
@@ -697,6 +701,9 @@ export class IntentTree {
 
 			this.recalculateChildrenShortIds(child, changes)
 		}
+
+		// 同步父节点的 maxChildIndex，使后续 addNode 从正确的基线递增
+		parent.maxChildIndex = childIndex
 	}
 
 	// ========================================================================
