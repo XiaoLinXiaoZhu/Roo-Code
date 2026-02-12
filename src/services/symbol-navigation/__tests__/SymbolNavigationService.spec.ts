@@ -148,6 +148,132 @@ describe("SymbolNavigationService", () => {
 			expect(result.source).toBe("lsp")
 			expect(result.definitions.length).toBeGreaterThan(0)
 		})
+
+		it("should use LocationLink.targetRange for full definition preview", async () => {
+			// LocationLink with targetRange spanning lines 20-35 (a 16-line function)
+			const mockLocationLink = {
+				targetUri: { fsPath: "/test/target.ts" },
+				targetRange: {
+					start: { line: 20, character: 0 },
+					end: { line: 35, character: 1 },
+				},
+				targetSelectionRange: {
+					start: { line: 20, character: 16 },
+					end: { line: 20, character: 30 },
+				},
+			}
+
+			const mockDocument = {
+				lineCount: 100,
+				lineAt: vi.fn((line: number) => ({ text: `  code at line ${line}` })),
+			}
+
+			vi.mocked(vscode.workspace.openTextDocument).mockResolvedValue(mockDocument as any)
+			vi.mocked(vscode.commands.executeCommand).mockResolvedValue([mockLocationLink])
+
+			const result = await service.findDefinition("/test/source.ts", "code")
+
+			expect(result.definitions.length).toBe(1)
+			const def = result.definitions[0]
+
+			// Preview should cover lines 20-35 (the full targetRange), not just ±5 around selection
+			const previewLines = def.preview!.split("\n")
+			// 16 lines (20 through 35 inclusive)
+			expect(previewLines.length).toBe(16)
+			// First line should be line 21 (1-based)
+			expect(previewLines[0]).toContain("21 |")
+			// Last line should be line 36 (1-based)
+			expect(previewLines[previewLines.length - 1]).toContain("36 |")
+		})
+
+		it("should fall back to DocumentSymbol API when no fullRange available", async () => {
+			// Plain Location (no fullRange)
+			const mockLocation = {
+				uri: { fsPath: "/test/file.ts" },
+				range: {
+					start: { line: 10, character: 5 },
+					end: { line: 10, character: 15 },
+				},
+			}
+
+			const mockDocumentSymbol = {
+				name: "myFunction",
+				range: {
+					start: { line: 8, character: 0 },
+					end: { line: 25, character: 1 },
+					contains: vi.fn((pos: any) => pos.line >= 8 && pos.line <= 25),
+				},
+				selectionRange: {
+					start: { line: 8, character: 16 },
+					end: { line: 8, character: 26 },
+				},
+				children: [],
+			}
+
+			const mockDocument = {
+				lineCount: 100,
+				lineAt: vi.fn((line: number) => ({ text: `  code at line ${line}` })),
+			}
+
+			vi.mocked(vscode.workspace.openTextDocument).mockResolvedValue(mockDocument as any)
+			vi.mocked(vscode.commands.executeCommand).mockImplementation((command: string, ...args: any[]) => {
+				if (command === "vscode.executeDefinitionProvider") {
+					return Promise.resolve([mockLocation]) as any
+				}
+				if (command === "vscode.executeDocumentSymbolProvider") {
+					return Promise.resolve([mockDocumentSymbol]) as any
+				}
+				return Promise.resolve(undefined) as any
+			})
+
+			const result = await service.findDefinition("/test/source.ts", "code")
+
+			expect(result.definitions.length).toBe(1)
+			const def = result.definitions[0]
+
+			// Preview should cover lines 8-25 (DocumentSymbol range)
+			const previewLines = def.preview!.split("\n")
+			expect(previewLines.length).toBe(18) // lines 8 through 25 inclusive
+			expect(previewLines[0]).toContain("9 |") // line 8 (0-based) = line 9 (1-based)
+			expect(previewLines[previewLines.length - 1]).toContain("26 |")
+		})
+
+		it("should truncate preview when definition exceeds MAX_PREVIEW_LINES", async () => {
+			// LocationLink with targetRange spanning 121 lines (exceeds 80 line limit)
+			const mockLocationLink = {
+				targetUri: { fsPath: "/test/target.ts" },
+				targetRange: {
+					start: { line: 10, character: 0 },
+					end: { line: 130, character: 1 },
+				},
+				targetSelectionRange: {
+					start: { line: 10, character: 12 },
+					end: { line: 10, character: 20 },
+				},
+			}
+
+			const mockDocument = {
+				lineCount: 200,
+				lineAt: vi.fn((line: number) => ({ text: `  code at line ${line}` })),
+			}
+
+			vi.mocked(vscode.workspace.openTextDocument).mockResolvedValue(mockDocument as any)
+			vi.mocked(vscode.commands.executeCommand).mockResolvedValue([mockLocationLink])
+
+			const result = await service.findDefinition("/test/source.ts", "code")
+
+			expect(result.definitions.length).toBe(1)
+			const def = result.definitions[0]
+
+			expect(def.previewTruncated).toBe(true)
+
+			const previewLines = def.preview!.split("\n")
+			// 80 code lines + 1 truncation indicator line
+			expect(previewLines.length).toBe(81)
+			// Last line should be the truncation indicator
+			expect(previewLines[80]).toContain("... (+")
+			expect(previewLines[80]).toContain("more lines)")
+		})
 	})
 
 	describe("findReferences", () => {
@@ -247,6 +373,38 @@ describe("SymbolNavigationService", () => {
 			expect(result.groupedByFile.size).toBe(2)
 			expect(result.groupedByFile.get("/test/file1.ts")?.length).toBe(2)
 			expect(result.groupedByFile.get("/test/file2.ts")?.length).toBe(1)
+		})
+
+		it("should use short context for reference previews", async () => {
+			const mockLocations = [
+				{
+					uri: { fsPath: "/test/file1.ts" },
+					range: { start: { line: 10, character: 0 }, end: { line: 10, character: 10 } },
+				},
+			]
+
+			const mockDocument = {
+				lineCount: 100,
+				lineAt: vi.fn((line: number) => ({ text: `const testSymbol = something; // line ${line}` })),
+				getWordRangeAtPosition: vi.fn(() => ({
+					start: { line: 0, character: 0 },
+					end: { line: 0, character: 10 },
+				})),
+				getText: vi.fn(() => "testSymbol"),
+			}
+
+			vi.mocked(vscode.commands.executeCommand).mockResolvedValue(mockLocations)
+			vi.mocked(vscode.workspace.openTextDocument).mockResolvedValue(mockDocument as any)
+
+			const result = await service.findReferences("/test/source.ts", "testSymbol")
+
+			expect(result.references.length).toBe(1)
+			const ref = result.references[0]
+
+			// Reference preview should use REFERENCE_CONTEXT_LINES (±2), not full definition
+			const previewLines = ref.preview!.split("\n")
+			// line 10 ± 2 = lines 8-12 = 5 lines
+			expect(previewLines.length).toBe(5)
 		})
 	})
 })

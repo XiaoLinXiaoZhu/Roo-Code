@@ -68,6 +68,13 @@ class AdaptiveTimeout {
 }
 
 /**
+ * Extended Location that carries the full definition range from LocationLink.targetRange
+ */
+interface LocationWithFullRange extends vscode.Location {
+	fullRange?: vscode.Range
+}
+
+/**
  * Normalize LSP results to a consistent Location array format
  *
  * VSCode LSP API can return:
@@ -78,16 +85,18 @@ class AdaptiveTimeout {
  */
 function normalizeLocations(
 	result: vscode.Location | vscode.Location[] | vscode.LocationLink[] | undefined,
-): vscode.Location[] {
+): LocationWithFullRange[] {
 	if (!result) return []
 	if (!Array.isArray(result)) return [result]
 
 	return result.map((item) => {
 		if ("targetUri" in item) {
 			// LocationLink → Location
-			// Use targetSelectionRange if available, otherwise use targetRange
-			const range = item.targetSelectionRange || item.targetRange
-			return new vscode.Location(item.targetUri, range)
+			// selectionRange for cursor positioning, targetRange for full definition preview
+			const selectionRange = item.targetSelectionRange || item.targetRange
+			const loc = new vscode.Location(item.targetUri, selectionRange) as LocationWithFullRange
+			loc.fullRange = item.targetRange // Preserve full definition range
+			return loc
 		}
 		return item
 	})
@@ -105,40 +114,159 @@ function thenableToPromise<T>(thenable: Thenable<T>): Promise<T> {
 /**
  * Convert VSCode Location to SymbolLocation
  */
+
+/**
+ * Preview mode determines how much context to include
+ */
+type PreviewMode = "definition" | "reference"
+
 /**
  * Number of context lines to include before and after the definition
  */
 const CONTEXT_LINES = 5
 
-async function locationToSymbolLocation(location: vscode.Location): Promise<SymbolLocation> {
+/**
+ * Number of context lines for reference mode (shorter)
+ */
+const REFERENCE_CONTEXT_LINES = 2
+
+/**
+ * Maximum number of lines to include in a definition preview
+ * to prevent excessive token consumption
+ */
+const MAX_PREVIEW_LINES = 80
+
+/**
+ * Timeout for DocumentSymbol API calls (ms)
+ */
+const DOCUMENT_SYMBOL_TIMEOUT = 3000
+
+/**
+ * Get the full definition range from DocumentSymbol API
+ *
+ * Uses vscode.executeDocumentSymbolProvider to find the smallest symbol
+ * that contains the given position, returning its full range.
+ */
+async function getFullRangeFromDocumentSymbols(
+	uri: vscode.Uri,
+	position: vscode.Position,
+): Promise<vscode.Range | undefined> {
+	try {
+		const result = await withTimeout(
+			thenableToPromise(
+				vscode.commands.executeCommand<vscode.DocumentSymbol[]>("vscode.executeDocumentSymbolProvider", uri),
+			),
+			DOCUMENT_SYMBOL_TIMEOUT,
+		)
+
+		if (!result || result.length === 0) return undefined
+		return findSmallestEnclosingSymbol(result, position)
+	} catch {
+		return undefined
+	}
+}
+
+/**
+ * Recursively find the smallest DocumentSymbol whose range contains the position.
+ * This ensures that for nested definitions (e.g., a method inside a class),
+ * we return the method's range rather than the entire class.
+ */
+function findSmallestEnclosingSymbol(
+	symbols: vscode.DocumentSymbol[],
+	position: vscode.Position,
+): vscode.Range | undefined {
+	for (const sym of symbols) {
+		if (sym.range.contains(position)) {
+			// Try to find a more precise match in children first
+			const childMatch = sym.children?.length ? findSmallestEnclosingSymbol(sym.children, position) : undefined
+			return childMatch || sym.range
+		}
+	}
+	return undefined
+}
+
+/**
+ * Convert VSCode Location to SymbolLocation with intelligent preview extraction.
+ *
+ * For definition mode, uses a three-tier priority chain:
+ * 1. LocationLink.targetRange (full definition range from LSP, zero cost)
+ * 2. DocumentSymbol API (one extra call, finds enclosing symbol range)
+ * 3. +/-CONTEXT_LINES fallback (existing behavior)
+ *
+ * For reference mode, uses a fixed +/-REFERENCE_CONTEXT_LINES window.
+ */
+async function locationToSymbolLocation(
+	location: LocationWithFullRange,
+	mode: PreviewMode = "definition",
+): Promise<SymbolLocation> {
 	const uri = location.uri.fsPath
 	const range = {
 		start: { line: location.range.start.line + 1, character: location.range.start.character },
 		end: { line: location.range.end.line + 1, character: location.range.end.character },
 	}
 
-	// Try to get code preview with context lines before and after
+	// Try to get code preview
 	let preview: string | undefined
+	let previewTruncated = false
 	try {
 		const document = await vscode.workspace.openTextDocument(location.uri)
-		// Include CONTEXT_LINES before the definition start
-		const contextStartLine = Math.max(0, location.range.start.line - CONTEXT_LINES)
-		// Include CONTEXT_LINES after the definition end
-		const contextEndLine = Math.min(location.range.end.line + CONTEXT_LINES, document.lineCount - 1)
+
+		let startLine: number
+		let endLine: number
+
+		if (mode === "reference") {
+			// Reference mode: short context window
+			startLine = Math.max(0, location.range.start.line - REFERENCE_CONTEXT_LINES)
+			endLine = Math.min(location.range.end.line + REFERENCE_CONTEXT_LINES, document.lineCount - 1)
+		} else {
+			// Definition mode: try to get full definition range
+
+			// Priority 1: Use fullRange from LocationLink.targetRange
+			let fullRange: vscode.Range | undefined = location.fullRange
+
+			// Priority 2: Use DocumentSymbol API to find enclosing symbol
+			if (!fullRange) {
+				fullRange = await getFullRangeFromDocumentSymbols(location.uri, location.range.start)
+			}
+
+			if (fullRange) {
+				startLine = fullRange.start.line
+				endLine = fullRange.end.line
+			} else {
+				// Priority 3: Fallback to +/-CONTEXT_LINES
+				startLine = Math.max(0, location.range.start.line - CONTEXT_LINES)
+				endLine = Math.min(location.range.end.line + CONTEXT_LINES, document.lineCount - 1)
+			}
+		}
+
+		// Truncation protection
+		const totalLines = endLine - startLine + 1
+		let actualEndLine = endLine
+		if (totalLines > MAX_PREVIEW_LINES) {
+			actualEndLine = startLine + MAX_PREVIEW_LINES - 1
+			previewTruncated = true
+		}
 
 		const lines: string[] = []
-		for (let i = contextStartLine; i <= contextEndLine; i++) {
+		for (let i = startLine; i <= actualEndLine; i++) {
 			// Add line number prefix for clarity
 			const lineNum = i + 1 // Convert to 1-based
 			const lineText = document.lineAt(i).text
 			lines.push(`${lineNum.toString().padStart(4, " ")} | ${lineText}`)
 		}
+
+		// Add truncation indicator
+		if (previewTruncated) {
+			const remaining = endLine - actualEndLine
+			lines.push(`     | ... (+${remaining} more lines)`)
+		}
+
 		preview = lines.join("\n")
 	} catch {
 		// Ignore preview errors
 	}
 
-	return { uri, range, preview }
+	return { uri, range, preview, previewTruncated }
 }
 
 /**
@@ -426,7 +554,9 @@ export class SymbolNavigationService implements ISymbolNavigationService {
 			}
 
 			// Convert to SymbolLocation
-			const symbolLocations = await Promise.all(locations.map(locationToSymbolLocation))
+			const symbolLocations = await Promise.all(
+				locations.map((loc) => locationToSymbolLocation(loc, "definition")),
+			)
 
 			return { success: true, locations: symbolLocations }
 		} catch (error) {
@@ -474,7 +604,7 @@ export class SymbolNavigationService implements ISymbolNavigationService {
 			}
 
 			// Convert to SymbolLocation
-			const symbolLocations = await Promise.all(result.map(locationToSymbolLocation))
+			const symbolLocations = await Promise.all(result.map((loc) => locationToSymbolLocation(loc, "reference")))
 
 			return { success: true, locations: symbolLocations }
 		} catch (error) {

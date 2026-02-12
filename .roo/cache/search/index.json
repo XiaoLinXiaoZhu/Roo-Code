@@ -1396,6 +1396,34 @@
       "gitCommit": "78bdd8e9ac142c518b258628baeed3a97fc10b40",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "57",
+      "query": "Where is the find_definition or LSP definition lookup tool implemented? How does it return code context around the definition?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "find_definition",
+        "or",
+        "lsp",
+        "definition",
+        "lookup",
+        "tool",
+        "implemented",
+        "how",
+        "does",
+        "it",
+        "return",
+        "code",
+        "context",
+        "around"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-12T15:17:08.438Z",
+      "gitCommit": "983a305aca56400e8b3d525f330b70fc8ec9cbeb",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
     }
   ]
 }

@@ -17,6 +17,8 @@ export interface SymbolLocation {
 	}
 	/** Code preview at this location */
 	preview?: string
+	/** Whether the preview was truncated due to MAX_PREVIEW_LINES */
+	previewTruncated?: boolean
 }
 
 /**
