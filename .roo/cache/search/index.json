@@ -1304,6 +1304,71 @@
       "gitCommit": "3165ce71c65cd19207c7c83a2c2ba6b6b4aefcc4",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "53",
+      "query": "How does the OpenAI compatible provider handle thinking mode or extended thinking?",
+      "tags": [
+        "how",
+        "does",
+        "the",
+        "openai",
+        "compatible",
+        "provider",
+        "handle",
+        "thinking",
+        "mode",
+        "or",
+        "extended"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-12T03:30:12.543Z",
+      "gitCommit": "b54e89211bd3d1a8374888d307d9f29632e1127e",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "54",
+      "query": "Where are the intent-tree tools implemented and tested?",
+      "tags": [
+        "where",
+        "are",
+        "the",
+        "intent",
+        "tree",
+        "tools",
+        "implemented",
+        "and",
+        "tested"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-12T03:47:54.198Z",
+      "gitCommit": "b54e89211bd3d1a8374888d307d9f29632e1127e",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "55",
+      "query": "如何在 openai-compatible 模式下处理模型的 thinking 思考模式配置？查找 thinking 相关的参数传递和模型配置",
+      "tags": [
+        "如何在",
+        "openai",
+        "compatible",
+        "模式下处理模型的",
+        "thinking",
+        "思考模式配置",
+        "查找",
+        "相关的参数传递和模型配置"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code",
+        "excludes": "node_modules,dist,.git",
+        "filePatterns": "*.ts"
+      },
+      "createdAt": "2026-02-12T04:10:44.573Z",
+      "gitCommit": "b54e89211bd3d1a8374888d307d9f29632e1127e",
+      "ttlHours": 168,
+      "schema": "{\"type\": \"object\", \"properties\": {\"files\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}}, \"summary\": {\"type\": \"string\"}}}"
     }
   ]
 }
