@@ -551,6 +551,28 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 	// Markdown tool call parser for detecting ```write_to and ```apply_diff blocks
 	private markdownToolParser: MarkdownToolParser = new MarkdownToolParser()
 
+	// Pending apply_diff block waiting for merge or flush.
+	// When a markdown apply_diff tool_end fires, we defer setting partial=false
+	// until we know whether the next tool is another same-file apply_diff (merge) or not (flush).
+	private pendingApplyDiff: { index: number; path: string } | null = null
+
+	/**
+	 * Flush the pending apply_diff block by marking it as complete (partial=false)
+	 * and building its nativeArgs. This triggers presentAssistantMessage to execute it.
+	 */
+	private flushPendingApplyDiff(): void {
+		if (!this.pendingApplyDiff) return
+		const { index } = this.pendingApplyDiff
+		const toolUse = this.assistantMessageContent[index] as ToolUse
+		if (toolUse && toolUse.type === "tool_use" && toolUse.partial) {
+			toolUse.partial = false
+			const path = toolUse.params.path
+			const content = toolUse.params.content || ""
+			toolUse.nativeArgs = { path, diff: content } as any
+		}
+		this.pendingApplyDiff = null
+	}
+
 	/**
 	 * Stores execution results from markdown tool calls (write_to, apply_diff, todo_list)
 	 * These results will be injected into environment_details instead of being converted to native tool_result
@@ -2954,6 +2976,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				// No legacy text-stream tool parser.
 				this.streamingToolCallIndices.clear()
 				this.markdownToolParser.reset()
+				this.pendingApplyDiff = null
 				// Clear any leftover streaming tool call state from previous interrupted streams
 				NativeToolCallParser.clearAllStreamingToolCalls()
 				NativeToolCallParser.clearRawChunkState()
@@ -3104,6 +3127,32 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 								for (const mdEvent of markdownEvents) {
 									switch (mdEvent.type) {
 										case "tool_start": {
+											// Check if we can merge with pending apply_diff
+											if (
+												this.pendingApplyDiff &&
+												mdEvent.toolName === "apply_diff" &&
+												mdEvent.path === this.pendingApplyDiff.path
+											) {
+												// Same file apply_diff - reuse the pending block instead of creating a new one.
+												// Route subsequent tool_delta events to the pending block.
+												const pendingIndex = this.pendingApplyDiff.index
+												const pendingToolUse = this.assistantMessageContent[
+													pendingIndex
+												] as ToolUse
+												if (pendingToolUse) {
+													// Add a separator between merged diffs
+													pendingToolUse.params.content =
+														(pendingToolUse.params.content || "") + "\n"
+												}
+												// Map the new tool's ID to the pending block's index
+												this.streamingToolCallIndices.set(mdEvent.id, pendingIndex)
+												this.userMessageContentReady = false
+												break
+											}
+
+											// Flush any pending apply_diff - the next tool is different
+											this.flushPendingApplyDiff()
+
 											// Create a new ToolUse block for the Markdown tool call
 											const toolUse: ToolUse = {
 												type: "tool_use",
@@ -3144,23 +3193,39 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 											break
 										}
 										case "tool_end": {
-											// Mark the ToolUse as complete and build nativeArgs
 											const toolUseIndex = this.streamingToolCallIndices.get(mdEvent.id)
 											if (toolUseIndex !== undefined) {
 												const toolUse = this.assistantMessageContent[toolUseIndex] as ToolUse
 												if (toolUse && toolUse.type === "tool_use") {
-													toolUse.partial = false
-													// Build nativeArgs based on tool type
-													const path = toolUse.params.path
-													const content = toolUse.params.content || ""
-													if (toolUse.name === "write_to_file") {
-														toolUse.nativeArgs = { path, content } as any
-													} else if (toolUse.name === "apply_diff") {
+													if (toolUse.name === "apply_diff") {
+														// Defer execution: check if next tool_start is same-file apply_diff
+														// If so, we'll merge. If not, flushPendingApplyDiff() will fire.
+														if (this.pendingApplyDiff) {
+															// There's already a pending apply_diff for the same or different file.
+															// Flush the old one first, then set this one as pending.
+															this.flushPendingApplyDiff()
+														}
+														// Build nativeArgs but keep partial=true (deferred)
+														const path = toolUse.params.path
+														const content = toolUse.params.content || ""
 														toolUse.nativeArgs = { path, diff: content } as any
-													} else if (toolUse.name === "update_todo_list") {
-														toolUse.nativeArgs = {
-															todos: toolUse.params.todos || "",
-														} as any
+														this.pendingApplyDiff = {
+															index: toolUseIndex,
+															path: path || "",
+														}
+													} else {
+														// Non-apply_diff tools: flush any pending apply_diff, then complete normally
+														this.flushPendingApplyDiff()
+														toolUse.partial = false
+														const path = toolUse.params.path
+														const content = toolUse.params.content || ""
+														if (toolUse.name === "write_to_file") {
+															toolUse.nativeArgs = { path, content } as any
+														} else if (toolUse.name === "update_todo_list") {
+															toolUse.nativeArgs = {
+																todos: toolUse.params.todos || "",
+															} as any
+														}
 													}
 												}
 												this.streamingToolCallIndices.delete(mdEvent.id)
@@ -3191,11 +3256,11 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 									const lastBlock =
 										this.assistantMessageContent[this.assistantMessageContent.length - 1]
 									if (lastBlock?.type === "text" && lastBlock.partial) {
-										lastBlock.content = assistantMessage
+										lastBlock.content += chunk.text
 									} else {
 										this.assistantMessageContent.push({
 											type: "text",
-											content: assistantMessage,
+											content: chunk.text,
 											partial: true,
 										})
 										this.userMessageContentReady = false
@@ -3293,6 +3358,9 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 					// Finalize any remaining markdown tool calls that weren't explicitly ended
 					// This handles cases where the stream ends mid-tool-call (e.g., ```write_to without closing ```)
+					// Flush any pending apply_diff before finalizing
+					this.flushPendingApplyDiff()
+
 					const markdownFinalizeEvents = this.markdownToolParser.finalize()
 					for (const mdEvent of markdownFinalizeEvents) {
 						switch (mdEvent.type) {

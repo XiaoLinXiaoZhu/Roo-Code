@@ -1369,6 +1369,33 @@
       "gitCommit": "b54e89211bd3d1a8374888d307d9f29632e1127e",
       "ttlHours": 168,
       "schema": "{\"type\": \"object\", \"properties\": {\"files\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}}, \"summary\": {\"type\": \"string\"}}}"
+    },
+    {
+      "id": "56",
+      "query": "Where is NativeToolCallParser implemented and how does it handle tool call finalization?",
+      "tags": [
+        "where",
+        "is",
+        "nativetoolcallparser",
+        "implemented",
+        "and",
+        "how",
+        "does",
+        "it",
+        "handle",
+        "tool",
+        "call",
+        "finalization"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,dist,__tests__"
+      },
+      "createdAt": "2026-02-12T13:42:22.513Z",
+      "gitCommit": "78bdd8e9ac142c518b258628baeed3a97fc10b40",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
     }
   ]
 }
