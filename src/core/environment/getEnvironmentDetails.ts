@@ -334,7 +334,7 @@ export async function getEnvironmentDetails(
 		const treeDescription = `Separates CONSTRAINTS (what user wants) from IMPLEMENTATIONS (how to achieve it).
 		  Constraints=[G]goal/[S]subgoal: Stable. Don't change when implementation fails.
 		  Implementations=[P]path/[I]impl: Volatile. Can be replaced or abandoned.
-		  Status: ●=in_progress, ✓=done, ✕=pruned`
+		  Status: 📋=planned, 🔧=in_progress, ✅=done, 🔄=superseded, ❌=pruned`
 
 		// 标记是否是更新触发的（帮助模型理解上下文）
 		const updateHint = cline.intentTreeUpdated ? ' hint="updated since last message"' : ""

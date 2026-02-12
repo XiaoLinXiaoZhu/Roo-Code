@@ -23,7 +23,17 @@ Example: User says "use Redis for caching"
 - \`goal\`: User's ultimate objective — stable, rarely changes. Only create when truly new.
 - \`subgoal\`: Verifiable milestone — "reduce query time by 50%"
 - \`path\`: Implementation approach — "use Redis caching" (can fail and be replaced)
-- \`impl\`: Concrete code change — "add cache layer in UserService"
+- \`impl\`: ONE atomic code change — "add cache layer in UserService"
+
+**Atomicity rule — keep nodes small and independently verifiable:**
+Litmus test: "Can I describe this in a single commit message without using 'and'?"
+- YES → good granularity (e.g., "add JWT validation middleware")
+- NO → decompose into multiple sibling nodes
+
+❌ BAD:  impl "implement auth system" (multiple concerns, untraceable)
+✅ GOOD: impl "add JWT token validation middleware"
+         impl "create user session store"
+         impl "add login endpoint with rate limiting"
 
 **Decision flow:**
 1. Read <intent_tree> in environment
@@ -79,7 +89,7 @@ export default {
 					type: "string",
 					enum: ["goal", "subgoal", "path", "impl"],
 					description:
-						"Node type: goal (stable objective), subgoal (milestone), path (approach), impl (code change).",
+						"Node type: goal (stable objective), subgoal (milestone), path (approach), impl (ONE atomic code change ≈ one commit).",
 				},
 				content: {
 					type: "string",

@@ -148,20 +148,16 @@ export class AddIntentTool extends BaseTool<"add_intent"> {
 				return
 			}
 
-			// 构建返回给 LLM 的 XML 结果（不包含 tree_summary，通过 environment 提供）
-			let response =
-				`<intent_result action="add" nodeId="${result.node.shortId}" type="${result.node.type}" status="${result.node.status}">\n` +
-				`  <content>${result.node.content}</content>\n`
+			// 构建返回给 LLM 的 XML 结果（与 toSummary 格式一致）
+			const tagName = result.node.type
+			let response = `<${tagName} id="${result.node.shortId}" status="${result.node.status}">${result.node.content}`
 
 			// 如果类型被调整，显式通知模型
 			if (result.typeAdjusted) {
-				response +=
-					`  <type_adjustment from="${result.requestedType}" to="${result.node.type}">\n` +
-					`    ${result.adjustmentReason}\n` +
-					`  </type_adjustment>\n`
+				response += `\n  <type_adjustment from="${result.requestedType}" to="${result.node.type}">${result.adjustmentReason}</type_adjustment>`
 			}
 
-			response += `</intent_result>`
+			response += `</${tagName}>`
 
 			pushToolResult(response)
 		} catch (error) {

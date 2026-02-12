@@ -46,7 +46,7 @@ describe("PruneIntentTool", () => {
 		await pruneIntentTool.execute({ nodeId: "P1.1", reason: "wrong approach" }, task, callbacks)
 
 		const result = callbacks.pushToolResult.mock.calls[0][0]
-		expect(result).toContain('prunedCount="2"')
+		expect(result).toContain('count="2"')
 		expect(result).toContain("P1.1")
 		expect(result).toContain("I1.1.1")
 		expect(result).toContain("wrong approach")
@@ -73,7 +73,7 @@ describe("PruneIntentTool", () => {
 
 		const result = callbacks.pushToolResult.mock.calls[0][0]
 		expect(result).toContain("abc1234")
-		expect(result).toContain("associated_commits")
+		expect(result).toContain("<commits")
 	})
 
 	test("errors when node not found", async () => {

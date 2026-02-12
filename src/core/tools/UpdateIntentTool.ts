@@ -127,11 +127,10 @@ export class UpdateIntentTool extends BaseTool<"update_intent"> {
 				return
 			}
 
-			// 构建返回给 LLM 的 XML 结果（不包含 tree_summary，通过 environment 提供）
+			// 构建返回给 LLM 的 XML 结果（与 toSummary 格式一致）
+			const tagName = updated.type
 			pushToolResult(
-				`<intent_result action="update" nodeId="${updated.shortId}" status="${updated.status}">\n` +
-					`  <content>${updated.content}</content>\n` +
-					`</intent_result>`,
+				`<${tagName} id="${updated.shortId}" status="${updated.status}">${updated.content}</${tagName}>`,
 			)
 		} catch (error) {
 			await handleError("update intent", error as Error)

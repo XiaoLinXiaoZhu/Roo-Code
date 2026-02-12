@@ -106,25 +106,23 @@ export class PruneIntentTool extends BaseTool<"prune_intent"> {
 				return
 			}
 
-			// 构建返回给 LLM 的 XML 结果
-			let result =
-				`<intent_result action="prune" prunedCount="${prunedIds.length}">\n` +
-				`  <pruned_nodes>${prunedIds.join(", ")}</pruned_nodes>\n`
+			// 构建返回给 LLM 的 XML 结果（与 toSummary 格式一致）
+			let result = `<pruned count="${prunedIds.length}">\n`
+			result += `  <nodes>${prunedIds.join(", ")}</nodes>\n`
 
 			if (reason) {
 				result += `  <reason>${reason}</reason>\n`
 			}
 
 			if (commits.length > 0) {
-				result += `  <associated_commits hint="these commits may need to be reverted">\n`
+				result += `  <commits hint="may need to be reverted">\n`
 				for (const c of commits) {
 					result += `    <commit hash="${c.commitHash}">${c.commitMessage}</commit>\n`
 				}
-				result += `  </associated_commits>\n`
+				result += `  </commits>\n`
 			}
 
-			// 不包含 tree_summary，通过 environment 提供
-			result += `</intent_result>`
+			result += `</pruned>`
 
 			pushToolResult(result)
 		} catch (error) {

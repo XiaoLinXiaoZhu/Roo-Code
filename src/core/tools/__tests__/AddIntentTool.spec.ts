@@ -55,7 +55,7 @@ describe("AddIntentTool", () => {
 
 		expect(callbacks.pushToolResult).toHaveBeenCalledTimes(1)
 		const result = callbacks.pushToolResult.mock.calls[0][0]
-		expect(result).toContain('nodeId="G1"')
+		expect(result).toContain('id="G1"')
 		expect(result).toContain("Fix the bug")
 	})
 
@@ -77,7 +77,7 @@ describe("AddIntentTool", () => {
 		)
 
 		const result = callbacks.pushToolResult.mock.calls[0][0]
-		expect(result).toContain('nodeId="P1.1"')
+		expect(result).toContain('id="P1.1"')
 	})
 
 	test("errors when intent tree not initialized", async () => {

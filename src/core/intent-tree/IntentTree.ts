@@ -106,6 +106,12 @@ export class IntentTree {
 			this.data.shortIdIndex = {}
 			this.rebuildShortIdIndex()
 		}
+		// 兼容旧数据：补全节点中可能缺失的数组字段
+		for (const node of Object.values(this.data.nodes)) {
+			if (!node.modifiedBy) node.modifiedBy = []
+			if (!node.childrenIds) node.childrenIds = []
+			if (!node.codeBindings) node.codeBindings = []
+		}
 	}
 
 	// ========================================================================
@@ -711,9 +717,9 @@ export class IntentTree {
 	// ========================================================================
 
 	/**
-	 * 生成意图树的文本摘要，用于注入用户消息。
+	 * 生成意图树的 XML 摘要，用于注入用户消息。
+	 * 使用类型作为标签名（goal/subgoal/path/impl），显式属性标注状态。
 	 * 只包含 active 节点，树状缩进展示层级关系。
-	 * shortId 用方括号包裹方便模型引用。
 	 */
 	toSummary(): string {
 		if (this.isEmpty()) {
@@ -723,44 +729,80 @@ export class IntentTree {
 		const currentNode = this.getCurrentActiveNode()
 		const lines: string[] = []
 		for (const rootId of this.data.rootIds) {
-			this.renderNode(rootId, 0, lines, currentNode?.id)
+			this.renderNodeXml(rootId, 0, lines, currentNode?.id)
 		}
 		return lines.join("\n")
 	}
 
-	private renderNode(nodeId: string, depth: number, lines: string[], currentId?: string): void {
+	private renderNodeXml(nodeId: string, depth: number, lines: string[], currentId?: string): void {
 		const node = this.data.nodes[nodeId]
 		if (!node) {
 			return
 		}
 
 		const indent = "  ".repeat(depth)
+		const tagName = node.type
 		const statusIcon = this.statusIcon(node.status)
-		const codeRef = node.codeBindings.length > 0 ? ` [${node.codeBindings.length} commit(s)]` : ""
-		const currentMarker = node.id === currentId ? " ← CURRENT" : ""
+		const isCurrent = node.id === currentId
+		const hasCommits = node.codeBindings.length > 0
 
-		lines.push(`${indent}[${node.shortId}] ${statusIcon} ${node.content}${codeRef}${currentMarker}`)
-
-		// 只展开 active 节点的子树
-		if (node.status !== "pruned" && node.status !== "superseded") {
-			for (const childId of node.childrenIds) {
-				this.renderNode(childId, depth + 1, lines, currentId)
-			}
+		// 构建属性字符串
+		const attrs = [`id="${node.shortId}"`, `status="${statusIcon}"`]
+		if (hasCommits) {
+			attrs.push(`commits="${node.codeBindings.length}"`)
 		}
+		if (isCurrent) {
+			attrs.push('current="true"')
+		}
+
+		// 清洗内容，防止与标签名冲突
+		const content = this.sanitizeContent(node.content)
+
+		// 检查是否有子节点需要渲染
+		const hasActiveChildren =
+			node.status !== "pruned" && node.status !== "superseded" && node.childrenIds.length > 0
+
+		if (hasActiveChildren) {
+			// 有子节点：开标签 + 内容 + 子节点 + 闭标签
+			lines.push(`${indent}<${tagName} ${attrs.join(" ")}>${content}`)
+			for (const childId of node.childrenIds) {
+				this.renderNodeXml(childId, depth + 1, lines, currentId)
+			}
+			lines.push(`${indent}</${tagName}>`)
+		} else {
+			// 无子节点：自闭合标签
+			lines.push(`${indent}<${tagName} ${attrs.join(" ")}>${content}</${tagName}>`)
+		}
+	}
+
+	/**
+	 * 清洗内容，防止与 XML 标签名冲突。
+	 * 只处理真正危险的模式（与 goal/subgoal/path/impl 标签冲突）。
+	 */
+	private sanitizeContent(content: string): string {
+		return content
+			.replace(/<\/?(?:goal|subgoal|path|impl)\b[^>]*>/gi, (match) => {
+				// 将 < 和 > 替换为 ‹ 和 ›，保持视觉相似但不会解析为标签
+				return match.replace(/</g, "‹").replace(/>/g, "›")
+			})
+			.replace(/<\/?(?:goal|subgoal|path|impl)\b/gi, (match) => {
+				// 处理没有闭合 > 的情况（如 </goal 后面没有 >）
+				return match.replace(/</g, "‹")
+			})
 	}
 
 	private statusIcon(status: IntentNodeStatus): string {
 		switch (status) {
 			case "planned":
-				return "○"
+				return "📋"
 			case "in_progress":
-				return "◐"
+				return "🔧"
 			case "done":
-				return "●"
+				return "✅"
 			case "superseded":
-				return "◇"
+				return "🔄"
 			case "pruned":
-				return "✕"
+				return "❌"
 		}
 	}
 

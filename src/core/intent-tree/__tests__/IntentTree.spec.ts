@@ -368,35 +368,45 @@ describe("IntentTree", () => {
 			expect(tree.toSummary()).toBe("")
 		})
 
-		test("includes shortId in brackets", () => {
+		test("outputs XML format with type as tag name", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Fix bug", parentId: null, taskId: "t1" })
 			const summary = tree.toSummary()
-			expect(summary).toContain("[G1]")
+			expect(summary).toContain('<goal id="G1"')
 			expect(summary).toContain("Fix bug")
+			expect(summary).toContain("</goal>")
 		})
 
-		test("shows CURRENT marker for in_progress node", () => {
+		test("shows current attribute for in_progress node", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
 			tree.updateNode("G1", { status: "in_progress" }, "t1")
-			expect(tree.toSummary()).toContain("← CURRENT")
+			expect(tree.toSummary()).toContain('current="true"')
 		})
 
-		test("shows commit count", () => {
+		test("shows commits attribute", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
 			tree.bindCode("G1", { commitHash: "abc", commitMessage: "msg", files: [], timestamp: "" }, "t1")
-			expect(tree.toSummary()).toContain("[1 commit(s)]")
+			expect(tree.toSummary()).toContain('commits="1"')
 		})
 
-		test("shows tree hierarchy with indentation", () => {
+		test("shows tree hierarchy with nested XML", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
 			tree.addNode({ type: "subgoal", content: "Sub", parentId: "G1", taskId: "t1" })
 			const lines = tree.toSummary().split("\n")
-			expect(lines[0]).toMatch(/^\[G1\]/)
-			expect(lines[1]).toMatch(/^  \[S1\.1\]/)
+			expect(lines[0]).toMatch(/^<goal id="G1"/)
+			expect(lines[1]).toMatch(/^  <subgoal id="S1\.1"/)
+		})
+
+		test("sanitizes content that conflicts with tag names", () => {
+			const tree = new IntentTree(treePath)
+			tree.addNode({ type: "goal", content: "Handle </goal> in content", parentId: null, taskId: "t1" })
+			const summary = tree.toSummary()
+			// 应该被转义为 ‹/goal›
+			expect(summary).toContain("‹/goal›")
+			expect(summary).not.toContain("</goal> in content")
 		})
 	})
 
