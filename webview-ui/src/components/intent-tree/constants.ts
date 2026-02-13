@@ -6,22 +6,22 @@ import type { IntentNodeType, IntentNodeStatus } from "./types"
 
 export const TYPE_ICONS: Record<IntentNodeType, string> = {
 	goal: "codicon-target",
-	subgoal: "codicon-milestone",
-	path: "codicon-git-branch",
+	objective: "codicon-milestone",
+	approach: "codicon-git-branch",
 	impl: "codicon-gear",
 }
 
 export const TYPE_LABELS: Record<IntentNodeType, string> = {
 	goal: "Goal",
-	subgoal: "Subgoal",
-	path: "Path",
+	objective: "Objective",
+	approach: "Approach",
 	impl: "Impl",
 }
 
 export const TYPE_COLORS: Record<IntentNodeType, string> = {
 	goal: "var(--vscode-charts-purple)",
-	subgoal: "var(--vscode-charts-blue)",
-	path: "var(--vscode-charts-orange)",
+	objective: "var(--vscode-charts-blue)",
+	approach: "var(--vscode-charts-yellow)",
 	impl: "var(--vscode-charts-green)",
 }
 

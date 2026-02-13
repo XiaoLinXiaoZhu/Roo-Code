@@ -3,7 +3,7 @@
  * 与后端 types.ts 保持同步
  */
 
-export type IntentNodeType = "goal" | "subgoal" | "path" | "impl"
+export type IntentNodeType = "goal" | "objective" | "approach" | "impl"
 
 export type IntentNodeStatus = "planned" | "in_progress" | "done" | "superseded" | "pruned"
 
