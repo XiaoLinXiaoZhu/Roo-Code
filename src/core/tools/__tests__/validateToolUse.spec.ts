@@ -188,9 +188,9 @@ describe("mode-validator", () => {
 		})
 
 		it("throws error for disallowed tools in architect mode", () => {
-			// browser_action is a valid tool but not allowed in architect mode (browser group not included)
-			expect(() => validateToolUse("browser_action", "architect", [])).toThrow(
-				'Tool "browser_action" is not allowed in architect mode.',
+			// execute_command is a valid tool but not allowed in architect mode (command group not included)
+			expect(() => validateToolUse("execute_command", "architect", [])).toThrow(
+				'Tool "execute_command" is not allowed in architect mode.',
 			)
 		})
 

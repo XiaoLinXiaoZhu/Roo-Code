@@ -1,8 +1,8 @@
 import path from "path"
 import * as fs from "fs/promises"
 
-import type { Anthropic } from "@anthropic-ai/sdk"
 import type { ClineSayTool } from "@roo-code/types"
+import type { TextPart, ImagePart } from "../task-persistence/rooMessage"
 
 import { Task } from "../task/Task"
 import { isPathOutsideWorkspace } from "../../utils/pathUtils"
@@ -230,7 +230,7 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 
 			// Build result
 			const xmlLines: string[] = []
-			const mediaBlocks: Array<Anthropic.ImageBlockParam | Record<string, unknown>> = []
+			const mediaBlocks: Array<ImagePart | Record<string, unknown>> = []
 
 			const isLoaded = fileResult.status === "approved" && fileResult.mediaDataUrl
 
@@ -295,12 +295,9 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 							const mimeType = fileResult.mimeType || IMAGE_MIME_TYPES[ext] || "image/jpeg"
 							mediaBlocks.push({
 								type: "image",
-								source: {
-									type: "base64",
-									media_type: mimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
-									data: fileResult.mediaDataUrl.split(",")[1],
-								},
-							})
+								image: fileResult.mediaDataUrl.split(",")[1],
+								mediaType: mimeType,
+							} satisfies ImagePart)
 						}
 					}
 					break
@@ -325,9 +322,9 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 
 			// Push result with media as ToolResponse
 			if (mediaBlocks.length > 0) {
-				const response: Array<Anthropic.TextBlockParam | Anthropic.ImageBlockParam | Record<string, unknown>> =
-					[{ type: "text", text: xmlLines.join("\n") }, ...mediaBlocks]
-				pushToolResult(response as Array<Anthropic.TextBlockParam | Anthropic.ImageBlockParam>)
+				const textPart: TextPart = { type: "text", text: xmlLines.join("\n") }
+				const response: Array<TextPart | ImagePart> = [textPart, ...(mediaBlocks as ImagePart[])]
+				pushToolResult(response)
 			} else {
 				pushToolResult(xmlLines.join("\n"))
 			}
