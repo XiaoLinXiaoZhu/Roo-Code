@@ -1,5 +1,15 @@
 # Roo Code Changelog
 
+## [3.51.3] - 2026-02-13
+
+### 🐛 修复
+
+- **Native Tool Calling 循环中断**：修复 `#11409` (RooMessage migration) 引入的 bug，native tool call 执行成功后 `pendingToolResults` 被 flush 到历史记录，但 `userMessageContent` 为空导致栈不推入，循环提前退出，触发误报 `[ERROR] You did not use a tool`
+    - 根因：`pushToolResultToUserContent()` 改为推入 `pendingToolResults` 而非 `userMessageContent`，但栈推入条件未同步更新
+    - 新增 `toolResultsSavedToHistory` 标志追踪 flush 状态
+    - 新增栈推入分支：当 `didToolUse && toolResultsSavedToHistory` 时继续循环
+    - 新增 debug 日志：`!didToolUse` 时输出 `assistantMessageContent` 详细状态
+
 ## [3.51.0] - 2026-02-13
 
 ### 🌳 意图树 (Intent Tree)

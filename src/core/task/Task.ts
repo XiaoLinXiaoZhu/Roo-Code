@@ -4110,6 +4110,28 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 						) || this.markdownToolResults.length > 0
 
 					if (!didToolUse) {
+						// DEBUG: Log detailed info about why no tool use was detected
+						const debugInfo = {
+							assistantMessageContentLength: this.assistantMessageContent.length,
+							blockTypes: this.assistantMessageContent.map((b) => ({
+								type: b.type,
+								partial: b.partial,
+								name: (b as any).name,
+								id: (b as any).id,
+							})),
+							markdownToolResultsLength: this.markdownToolResults.length,
+							pendingToolResultsLength: this.pendingToolResults.length,
+							didCompleteReadingStream: this.didCompleteReadingStream,
+							didRejectTool: this.didRejectTool,
+							didAlreadyUseTool: this.didAlreadyUseTool,
+							currentStreamingContentIndex: this.currentStreamingContentIndex,
+							streamingToolCallIndicesSize: this.streamingToolCallIndices.size,
+						}
+						console.error(
+							`[Task#${this.taskId}] NO_TOOL_USE_DETECTED debug:`,
+							JSON.stringify(debugInfo, null, 2),
+						)
+
 						// Increment consecutive no-tool-use counter
 						this.consecutiveNoToolUseCount++
 
@@ -4136,6 +4158,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 					// We don't use flushPendingToolResultsToHistory() here because that also
 					// flushes userMessageContent — which should instead go via the stack to
 					// become part of the next iteration's user message.
+					let toolResultsSavedToHistory = false
 					if (this.pendingToolResults.length > 0) {
 						const toolMessage: RooToolMessage = {
 							role: "tool",
@@ -4147,6 +4170,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 						const saved = await this.saveApiConversationHistory()
 						if (saved) {
 							this.pendingToolResults = []
+							toolResultsSavedToHistory = true
 						} else {
 							// Keep pending results for retry and roll back in-memory insertion to avoid duplicates.
 							this.apiConversationHistory = this.apiConversationHistory.slice(0, previousHistoryLength)
@@ -4177,6 +4201,20 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 									text: "[Tool execution completed. Check environment_details for results and continue with your task.]",
 								},
 							],
+							includeFileDetails: false,
+						})
+
+						// Add periodic yielding to prevent blocking
+						await new Promise((resolve) => setImmediate(resolve))
+					} else if (didToolUse && toolResultsSavedToHistory) {
+						// Native tool calling: tool results were saved as a separate "tool" role message
+						// in apiConversationHistory (via pendingToolResults flush above), but
+						// userMessageContent is empty because native protocol doesn't need to send
+						// tool results as user messages. We still need to push to the stack so the
+						// loop continues and makes the next API call - the model will see the tool
+						// results in the conversation history.
+						stack.push({
+							userContent: [],
 							includeFileDetails: false,
 						})
 
