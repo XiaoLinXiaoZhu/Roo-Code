@@ -254,37 +254,6 @@ export async function getEnvironmentDetails(
 	}
 
 	// ============================================================================
-	// Browser Session Section
-	// ============================================================================
-	const isBrowserActive = cline.browserSession.isSessionActive()
-
-	if (isBrowserActive) {
-		// Build viewport info for status (prefer actual viewport if available, else fallback to configured setting)
-		const configuredViewport = (state?.browserViewportSize as string | undefined) ?? "900x600"
-		let configuredWidth: number | undefined
-		let configuredHeight: number | undefined
-		if (configuredViewport.includes("x")) {
-			const parts = configuredViewport.split("x").map((v) => Number(v))
-			configuredWidth = parts[0]
-			configuredHeight = parts[1]
-		}
-
-		let actualWidth: number | undefined
-		let actualHeight: number | undefined
-		const vp = cline.browserSession.getViewportSize?.()
-		if (vp) {
-			actualWidth = vp.width
-			actualHeight = vp.height
-		}
-
-		const width = actualWidth ?? configuredWidth
-		const height = actualHeight ?? configuredHeight
-		const viewportInfo = width && height ? `${width}x${height}` : "900x600"
-
-		xmlContent += `\n  <browser status="active" viewport="${viewportInfo}"/>`
-	}
-
-	// ============================================================================
 	// Workspace Files Section
 	// ============================================================================
 	if (includeFileDetails) {

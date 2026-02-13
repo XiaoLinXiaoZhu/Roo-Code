@@ -3,7 +3,6 @@
 import type { ModelInfo } from "@roo-code/types"
 
 import { ApiHandler } from "../../index"
-import { ApiMessage } from "../../../core/task-persistence/apiMessages"
 import { maybeRemoveImageBlocks } from "../image-cleaning"
 
 describe("maybeRemoveImageBlocks", () => {
@@ -18,12 +17,13 @@ describe("maybeRemoveImageBlocks", () => {
 			}),
 			createMessage: vitest.fn(),
 			countTokens: vitest.fn(),
+			isAiSdkProvider: vitest.fn().mockReturnValue(false),
 		}
 	}
 
 	it("should handle empty messages array", () => {
 		const apiHandler = createMockApiHandler(true)
-		const messages: ApiMessage[] = []
+		const messages: any[] = []
 
 		const result = maybeRemoveImageBlocks(messages, apiHandler)
 
@@ -33,7 +33,7 @@ describe("maybeRemoveImageBlocks", () => {
 
 	it("should not modify messages with no image blocks", () => {
 		const apiHandler = createMockApiHandler(true)
-		const messages: ApiMessage[] = [
+		const messages: any[] = [
 			{
 				role: "user",
 				content: "Hello, world!",
@@ -52,7 +52,7 @@ describe("maybeRemoveImageBlocks", () => {
 
 	it("should not modify messages with array content but no image blocks", () => {
 		const apiHandler = createMockApiHandler(true)
-		const messages: ApiMessage[] = [
+		const messages: any[] = [
 			{
 				role: "user",
 				content: [
@@ -76,7 +76,7 @@ describe("maybeRemoveImageBlocks", () => {
 
 	it("should not modify image blocks when API handler supports images", () => {
 		const apiHandler = createMockApiHandler(true)
-		const messages: ApiMessage[] = [
+		const messages: any[] = [
 			{
 				role: "user",
 				content: [
@@ -105,7 +105,7 @@ describe("maybeRemoveImageBlocks", () => {
 
 	it("should convert image blocks to text descriptions when API handler doesn't support images", () => {
 		const apiHandler = createMockApiHandler(false)
-		const messages: ApiMessage[] = [
+		const messages: any[] = [
 			{
 				role: "user",
 				content: [
@@ -148,7 +148,7 @@ describe("maybeRemoveImageBlocks", () => {
 
 	it("should handle mixed content messages with multiple text and image blocks", () => {
 		const apiHandler = createMockApiHandler(false)
-		const messages: ApiMessage[] = [
+		const messages: any[] = [
 			{
 				role: "user",
 				content: [
@@ -211,7 +211,7 @@ describe("maybeRemoveImageBlocks", () => {
 
 	it("should handle multiple messages with image blocks", () => {
 		const apiHandler = createMockApiHandler(false)
-		const messages: ApiMessage[] = [
+		const messages: any[] = [
 			{
 				role: "user",
 				content: [
@@ -292,7 +292,7 @@ describe("maybeRemoveImageBlocks", () => {
 
 	it("should preserve additional message properties", () => {
 		const apiHandler = createMockApiHandler(false)
-		const messages: ApiMessage[] = [
+		const messages: any[] = [
 			{
 				role: "user",
 				content: [

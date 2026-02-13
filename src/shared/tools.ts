@@ -1,15 +1,8 @@
-import { Anthropic } from "@anthropic-ai/sdk"
+import type { TextPart, ImagePart } from "../core/task-persistence/rooMessage"
 
-import type {
-	ClineAsk,
-	ToolProgressStatus,
-	ToolGroup,
-	ToolName,
-	BrowserActionParams,
-	GenerateImageParams,
-} from "@roo-code/types"
+import type { ClineAsk, ToolProgressStatus, ToolGroup, ToolName, GenerateImageParams } from "@roo-code/types"
 
-export type ToolResponse = string | Array<Anthropic.TextBlockParam | Anthropic.ImageBlockParam>
+export type ToolResponse = string | Array<TextPart | ImagePart>
 
 export type AskApproval = (
 	type: ClineAsk,
@@ -73,6 +66,7 @@ export const toolParamNames = [
 	"file_path", // search_replace and edit_file parameter
 	"old_string", // search_replace and edit_file parameter
 	"new_string", // search_replace and edit_file parameter
+	"replace_all", // edit tool parameter for replacing all occurrences
 	"expected_replacements", // edit_file parameter for multiple occurrences
 	// Agent as Tools 架构的新工具参数
 	"schema", // search_project optional parameter
@@ -131,7 +125,8 @@ export type NativeToolArgs = {
 	attempt_completion: { result: string }
 	execute_command: { command: string; cwd?: string }
 	apply_diff: { path: string; diff: string }
-	search_and_replace: { path: string; operations: Array<{ search: string; replace: string }> }
+	edit: { file_path: string; old_string: string; new_string: string; replace_all?: boolean }
+	search_and_replace: { file_path: string; old_string: string; new_string: string; replace_all?: boolean }
 	search_replace: { file_path: string; old_string: string; new_string: string }
 	edit_file: { file_path: string; old_string: string; new_string: string; expected_replacements?: number }
 	apply_patch: { patch: string }
@@ -142,7 +137,6 @@ export type NativeToolArgs = {
 		question: string
 		follow_up: Array<{ choice: string; affect: string }>
 	}
-	browser_action: BrowserActionParams
 	codebase_search: { query: string; path?: string }
 	generate_image: GenerateImageParams
 	run_slash_command: { command: string; args?: string }
@@ -328,11 +322,6 @@ export interface ListFilesToolUse extends ToolUse<"list_files"> {
 	params: Partial<Pick<Record<ToolParamName, string>, "path" | "recursive">>
 }
 
-export interface BrowserActionToolUse extends ToolUse<"browser_action"> {
-	name: "browser_action"
-	params: Partial<Pick<Record<ToolParamName, string>, "action" | "url" | "coordinate" | "text" | "size" | "path">>
-}
-
 export interface UseMcpToolToolUse extends ToolUse<"use_mcp_tool"> {
 	name: "use_mcp_tool"
 	params: Partial<Pick<Record<ToolParamName, string>, "server_name" | "tool_name" | "arguments">>
@@ -413,13 +402,13 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	read_media: "read media files",
 	write_to_file: "write files",
 	apply_diff: "apply changes",
+	edit: "edit files",
 	search_and_replace: "apply changes using search and replace",
 	search_replace: "apply single search and replace",
 	edit_file: "edit files using search and replace",
 	apply_patch: "apply patches using codex format",
 	search_files: "search files",
 	list_files: "list files",
-	browser_action: "use a browser",
 	use_mcp_tool: "use mcp tools",
 	access_mcp_resource: "access mcp resources",
 	ask_followup_question: "ask questions",
@@ -454,10 +443,7 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 	},
 	edit: {
 		tools: ["apply_diff", "write_to_file", "generate_image"],
-	},
-	browser: {
-		tools: ["browser_action"],
-		// tools: [], // ! disable browser tools for now
+		customTools: ["edit", "search_replace", "edit_file", "apply_patch"],
 	},
 	command: {
 		// 移除了  "read_command_output" ，因为 read_command_output 的功能其实可以用 grep/sed + 文件重定向替代。
@@ -507,6 +493,7 @@ export const ALWAYS_AVAILABLE_TOOLS: ToolName[] = [
  */
 export const TOOL_ALIASES: Record<string, ToolName> = {
 	write_file: "write_to_file",
+	search_and_replace: "edit",
 } as const
 
 export type DiffResult =

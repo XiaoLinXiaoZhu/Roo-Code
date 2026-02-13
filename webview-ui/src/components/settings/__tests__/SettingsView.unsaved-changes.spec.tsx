@@ -34,6 +34,37 @@ vi.mock("@src/components/ui", () => ({
 			Toggle
 		</button>
 	),
+	Input: ({ value, onChange, placeholder, id, type, className, ...props }: any) => (
+		<input
+			type={type || "text"}
+			value={value}
+			onChange={onChange}
+			placeholder={placeholder}
+			id={id}
+			className={className}
+			{...props}
+		/>
+	),
+	Textarea: ({ value, onChange, placeholder, id, className, ...props }: any) => (
+		<textarea
+			value={value}
+			onChange={onChange}
+			placeholder={placeholder}
+			id={id}
+			className={className}
+			{...props}
+		/>
+	),
+	Checkbox: ({ checked, onCheckedChange, id, className, ...props }: any) => (
+		<input
+			type="checkbox"
+			checked={checked}
+			onChange={(e) => onCheckedChange?.(e.target.checked)}
+			id={id}
+			className={className}
+			{...props}
+		/>
+	),
 	AlertDialog: ({ children }: any) => <div>{children}</div>,
 	AlertDialogContent: ({ children }: any) => <div>{children}</div>,
 	AlertDialogTitle: ({ children }: any) => <div>{children}</div>,
@@ -118,9 +149,6 @@ vi.mock("../ApiOptions", () => ({
 vi.mock("../AutoApproveSettings", () => ({
 	AutoApproveSettings: vi.fn(() => <div>AutoApproveSettings</div>),
 }))
-vi.mock("../BrowserSettings", () => ({
-	BrowserSettings: vi.fn(() => <div>BrowserSettings</div>),
-}))
 vi.mock("../CheckpointSettings", () => ({
 	CheckpointSettings: vi.fn(() => <div>CheckpointSettings</div>),
 }))
@@ -183,7 +211,6 @@ describe("SettingsView - Unsaved Changes Detection", () => {
 		allowedMaxRequests: undefined,
 		allowedMaxCost: undefined,
 		language: "en",
-		alwaysAllowBrowser: false,
 		alwaysAllowExecute: false,
 		alwaysAllowMcp: false,
 		alwaysAllowModeSwitch: false,
@@ -193,15 +220,11 @@ describe("SettingsView - Unsaved Changes Detection", () => {
 		alwaysAllowWriteProtected: false,
 		autoCondenseContext: false,
 		autoCondenseContextPercent: 50,
-		browserToolEnabled: false,
-		browserViewportSize: "1280x720",
 		enableCheckpoints: false,
 		experiments: {},
 		maxOpenTabsContext: 10,
 		maxWorkspaceFiles: 200,
 		mcpEnabled: false,
-		remoteBrowserHost: "",
-		screenshotQuality: 75,
 		soundEnabled: false,
 		ttsEnabled: false,
 		ttsSpeed: 1.0,
@@ -219,7 +242,6 @@ describe("SettingsView - Unsaved Changes Detection", () => {
 		terminalZdotdir: false,
 		writeDelayMs: 0,
 		showRooIgnoredFiles: false,
-		remoteBrowserEnabled: false,
 		maxReadFileLine: -1,
 		maxImageFileSize: 5,
 		maxTotalImageSize: 20,

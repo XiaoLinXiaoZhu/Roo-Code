@@ -41,6 +41,7 @@ import { Mention } from "./Mention"
 import { CheckpointSaved } from "./checkpoints/CheckpointSaved"
 import { FollowUpSuggest } from "./FollowUpSuggest"
 import { BatchFilePermission } from "./BatchFilePermission"
+import { BatchListFilesPermission } from "./BatchListFilesPermission"
 import { BatchDiffApproval } from "./BatchDiffApproval"
 import { ProgressIndicator } from "./ProgressIndicator"
 import { Markdown } from "./Markdown"
@@ -407,6 +408,14 @@ export const ChatRowContent = ({
 		return (tool.content ?? tool.diff) as string | undefined
 	}, [tool])
 
+	const onJumpToCreatedFile = useMemo(() => {
+		if (!tool || tool.tool !== "newFileCreated" || !tool.path) {
+			return undefined
+		}
+
+		return () => vscode.postMessage({ type: "openFile", text: "./" + tool.path })
+	}, [tool])
+
 	const followUpData = useMemo(() => {
 		if (message.type === "ask" && message.ask === "followup" && !message.partial) {
 			return safeJsonParse<FollowUpData>(message.text)
@@ -421,9 +430,29 @@ export const ChatRowContent = ({
 				style={{ color: "var(--vscode-foreground)", marginBottom: "-1.5px" }}></span>
 		)
 
+		// Handle batch diffs for any file-edit tool type
+		if (message.type === "ask" && tool.batchDiffs && Array.isArray(tool.batchDiffs)) {
+			return (
+				<>
+					<div style={headerStyle}>
+						<FileDiff className="w-4 shrink-0" aria-label="Batch diff icon" />
+						<span style={{ fontWeight: "bold" }}>{t("chat:fileOperations.wantsToApplyBatchChanges")}</span>
+					</div>
+					<BatchDiffApproval files={tool.batchDiffs} ts={message.ts} />
+				</>
+			)
+		}
+
 		switch (tool.tool as string) {
 			case "editedExistingFile":
 			case "appliedDiff":
+			case "searchAndReplace":
+			case "search_and_replace":
+			case "search_replace":
+			case "edit":
+			case "edit_file":
+			case "apply_patch":
+			case "apply_diff":
 				// Check if this is a batch diff request
 				if (message.type === "ask" && tool.batchDiffs && Array.isArray(tool.batchDiffs)) {
 					return (
@@ -449,7 +478,7 @@ export const ChatRowContent = ({
 									style={{ color: "var(--vscode-editorWarning-foreground)", marginBottom: "-1.5px" }}
 								/>
 							) : (
-								toolIcon(tool.tool === "appliedDiff" ? "diff" : "edit")
+								toolIcon("diff")
 							)}
 							<span style={{ fontWeight: "bold" }}>
 								{tool.isProtected
@@ -462,12 +491,13 @@ export const ChatRowContent = ({
 						<div className="pl-6">
 							<CodeAccordian
 								path={tool.path}
-								code={unifiedDiff ?? tool.content ?? tool.diff}
+								code={unifiedDiff ?? tool.content ?? tool.diff ?? ""}
 								language="diff"
 								progressStatus={message.progressStatus}
 								isLoading={message.partial}
 								isExpanded={isExpanded}
 								onToggleExpand={handleToggleExpand}
+								onJumpToFile={onJumpToCreatedFile}
 								diffStats={tool.diffStats}
 							/>
 						</div>
@@ -495,40 +525,6 @@ export const ChatRowContent = ({
 											: t("chat:fileOperations.wantsToInsertWithLineNumber", {
 													lineNumber: tool.lineNumber,
 												})}
-							</span>
-						</div>
-						<div className="pl-6">
-							<CodeAccordian
-								path={tool.path}
-								code={unifiedDiff ?? tool.diff}
-								language="diff"
-								progressStatus={message.progressStatus}
-								isLoading={message.partial}
-								isExpanded={isExpanded}
-								onToggleExpand={handleToggleExpand}
-								diffStats={tool.diffStats}
-							/>
-						</div>
-					</>
-				)
-			case "searchAndReplace":
-				return (
-					<>
-						<div style={headerStyle}>
-							{tool.isProtected ? (
-								<span
-									className="codicon codicon-lock"
-									style={{ color: "var(--vscode-editorWarning-foreground)", marginBottom: "-1.5px" }}
-								/>
-							) : (
-								toolIcon("replace")
-							)}
-							<span style={{ fontWeight: "bold" }}>
-								{tool.isProtected && message.type === "ask"
-									? t("chat:fileOperations.wantsToEditProtected")
-									: message.type === "ask"
-										? t("chat:fileOperations.wantsToSearchReplace")
-										: t("chat:fileOperations.didSearchReplace")}
 							</span>
 						</div>
 						<div className="pl-6">
@@ -1162,45 +1158,57 @@ export const ChatRowContent = ({
 				)
 			}
 			case "listFilesTopLevel":
+			case "listFilesRecursive": {
+				const isRecursive = tool.tool === "listFilesRecursive"
+
+				// Check if this is a batch directory listing request
+				const isBatchDirRequest = message.type === "ask" && tool.batchDirs && Array.isArray(tool.batchDirs)
+
+				// When batching, check if all dirs share the same recursive value
+				const allTopLevel = tool.batchDirs?.every((d: { recursive: boolean }) => !d.recursive)
+				const DirIcon = isBatchDirRequest && !allTopLevel ? FolderTree : isRecursive ? FolderTree : ListTree
+				const dirIconLabel =
+					isBatchDirRequest && !allTopLevel
+						? "Folder tree icon"
+						: isRecursive
+							? "Folder tree icon"
+							: "List files icon"
+
+				if (isBatchDirRequest) {
+					return (
+						<>
+							<div style={headerStyle}>
+								<DirIcon className="w-4 shrink-0" aria-label={dirIconLabel} />
+								<span style={{ fontWeight: "bold" }}>
+									{t("chat:directoryOperations.wantsToViewMultipleDirectories")}
+								</span>
+							</div>
+							<BatchListFilesPermission dirs={tool.batchDirs || []} ts={message?.ts} />
+						</>
+					)
+				}
+
+				const labelKey = isRecursive
+					? message.type === "ask"
+						? tool.isOutsideWorkspace
+							? "chat:directoryOperations.wantsToViewRecursiveOutsideWorkspace"
+							: "chat:directoryOperations.wantsToViewRecursive"
+						: tool.isOutsideWorkspace
+							? "chat:directoryOperations.didViewRecursiveOutsideWorkspace"
+							: "chat:directoryOperations.didViewRecursive"
+					: message.type === "ask"
+						? tool.isOutsideWorkspace
+							? "chat:directoryOperations.wantsToViewTopLevelOutsideWorkspace"
+							: "chat:directoryOperations.wantsToViewTopLevel"
+						: tool.isOutsideWorkspace
+							? "chat:directoryOperations.didViewTopLevelOutsideWorkspace"
+							: "chat:directoryOperations.didViewTopLevel"
+
 				return (
 					<>
 						<div style={headerStyle}>
-							<ListTree className="w-4 shrink-0" aria-label="List files icon" />
-							<span style={{ fontWeight: "bold" }}>
-								{message.type === "ask"
-									? tool.isOutsideWorkspace
-										? t("chat:directoryOperations.wantsToViewTopLevelOutsideWorkspace")
-										: t("chat:directoryOperations.wantsToViewTopLevel")
-									: tool.isOutsideWorkspace
-										? t("chat:directoryOperations.didViewTopLevelOutsideWorkspace")
-										: t("chat:directoryOperations.didViewTopLevel")}
-							</span>
-						</div>
-						<div className="pl-6">
-							<CodeAccordian
-								path={tool.path}
-								code={tool.content}
-								language="shell-session"
-								isExpanded={isExpanded}
-								onToggleExpand={handleToggleExpand}
-							/>
-						</div>
-					</>
-				)
-			case "listFilesRecursive":
-				return (
-					<>
-						<div style={headerStyle}>
-							<FolderTree className="w-4 shrink-0" aria-label="Folder tree icon" />
-							<span style={{ fontWeight: "bold" }}>
-								{message.type === "ask"
-									? tool.isOutsideWorkspace
-										? t("chat:directoryOperations.wantsToViewRecursiveOutsideWorkspace")
-										: t("chat:directoryOperations.wantsToViewRecursive")
-									: tool.isOutsideWorkspace
-										? t("chat:directoryOperations.didViewRecursiveOutsideWorkspace")
-										: t("chat:directoryOperations.didViewRecursive")}
-							</span>
+							<DirIcon className="w-4 shrink-0" aria-label={dirIconLabel} />
+							<span style={{ fontWeight: "bold" }}>{t(labelKey)}</span>
 						</div>
 						<div className="pl-6">
 							<CodeAccordian
@@ -1213,6 +1221,7 @@ export const ChatRowContent = ({
 						</div>
 					</>
 				)
+			}
 			case "searchFiles":
 				return (
 					<>
@@ -2088,10 +2097,6 @@ export const ChatRowContent = ({
 							<ImageBlock imageUri={imageInfo.imageUri} imagePath={imageInfo.imagePath} />
 						</div>
 					)
-				case "browser_action":
-				case "browser_action_result":
-					// Handled by BrowserSessionRow; prevent raw JSON (action/result) from rendering here
-					return null
 				case "too_many_tools_warning": {
 					const warningData = safeJsonParse<{
 						toolCount: number

@@ -4,6 +4,7 @@ import * as path from "path"
 import * as os from "os"
 
 import * as vscode from "vscode"
+import pWaitFor from "p-wait-for"
 
 import {
 	type RooCodeAPI,
@@ -20,10 +21,13 @@ import {
 	IpcMessageType,
 } from "@roo-code/types"
 import { IpcServer } from "@roo-code/ipc"
+import { CloudService } from "@roo-code/cloud"
 
 import { Package } from "../shared/package"
 import { ClineProvider } from "../core/webview/ClineProvider"
 import { openClineInNewTab } from "../activate/registerCommands"
+import { getCommands } from "../services/command/commands"
+import { getModels } from "../api/providers/fetchers/modelCache"
 
 export class API extends EventEmitter<RooCodeEvents> implements RooCodeAPI {
 	private readonly outputChannel: vscode.OutputChannel
@@ -64,7 +68,15 @@ export class API extends EventEmitter<RooCodeEvents> implements RooCodeAPI {
 			ipc.listen()
 			this.log(`[API] ipc server started: socketPath=${socketPath}, pid=${process.pid}, ppid=${process.ppid}`)
 
-			ipc.on(IpcMessageType.TaskCommand, async (_clientId, command) => {
+			ipc.on(IpcMessageType.TaskCommand, async (clientId, command) => {
+				const sendResponse = (eventName: RooCodeEventName, payload: unknown[]) => {
+					ipc.send(clientId, {
+						type: IpcMessageType.TaskEvent,
+						origin: IpcOrigin.Server,
+						data: { eventName, payload } as TaskEvent,
+					})
+				}
+
 				switch (command.commandName) {
 					case TaskCommandName.StartNewTask:
 						this.log(
@@ -88,13 +100,56 @@ export class API extends EventEmitter<RooCodeEvents> implements RooCodeAPI {
 						} catch (error) {
 							const errorMessage = error instanceof Error ? error.message : String(error)
 							this.log(`[API] ResumeTask failed for taskId ${command.data}: ${errorMessage}`)
-							// Don't rethrow - we want to prevent IPC server crashes
-							// The error is logged for debugging purposes
+							// Don't rethrow - we want to prevent IPC server crashes.
+							// The error is logged for debugging purposes.
 						}
 						break
 					case TaskCommandName.SendMessage:
 						this.log(`[API] SendMessage -> ${command.data.text}`)
 						await this.sendMessage(command.data.text, command.data.images)
+						break
+					case TaskCommandName.GetCommands:
+						try {
+							const commands = await getCommands(this.sidebarProvider.cwd)
+
+							sendResponse(RooCodeEventName.CommandsResponse, [
+								commands.map((cmd) => ({
+									name: cmd.name,
+									source: cmd.source,
+									filePath: cmd.filePath,
+									description: cmd.description,
+									argumentHint: cmd.argumentHint,
+								})),
+							])
+						} catch (error) {
+							sendResponse(RooCodeEventName.CommandsResponse, [[]])
+						}
+
+						break
+					case TaskCommandName.GetModes:
+						try {
+							const modes = await this.sidebarProvider.getModes()
+							sendResponse(RooCodeEventName.ModesResponse, [modes])
+						} catch (error) {
+							sendResponse(RooCodeEventName.ModesResponse, [[]])
+						}
+
+						break
+					case TaskCommandName.GetModels:
+						try {
+							const models = await getModels({
+								provider: "roo" as const,
+								baseUrl: process.env.ROO_CODE_PROVIDER_URL ?? "https://api.roocode.com/proxy",
+								apiKey: CloudService.hasInstance()
+									? CloudService.instance.authService?.getSessionToken()
+									: undefined,
+							})
+
+							sendResponse(RooCodeEventName.ModelsResponse, [models])
+						} catch (error) {
+							sendResponse(RooCodeEventName.ModelsResponse, [{}])
+						}
+
 						break
 				}
 			})
@@ -154,9 +209,19 @@ export class API extends EventEmitter<RooCodeEvents> implements RooCodeAPI {
 	}
 
 	public async resumeTask(taskId: string): Promise<void> {
+		await vscode.commands.executeCommand(`${Package.name}.SidebarProvider.focus`)
+		await this.waitForWebviewLaunch(5_000)
+
 		const { historyItem } = await this.sidebarProvider.getTaskWithId(taskId)
 		await this.sidebarProvider.createTaskWithHistoryItem(historyItem)
-		await this.sidebarProvider.postMessageToWebview({ type: "action", action: "chatButtonClicked" })
+
+		if (this.sidebarProvider.viewLaunched) {
+			await this.sidebarProvider.postMessageToWebview({ type: "action", action: "chatButtonClicked" })
+		} else {
+			this.log(
+				`[API#resumeTask] webview not launched after resume for task ${taskId}; continuing in headless mode`,
+			)
+		}
 	}
 
 	public async isTaskInHistory(taskId: string): Promise<boolean> {
@@ -183,6 +248,21 @@ export class API extends EventEmitter<RooCodeEvents> implements RooCodeAPI {
 	}
 
 	public async sendMessage(text?: string, images?: string[]) {
+		const currentTask = this.sidebarProvider.getCurrentTask()
+
+		// In headless/sandbox flows the webview may not be launched, so routing
+		// through invoke=sendMessage drops the message. Deliver directly to the
+		// task ask-response channel instead.
+		if (!this.sidebarProvider.viewLaunched) {
+			if (!currentTask) {
+				this.log("[API#sendMessage] no current task in headless mode; message dropped")
+				return
+			}
+
+			await currentTask.submitUserMessage(text ?? "", images)
+			return
+		}
+
 		await this.sidebarProvider.postMessageToWebview({ type: "invoke", invoke: "sendMessage", text, images })
 	}
 
@@ -196,6 +276,20 @@ export class API extends EventEmitter<RooCodeEvents> implements RooCodeAPI {
 
 	public isReady() {
 		return this.sidebarProvider.viewLaunched
+	}
+
+	private async waitForWebviewLaunch(timeoutMs: number): Promise<boolean> {
+		try {
+			await pWaitFor(() => this.sidebarProvider.viewLaunched, {
+				timeout: timeoutMs,
+				interval: 50,
+			})
+
+			return true
+		} catch {
+			this.log(`[API#waitForWebviewLaunch] webview did not launch within ${timeoutMs}ms`)
+			return false
+		}
 	}
 
 	private registerListeners(provider: ClineProvider) {

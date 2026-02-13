@@ -1,3 +1,4 @@
+import type { RooMessage } from "../../../core/task-persistence/rooMessage"
 // Use vi.hoisted to define mock functions that can be referenced in hoisted vi.mock() calls
 const { mockStreamText, mockGenerateText } = vi.hoisted(() => ({
 	mockStreamText: vi.fn(),
@@ -25,7 +26,7 @@ vi.mock("@ai-sdk/deepseek", () => ({
 
 import type { Anthropic } from "@anthropic-ai/sdk"
 
-import { deepSeekDefaultModelId, type ModelInfo } from "@roo-code/types"
+import { deepSeekDefaultModelId, DEEP_SEEK_DEFAULT_TEMPERATURE, type ModelInfo } from "@roo-code/types"
 
 import type { ApiHandlerOptions } from "../../../shared/api"
 
@@ -155,11 +156,25 @@ describe("DeepSeekHandler", () => {
 			expect(model).toHaveProperty("temperature")
 			expect(model).toHaveProperty("maxTokens")
 		})
+
+		it("should use DEEP_SEEK_DEFAULT_TEMPERATURE as the default temperature", () => {
+			const model = handler.getModel()
+			expect(model.temperature).toBe(DEEP_SEEK_DEFAULT_TEMPERATURE)
+		})
+
+		it("should respect user-provided temperature over DEEP_SEEK_DEFAULT_TEMPERATURE", () => {
+			const handlerWithTemp = new DeepSeekHandler({
+				...mockOptions,
+				modelTemperature: 0.9,
+			})
+			const model = handlerWithTemp.getModel()
+			expect(model.temperature).toBe(0.9)
+		})
 	})
 
 	describe("createMessage", () => {
 		const systemPrompt = "You are a helpful assistant."
-		const messages: Anthropic.Messages.MessageParam[] = [
+		const messages: RooMessage[] = [
 			{
 				role: "user",
 				content: [
@@ -386,7 +401,7 @@ describe("DeepSeekHandler", () => {
 
 	describe("reasoning content with deepseek-reasoner", () => {
 		const systemPrompt = "You are a helpful assistant."
-		const messages: Anthropic.Messages.MessageParam[] = [
+		const messages: RooMessage[] = [
 			{
 				role: "user",
 				content: [
@@ -556,7 +571,7 @@ describe("DeepSeekHandler", () => {
 
 	describe("tool handling", () => {
 		const systemPrompt = "You are a helpful assistant."
-		const messages: Anthropic.Messages.MessageParam[] = [
+		const messages: RooMessage[] = [
 			{
 				role: "user",
 				content: [{ type: "text" as const, text: "Hello!" }],
