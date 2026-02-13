@@ -354,7 +354,7 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 		}
 
 		// 推断新父节点类型
-		const TYPE_ORDER = ["goal", "subgoal", "path", "impl"] as const
+		const TYPE_ORDER = ["goal", "objective", "approach", "impl"] as const
 		const validNodes = nodes.filter((n): n is NonNullable<typeof n> => n !== undefined)
 		const nodeTypeIndices = validNodes.map((n) => TYPE_ORDER.indexOf(n.type as (typeof TYPE_ORDER)[number]))
 		const highestTypeIndex = Math.min(...nodeTypeIndices)

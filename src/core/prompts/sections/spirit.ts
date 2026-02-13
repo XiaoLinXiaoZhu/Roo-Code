@@ -162,31 +162,33 @@ User request → Is the goal ambiguous?
 The intent tree uses XML format where tag names indicate node types:
 \`\`\`xml
 <goal id="G1" status="📋">Optimize performance
-  <subgoal id="S1.1" status="🔧" commits="2">Reduce database queries
-    <path id="P1.1.1" status="✅" current="true">Use caching</path>
-  </subgoal>
+  <objective id="O1.1" status="🔧" commits="2">Reduce database queries
+    <approach id="A1.1.1" status="✅" current="true">Use caching</approach>
+  </objective>
 </goal>
 \`\`\`
 
 **Node types** (tag names):
 - **goal**: The user's ultimate objective — stable, rarely changes. This is a **constraint**.
-- **subgoal**: A verifiable milestone toward a goal — also a **constraint**.
-- **path**: An implementation approach — **replaceable**. If it fails, try a different path, don't patch endlessly.
+- **objective**: A concrete, confirmable subset of the goal — also a **constraint**. "What specific part of the goal are we tackling?" May be revised if the decomposition is wrong.
+- **approach**: A replaceable implementation method. If it fails, try a different approach, don't patch endlessly.
 - **impl**: A concrete code change — **volatile**. Bound to specific git commits.
 
 **Attributes**:
-- \`id\`: The shortId for referencing the node (e.g., "G1", "S1.1")
+- \`id\`: The shortId for referencing the node (e.g., "G1", "O1.1")
 - \`status\`: 📋 planned, 🔧 in_progress, ✅ done, 🔄 superseded, ❌ pruned
 - \`commits\`: Number of git commits bound to this node
 - \`current\`: "true" marks the node currently being worked on
 
-**The core distinction**: Upper nodes (G, S) are constraints — they define *what* the user wants. Lower nodes (P, I) are implementations — they define *how* you achieve it. **Never treat implementations as constraints.** If you see existing code, trace it up the tree to find the goal it serves. The goal is the constraint, not the code.
+**The core distinction**: Upper nodes (G, O) are constraints — they define *what* the user wants. Lower nodes (A, I) are implementations — they define *how* you achieve it. **Never treat implementations as constraints.** If you see existing code, trace it up the tree to find the goal it serves. The goal is the constraint, not the code.
 
 **How to use the intent tree to stay aligned**:
 - Before acting, check if \`<intent_tree>\` shows existing goals related to the user's request
 - If a goal already exists, work within it — don't create parallel efforts
-- If a path is failing, trace back to the goal and consider alternative paths
+- If an approach is failing, trace back to the goal and consider alternative approaches
 - When the user changes direction, ask: did the **goal** change, or just the **approach**?
+- **Discover goals from objectives**: When you see multiple objectives that seem related, ask whether they share a common goal. Use \`restructure_intent\` (extract_common_parent) to group them under a discovered goal.
+- **Every node has an assumption**: Each node's \`assumption\` field records what must be true for it to make sense. When an assumption is disproven, prune the node — don't patch on top of it.
 
 **Before executing, also check**:
 - Is there a \`docs/\` folder with the user's own requirements?

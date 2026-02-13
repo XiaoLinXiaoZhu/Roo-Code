@@ -5,11 +5,10 @@ import { formatResponse } from "../prompts/responses"
 import { BaseTool, ToolCallbacks } from "./BaseTool"
 
 interface AddIntentParams {
-	type: "goal" | "subgoal" | "path" | "impl"
+	type: "goal" | "objective" | "approach" | "impl"
 	content: string
 	parentId?: string
-	placement: "new_root" | "child_of"
-	placementReason: string
+	assumption: string
 }
 
 export class AddIntentTool extends BaseTool<"add_intent"> {
@@ -38,48 +37,20 @@ export class AddIntentTool extends BaseTool<"add_intent"> {
 				return
 			}
 			const intentContent = params.content.trim()
+			const isNewRoot = !params.parentId
 
-			// P3: 验证 placement 和 parentId 的一致性
-			if (params.placement === "new_root" && params.parentId) {
-				task.consecutiveMistakeCount++
-				task.recordToolError("add_intent")
-				task.didToolFailInCurrentTurn = true
-				pushToolResult(
-					formatResponse.toolError(
-						`Inconsistent parameters: placement is 'new_root' but parentId is provided. ` +
-							`Either use placement='child_of' with parentId, or remove parentId for new_root.`,
-					),
-				)
-				return
-			}
-
-			if (params.placement === "child_of" && !params.parentId) {
-				task.consecutiveMistakeCount++
-				task.recordToolError("add_intent")
-				task.didToolFailInCurrentTurn = true
-				const existingNodes = task.intentTree.toSummary()
-				pushToolResult(
-					formatResponse.toolError(
-						`placement is 'child_of' but parentId is missing.\n\n` +
-							`Current tree:\n${existingNodes}\n\n` +
-							`Please specify which node this should be a child of.`,
-					),
-				)
-				return
-			}
-
-			// P4: 创建 new_root 时，如果树非空，检查 placementReason 是否有意义
-			if (params.placement === "new_root" && !task.intentTree.isEmpty()) {
-				if (!params.placementReason || params.placementReason.trim().length < 10) {
+			// P3: 创建 new_root 时，如果树非空，检查 assumption 是否有意义
+			if (isNewRoot && !task.intentTree.isEmpty()) {
+				if (!params.assumption || params.assumption.trim().length < 10) {
 					task.consecutiveMistakeCount++
 					task.recordToolError("add_intent")
 					task.didToolFailInCurrentTurn = true
 					const existingNodes = task.intentTree.toSummary()
 					pushToolResult(
 						formatResponse.toolError(
-							`Creating a new root requires a meaningful placementReason explaining why existing nodes don't fit.\n\n` +
+							`Creating a new root requires a meaningful assumption explaining why existing nodes don't fit.\n\n` +
 								`Current tree:\n${existingNodes}\n\n` +
-								`Please provide placementReason referencing specific nodes you considered.`,
+								`Please provide assumption referencing specific nodes you considered.`,
 						),
 					)
 					return
@@ -93,6 +64,11 @@ export class AddIntentTool extends BaseTool<"add_intent"> {
 				parentId: params.parentId ?? null,
 				taskId: task.taskId,
 			})
+
+			// 将 assumption 写入节点
+			if (params.assumption) {
+				result.node.assumption = params.assumption.trim()
+			}
 
 			await task.intentTree.save()
 

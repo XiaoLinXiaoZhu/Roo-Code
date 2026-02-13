@@ -45,20 +45,25 @@ describe("IntentTree", () => {
 		test("adds child nodes with hierarchical shortIds", () => {
 			const tree = new IntentTree(treePath)
 			const goal = tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-			const sub = tree.addNode({ type: "subgoal", content: "Sub", parentId: goal.node.id, taskId: "t1" })
-			const pathNode = tree.addNode({ type: "path", content: "Path", parentId: sub.node.id, taskId: "t1" })
+			const sub = tree.addNode({ type: "objective", content: "Sub", parentId: goal.node.id, taskId: "t1" })
+			const pathNode = tree.addNode({
+				type: "approach",
+				content: "Approach",
+				parentId: sub.node.id,
+				taskId: "t1",
+			})
 			const impl = tree.addNode({ type: "impl", content: "Impl", parentId: pathNode.node.id, taskId: "t1" })
 
-			expect(sub.node.shortId).toBe("S1.1")
-			expect(pathNode.node.shortId).toBe("P1.1.1")
+			expect(sub.node.shortId).toBe("O1.1")
+			expect(pathNode.node.shortId).toBe("A1.1.1")
 			expect(impl.node.shortId).toBe("I1.1.1.1")
 		})
 
 		test("adds child using parent shortId", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-			const sub = tree.addNode({ type: "subgoal", content: "Sub", parentId: "G1", taskId: "t1" })
-			expect(sub.node.shortId).toBe("S1.1")
+			const sub = tree.addNode({ type: "objective", content: "Sub", parentId: "G1", taskId: "t1" })
+			expect(sub.node.shortId).toBe("O1.1")
 			expect(sub.node.parentId).not.toBeNull()
 		})
 
@@ -73,42 +78,52 @@ describe("IntentTree", () => {
 		test("sibling numbering increments correctly", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-			const c1 = tree.addNode({ type: "subgoal", content: "Sub 1", parentId: "G1", taskId: "t1" })
-			const c2 = tree.addNode({ type: "subgoal", content: "Sub 2", parentId: "G1", taskId: "t1" })
-			const c3 = tree.addNode({ type: "subgoal", content: "Sub 3", parentId: "G1", taskId: "t1" })
-			expect(c1.node.shortId).toBe("S1.1")
-			expect(c2.node.shortId).toBe("S1.2")
-			expect(c3.node.shortId).toBe("S1.3")
+			const c1 = tree.addNode({ type: "objective", content: "Sub 1", parentId: "G1", taskId: "t1" })
+			const c2 = tree.addNode({ type: "objective", content: "Sub 2", parentId: "G1", taskId: "t1" })
+			const c3 = tree.addNode({ type: "objective", content: "Sub 3", parentId: "G1", taskId: "t1" })
+			expect(c1.node.shortId).toBe("O1.1")
+			expect(c2.node.shortId).toBe("O1.2")
+			expect(c3.node.shortId).toBe("O1.3")
 		})
 
-		test("auto-adjusts type based on parent (goal → subgoal)", () => {
+		test("auto-adjusts type based on parent (goal → objective)", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-			// 在 goal 下创建 goal，应该自动变成 subgoal
-			const child = tree.addNode({ type: "goal", content: "Should be subgoal", parentId: "G1", taskId: "t1" })
-			expect(child.node.type).toBe("subgoal")
+			// 在 goal 下创建 goal，应该自动变成 objective
+			const child = tree.addNode({ type: "goal", content: "Should be objective", parentId: "G1", taskId: "t1" })
+			expect(child.node.type).toBe("objective")
 			expect(child.typeAdjusted).toBe(true)
 			expect(child.requestedType).toBe("goal")
 		})
 
-		test("auto-adjusts type based on parent (subgoal → path)", () => {
+		test("auto-adjusts type based on parent (objective → approach)", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-			tree.addNode({ type: "subgoal", content: "Subgoal", parentId: "G1", taskId: "t1" })
-			// 在 subgoal 下创建 goal，应该自动变成 path
-			const child = tree.addNode({ type: "goal", content: "Should be path", parentId: "S1.1", taskId: "t1" })
-			expect(child.node.type).toBe("path")
+			tree.addNode({ type: "objective", content: "Objective", parentId: "G1", taskId: "t1" })
+			// 在 subgoal 下创建 goal，应该自动变成 approach
+			const child = tree.addNode({ type: "goal", content: "Should be approach", parentId: "O1.1", taskId: "t1" })
+			expect(child.node.type).toBe("approach")
 			expect(child.typeAdjusted).toBe(true)
 			expect(child.requestedType).toBe("goal")
 		})
 
-		test("auto-adjusts type based on parent (path → impl)", () => {
+		test("objective can have objective children (for finer decomposition)", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-			tree.addNode({ type: "subgoal", content: "Subgoal", parentId: "G1", taskId: "t1" })
-			tree.addNode({ type: "path", content: "Path", parentId: "S1.1", taskId: "t1" })
+			tree.addNode({ type: "objective", content: "Big objective", parentId: "G1", taskId: "t1" })
+			// objective 下可以创建 objective（更细粒度的分解）
+			const child = tree.addNode({ type: "objective", content: "Sub objective", parentId: "O1.1", taskId: "t1" })
+			expect(child.node.type).toBe("objective")
+			expect(child.typeAdjusted).toBe(false)
+		})
+
+		test("auto-adjusts type based on parent (approach → impl)", () => {
+			const tree = new IntentTree(treePath)
+			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
+			tree.addNode({ type: "objective", content: "Objective", parentId: "G1", taskId: "t1" })
+			tree.addNode({ type: "approach", content: "Approach", parentId: "O1.1", taskId: "t1" })
 			// 在 path 下创建 goal，应该自动变成 impl
-			const child = tree.addNode({ type: "goal", content: "Should be impl", parentId: "P1.1.1", taskId: "t1" })
+			const child = tree.addNode({ type: "goal", content: "Should be impl", parentId: "A1.1.1", taskId: "t1" })
 			expect(child.node.type).toBe("impl")
 			expect(child.typeAdjusted).toBe(true)
 			expect(child.requestedType).toBe("goal")
@@ -117,13 +132,13 @@ describe("IntentTree", () => {
 		test("keeps valid type unchanged", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-			// 在 goal 下创建 subgoal，类型不变
-			const sub = tree.addNode({ type: "subgoal", content: "Subgoal", parentId: "G1", taskId: "t1" })
-			expect(sub.node.type).toBe("subgoal")
+			// 在 goal 下创建 objective，类型不变
+			const sub = tree.addNode({ type: "objective", content: "Objective", parentId: "G1", taskId: "t1" })
+			expect(sub.node.type).toBe("objective")
 			expect(sub.typeAdjusted).toBe(false)
-			// 在 goal 下创建 path，类型不变（path 比 goal 低，允许）
-			const path = tree.addNode({ type: "path", content: "Path", parentId: "G1", taskId: "t1" })
-			expect(path.node.type).toBe("path")
+			// 在 goal 下创建 approach，类型不变（path 比 goal 低，允许）
+			const path = tree.addNode({ type: "approach", content: "Approach", parentId: "G1", taskId: "t1" })
+			expect(path.node.type).toBe("approach")
 			expect(path.typeAdjusted).toBe(false)
 		})
 
@@ -232,12 +247,12 @@ describe("IntentTree", () => {
 		test("prunes node and all descendants", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-			tree.addNode({ type: "subgoal", content: "Sub", parentId: "G1", taskId: "t1" })
-			tree.addNode({ type: "impl", content: "Impl", parentId: "S1.1", taskId: "t1" })
+			tree.addNode({ type: "objective", content: "Sub", parentId: "G1", taskId: "t1" })
+			tree.addNode({ type: "impl", content: "Impl", parentId: "O1.1", taskId: "t1" })
 
-			const pruned = tree.pruneSubtree("S1.1", "t1", "wrong approach")
-			expect(pruned).toEqual(["S1.1", "I1.1.1"])
-			expect(tree.getNode("S1.1")!.status).toBe("pruned")
+			const pruned = tree.pruneSubtree("O1.1", "t1", "wrong approach")
+			expect(pruned).toEqual(["O1.1", "I1.1.1"])
+			expect(tree.getNode("O1.1")!.status).toBe("pruned")
 			expect(tree.getNode("I1.1.1")!.status).toBe("pruned")
 			expect(tree.getNode("G1")!.status).toBe("planned") // parent unaffected
 		})
@@ -318,12 +333,12 @@ describe("IntentTree", () => {
 		test("returns most recently modified in_progress node", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-			tree.addNode({ type: "path", content: "Path 1", parentId: "G1", taskId: "t1" })
-			tree.addNode({ type: "path", content: "Path 2", parentId: "G1", taskId: "t1" })
-			tree.updateNode("P1.1", { status: "in_progress" }, "t1")
-			tree.updateNode("P1.2", { status: "in_progress" }, "t1")
+			tree.addNode({ type: "approach", content: "Path 1", parentId: "G1", taskId: "t1" })
+			tree.addNode({ type: "approach", content: "Path 2", parentId: "G1", taskId: "t1" })
+			tree.updateNode("A1.1", { status: "in_progress" }, "t1")
+			tree.updateNode("A1.2", { status: "in_progress" }, "t1")
 			const active = tree.getCurrentActiveNode()
-			expect(active!.shortId).toBe("P1.2")
+			expect(active!.shortId).toBe("A1.2")
 		})
 	})
 
@@ -335,14 +350,14 @@ describe("IntentTree", () => {
 		test("save and load round-trip preserves data", async () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-			tree.addNode({ type: "subgoal", content: "Sub", parentId: "G1", taskId: "t1" })
+			tree.addNode({ type: "objective", content: "Sub", parentId: "G1", taskId: "t1" })
 			await tree.save()
 
 			const loaded = await IntentTree.load(treePath)
 			expect(loaded.getNode("G1")).toBeDefined()
 			expect(loaded.getNode("G1")!.content).toBe("Goal")
-			expect(loaded.getNode("S1.1")).toBeDefined()
-			expect(loaded.getNode("S1.1")!.content).toBe("Sub")
+			expect(loaded.getNode("O1.1")).toBeDefined()
+			expect(loaded.getNode("O1.1")!.content).toBe("Sub")
 		})
 
 		test("load from nonexistent file creates empty tree", async () => {
@@ -394,10 +409,10 @@ describe("IntentTree", () => {
 		test("shows tree hierarchy with nested XML", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-			tree.addNode({ type: "subgoal", content: "Sub", parentId: "G1", taskId: "t1" })
+			tree.addNode({ type: "objective", content: "Sub", parentId: "G1", taskId: "t1" })
 			const lines = tree.toSummary().split("\n")
 			expect(lines[0]).toMatch(/^<goal id="G1"/)
-			expect(lines[1]).toMatch(/^  <subgoal id="S1\.1"/)
+			expect(lines[1]).toMatch(/^  <objective id="O1\.1"/)
 		})
 
 		test("sanitizes content that conflicts with tag names", () => {
@@ -418,10 +433,10 @@ describe("IntentTree", () => {
 		test("getActiveNodes excludes pruned and superseded", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "G1", parentId: null, taskId: "t1" })
-			tree.addNode({ type: "path", content: "P1", parentId: "G1", taskId: "t1" })
-			tree.addNode({ type: "path", content: "P2", parentId: "G1", taskId: "t1" })
-			tree.pruneSubtree("P1.1", "t1")
-			tree.updateNode("P1.2", { status: "superseded" }, "t1")
+			tree.addNode({ type: "approach", content: "P1", parentId: "G1", taskId: "t1" })
+			tree.addNode({ type: "approach", content: "P2", parentId: "G1", taskId: "t1" })
+			tree.pruneSubtree("A1.1", "t1")
+			tree.updateNode("A1.2", { status: "superseded" }, "t1")
 			const active = tree.getActiveNodes()
 			expect(active).toHaveLength(1) // only G1
 			expect(active[0].shortId).toBe("G1")
@@ -441,8 +456,8 @@ describe("IntentTree", () => {
 		test("getChildren returns child nodes", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-			tree.addNode({ type: "subgoal", content: "S1", parentId: "G1", taskId: "t1" })
-			tree.addNode({ type: "subgoal", content: "S2", parentId: "G1", taskId: "t1" })
+			tree.addNode({ type: "objective", content: "O1", parentId: "G1", taskId: "t1" })
+			tree.addNode({ type: "objective", content: "S2", parentId: "G1", taskId: "t1" })
 			const children = tree.getChildren("G1")
 			expect(children).toHaveLength(2)
 		})
@@ -457,9 +472,9 @@ describe("IntentTree", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal 1", parentId: null, taskId: "t1" })
 			tree.addNode({ type: "goal", content: "Goal 2", parentId: null, taskId: "t1" })
-			tree.addNode({ type: "subgoal", content: "Sub", parentId: "G1", taskId: "t1" })
+			tree.addNode({ type: "objective", content: "Sub", parentId: "G1", taskId: "t1" })
 
-			const result = tree.reparentNode("S1.1", "G2", "t1")
+			const result = tree.reparentNode("O1.1", "G2", "t1")
 			expect(result.success).toBe(true)
 			expect(result.node!.parentId).not.toBeNull()
 
@@ -467,7 +482,7 @@ describe("IntentTree", () => {
 			const children = tree.getChildren("G2")
 			expect(children).toHaveLength(1)
 			expect(children[0].content).toBe("Sub")
-			expect(children[0].shortId).toBe("S2.1")
+			expect(children[0].shortId).toBe("O2.1")
 
 			// Verify G1 has no children
 			expect(tree.getChildren("G1")).toHaveLength(0)
@@ -476,12 +491,12 @@ describe("IntentTree", () => {
 		test("moves node to root", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-			tree.addNode({ type: "subgoal", content: "Sub", parentId: "G1", taskId: "t1" })
+			tree.addNode({ type: "objective", content: "Sub", parentId: "G1", taskId: "t1" })
 
-			const result = tree.reparentNode("S1.1", null, "t1")
+			const result = tree.reparentNode("O1.1", null, "t1")
 			expect(result.success).toBe(true)
 			expect(result.node!.parentId).toBeNull()
-			expect(result.node!.shortId).toBe("S1")
+			expect(result.node!.shortId).toBe("O1")
 			expect(tree.getRootNodes()).toHaveLength(2)
 		})
 
@@ -494,7 +509,7 @@ describe("IntentTree", () => {
 			const result = tree.reparentNode("G2", "G1", "t1")
 			expect(result.success).toBe(true)
 			expect(result.typeAdjusted).toBe(true)
-			expect(result.node!.type).toBe("subgoal")
+			expect(result.node!.type).toBe("objective")
 		})
 
 		test("returns error for nonexistent node", () => {
@@ -518,11 +533,11 @@ describe("IntentTree", () => {
 		test("prevents circular reparenting", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-			tree.addNode({ type: "subgoal", content: "Sub", parentId: "G1", taskId: "t1" })
-			tree.addNode({ type: "path", content: "Path", parentId: "S1.1", taskId: "t1" })
+			tree.addNode({ type: "objective", content: "Sub", parentId: "G1", taskId: "t1" })
+			tree.addNode({ type: "approach", content: "Approach", parentId: "O1.1", taskId: "t1" })
 
 			// Try to move G1 under its grandchild - should fail
-			const result = tree.reparentNode("G1", "P1.1.1", "t1")
+			const result = tree.reparentNode("G1", "A1.1.1", "t1")
 			expect(result.success).toBe(false)
 			expect(result.error).toContain("descendant")
 		})
@@ -531,15 +546,15 @@ describe("IntentTree", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal 1", parentId: null, taskId: "t1" })
 			tree.addNode({ type: "goal", content: "Goal 2", parentId: null, taskId: "t1" })
-			tree.addNode({ type: "subgoal", content: "Sub", parentId: "G1", taskId: "t1" })
+			tree.addNode({ type: "objective", content: "Sub", parentId: "G1", taskId: "t1" })
 
-			const result = tree.reparentNode("S1.1", "G2", "t1")
+			const result = tree.reparentNode("O1.1", "G2", "t1")
 			expect(result.success).toBe(true)
 			expect(result.shortIdChanges.size).toBeGreaterThan(0)
 
 			// The node should have a new shortId under G2
 			const movedNode = tree.getNode(result.node!.id)
-			expect(movedNode!.shortId).toBe("S2.1")
+			expect(movedNode!.shortId).toBe("O2.1")
 		})
 	})
 
@@ -551,13 +566,13 @@ describe("IntentTree", () => {
 		test("returns formatted list of active nodes", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Fix the bug", parentId: null, taskId: "t1" })
-			tree.addNode({ type: "subgoal", content: "Identify root cause", parentId: "G1", taskId: "t1" })
+			tree.addNode({ type: "objective", content: "Identify root cause", parentId: "G1", taskId: "t1" })
 
 			const list = tree.getAvailableNodesList()
 			expect(list).toContain("G1")
 			expect(list).toContain("goal")
 			expect(list).toContain("Fix the bug")
-			expect(list).toContain("S1.1")
+			expect(list).toContain("O1.1")
 		})
 
 		test("excludes pruned nodes", () => {
@@ -585,15 +600,15 @@ describe("IntentTree", () => {
 		test("does not reuse shortId after node deletion via prune", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-			tree.addNode({ type: "subgoal", content: "Sub 1", parentId: "G1", taskId: "t1" })
-			tree.addNode({ type: "subgoal", content: "Sub 2", parentId: "G1", taskId: "t1" })
+			tree.addNode({ type: "objective", content: "Sub 1", parentId: "G1", taskId: "t1" })
+			tree.addNode({ type: "objective", content: "Sub 2", parentId: "G1", taskId: "t1" })
 
 			// Prune S1.1
-			tree.pruneSubtree("S1.1", "t1")
+			tree.pruneSubtree("O1.1", "t1")
 
 			// Add a new subgoal - should get S1.3, not S1.1
-			const result = tree.addNode({ type: "subgoal", content: "Sub 3", parentId: "G1", taskId: "t1" })
-			expect(result.node.shortId).toBe("S1.3")
+			const result = tree.addNode({ type: "objective", content: "Sub 3", parentId: "G1", taskId: "t1" })
+			expect(result.node.shortId).toBe("O1.3")
 		})
 	})
 
@@ -607,11 +622,11 @@ describe("IntentTree", () => {
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
 
 			// 在 goal 下创建 goal，应该被调整为 subgoal
-			const result = tree.addNode({ type: "goal", content: "Should be subgoal", parentId: "G1", taskId: "t1" })
+			const result = tree.addNode({ type: "goal", content: "Should be objective", parentId: "G1", taskId: "t1" })
 
 			expect(result.typeAdjusted).toBe(true)
 			expect(result.requestedType).toBe("goal")
-			expect(result.node.type).toBe("subgoal")
+			expect(result.node.type).toBe("objective")
 			expect(result.adjustmentReason).toContain("goal")
 		})
 
@@ -619,8 +634,8 @@ describe("IntentTree", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
 
-			// 在 goal 下创建 subgoal，类型不变
-			const result = tree.addNode({ type: "subgoal", content: "Subgoal", parentId: "G1", taskId: "t1" })
+			// 在 goal 下创建 objective，类型不变
+			const result = tree.addNode({ type: "objective", content: "Objective", parentId: "G1", taskId: "t1" })
 
 			expect(result.typeAdjusted).toBe(false)
 			expect(result.requestedType).toBeUndefined()

@@ -3,7 +3,7 @@
  *
  * 职责：
  * - 管理意图节点的增删改查
- * - 语义化短 ID（G1, S1.1, P1.1.1）方便模型引用
+ * - 语义化短 ID（G1, O1.1, A1.1.1）方便模型引用
  * - 持久化到 JSON 文件（跨对话）
  * - 生成摘要用于注入 prompt
  * - 与 git 集成（通过 commit_intent 绑定 commit hash）
@@ -40,23 +40,23 @@ function createEmptyTreeData(): IntentTreeData {
  */
 const TYPE_PREFIX: Record<IntentNodeType, string> = {
 	goal: "G",
-	subgoal: "S",
-	path: "P",
+	objective: "O",
+	approach: "A",
 	impl: "I",
 }
 
 /**
- * 类型层级顺序：goal → subgoal → path → impl
+ * 类型层级顺序：goal → objective → approach → impl
  * 用于自动顺延不合法的类型
  */
-const TYPE_ORDER: IntentNodeType[] = ["goal", "subgoal", "path", "impl"]
+const TYPE_ORDER: IntentNodeType[] = ["goal", "objective", "approach", "impl"]
 
 /**
  * 根据父节点类型，调整子节点类型（自动顺延）
  * 规则：子节点类型不能与父节点相同或更高（goal 最高，impl 最低）
- * - goal 下创建 goal → subgoal
- * - subgoal 下创建 goal/subgoal → path
- * - path 下创建 goal/subgoal/path → impl
+ * - goal 下创建 goal → objective
+ * - objective 下创建 goal → approach（但 objective 下可以创建 objective，表示更细粒度的分解）
+ * - approach 下创建 goal/objective/approach → impl
  * - impl 下可以创建 impl（表示 patch）
  *
  * @returns 调整后的类型和调整原因（如果发生了调整）
@@ -78,8 +78,13 @@ function adjustChildType(
 	const requestedIndex = TYPE_ORDER.indexOf(requestedType)
 
 	// 如果请求的类型层级 <= 父节点层级，顺延到父节点的下一级
-	// 特例：impl 下可以创建 impl
-	if (requestedIndex <= parentIndex && parentType !== "impl") {
+	// 特例：impl 下可以创建 impl（表示 patch）
+	// 特例：objective 下可以创建 objective（表示更细粒度的分解）
+	if (
+		requestedIndex <= parentIndex &&
+		parentType !== "impl" &&
+		!(parentType === "objective" && requestedType === "objective")
+	) {
 		const adjustedType = TYPE_ORDER[parentIndex + 1]
 		return {
 			type: adjustedType,
@@ -162,8 +167,8 @@ export class IntentTree {
 	 * 生成语义化短 ID。
 	 * 规则：
 	 * - 根节点：{前缀}{序号}，如 G1, G2（使用递增计数器避免复用）
-	 * - 子节点：{自己的类型前缀}{父节点序号}.{子序号}，如 S1.1, P1.1.1
-	 *   - 前缀是自己的类型（G/S/P/I）
+	 * - 子节点：{自己的类型前缀}{父节点序号}.{子序号}，如 O1.1, A1.1.1
+	 *   - 前缀是自己的类型（G/O/A/I）
 	 *   - 序号继承父节点的层级结构
 	 */
 	private generateShortId(type: IntentNodeType, parentId: string | null): string {
@@ -185,12 +190,12 @@ export class IntentTree {
 		}
 
 		// 子节点：使用自己的类型前缀 + 父节点的层级序号 + 子序号
-		// 例如：G1 下的第一个 subgoal 是 S1.1，G1 下的第二个 subgoal 是 S1.2
+		// 例如：G1 下的第一个 objective 是 O1.1，G1 下的第二个 objective 是 O1.2
 		const maxChildIndex = parent.maxChildIndex ?? 0
 		parent.maxChildIndex = maxChildIndex + 1
 
 		// 提取父节点 shortId 中的数字部分（去掉类型前缀）
-		const parentNumericPart = parent.shortId.replace(/^[GSPI]/, "")
+		const parentNumericPart = parent.shortId.replace(/^[GOAI]/, "")
 		return `${prefix}${parentNumericPart}.${maxChildIndex + 1}`
 	}
 
@@ -696,7 +701,7 @@ export class IntentTree {
 			childIndex++
 			// 使用子节点自己的类型前缀 + 父节点的数字部分 + 子序号
 			const prefix = TYPE_PREFIX[child.type]
-			const parentNumericPart = parent.shortId.replace(/^[GSPI]/, "")
+			const parentNumericPart = parent.shortId.replace(/^[GOAI]/, "")
 			const newShortId = `${prefix}${parentNumericPart}.${childIndex}`
 
 			if (child.shortId !== newShortId) {
@@ -718,7 +723,7 @@ export class IntentTree {
 
 	/**
 	 * 生成意图树的 XML 摘要，用于注入用户消息。
-	 * 使用类型作为标签名（goal/subgoal/path/impl），显式属性标注状态。
+	 * 使用类型作为标签名（goal/objective/approach/impl），显式属性标注状态。
 	 * 只包含 active 节点，树状缩进展示层级关系。
 	 */
 	toSummary(): string {
@@ -777,15 +782,15 @@ export class IntentTree {
 
 	/**
 	 * 清洗内容，防止与 XML 标签名冲突。
-	 * 只处理真正危险的模式（与 goal/subgoal/path/impl 标签冲突）。
+	 * 只处理真正危险的模式（与 goal/objective/approach/impl 标签冲突）。
 	 */
 	private sanitizeContent(content: string): string {
 		return content
-			.replace(/<\/?(?:goal|subgoal|path|impl)\b[^>]*>/gi, (match) => {
+			.replace(/<\/?(?:goal|outcome|approach|impl)\b[^>]*>/gi, (match) => {
 				// 将 < 和 > 替换为 ‹ 和 ›，保持视觉相似但不会解析为标签
 				return match.replace(/</g, "‹").replace(/>/g, "›")
 			})
-			.replace(/<\/?(?:goal|subgoal|path|impl)\b/gi, (match) => {
+			.replace(/<\/?(?:goal|outcome|approach|impl)\b/gi, (match) => {
 				// 处理没有闭合 > 的情况（如 </goal 后面没有 >）
 				return match.replace(/</g, "‹")
 			})

@@ -31,8 +31,8 @@ describe("PruneIntentTool", () => {
 		tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "prune-intent-test-"))
 		tree = new IntentTree(path.join(tmpDir, "intent-tree.json"))
 		tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-		tree.addNode({ type: "path", content: "Path A", parentId: "G1", taskId: "t1" })
-		tree.addNode({ type: "impl", content: "Impl 1", parentId: "P1.1", taskId: "t1" })
+		tree.addNode({ type: "approach", content: "Approach A", parentId: "G1", taskId: "t1" })
+		tree.addNode({ type: "impl", content: "Impl 1", parentId: "A1.1", taskId: "t1" })
 	})
 
 	afterEach(async () => {
@@ -43,23 +43,23 @@ describe("PruneIntentTool", () => {
 		const task = createMockTask(tree)
 		const callbacks = createMockCallbacks()
 
-		await pruneIntentTool.execute({ nodeId: "P1.1", reason: "wrong approach" }, task, callbacks)
+		await pruneIntentTool.execute({ nodeId: "A1.1", reason: "wrong approach" }, task, callbacks)
 
 		const result = callbacks.pushToolResult.mock.calls[0][0]
 		expect(result).toContain('count="2"')
-		expect(result).toContain("P1.1")
+		expect(result).toContain("A1.1")
 		expect(result).toContain("I1.1.1")
 		expect(result).toContain("wrong approach")
-		expect(tree.getNode("P1.1")!.status).toBe("pruned")
+		expect(tree.getNode("A1.1")!.status).toBe("pruned")
 		expect(tree.getNode("I1.1.1")!.status).toBe("pruned")
 	})
 
 	test("shows associated commits", async () => {
 		tree.bindCode(
-			"P1.1",
+			"A1.1",
 			{
 				commitHash: "abc1234",
-				commitMessage: "impl path A",
+				commitMessage: "impl approach A",
 				files: ["a.ts"],
 				timestamp: new Date().toISOString(),
 			},
@@ -69,7 +69,7 @@ describe("PruneIntentTool", () => {
 		const task = createMockTask(tree)
 		const callbacks = createMockCallbacks()
 
-		await pruneIntentTool.execute({ nodeId: "P1.1" }, task, callbacks)
+		await pruneIntentTool.execute({ nodeId: "A1.1" }, task, callbacks)
 
 		const result = callbacks.pushToolResult.mock.calls[0][0]
 		expect(result).toContain("abc1234")

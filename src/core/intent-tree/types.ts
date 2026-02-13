@@ -7,20 +7,24 @@
  */
 
 /**
- * 意图节点类型：
- * - goal: 最终目标（稳定、主观，由用户确认）
- * - subgoal: 可确认的子目标（Y1/Y2，可被用户验证）
- * - path: 实现路径（A/B，用户尝试达成目标的手段）
- * - impl: 具体实现（A1/A2，代码层面的产出）
+ * 意图节点类型（GOAI）：
+ *
+ * 约束层（goal/outcome）：描述"要什么"，失败不放弃
+ * - goal: 用户的最终目标（稳定、主观、方向性）
+ * - objective: 可验证的期望结果（可能被修正、只覆盖 goal 的一部分）
+ *
+ * 实现层（approach/impl）：描述"怎么做"，失败可替换
+ * - approach: 可替换的实现手段（失败了换一个）
+ * - impl: 原子代码变更（≈ 一个 commit）
  */
-export type IntentNodeType = "goal" | "subgoal" | "path" | "impl"
+export type IntentNodeType = "goal" | "objective" | "approach" | "impl"
 
 /**
  * 意图节点状态：
  * - planned: 已规划，尚未开始
  * - in_progress: 正在实现
  * - done: 已完成
- * - superseded: 被新路径/实现替代
+ * - superseded: 被新 approach/impl 替代
  * - pruned: 已废弃/剪枝
  */
 export type IntentNodeStatus = "planned" | "in_progress" | "done" | "superseded" | "pruned"
@@ -59,7 +63,7 @@ export interface IntentProvenance {
 export interface IntentNode {
 	/** 内部唯一标识（UUID，用于持久化） */
 	id: string
-	/** 语义化短 ID，对模型友好（如 G1, S1.1, P1.1.1, I1.1.1.1） */
+	/** 语义化短 ID，对模型友好（如 G1, O1.1, A1.1.1, I1.1.1.1） */
 	shortId: string
 	/** 节点类型 */
 	type: IntentNodeType
@@ -71,6 +75,13 @@ export interface IntentNode {
 	parentId: string | null
 	/** 子节点 ID 列表 */
 	childrenIds: string[]
+	/**
+	 * 可证伪的假设：说明本节点与父节点之间的因果关系（源自 Theory of Change）。
+	 * 例如 outcome 节点："假设完成此 outcome 能推进 goal"；
+	 * approach 节点："假设此手段能达成 outcome"。
+	 * 当假设被证伪时，该节点应被 superseded 或 pruned。
+	 */
+	assumption?: string
 	/** 代码绑定列表（一个节点可能有多次 commit） */
 	codeBindings: IntentCodeBinding[]
 	/** 创建信息 */
