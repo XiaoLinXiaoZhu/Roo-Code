@@ -1478,6 +1478,133 @@
       "gitCommit": "eeafad30e821f36125d399cbf03f04710b147ff6",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "60",
+      "query": "Where is the \"You did not use a tool in your previous response\" error message generated and what logic determines whether a tool was used?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "you",
+        "did",
+        "not",
+        "use",
+        "tool",
+        "in",
+        "your",
+        "previous",
+        "response",
+        "error",
+        "message",
+        "generated",
+        "and",
+        "what",
+        "logic",
+        "determines",
+        "whether",
+        "was",
+        "used"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-13T17:47:21.006Z",
+      "gitCommit": "5096a3bdd1e645eee3394a8a1cb2ff611569e166",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"logic_description\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "61",
+      "query": "How is assistantMessageContent populated with tool_use blocks? Where are assistant message content blocks parsed from the API stream response?",
+      "tags": [
+        "how",
+        "is",
+        "assistantmessagecontent",
+        "populated",
+        "with",
+        "tool_use",
+        "blocks",
+        "where",
+        "are",
+        "assistant",
+        "message",
+        "content",
+        "parsed",
+        "from",
+        "the",
+        "api",
+        "stream",
+        "response"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,__tests__,*.spec.ts"
+      },
+      "createdAt": "2026-02-13T17:48:43.456Z",
+      "gitCommit": "5096a3bdd1e645eee3394a8a1cb2ff611569e166",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"parsing_flow\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "62",
+      "query": "How is globalState used in the extension? What data is stored in globalState vs disk storage?",
+      "tags": [
+        "how",
+        "is",
+        "globalstate",
+        "used",
+        "in",
+        "the",
+        "extension",
+        "what",
+        "data",
+        "stored",
+        "vs",
+        "disk",
+        "storage"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,dist,__tests__,*.spec.ts,*.test.ts"
+      },
+      "createdAt": "2026-02-13T18:15:58.390Z",
+      "gitCommit": "33ac0f0716ca2cc892b33eb19f2e469af3cd1a50",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"globalStateUsages\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"file\":{\"type\":\"string\"},\"key\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"},\"estimatedSize\":{\"type\":\"string\"}}}},\"diskStorageUsages\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"file\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}}}}}}"
+    },
+    {
+      "id": "63",
+      "query": "What is stored in taskHistory in globalState? How large can it get? What data does each task history entry contain?",
+      "tags": [
+        "what",
+        "is",
+        "stored",
+        "in",
+        "taskhistory",
+        "globalstate",
+        "how",
+        "large",
+        "can",
+        "it",
+        "get",
+        "data",
+        "does",
+        "each",
+        "task",
+        "history",
+        "entry",
+        "contain"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src,/Users/wepie/Documents/pie/project/roo-code/packages/types/src",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,dist,__tests__,*.spec.ts"
+      },
+      "createdAt": "2026-02-13T18:16:57.186Z",
+      "gitCommit": "33ac0f0716ca2cc892b33eb19f2e469af3cd1a50",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"taskHistoryDefinition\":{\"type\":\"string\"},\"taskHistoryEntryFields\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"whereStored\":{\"type\":\"string\"},\"potentiallyLargeFields\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"relevantFiles\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
     }
   ]
 }

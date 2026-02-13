@@ -44,7 +44,7 @@
 			"content": "在 searchStdin 中实现滑动窗口算法，收集匹配行的前后上下文行",
 			"status": "in_progress",
 			"parentId": "fc1e90c0-585b-490c-8bd7-06047079c716",
-			"childrenIds": [],
+			"childrenIds": ["2ef8594a-3552-487a-ad4f-fc8f2a03cffc"],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c57f2-71b2-708a-90df-607e9f52f8da",
@@ -58,14 +58,76 @@
 					"action": "updated: content, status→in_progress"
 				}
 			],
-			"assumption": "O1.1 已确认根因。现在需要实现修复：在 searchStdin 中添加上下文行支持，并添加测试覆盖。"
+			"assumption": "O1.1 已确认根因。现在需要实现修复：在 searchStdin 中添加上下文行支持，并添加测试覆盖。",
+			"maxChildIndex": 1
+		},
+		"2ef8594a-3552-487a-ad4f-fc8f2a03cffc": {
+			"id": "2ef8594a-3552-487a-ad4f-fc8f2a03cffc",
+			"shortId": "I1.1.1.1",
+			"type": "impl",
+			"content": "fix: GrepHandler.searchStdin() now supports -A/-B/-C context line options\n\nRoot cause: searchStdin() ignored contextBefore/contextAfter/contextBoth options,\nonly outputting matching lines without surrounding context. This caused\n`cat file | grep -A N pattern` to lose context lines in the pipeline.\n\nChanges:\n- Rewrote searchStdin() with two-pass algorithm: find matches, then collect context\n- Fixed contextBoth default from 1 to 0 (matching native grep behavior)\n- Added grep-style \"--\" separators between non-contiguous context groups\n- Added grep-style line number separators (\":\" for match, \"-\" for context)\n- Added 8 new test cases covering -A, -B, -C, edge cases, and separators",
+			"status": "done",
+			"parentId": "0a4e1c0c-cb92-405f-9684-8133b2ceb482",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "5096a3bdd1e645eee3394a8a1cb2ff611569e166",
+					"commitMessage": "[intent:A1.1.1] fix: GrepHandler.searchStdin() now supports -A/-B/-C context line options\n\nRoot cause: searchStdin() ignored contextBefore/contextAfter/contextBoth options,\nonly outputting matching lines without surrounding context. This caused\n`cat file | grep -A N pattern` to lose context lines in the pipeline.\n\nChanges:\n- Rewrote searchStdin() with two-pass algorithm: find matches, then collect context\n- Fixed contextBoth default from 1 to 0 (matching native grep behavior)\n- Added grep-style \"--\" separators between non-contiguous context groups\n- Added grep-style line number separators (\":\" for match, \"-\" for context)\n- Added 8 new test cases covering -A, -B, -C, edge cases, and separators",
+					"files": [
+						".roo/cache/search/index.json",
+						".roo/intent-tree.json",
+						"src/core/command-interceptor/__tests__/handlers/GrepHandler.spec.ts",
+						"src/core/command-interceptor/handlers/GrepHandler.ts",
+						"src/package.json",
+						"turbo.json"
+					],
+					"diffSummary": "6 file(s), +276 -11",
+					"timestamp": "2026-02-13T17:04:33.145Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c57f2-71b2-708a-90df-607e9f52f8da",
+				"timestamp": "2026-02-13T17:04:33.145Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c57f2-71b2-708a-90df-607e9f52f8da",
+					"timestamp": "2026-02-13T17:04:33.145Z",
+					"action": "bound commit 5096a3b"
+				},
+				{
+					"taskId": "019c57f2-71b2-708a-90df-607e9f52f8da",
+					"timestamp": "2026-02-13T17:04:33.145Z",
+					"action": "updated: status→done"
+				}
+			]
+		},
+		"33d690a7-d4af-4596-82dc-be6c723f8dbd": {
+			"id": "33d690a7-d4af-4596-82dc-be6c723f8dbd",
+			"shortId": "G2",
+			"type": "goal",
+			"content": "修复工具调用检测 bug：工具成功执行但 didToolUse 检测返回 false，导致误报 \"You did not use a tool\"",
+			"status": "planned",
+			"parentId": null,
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c581b-a071-715e-8747-258c3d344640",
+				"timestamp": "2026-02-13T17:52:43.706Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "用户报告了一个活跃的 bug：工具调用成功执行但系统检测不到 tool_use，导致误报 \"You did not use a tool\"。用户怀疑是切换到 AI SDK 后引入的。我在调查过程中也复现了这个 bug。"
 		}
 	},
-	"rootIds": ["88db1b9c-c4dc-4612-9aed-b8a3345c41f4"],
+	"rootIds": ["88db1b9c-c4dc-4612-9aed-b8a3345c41f4", "33d690a7-d4af-4596-82dc-be6c723f8dbd"],
 	"shortIdIndex": {
 		"G1": "88db1b9c-c4dc-4612-9aed-b8a3345c41f4",
 		"O1.1": "fc1e90c0-585b-490c-8bd7-06047079c716",
-		"A1.1.1": "0a4e1c0c-cb92-405f-9684-8133b2ceb482"
+		"A1.1.1": "0a4e1c0c-cb92-405f-9684-8133b2ceb482",
+		"I1.1.1.1": "2ef8594a-3552-487a-ad4f-fc8f2a03cffc",
+		"G2": "33d690a7-d4af-4596-82dc-be6c723f8dbd"
 	},
-	"rootMaxChildIndex": 1
+	"rootMaxChildIndex": 2
 }
