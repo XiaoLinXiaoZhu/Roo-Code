@@ -1,5 +1,33 @@
 # Roo Code Changelog
 
+## [3.51.0] - 2026-02-13
+
+### 🌳 意图树 (Intent Tree)
+
+- **术语统一**：将 subgoal/path 重命名为 objective/approach，保持意图树节点命名一致性
+- **XML 格式增强**：更新意图树 XML 输出格式，增加节点类型和属性说明，增强节点信息和内容清洗逻辑
+- **注入机制优化**：优化注入机制减少上下文溢出；更新 `getEnvironmentDetails` 新增 `isUserMessage` 参数以优化注入逻辑
+- **节点管理增强**：添加 `placement` 和 `placementReason` 参数到 `add_intent` 工具；同步计数器确保 `addNode` 增量逻辑与重建后状态一致
+- **本地化支持**：添加模式管理和意图树的本地化支持
+- **行为描述更新**：更新 Spirit 行为描述，明确目标发现和执行流程
+
+### 🔧 工具与提示词
+
+- **ReadMediaTool 重构**：使用 ImagePart 和 TextPart 类型重构，更新 architect 模式下的工具验证测试
+- **apply_diff 延迟合并**：实现 apply_diff 块的延迟合并逻辑，优化工具调用处理
+- **符号导航增强**：增强符号位置接口，支持完整定义范围和预览截断指示
+- **模式角色更新**：更新默认模式的角色定义和自定义指令，增强描述和工作流程
+- **工具使用规范**：增加 LSP 优先和 MARKDOWN 修改模式的说明
+- **代码清理**：移除未使用的 TOOL_ICONS 导入，优化代码结构
+
+### 🐛 修复
+
+- **ExecuteCommandTool**：修复 `result?.trim()` 空值守卫，添加 CommitIntentTool 审批顺序 TODO
+
+### 🔀 上游同步
+
+- 合并 `upstream/main` @ `b4d9f92b4`（上游版本 v3.47.3，2026-02-13）
+
 ## [3.50.4] - 2026-02-09
 
 ### 🛠️ 优化工具描述和顺序
