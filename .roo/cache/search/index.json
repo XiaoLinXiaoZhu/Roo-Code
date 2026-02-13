@@ -1452,6 +1452,32 @@
       "gitCommit": "76765ee16ed06437f144bd07e7072be398097d54",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "59",
+      "query": "Where is the CommandInterceptor and PipelineExecutor implemented for CLI command interception?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "commandinterceptor",
+        "and",
+        "pipelineexecutor",
+        "implemented",
+        "for",
+        "cli",
+        "command",
+        "interception"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,dist,__tests__"
+      },
+      "createdAt": "2026-02-13T17:01:35.036Z",
+      "gitCommit": "eeafad30e821f36125d399cbf03f04710b147ff6",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
     }
   ]
 }

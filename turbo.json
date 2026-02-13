@@ -14,6 +14,18 @@
 			"outputs": ["dist/**"],
 			"inputs": ["src/**", "package.json", "tsconfig.json", "tsup.config.ts", "vite.config.ts"]
 		},
+		"@roo-code/vscode-webview#build": {
+			"outputs": [],
+			"cache": false
+		},
+		"vsix": {
+			"dependsOn": ["@roo-code/vscode-webview#build", "^build"],
+			"cache": false
+		},
+		"vsix:nightly": {
+			"dependsOn": ["@roo-code/vscode-webview#build", "^build"],
+			"cache": false
+		},
 		"watch:tsc": {
 			"cache": false
 		}

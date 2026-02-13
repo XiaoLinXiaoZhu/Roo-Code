@@ -97,4 +97,112 @@ describe("GrepHandler", () => {
 			expect(result.stdout).not.toContain("ab")
 		})
 	})
+
+	describe("stdin context lines (-A, -B, -C)", () => {
+		const createContext = (stdin?: string): CommandContext => ({
+			cwd: "/tmp",
+			stdin,
+			env: {},
+		})
+
+		const sampleInput = [
+			"line1 header",
+			"line2 start",
+			"line3 match-target",
+			"line4 after1",
+			"line5 after2",
+			"line6 after3",
+			"line7 after4",
+			"line8 after5",
+			"line9 footer",
+		].join("\n")
+
+		it("should support -A (after context) from stdin", async () => {
+			const context = createContext(sampleInput)
+			const result = await handler.execute(["-A", "2", "match-target"], context)
+
+			expect(result.exitCode).toBe(0)
+			expect(result.stdout).toContain("line3 match-target")
+			expect(result.stdout).toContain("line4 after1")
+			expect(result.stdout).toContain("line5 after2")
+			expect(result.stdout).not.toContain("line6 after3")
+			expect(result.stdout).not.toContain("line2 start")
+		})
+
+		it("should support -B (before context) from stdin", async () => {
+			const context = createContext(sampleInput)
+			const result = await handler.execute(["-B", "2", "match-target"], context)
+
+			expect(result.exitCode).toBe(0)
+			expect(result.stdout).toContain("line1 header")
+			expect(result.stdout).toContain("line2 start")
+			expect(result.stdout).toContain("line3 match-target")
+			expect(result.stdout).not.toContain("line4 after1")
+		})
+
+		it("should support -C (both context) from stdin", async () => {
+			const context = createContext(sampleInput)
+			const result = await handler.execute(["-C", "1", "match-target"], context)
+
+			expect(result.exitCode).toBe(0)
+			expect(result.stdout).toContain("line2 start")
+			expect(result.stdout).toContain("line3 match-target")
+			expect(result.stdout).toContain("line4 after1")
+			expect(result.stdout).not.toContain("line1 header")
+			expect(result.stdout).not.toContain("line5 after2")
+		})
+
+		it("should support -A 5 like cat file | grep -A 5 pattern", async () => {
+			const context = createContext(sampleInput)
+			const result = await handler.execute(["-A", "5", "match-target"], context)
+
+			expect(result.exitCode).toBe(0)
+			const lines = result.stdout.split("\n")
+			// Should contain match + 5 after lines
+			expect(lines).toContain("line3 match-target")
+			expect(lines).toContain("line4 after1")
+			expect(lines).toContain("line5 after2")
+			expect(lines).toContain("line6 after3")
+			expect(lines).toContain("line7 after4")
+			expect(lines).toContain("line8 after5")
+			expect(result.stdout).not.toContain("line2 start")
+		})
+
+		it("should show line numbers with correct separators when -n is used with context", async () => {
+			const context = createContext(sampleInput)
+			const result = await handler.execute(["-n", "-A", "1", "match-target"], context)
+
+			expect(result.exitCode).toBe(0)
+			// Match line uses ":", context line uses "-"
+			expect(result.stdout).toContain("3:line3 match-target")
+			expect(result.stdout).toContain("4-line4 after1")
+		})
+
+		it("should insert -- separator between non-contiguous context groups", async () => {
+			const input = "aaa\nbbb\nccc\nddd\neee\nfff\nggg"
+			const context = createContext(input)
+			// Match "aaa" and "ggg" with -A 0 — two separate groups
+			const result = await handler.execute(["-A", "1", "aaa\\|fff"], context)
+
+			expect(result.exitCode).toBe(0)
+			expect(result.stdout).toContain("--")
+		})
+
+		it("should not add context when no -A/-B/-C flags", async () => {
+			const context = createContext(sampleInput)
+			const result = await handler.execute(["match-target"], context)
+
+			expect(result.exitCode).toBe(0)
+			expect(result.stdout).toBe("line3 match-target")
+		})
+
+		it("should handle -A at end of input (fewer lines available than requested)", async () => {
+			const context = createContext(sampleInput)
+			const result = await handler.execute(["-A", "5", "after5"], context)
+
+			expect(result.exitCode).toBe(0)
+			expect(result.stdout).toContain("line8 after5")
+			expect(result.stdout).toContain("line9 footer")
+		})
+	})
 })

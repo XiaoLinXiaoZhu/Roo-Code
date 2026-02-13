@@ -1,0 +1,71 @@
+{
+	"version": 1,
+	"nodes": {
+		"88db1b9c-c4dc-4612-9aed-b8a3345c41f4": {
+			"id": "88db1b9c-c4dc-4612-9aed-b8a3345c41f4",
+			"shortId": "G1",
+			"type": "goal",
+			"content": "修复 CLI 代理层管道命令输出截断问题：`cat file | grep -A N` 丢失上下文行",
+			"status": "planned",
+			"parentId": null,
+			"childrenIds": ["fc1e90c0-585b-490c-8bd7-06047079c716"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c57f2-71b2-708a-90df-607e9f52f8da",
+				"timestamp": "2026-02-13T17:00:41.707Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "用户报告了 CLI 代理层的管道处理 bug：`cat package.json | grep -A 5 '\"scripts\"'` 只输出了匹配行，丢失了 -A 5 的上下文行。这是 CommandInterceptor 的实现问题。",
+			"maxChildIndex": 1
+		},
+		"fc1e90c0-585b-490c-8bd7-06047079c716": {
+			"id": "fc1e90c0-585b-490c-8bd7-06047079c716",
+			"shortId": "O1.1",
+			"type": "objective",
+			"content": "GrepHandler.searchStdin() 需要支持 -A/-B/-C 上下文行选项",
+			"status": "planned",
+			"parentId": "88db1b9c-c4dc-4612-9aed-b8a3345c41f4",
+			"childrenIds": ["0a4e1c0c-cb92-405f-9684-8133b2ceb482"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c57f2-71b2-708a-90df-607e9f52f8da",
+				"timestamp": "2026-02-13T17:02:20.176Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "The root cause is identified: GrepHandler.searchStdin() ignores context line options (-A, -B, -C). Need to implement context line support in stdin search mode.",
+			"maxChildIndex": 1
+		},
+		"0a4e1c0c-cb92-405f-9684-8133b2ceb482": {
+			"id": "0a4e1c0c-cb92-405f-9684-8133b2ceb482",
+			"shortId": "A1.1.1",
+			"type": "approach",
+			"content": "在 searchStdin 中实现滑动窗口算法，收集匹配行的前后上下文行",
+			"status": "in_progress",
+			"parentId": "fc1e90c0-585b-490c-8bd7-06047079c716",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c57f2-71b2-708a-90df-607e9f52f8da",
+				"timestamp": "2026-02-13T17:02:26.433Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c57f2-71b2-708a-90df-607e9f52f8da",
+					"timestamp": "2026-02-13T17:02:30.818Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
+			"assumption": "O1.1 已确认根因。现在需要实现修复：在 searchStdin 中添加上下文行支持，并添加测试覆盖。"
+		}
+	},
+	"rootIds": ["88db1b9c-c4dc-4612-9aed-b8a3345c41f4"],
+	"shortIdIndex": {
+		"G1": "88db1b9c-c4dc-4612-9aed-b8a3345c41f4",
+		"O1.1": "fc1e90c0-585b-490c-8bd7-06047079c716",
+		"A1.1.1": "0a4e1c0c-cb92-405f-9684-8133b2ceb482"
+	},
+	"rootMaxChildIndex": 1
+}

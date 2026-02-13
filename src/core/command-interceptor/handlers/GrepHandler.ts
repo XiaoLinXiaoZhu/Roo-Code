@@ -172,7 +172,7 @@ export class GrepHandler extends BaseHandler {
 			lineNumber: parsed.flags.has("n") || parsed.flags.has("line-number"),
 			contextBefore: parseInt(parsed.options.get("B") || parsed.options.get("before-context") || "0"),
 			contextAfter: parseInt(parsed.options.get("A") || parsed.options.get("after-context") || "0"),
-			contextBoth: parseInt(parsed.options.get("C") || parsed.options.get("context") || "1"),
+			contextBoth: parseInt(parsed.options.get("C") || parsed.options.get("context") || "0"),
 			maxCount: parseInt(parsed.options.get("m") || parsed.options.get("max-count") || "0"),
 			includePattern: parsed.options.get("include"),
 			excludePattern: parsed.options.get("exclude"),
@@ -184,10 +184,12 @@ export class GrepHandler extends BaseHandler {
 
 	/**
 	 * 从 stdin 搜索
+	 *
+	 * 支持 -A (after-context), -B (before-context), -C (context) 选项。
+	 * 使用两遍扫描：先找匹配行索引，再收集上下文行。
 	 */
 	private searchStdin(pattern: string, stdin: string, options: GrepOptions): CommandResult {
 		const lines = stdin.split("\n")
-		const matches: string[] = []
 
 		let regex: RegExp
 		try {
@@ -200,19 +202,17 @@ export class GrepHandler extends BaseHandler {
 			return this.failure(`grep: invalid regex: ${error}`)
 		}
 
+		// Pass 1: 找到所有匹配行的索引
+		const matchIndices: number[] = []
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i]
 			const isMatch = regex.test(line)
 			const shouldInclude = options.invertMatch ? !isMatch : isMatch
 
 			if (shouldInclude) {
-				if (options.lineNumber) {
-					matches.push(`${i + 1}:${line}`)
-				} else {
-					matches.push(line)
-				}
+				matchIndices.push(i)
 
-				if (options.maxCount > 0 && matches.length >= options.maxCount) {
+				if (options.maxCount > 0 && matchIndices.length >= options.maxCount) {
 					break
 				}
 			}
@@ -221,10 +221,58 @@ export class GrepHandler extends BaseHandler {
 			regex.lastIndex = 0
 		}
 
+		if (matchIndices.length === 0) {
+			return {
+				stdout: "",
+				stderr: "",
+				exitCode: 1,
+			}
+		}
+
+		// 计算上下文行数
+		const contextBefore = Math.max(options.contextBefore, options.contextBoth)
+		const contextAfter = Math.max(options.contextAfter, options.contextBoth)
+		const hasContext = contextBefore > 0 || contextAfter > 0
+
+		// Pass 2: 收集匹配行及上下文行
+		// 使用 Set 记录需要输出的行索引，避免重复
+		const outputLineIndices = new Set<number>()
+		for (const idx of matchIndices) {
+			const start = Math.max(0, idx - contextBefore)
+			const end = Math.min(lines.length - 1, idx + contextAfter)
+			for (let j = start; j <= end; j++) {
+				outputLineIndices.add(j)
+			}
+		}
+
+		// 按行号排序输出
+		const sortedIndices = Array.from(outputLineIndices).sort((a, b) => a - b)
+		const matchSet = new Set(matchIndices)
+		const outputLines: string[] = []
+		let lastOutputIdx = -2 // 用于检测不连续的行（需要插入分隔符）
+
+		for (const idx of sortedIndices) {
+			// 如果行不连续且有上下文，插入 grep 风格的分隔符 "--"
+			if (hasContext && lastOutputIdx >= 0 && idx > lastOutputIdx + 1) {
+				outputLines.push("--")
+			}
+
+			const line = lines[idx]
+			if (options.lineNumber) {
+				// grep 风格：匹配行用 ":"，上下文行用 "-"
+				const separator = matchSet.has(idx) ? ":" : "-"
+				outputLines.push(`${idx + 1}${separator}${line}`)
+			} else {
+				outputLines.push(line)
+			}
+
+			lastOutputIdx = idx
+		}
+
 		return {
-			stdout: matches.join("\n"),
+			stdout: outputLines.join("\n"),
 			stderr: "",
-			exitCode: matches.length > 0 ? 0 : 1,
+			exitCode: matchIndices.length > 0 ? 0 : 1,
 		}
 	}
 
