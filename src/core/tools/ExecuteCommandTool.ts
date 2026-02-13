@@ -65,7 +65,7 @@ export class ExecuteCommandTool extends BaseTool<"execute_command"> {
 			}
 
 			// 尝试使用 CLI 代理层拦截执行
-			const interceptResult = await this.interceptor.tryIntercept(unescapedCommand, {
+			const interceptResult = await this.interceptor.tryIntercept(canonicalCommand, {
 				cwd: customCwd ? path.resolve(task.cwd, customCwd) : task.cwd,
 				rooIgnoreController: task.rooIgnoreController,
 			})
@@ -81,7 +81,7 @@ export class ExecuteCommandTool extends BaseTool<"execute_command"> {
 				}
 
 				// 统一截断处理：超过限制时截断并保存完整输出
-				const truncResult = await truncateCliOutput(rawOutput, task.cwd, unescapedCommand)
+				const truncResult = await truncateCliOutput(rawOutput, task.cwd, canonicalCommand)
 				let output = truncResult.output
 
 				// 添加截断提示（来自截断处理器）
@@ -481,7 +481,7 @@ export async function executeCommandInTerminal(
 			lines.push(`<command_result cwd="${currentWorkingDir}" exit_code="undefined">`)
 		}
 
-		if (result.trim()) {
+		if (result?.trim()) {
 			lines.push(`<output>`)
 			lines.push(result)
 			lines.push(`</output>`)

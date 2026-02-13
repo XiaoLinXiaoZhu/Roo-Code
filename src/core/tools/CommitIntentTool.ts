@@ -73,6 +73,9 @@ export class CommitIntentTool extends BaseTool<"commit_intent"> {
 
 			const git = simpleGit({ baseDir: task.cwd })
 
+			// TODO: git.add 在 askApproval 之前执行，若用户拒绝则 staging 已被污染。
+			// 当前 intent 工具在默认自动通过组中，用户无法拒绝，暂不影响。
+			// 后续若 intent 工具移出自动通过组，需将 askApproval 提前到 git.add 之前。
 			await git.add([".", "--ignore-errors"])
 
 			const status = await git.status()
