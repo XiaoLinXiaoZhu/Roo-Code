@@ -1424,6 +1424,34 @@
       "gitCommit": "983a305aca56400e8b3d525f330b70fc8ec9cbeb",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "58",
+      "query": "Where is the \"可用功能\" or \"Available Tools\" section rendered in the mode configuration UI?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "可用功能",
+        "or",
+        "available",
+        "tools",
+        "section",
+        "rendered",
+        "in",
+        "mode",
+        "configuration",
+        "ui"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/webview-ui",
+        "filePatterns": "*.tsx,*.ts",
+        "excludes": "node_modules,dist"
+      },
+      "createdAt": "2026-02-13T10:23:46.776Z",
+      "gitCommit": "76765ee16ed06437f144bd07e7072be398097d54",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
     }
   ]
 }
