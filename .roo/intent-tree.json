@@ -189,10 +189,24 @@
 			"shortId": "I3.1.1.1",
 			"type": "impl",
 			"content": "在 multi-search-replace.ts 的 buffer 范围 fuzzySearch 失败后（matchIndex === -1 || bestMatchScore &lt; threshold），插入全文精确子串匹配：遍历 resultLines 找所有 normalizeString 后完全匹配的位置，多处匹配时选离 startLine 最近的",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "f9922ea5-4cf2-42db-9648-a3c24e2173c6",
 			"childrenIds": [],
-			"codeBindings": [],
+			"codeBindings": [
+				{
+					"commitHash": "26e1ba245ae89a6e97aa7f13c43a3b44316e33ca",
+					"commitMessage": "[intent:I3.1.1.1] feat: add full-file exact substring match fallback in MultiSearchReplaceDiffStrategy\n\nWhen buffer-range fuzzySearch fails (startLine significantly off), a new\nexactSubstringSearch fallback scans the entire file using normalized\nline-by-line comparison. Multiple matches are resolved by proximity to\nstartLine. This prevents false negatives when AI provides inaccurate\nline numbers but the search content uniquely exists in the file.",
+					"files": [
+						".roo/intent-tree.json",
+						"package.json",
+						"scripts/quick-deploy.sh",
+						"src/core/diff/strategies/multi-search-replace.ts",
+						"src/package.json"
+					],
+					"diffSummary": "5 file(s), +283 -40",
+					"timestamp": "2026-02-14T05:32:27.890Z"
+				}
+			],
 			"createdBy": {
 				"taskId": "019c5a9c-0661-73ae-a9a9-351e76b7829b",
 				"timestamp": "2026-02-14T05:27:55.198Z",
@@ -203,6 +217,16 @@
 					"taskId": "019c5a9f-c1b7-75e9-93f1-ce9e830838c3",
 					"timestamp": "2026-02-14T05:29:37.407Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c5a9f-c1b7-75e9-93f1-ce9e830838c3",
+					"timestamp": "2026-02-14T05:32:27.890Z",
+					"action": "bound commit 26e1ba2"
+				},
+				{
+					"taskId": "019c5a9f-c1b7-75e9-93f1-ce9e830838c3",
+					"timestamp": "2026-02-14T05:32:27.890Z",
+					"action": "updated: status→done"
 				}
 			],
 			"assumption": "这是 A3.1.1 的第一个原子实现：在 multi-search-replace.ts 的 fuzzySearch 失败后（约第 407 行）、aggressive stripping 之前，插入全文精确子串搜索逻辑。这是核心修改。"
@@ -211,8 +235,8 @@
 			"id": "4b144bbd-fc91-4a2d-a4b7-685ddef29415",
 			"shortId": "I3.1.1.2",
 			"type": "impl",
-			"content": "将 aggressive line stripping fallback 的 fuzzySearch 搜索范围从 searchStartIndex/searchEndIndex 扩大到 0/resultLines.length（全文范围）",
-			"status": "planned",
+			"content": "将 aggressive line stripping fallback 的 fuzzySearch 搜索范围从 buffer 范围扩大到 0/resultLines.length（全文范围），已在 I3.1.1.1 中一并实现",
+			"status": "done",
 			"parentId": "f9922ea5-4cf2-42db-9648-a3c24e2173c6",
 			"childrenIds": [],
 			"codeBindings": [],
@@ -221,7 +245,13 @@
 				"timestamp": "2026-02-14T05:28:01.604Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c5a9f-c1b7-75e9-93f1-ce9e830838c3",
+					"timestamp": "2026-02-14T05:32:34.390Z",
+					"action": "updated: content, status→done"
+				}
+			],
 			"assumption": "这是 A3.1.1 的第二个原子实现：当前 aggressive stripping fallback 复用了 searchStartIndex/searchEndIndex（即 startLine ± 40行），走到这一步说明 buffer 范围内确实找不到，继续限制范围没有意义，应扩大到全文。"
 		},
 		"5ccf4567-d090-4ff3-b687-13b1b30717d7": {
@@ -229,7 +259,7 @@
 			"shortId": "I3.1.1.3",
 			"type": "impl",
 			"content": "在 multi-search-replace.spec.ts 中添加测试用例：1) startLine 大幅偏移但内容唯一 → 全文精确匹配成功 2) startLine 偏移且多处匹配 → 选离 startLine 最近的 3) aggressive stripping 全文范围回退",
-			"status": "planned",
+			"status": "in_progress",
 			"parentId": "f9922ea5-4cf2-42db-9648-a3c24e2173c6",
 			"childrenIds": [],
 			"codeBindings": [],
@@ -238,7 +268,13 @@
 				"timestamp": "2026-02-14T05:28:08.617Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c5a9f-c1b7-75e9-93f1-ce9e830838c3",
+					"timestamp": "2026-02-14T05:33:14.139Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
 			"assumption": "需要测试覆盖来验证新增的回退逻辑。测试场景：1) startLine 偏移超过 bufferLines 但内容唯一存在 → 应成功 2) startLine 偏移且内容有多处匹配 → 应选最近的 3) 现有测试不回归。"
 		}
 	},

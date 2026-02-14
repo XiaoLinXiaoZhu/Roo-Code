@@ -1204,4 +1204,175 @@ function sum(a, b) {
 			expect(result.error).toContain(":start_line:5    <-- Invalid location")
 		})
 	})
+
+	describe("full-file exact substring match fallback", () => {
+		let strategy: MultiSearchReplaceDiffStrategy
+
+		beforeEach(() => {
+			strategy = new MultiSearchReplaceDiffStrategy()
+		})
+
+		it("should find unique content when startLine is significantly off", async () => {
+			// Content exists at lines 95-97 but startLine says 10
+			const lines: string[] = []
+			for (let i = 1; i <= 100; i++) {
+				if (i === 95) {
+					lines.push("function uniqueTarget() {")
+					lines.push('  return "found me"')
+					lines.push("}")
+				} else {
+					lines.push(`// filler line ${i}`)
+				}
+			}
+			const originalContent = lines.join("\n")
+
+			const diff =
+				"<<<<<<< SEARCH\n" +
+				":start_line:10\n" +
+				"-------\n" +
+				"function uniqueTarget() {\n" +
+				'  return "found me"\n' +
+				"}\n" +
+				"=======\n" +
+				"function uniqueTarget() {\n" +
+				'  return "updated"\n' +
+				"}\n" +
+				">>>>>>> REPLACE"
+
+			const result = await strategy.applyDiff(originalContent, diff)
+			expect(result.success).toBe(true)
+			expect(result.content).toContain('return "updated"')
+			expect(result.content).not.toContain('return "found me"')
+		})
+
+		it("should pick the closest match to startLine when multiple matches exist", async () => {
+			// Same content at lines 20-21 and 80-81, startLine says 75
+			const lines: string[] = []
+			for (let i = 1; i <= 100; i++) {
+				if (i === 20 || i === 80) {
+					lines.push("const value = 42")
+					lines.push("console.log(value)")
+					i++ // skip next since we added 2 lines
+				} else {
+					lines.push(`// filler line ${i}`)
+				}
+			}
+			const originalContent = lines.join("\n")
+
+			const diff =
+				"<<<<<<< SEARCH\n" +
+				":start_line:75\n" +
+				"-------\n" +
+				"const value = 42\n" +
+				"console.log(value)\n" +
+				"=======\n" +
+				"const value = 99\n" +
+				"console.log(value)\n" +
+				">>>>>>> REPLACE"
+
+			const result = await strategy.applyDiff(originalContent, diff)
+			expect(result.success).toBe(true)
+			// The match at line 80 (closer to startLine 75) should be replaced
+			// The match at line 20 should remain unchanged
+			const resultLines = result.content!.split("\n")
+			// Find all occurrences of "const value = "
+			const value42Lines = resultLines.filter((l) => l.includes("const value = 42"))
+			const value99Lines = resultLines.filter((l) => l.includes("const value = 99"))
+			expect(value42Lines.length).toBe(1) // The one at line 20 remains
+			expect(value99Lines.length).toBe(1) // The one at line 80 was replaced
+		})
+
+		it("should succeed with exact match fallback even when fuzzy threshold is 1.0", async () => {
+			// Exact content exists far from startLine, threshold is strict (1.0)
+			const lines: string[] = []
+			for (let i = 1; i <= 200; i++) {
+				if (i === 180) {
+					lines.push("  if (condition) {")
+					lines.push("    doSomething()")
+					lines.push("  }")
+				} else {
+					lines.push(`// line ${i}`)
+				}
+			}
+			const originalContent = lines.join("\n")
+
+			const diff =
+				"<<<<<<< SEARCH\n" +
+				":start_line:5\n" +
+				"-------\n" +
+				"  if (condition) {\n" +
+				"    doSomething()\n" +
+				"  }\n" +
+				"=======\n" +
+				"  if (condition) {\n" +
+				"    doSomethingElse()\n" +
+				"  }\n" +
+				">>>>>>> REPLACE"
+
+			const result = await strategy.applyDiff(originalContent, diff)
+			expect(result.success).toBe(true)
+			expect(result.content).toContain("doSomethingElse()")
+			expect(result.content).not.toContain("doSomething()")
+		})
+
+		it("should fall back to aggressive stripping with full-file range", async () => {
+			// Content has line number prefixes that need aggressive stripping
+			// and is far from startLine
+			const lines: string[] = []
+			for (let i = 1; i <= 100; i++) {
+				if (i === 90) {
+					lines.push("function target() {")
+					lines.push("  return true")
+					lines.push("}")
+				} else {
+					lines.push(`// padding ${i}`)
+				}
+			}
+			const originalContent = lines.join("\n")
+
+			// Search content has line number prefixes with pipe format (aggressive strip pattern)
+			// aggressive pattern: /^\s*(?:\d+\s)?\|\s(.*)$/
+			const diff =
+				"<<<<<<< SEARCH\n" +
+				":start_line:5\n" +
+				"-------\n" +
+				"| function target() {\n" +
+				"|   return true\n" +
+				"| }\n" +
+				"=======\n" +
+				"| function target() {\n" +
+				"|   return false\n" +
+				"| }\n" +
+				">>>>>>> REPLACE"
+
+			const result = await strategy.applyDiff(originalContent, diff)
+			expect(result.success).toBe(true)
+			expect(result.content).toContain("return false")
+			expect(result.content).not.toContain("return true")
+		})
+
+		it("should not match when content does not exist anywhere in the file", async () => {
+			const lines: string[] = []
+			for (let i = 1; i <= 50; i++) {
+				lines.push(`// line ${i}`)
+			}
+			const originalContent = lines.join("\n")
+
+			const diff =
+				"<<<<<<< SEARCH\n" +
+				":start_line:10\n" +
+				"-------\n" +
+				"function nonExistent() {\n" +
+				"  return null\n" +
+				"}\n" +
+				"=======\n" +
+				"function replacement() {\n" +
+				"  return null\n" +
+				"}\n" +
+				">>>>>>> REPLACE"
+
+			const result = await strategy.applyDiff(originalContent, diff)
+			expect(result.success).toBe(false)
+		})
+	})
 })
