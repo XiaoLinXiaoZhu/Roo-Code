@@ -72,6 +72,43 @@ function fuzzySearch(lines: string[], searchChunk: string, startIndex: number, e
 	return { bestScore, bestMatchIndex, bestMatchContent }
 }
 
+/**
+ * Performs an exact substring search across all `lines` using normalized comparison.
+ * Returns all positions where the normalized search content matches exactly.
+ * When multiple matches exist, they are sorted by distance to `preferredLine` (0-based).
+ */
+function exactSubstringSearch(
+	lines: string[],
+	searchLines: string[],
+	preferredLine: number,
+): { matchIndices: number[] } {
+	const searchLen = searchLines.length
+	if (searchLen === 0) return { matchIndices: [] }
+
+	// Pre-normalize search lines (line-by-line to preserve structure)
+	const normalizedSearchLines = searchLines.map((l) => normalizeString(l))
+
+	const matchIndices: number[] = []
+
+	for (let i = 0; i <= lines.length - searchLen; i++) {
+		let allMatch = true
+		for (let j = 0; j < searchLen; j++) {
+			if (normalizeString(lines[i + j]) !== normalizedSearchLines[j]) {
+				allMatch = false
+				break
+			}
+		}
+		if (allMatch) {
+			matchIndices.push(i)
+		}
+	}
+
+	// Sort by distance to preferred line (closest first)
+	matchIndices.sort((a, b) => Math.abs(a - preferredLine) - Math.abs(b - preferredLine))
+
+	return { matchIndices }
+}
+
 export class MultiSearchReplaceDiffStrategy implements DiffStrategy {
 	private fuzzyThreshold: number
 	private bufferLines: number
@@ -406,7 +443,21 @@ export class MultiSearchReplaceDiffStrategy implements DiffStrategy {
 				bestMatchContent = midContent
 			}
 
-			// Try aggressive line number stripping as a fallback if regular matching fails
+			// Fallback 1: Full-file exact substring match (normalized line-by-line comparison)
+			// This handles cases where startLine is significantly off but content exists uniquely in the file
+			if (matchIndex === -1 || bestMatchScore < this.fuzzyThreshold) {
+				const preferredLine = startLine ? startLine - 1 : Math.floor(resultLines.length / 2)
+				const { matchIndices } = exactSubstringSearch(resultLines, searchLines, preferredLine)
+
+				if (matchIndices.length > 0) {
+					// Use the closest match to the preferred line
+					matchIndex = matchIndices[0]
+					bestMatchScore = 1.0
+					bestMatchContent = resultLines.slice(matchIndex, matchIndex + searchLines.length).join("\n")
+				}
+			}
+
+			// Fallback 2: Aggressive line number stripping with full-file search range
 			if (matchIndex === -1 || bestMatchScore < this.fuzzyThreshold) {
 				// Strip both search and replace content once (simultaneously)
 				const aggressiveSearchContent = stripLineNumbers(searchContent, true)
@@ -415,47 +466,64 @@ export class MultiSearchReplaceDiffStrategy implements DiffStrategy {
 				const aggressiveSearchLines = aggressiveSearchContent ? aggressiveSearchContent.split(/\r?\n/) : []
 				const aggressiveSearchChunk = aggressiveSearchLines.join("\n")
 
-				// Try middle-out search again with aggressive stripped content (respecting the same search bounds)
-				const {
-					bestScore,
-					bestMatchIndex,
-					bestMatchContent: aggContent,
-				} = fuzzySearch(resultLines, aggressiveSearchChunk, searchStartIndex, searchEndIndex)
-				if (bestMatchIndex !== -1 && bestScore >= this.fuzzyThreshold) {
-					matchIndex = bestMatchIndex
-					bestMatchScore = bestScore
-					bestMatchContent = aggContent
+				// Try full-file exact substring match with aggressive stripped content first
+				const preferredLine = startLine ? startLine - 1 : Math.floor(resultLines.length / 2)
+				const { matchIndices } = exactSubstringSearch(resultLines, aggressiveSearchLines, preferredLine)
+
+				if (matchIndices.length > 0) {
+					matchIndex = matchIndices[0]
+					bestMatchScore = 1.0
+					bestMatchContent = resultLines
+						.slice(matchIndex, matchIndex + aggressiveSearchLines.length)
+						.join("\n")
 					// Replace the original search/replace with their stripped versions
 					searchContent = aggressiveSearchContent
 					replaceContent = aggressiveReplaceContent
 					searchLines = aggressiveSearchLines
 					replaceLines = replaceContent ? replaceContent.split(/\r?\n/) : []
 				} else {
-					// No match found with either method
-					const originalContentSection =
-						startLine !== undefined && endLine !== undefined
-							? `\n\nOriginal Content:\n${addLineNumbers(
-									resultLines
-										.slice(
-											Math.max(0, startLine - 1 - this.bufferLines),
-											Math.min(resultLines.length, endLine + this.bufferLines),
-										)
-										.join("\n"),
-									Math.max(1, startLine - this.bufferLines),
-								)}`
-							: `\n\nOriginal Content:\n${addLineNumbers(resultLines.join("\n"))}`
+					// Try middle-out fuzzy search with full-file range as last resort
+					const {
+						bestScore,
+						bestMatchIndex,
+						bestMatchContent: aggContent,
+					} = fuzzySearch(resultLines, aggressiveSearchChunk, 0, resultLines.length)
+					if (bestMatchIndex !== -1 && bestScore >= this.fuzzyThreshold) {
+						matchIndex = bestMatchIndex
+						bestMatchScore = bestScore
+						bestMatchContent = aggContent
+						// Replace the original search/replace with their stripped versions
+						searchContent = aggressiveSearchContent
+						replaceContent = aggressiveReplaceContent
+						searchLines = aggressiveSearchLines
+						replaceLines = replaceContent ? replaceContent.split(/\r?\n/) : []
+					} else {
+						// No match found with any method
+						const originalContentSection =
+							startLine !== undefined && endLine !== undefined
+								? `\n\nOriginal Content:\n${addLineNumbers(
+										resultLines
+											.slice(
+												Math.max(0, startLine - 1 - this.bufferLines),
+												Math.min(resultLines.length, endLine + this.bufferLines),
+											)
+											.join("\n"),
+										Math.max(1, startLine - this.bufferLines),
+									)}`
+								: `\n\nOriginal Content:\n${addLineNumbers(resultLines.join("\n"))}`
 
-					const bestMatchSection = bestMatchContent
-						? `\n\nBest Match Found:\n${addLineNumbers(bestMatchContent, matchIndex + 1)}`
-						: `\n\nBest Match Found:\n(no match)`
+						const bestMatchSection = bestMatchContent
+							? `\n\nBest Match Found:\n${addLineNumbers(bestMatchContent, matchIndex + 1)}`
+							: `\n\nBest Match Found:\n(no match)`
 
-					const lineRange = startLine ? ` at line: ${startLine}` : ""
+						const lineRange = startLine ? ` at line: ${startLine}` : ""
 
-					diffResults.push({
-						success: false,
-						error: `No sufficiently similar match found${lineRange} (${Math.floor(bestMatchScore * 100)}% similar, needs ${Math.floor(this.fuzzyThreshold * 100)}%)\n\nDebug Info:\n- Similarity Score: ${Math.floor(bestMatchScore * 100)}%\n- Required Threshold: ${Math.floor(this.fuzzyThreshold * 100)}%\n- Search Range: ${startLine ? `starting at line ${startLine}` : "start to end"}\n- Tried both standard and aggressive line number stripping\n- Tip: Use the read_file tool to get the latest content of the file before attempting to use the apply_diff tool again, as the file content may have changed\n\nSearch Content:\n${searchChunk}${bestMatchSection}${originalContentSection}`,
-					})
-					continue
+						diffResults.push({
+							success: false,
+							error: `No sufficiently similar match found${lineRange} (${Math.floor(bestMatchScore * 100)}% similar, needs ${Math.floor(this.fuzzyThreshold * 100)}%)\n\nDebug Info:\n- Similarity Score: ${Math.floor(bestMatchScore * 100)}%\n- Required Threshold: ${Math.floor(this.fuzzyThreshold * 100)}%\n- Search Range: ${startLine ? `starting at line ${startLine}` : "start to end"}\n- Tried standard matching, full-file exact match, and aggressive line number stripping\n- Tip: Use the read_file tool to get the latest content of the file before attempting to use the apply_diff tool again, as the file content may have changed\n\nSearch Content:\n${searchChunk}${bestMatchSection}${originalContentSection}`,
+						})
+						continue
+					}
 				}
 			}
 
