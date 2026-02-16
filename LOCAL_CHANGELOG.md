@@ -1,5 +1,14 @@
 # Roo Code Changelog
 
+## [3.51.4] - 2026-02-16
+
+### 🌳 意图树 (Intent Tree)
+
+- **注入策略优化**：将 `intentTreeUpdated` 从 boolean 改为三级标记（`structural` / `minor` / `false`），只在结构性变化时注入完整树摘要
+    - `restructure_intent`（reparent/promote/extract）→ `structural`：shortId 可能大规模变化，需要完整树
+    - `add_intent` / `update_intent` / `prune_intent` / `commit_intent` → `minor`：工具返回值已足够说明变更
+    - 减少不必要的注意力偏移和 token 消耗
+
 ## [3.51.3] - 2026-02-13
 
 ### 🐛 修复

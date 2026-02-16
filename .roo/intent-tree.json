@@ -48,10 +48,27 @@
 			"shortId": "I1.1.1",
 			"type": "impl",
 			"content": "修改 Task.ts 中 intentTreeUpdated 的类型从 boolean 改为联合类型",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "03c98f41-b0d9-45f8-ac67-1ce4ba1d589d",
 			"childrenIds": [],
-			"codeBindings": [],
+			"codeBindings": [
+				{
+					"commitHash": "c944f19f6472b4e780af1762eb4ef322167ee5e3",
+					"commitMessage": "[intent:I1.1.1] 优化 intent tree 注入策略：区分 structural/minor 变化级别，只在结构性变化时注入完整树摘要",
+					"files": [
+						".roo/intent-tree.json",
+						"src/core/environment/getEnvironmentDetails.ts",
+						"src/core/task/Task.ts",
+						"src/core/tools/AddIntentTool.ts",
+						"src/core/tools/CommitIntentTool.ts",
+						"src/core/tools/PruneIntentTool.ts",
+						"src/core/tools/RestructureIntentTool.ts",
+						"src/core/tools/UpdateIntentTool.ts"
+					],
+					"diffSummary": "8 file(s), +59 -277",
+					"timestamp": "2026-02-16T14:40:43.138Z"
+				}
+			],
 			"createdBy": {
 				"taskId": "019c66e1-703e-7079-9635-6cbc822ce53f",
 				"timestamp": "2026-02-16T14:37:39.037Z",
@@ -62,6 +79,16 @@
 					"taskId": "019c66e1-703e-7079-9635-6cbc822ce53f",
 					"timestamp": "2026-02-16T14:37:46.231Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c66e1-703e-7079-9635-6cbc822ce53f",
+					"timestamp": "2026-02-16T14:40:43.138Z",
+					"action": "bound commit c944f19"
+				},
+				{
+					"taskId": "019c66e1-703e-7079-9635-6cbc822ce53f",
+					"timestamp": "2026-02-16T14:40:43.138Z",
+					"action": "updated: status→done"
 				}
 			],
 			"assumption": "A1.1 的实现需要修改 Task.ts 中的类型声明。这是第一个原子变更。"
