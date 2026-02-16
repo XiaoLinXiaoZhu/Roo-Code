@@ -72,8 +72,8 @@ export class AddIntentTool extends BaseTool<"add_intent"> {
 
 			await task.intentTree.save()
 
-			// 标记 intent-tree 已更新，下次 environment 会包含最新树
-			task.intentTreeUpdated = true
+			// 标记 intent-tree 已更新（minor：新增节点，工具返回已包含完整节点信息和父节点位置）
+			task.intentTreeUpdated = "minor"
 
 			// 获取父节点信息（如果有）
 			let parentNode = null

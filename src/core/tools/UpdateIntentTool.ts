@@ -84,8 +84,8 @@ export class UpdateIntentTool extends BaseTool<"update_intent"> {
 
 			await task.intentTree.save()
 
-			// 标记 intent-tree 已更新，下次 environment 会包含最新树
-			task.intentTreeUpdated = true
+			// 标记 intent-tree 已更新（minor：仅状态/内容变更，工具返回已足够说明）
+			task.intentTreeUpdated = "minor"
 
 			// 构建变更列表
 			const changes: Array<{ field: "content" | "status"; oldValue: string; newValue: string }> = []

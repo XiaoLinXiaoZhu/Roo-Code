@@ -126,8 +126,8 @@ export class CommitIntentTool extends BaseTool<"commit_intent"> {
 			task.intentTree.updateNode(targetNode.shortId, { status: "done" }, task.taskId)
 			await task.intentTree.save()
 
-			// 标记 intent-tree 已更新，下次 environment 会包含最新树
-			task.intentTreeUpdated = true
+			// 标记 intent-tree 已更新（minor：绑定 commit + 状态变更，工具返回已足够说明）
+			task.intentTreeUpdated = "minor"
 
 			// 构建 UI 展示用的 JSON 结果
 			const uiResult = {

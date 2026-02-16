@@ -80,8 +80,8 @@ export class PruneIntentTool extends BaseTool<"prune_intent"> {
 
 			await task.intentTree.save()
 
-			// 标记 intent-tree 已更新，下次 environment 会包含最新树
-			task.intentTreeUpdated = true
+			// 标记 intent-tree 已更新（minor：剪枝操作，工具返回已包含被剪枝节点列表）
+			task.intentTreeUpdated = "minor"
 
 			// 构建 UI 展示用的 JSON 结果
 			const uiResult = {

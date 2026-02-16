@@ -90,8 +90,8 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 
 		await task.intentTree!.save()
 
-		// 标记 intent-tree 已更新，下次 environment 会包含最新树
-		task.intentTreeUpdated = true
+		// 标记 intent-tree 已更新（structural：reparent 可能导致 shortId 大规模变化，需要注入完整树）
+		task.intentTreeUpdated = "structural"
 
 		// 获取新父节点信息
 		let newParentNode = null
@@ -228,8 +228,8 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 
 		await task.intentTree!.save()
 
-		// 标记 intent-tree 已更新，下次 environment 会包含最新树
-		task.intentTreeUpdated = true
+		// 标记 intent-tree 已更新（structural：promote 可能导致 shortId 大规模变化，需要注入完整树）
+		task.intentTreeUpdated = "structural"
 
 		// 获取新父节点信息
 		let newParentNode = null
@@ -388,8 +388,8 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 
 		await task.intentTree!.save()
 
-		// 标记 intent-tree 已更新，下次 environment 会包含最新树
-		task.intentTreeUpdated = true
+		// 标记 intent-tree 已更新（structural：extract_common_parent 重组树结构，需要注入完整树）
+		task.intentTreeUpdated = "structural"
 
 		// 构建 UI 展示用的 JSON 结果
 		const shortIdChanges: Array<{ old: string; new: string }> = []

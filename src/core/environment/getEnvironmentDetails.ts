@@ -291,11 +291,13 @@ export async function getEnvironmentDetails(
 	// ============================================================================
 	// Intent Tree Section (意图树：项目级 OKR，跨对话的目标/实现溯源)
 	// 所有模式都可读，只有 solo_dev 可写（通过 intent 工具组）
-	// 优化：只在两种情况下注入 intent-tree：
-	// 1. 对话开始时（isFirstMessage）- 类似 file-list
-	// 2. intent-tree 更新后（intentTreeUpdated）- 工具操作后
+	// 优化：只在以下情况注入完整 intent-tree 摘要：
+	// 1. 对话开始时（isFirstMessage）- 提供完整上下文
+	// 2. 结构性变化后（intentTreeUpdated === "structural"）- restructure 等导致 shortId 大规模变化
+	// 不注入的情况：
+	// - minor 变化（add/update/prune/commit）- 工具返回值已足够说明变更结果
 	// ============================================================================
-	const shouldIncludeIntentTree = cline.intentTree && (isFirstMessage || cline.intentTreeUpdated)
+	const shouldIncludeIntentTree = cline.intentTree && (isFirstMessage || cline.intentTreeUpdated === "structural")
 	if (shouldIncludeIntentTree) {
 		const intentSummary = cline.intentTree!.toSummary()
 		// 解释 intent-tree 是什么，让所有模式都能理解上下文
@@ -306,7 +308,8 @@ export async function getEnvironmentDetails(
 		  Status: 📋=planned, 🔧=in_progress, ✅=done, 🔄=superseded, ❌=pruned`
 
 		// 标记是否是更新触发的（帮助模型理解上下文）
-		const updateHint = cline.intentTreeUpdated ? ' hint="updated since last message"' : ""
+		const updateHint =
+			cline.intentTreeUpdated === "structural" ? ' hint="structural change since last message"' : ""
 
 		if (intentSummary) {
 			xmlContent += `\n  <intent_tree description="${treeDescription}"${updateHint}>`
@@ -318,8 +321,10 @@ export async function getEnvironmentDetails(
 		} else {
 			xmlContent += `\n  <intent_tree description="${treeDescription}" status="empty"${updateHint}/>`
 		}
+	}
 
-		// 清除更新标记，避免重复注入
+	// 无论是否注入了摘要，都清除更新标记，避免重复注入
+	if (cline.intentTreeUpdated) {
 		cline.intentTreeUpdated = false
 	}
 

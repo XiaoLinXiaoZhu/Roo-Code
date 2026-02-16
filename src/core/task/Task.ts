@@ -331,7 +331,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 	diffViewProvider: DiffViewProvider
 	diffStrategy?: DiffStrategy
 	didEditFile: boolean = false
-	intentTreeUpdated: boolean = false // 标记 intent-tree 是否在本轮更新，用于在 environment 中附加
+	intentTreeUpdated: "structural" | "minor" | false = false // 标记 intent-tree 变化级别：structural=需要注入完整树摘要, minor=工具返回已足够
 
 	// LLM Messages & Chat Messages
 	apiConversationHistory: RooMessage[] = []
