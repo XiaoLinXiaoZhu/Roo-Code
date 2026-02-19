@@ -337,8 +337,17 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 			return
 		}
 
-		// 验证所有节点存在
-		const nodes = params.nodeIds.map((id) => task.intentTree!.getNode(id))
+		// 验证所有节点存在，并提前解析 shortId 为 UUID
+		// 重要：必须在 reparent 循环之前解析，因为每次 reparentNode 都会触发
+		// recalculateShortIds()，导致后续迭代中的 shortId 指向错误的节点
+		const resolvedNodeIds: string[] = []
+		const nodes = params.nodeIds.map((id) => {
+			const resolvedId = task.intentTree!.resolveId(id)
+			if (resolvedId) {
+				resolvedNodeIds.push(resolvedId)
+			}
+			return task.intentTree!.getNode(id)
+		})
 		const missingIndex = nodes.findIndex((n) => !n)
 		if (missingIndex !== -1) {
 			task.consecutiveMistakeCount++
@@ -369,10 +378,11 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 		})
 
 		// 将所有指定节点 reparent 到新父节点下
+		// 使用预先解析的 UUID 而非 shortId，避免 recalculateShortIds 导致的 shortId 漂移
 		const reparentResults: Array<{ nodeId: string; success: boolean; error?: string }> = []
 		const allShortIdChanges = new Map<string, { old: string; new: string }>()
 
-		for (const nodeId of params.nodeIds) {
+		for (const nodeId of resolvedNodeIds) {
 			const result = task.intentTree!.reparentNode(nodeId, newParentResult.node.id, task.taskId)
 			reparentResults.push({
 				nodeId,

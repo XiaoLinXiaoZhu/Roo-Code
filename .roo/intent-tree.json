@@ -92,13 +92,56 @@
 				}
 			],
 			"assumption": "A1.1 的实现需要修改 Task.ts 中的类型声明。这是第一个原子变更。"
+		},
+		"799ff501-3cf2-4fe1-a70a-94cb6131f315": {
+			"id": "799ff501-3cf2-4fe1-a70a-94cb6131f315",
+			"shortId": "G2",
+			"type": "goal",
+			"content": "修复 intent tree 重构函数中的 shortId 漂移 bug",
+			"status": "planned",
+			"parentId": null,
+			"childrenIds": ["5813be81-ffb5-4592-8c8f-cfb2dbfe81dd"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c73a7-b414-70a9-a1cb-e53b4279a141",
+				"timestamp": "2026-02-19T02:11:56.621Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "用户提到 intent tree 的重构函数有问题。通过测试验证，确认 handleExtractCommonParent 中存在 shortId 漂移 bug：循环中每次 reparentNode 都会 recalculateShortIds，导致后续迭代用旧 shortId 找到错误的节点。",
+			"maxChildIndex": 1
+		},
+		"5813be81-ffb5-4592-8c8f-cfb2dbfe81dd": {
+			"id": "5813be81-ffb5-4592-8c8f-cfb2dbfe81dd",
+			"shortId": "I2.1",
+			"type": "impl",
+			"content": "在 handleExtractCommonParent 的 reparent 循环前，先将 params.nodeIds 中的 shortId 全部解析为 UUID",
+			"status": "in_progress",
+			"parentId": "799ff501-3cf2-4fe1-a70a-94cb6131f315",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c73a7-b414-70a9-a1cb-e53b4279a141",
+				"timestamp": "2026-02-19T02:12:04.390Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c73a7-b414-70a9-a1cb-e53b4279a141",
+					"timestamp": "2026-02-19T02:12:10.238Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
+			"assumption": "handleExtractCommonParent 在循环 reparent 前需要先将所有 shortId 解析为 UUID，避免 recalculateShortIds 导致的 shortId 漂移。这是最小改动的修复方案。"
 		}
 	},
-	"rootIds": ["ae1190ad-072a-4d35-953f-408f9eb833b8"],
+	"rootIds": ["ae1190ad-072a-4d35-953f-408f9eb833b8", "799ff501-3cf2-4fe1-a70a-94cb6131f315"],
 	"shortIdIndex": {
 		"G1": "ae1190ad-072a-4d35-953f-408f9eb833b8",
 		"A1.1": "03c98f41-b0d9-45f8-ac67-1ce4ba1d589d",
-		"I1.1.1": "e20d4807-151b-4907-82dc-b7d3deb24c4e"
+		"I1.1.1": "e20d4807-151b-4907-82dc-b7d3deb24c4e",
+		"G2": "799ff501-3cf2-4fe1-a70a-94cb6131f315",
+		"I2.1": "5813be81-ffb5-4592-8c8f-cfb2dbfe81dd"
 	},
-	"rootMaxChildIndex": 1
+	"rootMaxChildIndex": 2
 }

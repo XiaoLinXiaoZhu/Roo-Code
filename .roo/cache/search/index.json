@@ -1605,6 +1605,25 @@
       "gitCommit": "33ac0f0716ca2cc892b33eb19f2e469af3cd1a50",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"taskHistoryDefinition\":{\"type\":\"string\"},\"taskHistoryEntryFields\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"whereStored\":{\"type\":\"string\"},\"potentiallyLargeFields\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"relevantFiles\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+    },
+    {
+      "id": "64",
+      "query": "Where is the intent tree restructure function implemented?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "intent",
+        "tree",
+        "restructure",
+        "function",
+        "implemented"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-19T02:09:45.703Z",
+      "gitCommit": "3a7b9e279749ed78f6bf8c426db52b3bca50418b",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
     }
   ]
 }
