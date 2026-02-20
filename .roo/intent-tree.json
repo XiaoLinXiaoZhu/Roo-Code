@@ -196,7 +196,7 @@
 			"content": "Redesign consult_expert as empowerment tool: simplified params focused on domain knowledge, methodology, best practices acquisition",
 			"status": "planned",
 			"parentId": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
-			"childrenIds": ["ccd75032-efa7-4d88-94c4-cb41eaeb2de5"],
+			"childrenIds": ["ccd75032-efa7-4d88-94c4-cb41eaeb2de5", "5eae7f03-dc70-43dc-a28e-ccdbb2e56ad6"],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
@@ -205,17 +205,31 @@
 			},
 			"modifiedBy": [],
 			"assumption": "G1 goal has shifted to empowerment positioning. The previous approach A1.1 was about cognitive scaffolding for problem diagnosis. Now we need a completely different approach: redesign as knowledge/methodology acquisition tool. This supersedes A1.1's design philosophy.",
-			"maxChildIndex": 1
+			"maxChildIndex": 2
 		},
 		"ccd75032-efa7-4d88-94c4-cb41eaeb2de5": {
 			"id": "ccd75032-efa7-4d88-94c4-cb41eaeb2de5",
 			"shortId": "I1.2.1",
 			"type": "impl",
 			"content": "Rewrite all consult_expert files: tool definition, ConsultExpertTool, NativeToolCallParser, tools.ts types for empowerment model",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "168b6825-a435-4516-91fd-ff80edddcfc2",
 			"childrenIds": [],
-			"codeBindings": [],
+			"codeBindings": [
+				{
+					"commitHash": "80e455e9a278a72a2d5f21f12fe5323d428f9167",
+					"commitMessage": "[intent:I1.2.1] Redesign consult_expert as empowerment tool: simplified params (domain, topic, context), new consultTypes (principles, best-practices, methodology, standards)",
+					"files": [
+						".roo/intent-tree.json",
+						"src/core/assistant-message/NativeToolCallParser.ts",
+						"src/core/prompts/tools/native-tools/consult_expert.ts",
+						"src/core/tools/ConsultExpertTool.ts",
+						"src/shared/tools.ts"
+					],
+					"diffSummary": "5 file(s), +199 -223",
+					"timestamp": "2026-02-20T03:07:48.045Z"
+				}
+			],
 			"createdBy": {
 				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
 				"timestamp": "2026-02-20T03:02:10.591Z",
@@ -226,9 +240,42 @@
 					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
 					"timestamp": "2026-02-20T03:02:21.634Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+					"timestamp": "2026-02-20T03:07:48.045Z",
+					"action": "bound commit 80e455e"
+				},
+				{
+					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+					"timestamp": "2026-02-20T03:07:48.045Z",
+					"action": "updated: status→done"
 				}
 			],
 			"assumption": "Under A1.2. Need to redesign the tool definition, execution logic, parser, and types all at once. The empowerment model means: domain (who), topic (what knowledge area), context (why I need this), attachments, consultType changes to knowledge-oriented types."
+		},
+		"5eae7f03-dc70-43dc-a28e-ccdbb2e56ad6": {
+			"id": "5eae7f03-dc70-43dc-a28e-ccdbb2e56ad6",
+			"shortId": "I1.2.2",
+			"type": "impl",
+			"content": "Update expert mode definition in packages/types/src/mode.ts to align with empowerment positioning",
+			"status": "in_progress",
+			"parentId": "168b6825-a435-4516-91fd-ff80edddcfc2",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+				"timestamp": "2026-02-20T03:08:57.950Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+					"timestamp": "2026-02-20T03:09:18.039Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
+			"assumption": "Under A1.2 approach. The expert mode's roleDefinition and customInstructions still describe it as a problem-solver. Need to align with the empowerment positioning - the expert should teach knowledge/methodology, not diagnose specific problems."
 		}
 	},
 	"rootIds": ["c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf", "d66da17a-39a6-4c95-baf0-49dfb816c3eb"],
@@ -240,7 +287,8 @@
 		"I1.1.1": "0786ae71-444e-4db8-b3b6-64137d2d4fcc",
 		"I1.1.2": "6b5c9884-90a5-49dd-a5ec-27aa304fbcaa",
 		"A1.2": "168b6825-a435-4516-91fd-ff80edddcfc2",
-		"I1.2.1": "ccd75032-efa7-4d88-94c4-cb41eaeb2de5"
+		"I1.2.1": "ccd75032-efa7-4d88-94c4-cb41eaeb2de5",
+		"I1.2.2": "5eae7f03-dc70-43dc-a28e-ccdbb2e56ad6"
 	},
 	"rootMaxChildIndex": 2
 }
