@@ -2,37 +2,46 @@ import type OpenAI from "openai"
 
 const CONSULT_EXPERT_DESCRIPTION = `Consult an expert for in-depth analysis, architectural advice, or technical decision-making. This tool provides specialized recommendations based on domain knowledge.
 
-To get the most value from this tool, you should be an effective questioner. Follow these guidelines:
+CRITICAL: Avoid the XY Problem. Do not ask "How do I do X?" or "Is X correct?" when your actual goal is Y. Always state your ultimate goal (Y) clearly.
 
-**1. Identify the Right Expert (Find Your Target)**
-- Determine the problem type: implementation engineering, business logic, or underlying principles. Choose a practitioner, planner, or researcher accordingly.
+To get the most value from this tool, follow these guidelines:
+
+**1. Identify the Right Expert**
+- Determine the problem type: implementation, architecture, or principles.
 - Seek cross-domain expertise (e.g., "algorithms + linguistics") rather than generic skills.
-- Prioritize experts with concrete outputs (code, articles, projects) over those with titles only.
 
-**2. Define the Scope (Clarify Your Request)**
-- Clearly state what you need: guidance, design review, or critique.
-- Specify response format: one-line suggestion or detailed analysis?
-- Indicate time/depth: "占用五分钟" (five minutes) or "需要深入审视" (in-depth review).
+**2. Define the Goal (The 'Y' in XY Problem)**
+- What is the ultimate business or technical objective you are trying to achieve?
+- Do not confuse the goal with your current proposed solution.
 
-**3. Provide Context (Present the Facts)**
-- Known: What you've tried and where you're stuck.
-- Unknown: Specific points causing confusion.
-- Principle: Provide sufficient context, but avoid unnecessary details or verbose descriptions.
+**3. Present the Context and Current Thoughts**
+- Known: What you've tried, where you're stuck, and the constraints.
+- Proposed Solutions: What approaches you are considering (A, B, etc.), but remain open to the expert suggesting a completely different approach (C).
 
 **4. Construct Good Questions**
-- Break down: Ask one question at a time, not everything at once.
-- Be open: Ask "how" and "why" more than "is this correct?"
-- Avoid assumptions: Don't ask "how to use X to do Y" (X might be wrong). Instead ask "how to solve Y".`
+- Ask "What is the best approach to achieve [Goal]?" instead of "Is [Approach A] correct?"
+- Ask for evaluation of your proposed solutions against the goal.
+- Ask for alternative solutions you might have missed.
+
+**Example Good Consultation:**
+Goal: "I need to prevent users from submitting duplicate orders."
+Proposed Solutions: "1. Disable the submit button. 2. Add a unique constraint in the database."
+Question: "What is the most robust architecture to prevent duplicate orders? Are my proposed solutions sufficient, or is there a better pattern like idempotency keys?"
+
+**Example Bad Consultation (XY Problem):**
+Question: "How do I disable a button in React after click?" (This hides the real goal of preventing duplicate orders, leading to a fragile solution).`
 
 const DOMAIN_PARAMETER_DESCRIPTION = `Expert domain or specialty (e.g., "UI/UX design and user experience", "Backend architecture and distributed systems", "Database design and optimization", "Security and code review"). Be specific about the expertise needed.`
 
 const TOPIC_PARAMETER_DESCRIPTION = `Brief topic or title of the consultation. Should be concise but descriptive.`
 
-const QUESTION_PARAMETER_DESCRIPTION = `Detailed question or description of what you need expert advice on. Ask "how" and "why" more than "is this correct?" Avoid assumptions: Don't ask "how to use X to do Y" (X might be wrong). Instead ask "how to solve Y".`
+const ULTIMATE_GOAL_PARAMETER_DESCRIPTION = `The true objective (Y) you are trying to achieve. This must be the underlying problem you want to solve, NOT your proposed implementation or method (X). Example: "Prevent duplicate order submissions" instead of "Disable the submit button".`
 
-const KNOWN_CONTEXT_PARAMETER_DESCRIPTION = `What you already know about this problem: current state, what you've tried, where you're stuck, relevant code/files you've examined. This helps the expert understand your starting point and avoid repeating information you already have.`
+const CURRENT_APPROACH_PARAMETER_DESCRIPTION = `What you are currently doing, planning to do, or the options you are considering (A vs B). Be transparent that these are just ideas and might be wrong.`
 
-const UNKNOWN_POINTS_PARAMETER_DESCRIPTION = `Specific points causing confusion or uncertainty: what you don't understand, what you need help deciding, what risks you're unsure about. This helps the expert focus on the gaps in your knowledge.`
+const QUESTION_PARAMETER_DESCRIPTION = `The specific question for the expert. CRITICAL: Do not ask "Is my approach correct?" or "Should I choose A or B?". Instead, ask "What is the best way to achieve the ultimate goal?" and "What are the flaws in my current approach?" Ask for alternative solutions you might have missed.`
+
+const CONTEXT_PARAMETER_DESCRIPTION = `Relevant background information, constraints, what you've tried, and where you're stuck. This helps the expert understand your starting point.`
 
 const ATTACHMENTS_PARAMETER_DESCRIPTION = `Optional: File paths or content to provide as context for the expert. Use absolute paths when possible.`
 
@@ -59,17 +68,21 @@ export default {
 					type: "string",
 					description: TOPIC_PARAMETER_DESCRIPTION,
 				},
+				ultimateGoal: {
+					type: "string",
+					description: ULTIMATE_GOAL_PARAMETER_DESCRIPTION,
+				},
+				currentApproach: {
+					type: "string",
+					description: CURRENT_APPROACH_PARAMETER_DESCRIPTION,
+				},
+				context: {
+					type: "string",
+					description: CONTEXT_PARAMETER_DESCRIPTION,
+				},
 				question: {
 					type: "string",
 					description: QUESTION_PARAMETER_DESCRIPTION,
-				},
-				knownContext: {
-					type: "string",
-					description: KNOWN_CONTEXT_PARAMETER_DESCRIPTION,
-				},
-				unknownPoints: {
-					type: "string",
-					description: UNKNOWN_POINTS_PARAMETER_DESCRIPTION,
 				},
 				attachments: {
 					type: ["string", "null"],
@@ -81,7 +94,7 @@ export default {
 					description: CONSULT_TYPE_PARAMETER_DESCRIPTION,
 				},
 			},
-			required: ["domain", "topic", "question", "knownContext", "unknownPoints", "consultType"],
+			required: ["domain", "topic", "ultimateGoal", "currentApproach", "context", "question", "consultType"],
 			additionalProperties: false,
 		},
 	},

@@ -1,147 +1,70 @@
 {
 	"version": 1,
 	"nodes": {
-		"ae1190ad-072a-4d35-953f-408f9eb833b8": {
-			"id": "ae1190ad-072a-4d35-953f-408f9eb833b8",
+		"c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf": {
+			"id": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
 			"shortId": "G1",
 			"type": "goal",
-			"content": "优化 intent tree 在 environment details 中的注入策略：只在结构性变化时注入完整摘要，避免小更新带来的注意力偏移",
+			"content": "Optimize consult_expert tool definition to improve question quality and avoid XY problems",
 			"status": "planned",
 			"parentId": null,
-			"childrenIds": ["03c98f41-b0d9-45f8-ac67-1ce4ba1d589d"],
+			"childrenIds": [],
 			"codeBindings": [],
 			"createdBy": {
-				"taskId": "019c66e1-703e-7079-9635-6cbc822ce53f",
-				"timestamp": "2026-02-16T14:36:30.051Z",
+				"taskId": "019c78ca-4f9a-7419-8801-7424703a7007",
+				"timestamp": "2026-02-20T02:04:22.709Z",
 				"action": "created"
 			},
 			"modifiedBy": [],
-			"assumption": "用户明确描述了期望：只在 intent tree 发生较大变化时才在 environment details 中注入完整摘要，小变更（如状态更新）不需要注入，因为工具返回值已经足够说明。这是一个新的优化目标。",
-			"maxChildIndex": 1
+			"assumption": "The user wants to optimize the consult_expert tool to prevent XY problems and improve the quality of questions asked by the model."
 		},
-		"03c98f41-b0d9-45f8-ac67-1ce4ba1d589d": {
-			"id": "03c98f41-b0d9-45f8-ac67-1ce4ba1d589d",
-			"shortId": "A1.1",
-			"type": "approach",
-			"content": "将 intentTreeUpdated 从 boolean 改为变化级别标记（'structural' | 'minor' | false），只有 structural 级别才在 environment 中注入完整树摘要",
-			"status": "in_progress",
-			"parentId": "ae1190ad-072a-4d35-953f-408f9eb833b8",
-			"childrenIds": ["e20d4807-151b-4907-82dc-b7d3deb24c4e"],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c66e1-703e-7079-9635-6cbc822ce53f",
-				"timestamp": "2026-02-16T14:37:01.097Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c66e1-703e-7079-9635-6cbc822ce53f",
-					"timestamp": "2026-02-16T14:37:06.589Z",
-					"action": "updated: content, status→in_progress"
-				}
-			],
-			"assumption": "G1 的目标是减少不必要的 intent tree 摘要注入。需要区分\"结构性变化\"和\"局部更新\"。方案：将 boolean 标记改为枚举/级别标记，只有结构性变化才触发完整摘要注入。",
-			"maxChildIndex": 1
-		},
-		"e20d4807-151b-4907-82dc-b7d3deb24c4e": {
-			"id": "e20d4807-151b-4907-82dc-b7d3deb24c4e",
-			"shortId": "I1.1.1",
-			"type": "impl",
-			"content": "修改 Task.ts 中 intentTreeUpdated 的类型从 boolean 改为联合类型",
-			"status": "done",
-			"parentId": "03c98f41-b0d9-45f8-ac67-1ce4ba1d589d",
-			"childrenIds": [],
-			"codeBindings": [
-				{
-					"commitHash": "c944f19f6472b4e780af1762eb4ef322167ee5e3",
-					"commitMessage": "[intent:I1.1.1] 优化 intent tree 注入策略：区分 structural/minor 变化级别，只在结构性变化时注入完整树摘要",
-					"files": [
-						".roo/intent-tree.json",
-						"src/core/environment/getEnvironmentDetails.ts",
-						"src/core/task/Task.ts",
-						"src/core/tools/AddIntentTool.ts",
-						"src/core/tools/CommitIntentTool.ts",
-						"src/core/tools/PruneIntentTool.ts",
-						"src/core/tools/RestructureIntentTool.ts",
-						"src/core/tools/UpdateIntentTool.ts"
-					],
-					"diffSummary": "8 file(s), +59 -277",
-					"timestamp": "2026-02-16T14:40:43.138Z"
-				}
-			],
-			"createdBy": {
-				"taskId": "019c66e1-703e-7079-9635-6cbc822ce53f",
-				"timestamp": "2026-02-16T14:37:39.037Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c66e1-703e-7079-9635-6cbc822ce53f",
-					"timestamp": "2026-02-16T14:37:46.231Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c66e1-703e-7079-9635-6cbc822ce53f",
-					"timestamp": "2026-02-16T14:40:43.138Z",
-					"action": "bound commit c944f19"
-				},
-				{
-					"taskId": "019c66e1-703e-7079-9635-6cbc822ce53f",
-					"timestamp": "2026-02-16T14:40:43.138Z",
-					"action": "updated: status→done"
-				}
-			],
-			"assumption": "A1.1 的实现需要修改 Task.ts 中的类型声明。这是第一个原子变更。"
-		},
-		"799ff501-3cf2-4fe1-a70a-94cb6131f315": {
-			"id": "799ff501-3cf2-4fe1-a70a-94cb6131f315",
+		"d66da17a-39a6-4c95-baf0-49dfb816c3eb": {
+			"id": "d66da17a-39a6-4c95-baf0-49dfb816c3eb",
 			"shortId": "G2",
 			"type": "goal",
-			"content": "修复 intent tree 重构函数中的 shortId 漂移 bug",
+			"content": "修复 sanitizeToolUseId 误清洗 OpenAI 原生 call_id 导致 tool-result 找不到对应 tool-call 的 bug",
 			"status": "planned",
 			"parentId": null,
-			"childrenIds": ["5813be81-ffb5-4592-8c8f-cfb2dbfe81dd"],
+			"childrenIds": ["cbf801cc-94cd-4bc7-9416-209664ee665e"],
 			"codeBindings": [],
 			"createdBy": {
-				"taskId": "019c73a7-b414-70a9-a1cb-e53b4279a141",
-				"timestamp": "2026-02-19T02:11:56.621Z",
+				"taskId": "019c78d7-674c-727e-b1cc-fdf53d866618",
+				"timestamp": "2026-02-20T02:18:54.437Z",
 				"action": "created"
 			},
 			"modifiedBy": [],
-			"assumption": "用户提到 intent tree 的重构函数有问题。通过测试验证，确认 handleExtractCommonParent 中存在 shortId 漂移 bug：循环中每次 reparentNode 都会 recalculateShortIds，导致后续迭代用旧 shortId 找到错误的节点。",
+			"assumption": "这是一个独立的 bug 修复任务，与 G1 无关。需要新建 goal。",
 			"maxChildIndex": 1
 		},
-		"5813be81-ffb5-4592-8c8f-cfb2dbfe81dd": {
-			"id": "5813be81-ffb5-4592-8c8f-cfb2dbfe81dd",
+		"cbf801cc-94cd-4bc7-9416-209664ee665e": {
+			"id": "cbf801cc-94cd-4bc7-9416-209664ee665e",
 			"shortId": "I2.1",
 			"type": "impl",
-			"content": "在 handleExtractCommonParent 的 reparent 循环前，先将 params.nodeIds 中的 shortId 全部解析为 UUID",
+			"content": "在 sanitizeToolUseId 中增加：若 ID 以 call_ 开头（OpenAI 原生 ID），直接返回原值，跳过字符替换",
 			"status": "in_progress",
-			"parentId": "799ff501-3cf2-4fe1-a70a-94cb6131f315",
+			"parentId": "d66da17a-39a6-4c95-baf0-49dfb816c3eb",
 			"childrenIds": [],
 			"codeBindings": [],
 			"createdBy": {
-				"taskId": "019c73a7-b414-70a9-a1cb-e53b4279a141",
-				"timestamp": "2026-02-19T02:12:04.390Z",
+				"taskId": "019c78d7-674c-727e-b1cc-fdf53d866618",
+				"timestamp": "2026-02-20T02:18:59.405Z",
 				"action": "created"
 			},
 			"modifiedBy": [
 				{
-					"taskId": "019c73a7-b414-70a9-a1cb-e53b4279a141",
-					"timestamp": "2026-02-19T02:12:10.238Z",
+					"taskId": "019c78d7-674c-727e-b1cc-fdf53d866618",
+					"timestamp": "2026-02-20T02:19:02.687Z",
 					"action": "updated: content, status→in_progress"
 				}
 			],
-			"assumption": "handleExtractCommonParent 在循环 reparent 前需要先将所有 shortId 解析为 UUID，避免 recalculateShortIds 导致的 shortId 漂移。这是最小改动的修复方案。"
+			"assumption": "修复点在 sanitizeToolUseId：对 call_ 前缀的 ID 跳过清洗。这是唯一需要改动的地方。"
 		}
 	},
-	"rootIds": ["ae1190ad-072a-4d35-953f-408f9eb833b8", "799ff501-3cf2-4fe1-a70a-94cb6131f315"],
+	"rootIds": ["c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf", "d66da17a-39a6-4c95-baf0-49dfb816c3eb"],
 	"shortIdIndex": {
-		"G1": "ae1190ad-072a-4d35-953f-408f9eb833b8",
-		"A1.1": "03c98f41-b0d9-45f8-ac67-1ce4ba1d589d",
-		"I1.1.1": "e20d4807-151b-4907-82dc-b7d3deb24c4e",
-		"G2": "799ff501-3cf2-4fe1-a70a-94cb6131f315",
-		"I2.1": "5813be81-ffb5-4592-8c8f-cfb2dbfe81dd"
+		"G1": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
+		"G2": "d66da17a-39a6-4c95-baf0-49dfb816c3eb",
+		"I2.1": "cbf801cc-94cd-4bc7-9416-209664ee665e"
 	},
 	"rootMaxChildIndex": 2
 }

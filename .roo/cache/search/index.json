@@ -1624,6 +1624,36 @@
       "gitCommit": "3a7b9e279749ed78f6bf8c426db52b3bca50418b",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "65",
+      "query": "Where is the toolCallId sanitization/cleaning logic implemented that replaces special characters like +, /, = with underscores?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "toolcallid",
+        "sanitization",
+        "cleaning",
+        "logic",
+        "implemented",
+        "that",
+        "replaces",
+        "special",
+        "characters",
+        "like",
+        "with",
+        "underscores"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,dist"
+      },
+      "createdAt": "2026-02-20T02:09:55.574Z",
+      "gitCommit": "f03b3db8d7ca8c296f8535ddff760b20903ddf6d",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
     }
   ]
 }

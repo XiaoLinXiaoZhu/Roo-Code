@@ -76,6 +76,29 @@ describe("sanitizeToolUseId", () => {
 			expect(sanitizeToolUseId("toolu_01H2X3Y4Z5")).toBe("toolu_01H2X3Y4Z5")
 		})
 	})
+
+	describe("OpenAI-native call_ IDs are returned unchanged", () => {
+		it("should not sanitize a plain OpenAI call ID", () => {
+			expect(sanitizeToolUseId("call_abc123")).toBe("call_abc123")
+		})
+
+		it("should not sanitize an OpenAI call ID with base64 chars in __thought__ suffix", () => {
+			// This is the exact pattern that triggered the bug: OpenAI embeds base64
+			// content (containing +, /) after __thought__, which must not be modified.
+			const id = "call_b8e10b4297204ed1be21c49b2d96__thought__CnABjz1rX+/xyPWpHY5/"
+			expect(sanitizeToolUseId(id)).toBe(id)
+		})
+
+		it("should not sanitize an OpenAI call ID that contains other special characters", () => {
+			const id = "call_some:id.with/special+chars"
+			expect(sanitizeToolUseId(id)).toBe(id)
+		})
+
+		it("should still sanitize non-call_ IDs that contain special characters", () => {
+			// Ensure the early-return only applies to call_ prefix
+			expect(sanitizeToolUseId("functions.read_file:0")).toBe("functions_read_file_0")
+		})
+	})
 })
 
 describe("truncateOpenAiCallId", () => {
