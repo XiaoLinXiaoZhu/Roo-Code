@@ -1,5 +1,27 @@
 # Roo Code Changelog
 
+## [3.51.6] - 2026-02-20
+
+### 🐛 修复
+
+- **sanitizeToolUseId 误清洗 OpenAI 原生 ID**：OpenAI 原生 tool call ID（以 `call_` 开头）被 `sanitizeToolUseId` 的字符替换逻辑修改，导致 tool-result 找不到对应的 tool-call。修复：若 ID 以 `call_` 开头，直接返回原值跳过清洗
+- **意图树 extract_common_parent 崩溃**：`handleExtractCommonParent` 中 sequential reparent 使用 shortId 而非 UUID，导致节点查找失败。修复：在 reparent 前将 shortId 解析为 UUID
+
+### 🔧 consult_expert 工具重设计
+
+- **定位转型**：从"问题诊断"转向"赋能"——"Teach me to fish" not "Fish for me"
+    - 工具不再接受具体问题（"我的代码对吗？""该选 A 还是 B？"），只接受知识/方法论/最佳实践的获取请求
+    - 从根本上消除 XY 问题：当工具本身不接受具体问题时，模型无法把实现细节塞进去寻求确认
+- **参数精简**：从 7 个参数（domain/topic/ultimateGoal/currentApproach/context/question/consultType）精简为 5 个（domain/topic/context/attachments/consultType）
+    - 删除 `question` 字段（确认偏误的温床）
+    - 删除 `ultimateGoal`/`currentApproach`/`knownContext`/`unknownPoints`（具体问题诊断相关）
+    - 保留 `topic`（重新定义为"想学习的知识类别"）和 `context`（重新定义为"为什么需要这个知识"）
+- **consultType 重新定义**：从 analysis/design/comparison/recommendation 改为 `principles`/`best-practices`/`methodology`/`standards`，全部面向知识获取
+- **参数描述认知脚手架**：每个参数描述包含 ✅/❌ 对比示例，引导模型正确填写
+- **Bug 修复**：修复工具定义参数（ultimateGoal/currentApproach）与执行侧参数（knownContext/unknownPoints）完全不一致的问题，之前 LLM 填写的目标信息在解析时被丢弃
+- **expert 模式同步**：更新 `packages/types/src/mode.ts` 中 expert 模式的 roleDefinition 和 customInstructions，对齐赋能定位，明确禁止"帮你解决具体 bug"和"你的方案是对的"式回答
+- 涉及文件：`consult_expert.ts`、`ConsultExpertTool.ts`、`NativeToolCallParser.ts`、`tools.ts`、`mode.ts`
+
 ## [3.51.5] - 2026-02-16
 
 ### 🌳 意图树 (Intent Tree)

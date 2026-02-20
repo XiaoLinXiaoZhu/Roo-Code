@@ -259,10 +259,18 @@
 			"shortId": "I1.2.2",
 			"type": "impl",
 			"content": "Update expert mode definition in packages/types/src/mode.ts to align with empowerment positioning",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "168b6825-a435-4516-91fd-ff80edddcfc2",
 			"childrenIds": [],
-			"codeBindings": [],
+			"codeBindings": [
+				{
+					"commitHash": "9abcc51cd38eb3228c49acd35cfc6f970638e9f8",
+					"commitMessage": "[intent:I1.2.2] Update expert mode roleDefinition and customInstructions to align with empowerment positioning: teach principles/methodology, not solve specific problems",
+					"files": [".roo/intent-tree.json", "packages/types/src/mode.ts"],
+					"diffSummary": "2 file(s), +57 -9",
+					"timestamp": "2026-02-20T03:10:32.493Z"
+				}
+			],
 			"createdBy": {
 				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
 				"timestamp": "2026-02-20T03:08:57.950Z",
@@ -273,6 +281,16 @@
 					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
 					"timestamp": "2026-02-20T03:09:18.039Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+					"timestamp": "2026-02-20T03:10:32.493Z",
+					"action": "bound commit 9abcc51"
+				},
+				{
+					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+					"timestamp": "2026-02-20T03:10:32.493Z",
+					"action": "updated: status→done"
 				}
 			],
 			"assumption": "Under A1.2 approach. The expert mode's roleDefinition and customInstructions still describe it as a problem-solver. Need to align with the empowerment positioning - the expert should teach knowledge/methodology, not diagnose specific problems."

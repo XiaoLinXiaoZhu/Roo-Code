@@ -1241,6 +1241,7 @@ function sum(a, b) {
 
 			const result = await strategy.applyDiff(originalContent, diff)
 			expect(result.success).toBe(true)
+			if (!result.success) return
 			expect(result.content).toContain('return "updated"')
 			expect(result.content).not.toContain('return "found me"')
 		})
@@ -1272,12 +1273,13 @@ function sum(a, b) {
 
 			const result = await strategy.applyDiff(originalContent, diff)
 			expect(result.success).toBe(true)
+			if (!result.success) return
 			// The match at line 80 (closer to startLine 75) should be replaced
 			// The match at line 20 should remain unchanged
-			const resultLines = result.content!.split("\n")
+			const resultLines = result.content.split("\n")
 			// Find all occurrences of "const value = "
-			const value42Lines = resultLines.filter((l) => l.includes("const value = 42"))
-			const value99Lines = resultLines.filter((l) => l.includes("const value = 99"))
+			const value42Lines = resultLines.filter((l: string) => l.includes("const value = 42"))
+			const value99Lines = resultLines.filter((l: string) => l.includes("const value = 99"))
 			expect(value42Lines.length).toBe(1) // The one at line 20 remains
 			expect(value99Lines.length).toBe(1) // The one at line 80 was replaced
 		})
@@ -1311,6 +1313,7 @@ function sum(a, b) {
 
 			const result = await strategy.applyDiff(originalContent, diff)
 			expect(result.success).toBe(true)
+			if (!result.success) return
 			expect(result.content).toContain("doSomethingElse()")
 			expect(result.content).not.toContain("doSomething()")
 		})
@@ -1347,6 +1350,7 @@ function sum(a, b) {
 
 			const result = await strategy.applyDiff(originalContent, diff)
 			expect(result.success).toBe(true)
+			if (!result.success) return
 			expect(result.content).toContain("return false")
 			expect(result.content).not.toContain("return true")
 		})
