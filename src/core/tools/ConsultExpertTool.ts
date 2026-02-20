@@ -7,17 +7,17 @@ import type { ToolUse } from "../../shared/tools"
 import { TodoItem } from "@roo-code/types"
 
 /**
- * ConsultExpertTool - 咨询专家工具
+ * ConsultExpertTool - 咨询专家工具（赋能定位）
  *
- * 这是一个"Agent as Tools"架构的封装工具,用于获取专家意见。
+ * 用于获取领域知识、方法论、最佳实践和标准。
+ * 不做具体问题诊断，而是教模型"如何思考一类问题"。
  *
  * 内部实现:
  * - 创建一个 expert 模式的子任务
- * - 使用自定义的角色定义
- * - 返回专家意见和建议
+ * - 返回领域知识和方法论建议
  */
 
-type ConsultType = "analysis" | "design" | "comparison" | "recommendation"
+type ConsultType = "principles" | "best-practices" | "methodology" | "standards"
 
 interface ConsultTypeConfig {
 	approach: string[]
@@ -26,48 +26,45 @@ interface ConsultTypeConfig {
 }
 
 const CONSULT_TYPE_CONFIGS: Record<ConsultType, ConsultTypeConfig> = {
-	analysis: {
+	principles: {
 		approach: [
-			"收集相关代码、文档、日志等上下文",
-			"识别核心问题和关联因素",
-			"深入分析根因，区分表象与本质",
-			"评估影响范围和严重程度",
+			"识别该领域的核心设计原则和心智模型",
+			"解释每个原则背后的 WHY（为什么这样做）",
+			"提供原则之间的权衡关系和优先级",
+			"给出判断标准：什么时候该用、什么时候不该用",
 		],
-		deliverable: "深度分析报告",
-		todoTemplate: ["收集上下文信息", "识别核心问题", "分析根因", "评估影响范围"],
+		deliverable: "设计原则和心智模型",
+		todoTemplate: ["识别核心原则", "解释原则背后的 WHY", "说明权衡关系", "给出判断标准"],
 	},
-	design: {
+	"best-practices": {
 		approach: [
-			"理解需求和约束条件",
-			"调研业界最佳实践和相关模式",
-			"设计核心架构和关键接口",
-			"考虑扩展性、可维护性、性能等质量属性",
-			"识别技术风险和缓解策略",
+			"总结该领域经过验证的最佳实践",
+			"列出常见陷阱和反模式（以及为什么它们是错的）",
+			"提供实践的适用条件和边界",
+			"给出质量检查清单",
 		],
-		deliverable: "架构设计方案",
-		todoTemplate: ["理解需求和约束", "调研最佳实践", "设计核心架构", "评估质量属性"],
+		deliverable: "最佳实践和常见陷阱",
+		todoTemplate: ["总结最佳实践", "列出常见陷阱", "说明适用条件", "给出检查清单"],
 	},
-	comparison: {
+	methodology: {
 		approach: [
-			"明确对比维度和评估标准",
-			"收集各方案的客观数据",
-			"逐维度进行公正对比",
-			"分析各方案的适用场景",
-			"给出基于场景的推荐",
+			"提供结构化的步骤框架",
+			"解释每个步骤的目的和产出",
+			"说明步骤之间的依赖关系和可选路径",
+			"给出每个步骤的完成标准",
 		],
-		deliverable: "方案对比评估",
-		todoTemplate: ["明确对比维度", "收集方案数据", "逐维度对比", "分析适用场景"],
+		deliverable: "结构化方法论框架",
+		todoTemplate: ["提供步骤框架", "解释步骤目的", "说明依赖关系", "给出完成标准"],
 	},
-	recommendation: {
+	standards: {
 		approach: [
-			"理解当前状态和目标状态",
-			"识别可行的行动路径",
-			"评估各路径的成本和收益",
-			"制定具体、可执行的行动步骤",
-			"设定验收标准和检查点",
+			"列出该领域的行业标准和规范",
+			"解释标准的核心要求和合规标准",
+			"提供质量等级和验收标准",
+			"给出常见的不合规情况和修正方法",
 		],
-		deliverable: "具体行动建议",
-		todoTemplate: ["理解现状和目标", "识别行动路径", "评估成本收益", "制定行动步骤"],
+		deliverable: "标准规范和验收标准",
+		todoTemplate: ["列出行业标准", "解释核心要求", "提供验收标准", "说明常见不合规"],
 	},
 }
 
@@ -79,24 +76,14 @@ interface ConsultExpertParams {
 	domain: string
 
 	/**
-	 * 问题陈述：当前状态与期望状态之间的差距
+	 * 想学习的知识/方法论/最佳实践主题
 	 */
-	problemStatement: string
+	topic: string
 
 	/**
-	 * 不可改变的约束条件
+	 * 为什么需要这个知识（背景）
 	 */
-	constraints: string
-
-	/**
-	 * 可选：当前方法或已尝试的方案（可能需要替换）
-	 */
-	currentApproach?: string | null
-
-	/**
-	 * 不确定的决策、风险、权衡
-	 */
-	uncertainties: string
+	context: string
 
 	/**
 	 * 可选:附件 (文件路径或内容)
@@ -104,7 +91,7 @@ interface ConsultExpertParams {
 	attachments?: string | null
 
 	/**
-	 * 咨询类型（必选）
+	 * 咨询类型
 	 */
 	consultType: ConsultType
 }
@@ -116,18 +103,15 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 	parseLegacy(params: Partial<Record<string, string>>): ConsultExpertParams {
 		return {
 			domain: params.domain || "",
-			problemStatement: params.problemStatement || "",
-			constraints: params.constraints || "",
-			currentApproach: params.currentApproach,
-			uncertainties: params.uncertainties || "",
+			topic: params.topic || "",
+			context: params.context || "",
 			attachments: params.attachments,
-			consultType: (params.consultType as ConsultType) || "analysis",
+			consultType: (params.consultType as ConsultType) || "best-practices",
 		}
 	}
 
 	async execute(params: ConsultExpertParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
-		const { domain, problemStatement, constraints, currentApproach, uncertainties, attachments, consultType } =
-			params
+		const { domain, topic, context, attachments, consultType } = params
 		const { askApproval, handleError, pushToolResult, toolCallId } = callbacks
 
 		// 验证必需参数
@@ -138,24 +122,17 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 			return
 		}
 
-		if (!problemStatement) {
+		if (!topic) {
 			task.consecutiveMistakeCount++
 			task.didToolFailInCurrentTurn = true
-			pushToolResult(await task.sayAndCreateMissingParamError("consult_expert", "problemStatement"))
+			pushToolResult(await task.sayAndCreateMissingParamError("consult_expert", "topic"))
 			return
 		}
 
-		if (!constraints) {
+		if (!context) {
 			task.consecutiveMistakeCount++
 			task.didToolFailInCurrentTurn = true
-			pushToolResult(await task.sayAndCreateMissingParamError("consult_expert", "constraints"))
-			return
-		}
-
-		if (!uncertainties) {
-			task.consecutiveMistakeCount++
-			task.didToolFailInCurrentTurn = true
-			pushToolResult(await task.sayAndCreateMissingParamError("consult_expert", "uncertainties"))
+			pushToolResult(await task.sayAndCreateMissingParamError("consult_expert", "context"))
 			return
 		}
 
@@ -169,15 +146,7 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 		task.consecutiveMistakeCount = 0
 
 		// 构建任务消息
-		const taskMessage = this.buildConsultMessage(
-			domain,
-			problemStatement,
-			constraints,
-			currentApproach,
-			uncertainties,
-			consultType,
-			attachments,
-		)
+		const taskMessage = this.buildConsultMessage(domain, topic, context, consultType, attachments)
 
 		// 获取 Provider
 		const provider = task.providerRef.deref()
@@ -190,10 +159,8 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 		const toolMessage = JSON.stringify({
 			tool: "consultExpert",
 			domain,
-			problemStatement,
-			constraints,
-			currentApproach: currentApproach ?? null,
-			uncertainties,
+			topic,
+			context,
 			attachments: attachments ?? null,
 			consultType,
 		})
@@ -213,14 +180,10 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 				parentTaskId: task.taskId,
 				message: taskMessage,
 				initialTodos: todos,
-				mode: "expert", // 使用专门的 expert 模式
+				mode: "expert",
 			})
 
-			// 等待子任务完成并返回结果
 			pushToolResult(`已创建专家咨询子任务 ${child.taskId}, 正在分析...`)
-
-			// 注意: 这里我们不等待子任务完成,因为父任务会被暂停
-			// 子任务完成后会通过 reopenParentFromDelegation 恢复父任务
 		} catch (error: any) {
 			await handleError("creating expert consultation subtask", error)
 		}
@@ -228,10 +191,8 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 
 	private buildConsultMessage(
 		domain: string,
-		problemStatement: string,
-		constraints: string,
-		currentApproach: string | null | undefined,
-		uncertainties: string,
+		topic: string,
+		context: string,
 		consultType: ConsultType,
 		attachments?: string | null,
 	): string {
@@ -242,14 +203,9 @@ ${domain} 领域专家
 </role>
 
 <consultation>
-问题陈述：${problemStatement}
+主题：${topic}
 
-约束条件：
-${constraints}
-${currentApproach ? `\n当前方法（可能需要替换）：\n${currentApproach}` : ""}
-
-需要专家判断的不确定点：
-${uncertainties}
+背景：${context}
 </consultation>`
 
 		if (attachments) {
@@ -258,14 +214,14 @@ ${attachments}
 </attachments>`
 		}
 
-		// 根据 consultType 获取差异化的 approach
 		message += `\n\n<approach>
 ${config.approach.map((step) => `- ${step}`).join("\n")}
 </approach>`
 
-		// 获取交付物描述
 		message += `\n\n<deliverable>
 输出格式：${config.deliverable}
+
+重要：你的任务是传授知识和方法论，不是解决具体问题。提供可复用的原则和框架，而不是针对特定场景的具体方案。
 
 完成后使用 attempt_completion 提交。
 </deliverable>`
@@ -277,7 +233,6 @@ ${config.approach.map((step) => `- ${step}`).join("\n")}
 		const config = CONSULT_TYPE_CONFIGS[consultType]
 		const todos: TodoItem[] = []
 
-		// Step 1: 信息获取
 		if (attachments) {
 			todos.push({
 				id: crypto.randomUUID(),
@@ -286,14 +241,12 @@ ${config.approach.map((step) => `- ${step}`).join("\n")}
 			})
 		}
 
-		// Step 2: 提供退路（符合诚实透明原则）
 		todos.push({
 			id: crypto.randomUUID(),
 			content: "若超出专业范围或信息不足，调用 attempt_completion 说明边界",
 			status: "pending",
 		})
 
-		// Step 3-N: 根据 consultType 添加差异化的 TODO 模板
 		for (const todoContent of config.todoTemplate) {
 			todos.push({
 				id: crypto.randomUUID(),
@@ -302,7 +255,6 @@ ${config.approach.map((step) => `- ${step}`).join("\n")}
 			})
 		}
 
-		// Step N+1: 交付（末端重申质量要求）
 		todos.push({
 			id: crypto.randomUUID(),
 			content: "attempt_completion 提交结果",
@@ -314,20 +266,16 @@ ${config.approach.map((step) => `- ${step}`).join("\n")}
 
 	override async handlePartial(task: Task, block: ToolUse<"consult_expert">): Promise<void> {
 		const domain: string | undefined = block.params.domain
-		const problemStatement: string | undefined = block.params.problemStatement
-		const constraints: string | undefined = block.params.constraints
-		const currentApproach: string | undefined = block.params.currentApproach
-		const uncertainties: string | undefined = block.params.uncertainties
+		const topic: string | undefined = block.params.topic
+		const context: string | undefined = block.params.context
 		const attachments: string | undefined = block.params.attachments
 		const consultType: string | undefined = block.params.consultType
 
 		const partialMessage = JSON.stringify({
 			tool: "consultExpert",
 			domain,
-			problemStatement,
-			constraints,
-			currentApproach,
-			uncertainties,
+			topic,
+			context,
 			attachments,
 			consultType,
 		})

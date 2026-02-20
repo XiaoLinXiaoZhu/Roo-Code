@@ -5,10 +5,10 @@
 			"id": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
 			"shortId": "G1",
 			"type": "goal",
-			"content": "Optimize consult_expert tool definition to improve question quality and avoid XY problems",
+			"content": "Optimize consult_expert tool: reposition as empowerment tool (knowledge/methodology/best-practices) instead of problem diagnosis",
 			"status": "in_progress",
 			"parentId": null,
-			"childrenIds": ["d5b80c6a-4b28-447f-9f93-581de7184245"],
+			"childrenIds": ["d5b80c6a-4b28-447f-9f93-581de7184245", "168b6825-a435-4516-91fd-ff80edddcfc2"],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c78ca-4f9a-7419-8801-7424703a7007",
@@ -20,10 +20,15 @@
 					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
 					"timestamp": "2026-02-20T02:46:22.440Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+					"timestamp": "2026-02-20T03:01:36.368Z",
+					"action": "updated: content, status→in_progress"
 				}
 			],
 			"assumption": "The user wants to optimize the consult_expert tool to prevent XY problems and improve the quality of questions asked by the model.",
-			"maxChildIndex": 1
+			"maxChildIndex": 2
 		},
 		"d66da17a-39a6-4c95-baf0-49dfb816c3eb": {
 			"id": "d66da17a-39a6-4c95-baf0-49dfb816c3eb",
@@ -113,10 +118,25 @@
 			"shortId": "I1.1.1",
 			"type": "impl",
 			"content": "Rewrite consult_expert.ts tool definition with new parameter structure and cognitive scaffolding descriptions",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "d5b80c6a-4b28-447f-9f93-581de7184245",
 			"childrenIds": [],
-			"codeBindings": [],
+			"codeBindings": [
+				{
+					"commitHash": "19d2f9887c2542e63ef6fb10e419e0d69ecce066",
+					"commitMessage": "[intent:I1.1.1] Rewrite consult_expert tool definition: replace question/topic/ultimateGoal with problemStatement+constraints+uncertainties cognitive scaffolding",
+					"files": [
+						".roo/cache/search/index.json",
+						".roo/intent-tree.json",
+						"src/core/assistant-message/NativeToolCallParser.ts",
+						"src/core/prompts/tools/native-tools/consult_expert.ts",
+						"src/core/tools/ConsultExpertTool.ts",
+						"src/shared/tools.ts"
+					],
+					"diffSummary": "6 file(s), +274 -141",
+					"timestamp": "2026-02-20T02:53:48.247Z"
+				}
+			],
 			"createdBy": {
 				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
 				"timestamp": "2026-02-20T02:47:05.210Z",
@@ -127,6 +147,16 @@
 					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
 					"timestamp": "2026-02-20T02:47:18.457Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+					"timestamp": "2026-02-20T02:53:48.247Z",
+					"action": "bound commit 19d2f98"
+				},
+				{
+					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+					"timestamp": "2026-02-20T02:53:48.247Z",
+					"action": "updated: status→done"
 				}
 			],
 			"assumption": "Under A1.1 approach. This impl covers the tool definition file which is what the LLM sees. It's the most important change - the parameter structure and descriptions that shape LLM thinking."
@@ -136,7 +166,7 @@
 			"shortId": "I1.1.2",
 			"type": "impl",
 			"content": "Sync tools.ts types, NativeToolCallParser.ts mapping, and ConsultExpertTool.ts execution with new parameter structure",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "d5b80c6a-4b28-447f-9f93-581de7184245",
 			"childrenIds": [],
 			"codeBindings": [],
@@ -150,9 +180,55 @@
 					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
 					"timestamp": "2026-02-20T02:48:31.310Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+					"timestamp": "2026-02-20T02:53:59.331Z",
+					"action": "updated: content, status→done"
 				}
 			],
 			"assumption": "Under A1.1 approach. Need to sync tools.ts type definitions, NativeToolCallParser.ts parameter mapping, and ConsultExpertTool.ts execution logic with the new parameter structure."
+		},
+		"168b6825-a435-4516-91fd-ff80edddcfc2": {
+			"id": "168b6825-a435-4516-91fd-ff80edddcfc2",
+			"shortId": "A1.2",
+			"type": "approach",
+			"content": "Redesign consult_expert as empowerment tool: simplified params focused on domain knowledge, methodology, best practices acquisition",
+			"status": "planned",
+			"parentId": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
+			"childrenIds": ["ccd75032-efa7-4d88-94c4-cb41eaeb2de5"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+				"timestamp": "2026-02-20T03:01:53.263Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "G1 goal has shifted to empowerment positioning. The previous approach A1.1 was about cognitive scaffolding for problem diagnosis. Now we need a completely different approach: redesign as knowledge/methodology acquisition tool. This supersedes A1.1's design philosophy.",
+			"maxChildIndex": 1
+		},
+		"ccd75032-efa7-4d88-94c4-cb41eaeb2de5": {
+			"id": "ccd75032-efa7-4d88-94c4-cb41eaeb2de5",
+			"shortId": "I1.2.1",
+			"type": "impl",
+			"content": "Rewrite all consult_expert files: tool definition, ConsultExpertTool, NativeToolCallParser, tools.ts types for empowerment model",
+			"status": "in_progress",
+			"parentId": "168b6825-a435-4516-91fd-ff80edddcfc2",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+				"timestamp": "2026-02-20T03:02:10.591Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+					"timestamp": "2026-02-20T03:02:21.634Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
+			"assumption": "Under A1.2. Need to redesign the tool definition, execution logic, parser, and types all at once. The empowerment model means: domain (who), topic (what knowledge area), context (why I need this), attachments, consultType changes to knowledge-oriented types."
 		}
 	},
 	"rootIds": ["c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf", "d66da17a-39a6-4c95-baf0-49dfb816c3eb"],
@@ -162,7 +238,9 @@
 		"I2.1": "cbf801cc-94cd-4bc7-9416-209664ee665e",
 		"A1.1": "d5b80c6a-4b28-447f-9f93-581de7184245",
 		"I1.1.1": "0786ae71-444e-4db8-b3b6-64137d2d4fcc",
-		"I1.1.2": "6b5c9884-90a5-49dd-a5ec-27aa304fbcaa"
+		"I1.1.2": "6b5c9884-90a5-49dd-a5ec-27aa304fbcaa",
+		"A1.2": "168b6825-a435-4516-91fd-ff80edddcfc2",
+		"I1.2.1": "ccd75032-efa7-4d88-94c4-cb41eaeb2de5"
 	},
 	"rootMaxChildIndex": 2
 }

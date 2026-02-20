@@ -1,57 +1,51 @@
 import type OpenAI from "openai"
 
-const CONSULT_EXPERT_DESCRIPTION = `Get expert analysis on a technical problem. The expert will evaluate your situation and provide recommendations, including approaches you may not have considered.
+const CONSULT_EXPERT_DESCRIPTION = `Consult a domain expert to acquire knowledge, methodology, best practices, or standards. This tool is for EMPOWERMENT — learning HOW to think about a class of problems, not for solving a specific problem.
 
-IMPORTANT: Describe your PROBLEM, not your SOLUTION. The expert's value is in seeing what you might have missed.
+Use this when you need:
+- Design principles and patterns for a domain you're unfamiliar with
+- Best practices and common pitfalls to avoid
+- Methodology and frameworks for making decisions
+- Standards and conventions in a specific field
 
-Parameter filling order matters — think about each one before moving to the next:
-1. domain → Who should answer this?
-2. problemStatement → What gap am I trying to close?
-3. constraints → What can't change?
-4. currentApproach → What have I tried? (optional — it's OK to have no approach yet)
-5. uncertainties → What am I not sure about?`
+DO NOT use this to ask "how do I fix this specific bug?" or "is my code correct?" — those are problems you should solve yourself using the knowledge you acquire here.
 
-const DOMAIN_PARAMETER_DESCRIPTION = `The specific expertise needed. Be precise about the intersection of skills.
+Think of it as: "Teach me to fish" not "Fish for me."
+
+Examples of GOOD consultations:
+- "What are the best practices for designing idempotent APIs?"
+- "What patterns should I follow for responsive CSS architecture?"
+- "What are common pitfalls when implementing event-driven systems?"
+- "What methodology should I use for database schema migration?"
+
+Examples of BAD consultations (too specific, solve-it-for-me):
+- "Is my Redis caching implementation correct?"
+- "Should I use approach A or approach B for this function?"
+- "Why is my API returning 500 errors?"`
+
+const DOMAIN_DESCRIPTION = `The specific expertise needed. Be precise about the intersection of skills.
 Example: "React performance optimization + virtual DOM internals" not just "frontend".`
 
-const PROBLEM_STATEMENT_DESCRIPTION = `Describe the GAP between your current state and desired state. Focus on WHAT is wrong or missing, not HOW you plan to fix it.
+const TOPIC_DESCRIPTION = `What knowledge, methodology, or best practices you want to learn about. Frame this as a CLASS of problems, not a specific instance.
 
-Format: "[Current state] → [Desired state]. [Why the gap matters]"
+✅ "Best practices for preventing duplicate submissions in distributed systems"
+✅ "Common pitfalls when designing prompt templates for LLM tool-use"
+✅ "Methodology for designing responsive layouts that work across breakpoints"
+❌ "How to fix the duplicate order bug in our checkout flow" (too specific)
+❌ "Is my caching strategy correct?" (asking for validation, not knowledge)`
 
-✅ "API response time is 3s → Need <200ms. Users are abandoning the checkout flow."
-✅ "Tests pass locally → Fail in CI. Blocking the release pipeline."
-❌ "I need to add Redis caching" (this is a solution, not a problem)
-❌ "How to optimize database queries?" (this is a question, not a statement)`
+const CONTEXT_DESCRIPTION = `Why you need this knowledge — what kind of work you're about to do. This helps the expert tailor the advice to your situation without turning it into a specific problem-solving session.
 
-const CONSTRAINTS_DESCRIPTION = `Non-negotiable constraints that any solution must respect. These are FACTS, not preferences.
+Example: "I'm about to design a payment processing pipeline and want to understand idempotency patterns before I start."
+Example: "Our team is adopting event-driven architecture and I need to understand the common failure modes."`
 
-Include: tech stack, performance requirements, backward compatibility needs, team size/skill, timeline.
-Exclude: your current approach (that goes in currentApproach).
+const ATTACHMENTS_DESCRIPTION = `Optional: File paths or content to provide as reference material for the expert. Use absolute paths when possible.`
 
-Example: "Must work with PostgreSQL 14. Cannot add new infrastructure. Response time SLA is 200ms p99. Team has no Redis experience."`
-
-const CURRENT_APPROACH_DESCRIPTION = `Optional: What you've tried or are considering. Be explicit that this might be wrong — the expert may suggest replacing it entirely.
-
-If provided, the expert will evaluate it AND suggest alternatives. If omitted, the expert will recommend approaches from scratch.
-
-Format: "Considering [approach]. Tried [what you tried] → [what happened]."
-
-Example: "Considering adding a database index on user_id. Haven't tried yet because unsure if it addresses the root cause. Also considered query caching but worried about stale data."`
-
-const UNCERTAINTIES_DESCRIPTION = `What you're NOT sure about. These become the expert's primary focus areas.
-
-List the decisions you can't confidently make, the risks you can't assess, or the trade-offs you don't understand.
-
-✅ "Not sure if the bottleneck is query planning or data volume. Don't know the trade-offs between materialized views vs application-level caching for this access pattern."
-❌ "Is my approach correct?" (too vague, not actionable)`
-
-const ATTACHMENTS_PARAMETER_DESCRIPTION = `Optional: File paths or content to provide as context for the expert. Use absolute paths when possible.`
-
-const CONSULT_TYPE_PARAMETER_DESCRIPTION = `Type of consultation:
-- "analysis": Root cause investigation — when you don't understand WHY something is happening
-- "design": Architecture/solution design — when you need to CREATE something new
-- "comparison": Trade-off evaluation — when you have OPTIONS and need to choose
-- "recommendation": Action plan — when you know the goal and need STEPS to get there`
+const CONSULT_TYPE_DESCRIPTION = `Type of knowledge you're seeking:
+- "principles": Design principles, patterns, and mental models — when you need to understand HOW to think about a domain
+- "best-practices": Proven approaches and common pitfalls — when you need to know WHAT works and what doesn't
+- "methodology": Step-by-step frameworks and processes — when you need a structured APPROACH to follow
+- "standards": Conventions, specifications, and quality criteria — when you need to know WHAT the bar is`
 
 export default {
 	type: "function",
@@ -64,43 +58,27 @@ export default {
 			properties: {
 				domain: {
 					type: "string",
-					description: DOMAIN_PARAMETER_DESCRIPTION,
+					description: DOMAIN_DESCRIPTION,
 				},
-				problemStatement: {
+				topic: {
 					type: "string",
-					description: PROBLEM_STATEMENT_DESCRIPTION,
+					description: TOPIC_DESCRIPTION,
 				},
-				constraints: {
+				context: {
 					type: "string",
-					description: CONSTRAINTS_DESCRIPTION,
-				},
-				currentApproach: {
-					type: ["string", "null"],
-					description: CURRENT_APPROACH_DESCRIPTION,
-				},
-				uncertainties: {
-					type: "string",
-					description: UNCERTAINTIES_DESCRIPTION,
+					description: CONTEXT_DESCRIPTION,
 				},
 				attachments: {
 					type: ["string", "null"],
-					description: ATTACHMENTS_PARAMETER_DESCRIPTION,
+					description: ATTACHMENTS_DESCRIPTION,
 				},
 				consultType: {
 					type: "string",
-					enum: ["analysis", "design", "comparison", "recommendation"],
-					description: CONSULT_TYPE_PARAMETER_DESCRIPTION,
+					enum: ["principles", "best-practices", "methodology", "standards"],
+					description: CONSULT_TYPE_DESCRIPTION,
 				},
 			},
-			required: [
-				"domain",
-				"problemStatement",
-				"constraints",
-				"currentApproach",
-				"uncertainties",
-				"attachments",
-				"consultType",
-			],
+			required: ["domain", "topic", "context", "attachments", "consultType"],
 			additionalProperties: false,
 		},
 	},

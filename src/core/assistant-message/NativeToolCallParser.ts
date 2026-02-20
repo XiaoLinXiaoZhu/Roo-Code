@@ -656,17 +656,11 @@ export class NativeToolCallParser {
 				break
 
 			case "consult_expert":
-				if (
-					partialArgs.domain !== undefined ||
-					partialArgs.problemStatement !== undefined ||
-					partialArgs.uncertainties !== undefined
-				) {
+				if (partialArgs.domain !== undefined || partialArgs.topic !== undefined) {
 					nativeArgs = {
 						domain: partialArgs.domain,
-						problemStatement: partialArgs.problemStatement,
-						constraints: partialArgs.constraints,
-						currentApproach: partialArgs.currentApproach,
-						uncertainties: partialArgs.uncertainties,
+						topic: partialArgs.topic,
+						context: partialArgs.context,
 						attachments: partialArgs.attachments,
 						consultType: partialArgs.consultType,
 					}
@@ -1142,17 +1136,11 @@ export class NativeToolCallParser {
 					break
 
 				case "consult_expert":
-					if (
-						args.domain !== undefined &&
-						args.problemStatement !== undefined &&
-						args.uncertainties !== undefined
-					) {
+					if (args.domain !== undefined && args.topic !== undefined && args.context !== undefined) {
 						nativeArgs = {
 							domain: args.domain,
-							problemStatement: args.problemStatement,
-							constraints: args.constraints,
-							currentApproach: args.currentApproach,
-							uncertainties: args.uncertainties,
+							topic: args.topic,
+							context: args.context,
 							attachments: args.attachments,
 							consultType: args.consultType,
 						} as NativeArgsFor<TName>
