@@ -1654,6 +1654,34 @@
       "gitCommit": "f03b3db8d7ca8c296f8535ddff760b20903ddf6d",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "66",
+      "query": "How is the consult_expert tool executed when called? Where is the handler that processes the consult_expert tool call?",
+      "tags": [
+        "how",
+        "is",
+        "the",
+        "consult_expert",
+        "tool",
+        "executed",
+        "when",
+        "called",
+        "where",
+        "handler",
+        "that",
+        "processes",
+        "call"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,__tests__,*.spec.ts"
+      },
+      "createdAt": "2026-02-20T02:42:25.056Z",
+      "gitCommit": "fa92dcebb980f7c605c7866315e004f4802e821e",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
     }
   ]
 }

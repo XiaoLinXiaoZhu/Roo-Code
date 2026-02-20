@@ -6,17 +6,24 @@
 			"shortId": "G1",
 			"type": "goal",
 			"content": "Optimize consult_expert tool definition to improve question quality and avoid XY problems",
-			"status": "planned",
+			"status": "in_progress",
 			"parentId": null,
-			"childrenIds": [],
+			"childrenIds": ["d5b80c6a-4b28-447f-9f93-581de7184245"],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c78ca-4f9a-7419-8801-7424703a7007",
 				"timestamp": "2026-02-20T02:04:22.709Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
-			"assumption": "The user wants to optimize the consult_expert tool to prevent XY problems and improve the quality of questions asked by the model."
+			"modifiedBy": [
+				{
+					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+					"timestamp": "2026-02-20T02:46:22.440Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
+			"assumption": "The user wants to optimize the consult_expert tool to prevent XY problems and improve the quality of questions asked by the model.",
+			"maxChildIndex": 1
 		},
 		"d66da17a-39a6-4c95-baf0-49dfb816c3eb": {
 			"id": "d66da17a-39a6-4c95-baf0-49dfb816c3eb",
@@ -41,10 +48,24 @@
 			"shortId": "I2.1",
 			"type": "impl",
 			"content": "在 sanitizeToolUseId 中增加：若 ID 以 call_ 开头（OpenAI 原生 ID），直接返回原值，跳过字符替换",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "d66da17a-39a6-4c95-baf0-49dfb816c3eb",
 			"childrenIds": [],
-			"codeBindings": [],
+			"codeBindings": [
+				{
+					"commitHash": "fa92dcebb980f7c605c7866315e004f4802e821e",
+					"commitMessage": "[intent:I2.1] fix: skip sanitization for OpenAI-native call_ IDs to prevent tool-result mismatch\n\nOpenAI generates call IDs with the \"call_\" prefix that may contain base64\ncharacters (+, /) in __thought__ suffixes. Sanitizing these IDs replaces\nthose characters with underscores, but OpenAI internally tracks the original\nID — causing \"tool_result does not match any tool_use\" errors.\n\nFix: return call_ prefixed IDs unchanged in sanitizeToolUseId(). The\nsanitization logic is still needed for Gemini/OpenRouter IDs (e.g.\nfunctions.read_file:0) which contain dots and colons that violate the\n^[a-zA-Z0-9_-]+$ pattern required by the OpenAI API.",
+					"files": [
+						".roo/cache/search/index.json",
+						".roo/intent-tree.json",
+						"src/core/prompts/tools/native-tools/consult_expert.ts",
+						"src/utils/__tests__/tool-id.spec.ts",
+						"src/utils/tool-id.ts"
+					],
+					"diffSummary": "5 file(s), +132 -129",
+					"timestamp": "2026-02-20T02:19:50.249Z"
+				}
+			],
 			"createdBy": {
 				"taskId": "019c78d7-674c-727e-b1cc-fdf53d866618",
 				"timestamp": "2026-02-20T02:18:59.405Z",
@@ -55,16 +76,93 @@
 					"taskId": "019c78d7-674c-727e-b1cc-fdf53d866618",
 					"timestamp": "2026-02-20T02:19:02.687Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c78d7-674c-727e-b1cc-fdf53d866618",
+					"timestamp": "2026-02-20T02:19:50.249Z",
+					"action": "bound commit fa92dce"
+				},
+				{
+					"taskId": "019c78d7-674c-727e-b1cc-fdf53d866618",
+					"timestamp": "2026-02-20T02:19:50.249Z",
+					"action": "updated: status→done"
 				}
 			],
 			"assumption": "修复点在 sanitizeToolUseId：对 call_ 前缀的 ID 跳过清洗。这是唯一需要改动的地方。"
+		},
+		"d5b80c6a-4b28-447f-9f93-581de7184245": {
+			"id": "d5b80c6a-4b28-447f-9f93-581de7184245",
+			"shortId": "A1.1",
+			"type": "approach",
+			"content": "Redesign parameter structure as cognitive scaffolding: remove question/topic/ultimateGoal, add problemStatement+constraints+uncertainties, make currentApproach optional",
+			"status": "planned",
+			"parentId": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
+			"childrenIds": ["0786ae71-444e-4db8-b3b6-64137d2d4fcc", "6b5c9884-90a5-49dd-a5ec-27aa304fbcaa"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+				"timestamp": "2026-02-20T02:46:36.833Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "G1 is about improving consult_expert tool quality. The approach is to redesign parameter structure as cognitive scaffolding - removing question field, splitting context, forcing goal-first thinking. This is the expert-recommended approach combining structural constraints + few-shot examples + cognitive scaffolding.",
+			"maxChildIndex": 2
+		},
+		"0786ae71-444e-4db8-b3b6-64137d2d4fcc": {
+			"id": "0786ae71-444e-4db8-b3b6-64137d2d4fcc",
+			"shortId": "I1.1.1",
+			"type": "impl",
+			"content": "Rewrite consult_expert.ts tool definition with new parameter structure and cognitive scaffolding descriptions",
+			"status": "in_progress",
+			"parentId": "d5b80c6a-4b28-447f-9f93-581de7184245",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+				"timestamp": "2026-02-20T02:47:05.210Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+					"timestamp": "2026-02-20T02:47:18.457Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
+			"assumption": "Under A1.1 approach. This impl covers the tool definition file which is what the LLM sees. It's the most important change - the parameter structure and descriptions that shape LLM thinking."
+		},
+		"6b5c9884-90a5-49dd-a5ec-27aa304fbcaa": {
+			"id": "6b5c9884-90a5-49dd-a5ec-27aa304fbcaa",
+			"shortId": "I1.1.2",
+			"type": "impl",
+			"content": "Sync tools.ts types, NativeToolCallParser.ts mapping, and ConsultExpertTool.ts execution with new parameter structure",
+			"status": "in_progress",
+			"parentId": "d5b80c6a-4b28-447f-9f93-581de7184245",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+				"timestamp": "2026-02-20T02:48:12.335Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
+					"timestamp": "2026-02-20T02:48:31.310Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
+			"assumption": "Under A1.1 approach. Need to sync tools.ts type definitions, NativeToolCallParser.ts parameter mapping, and ConsultExpertTool.ts execution logic with the new parameter structure."
 		}
 	},
 	"rootIds": ["c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf", "d66da17a-39a6-4c95-baf0-49dfb816c3eb"],
 	"shortIdIndex": {
 		"G1": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
 		"G2": "d66da17a-39a6-4c95-baf0-49dfb816c3eb",
-		"I2.1": "cbf801cc-94cd-4bc7-9416-209664ee665e"
+		"I2.1": "cbf801cc-94cd-4bc7-9416-209664ee665e",
+		"A1.1": "d5b80c6a-4b28-447f-9f93-581de7184245",
+		"I1.1.1": "0786ae71-444e-4db8-b3b6-64137d2d4fcc",
+		"I1.1.2": "6b5c9884-90a5-49dd-a5ec-27aa304fbcaa"
 	},
 	"rootMaxChildIndex": 2
 }

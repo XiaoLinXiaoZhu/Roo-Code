@@ -1,55 +1,57 @@
 import type OpenAI from "openai"
 
-const CONSULT_EXPERT_DESCRIPTION = `Consult an expert for in-depth analysis, architectural advice, or technical decision-making. This tool provides specialized recommendations based on domain knowledge.
+const CONSULT_EXPERT_DESCRIPTION = `Get expert analysis on a technical problem. The expert will evaluate your situation and provide recommendations, including approaches you may not have considered.
 
-CRITICAL: Avoid the XY Problem. Do not ask "How do I do X?" or "Is X correct?" when your actual goal is Y. Always state your ultimate goal (Y) clearly.
+IMPORTANT: Describe your PROBLEM, not your SOLUTION. The expert's value is in seeing what you might have missed.
 
-To get the most value from this tool, follow these guidelines:
+Parameter filling order matters — think about each one before moving to the next:
+1. domain → Who should answer this?
+2. problemStatement → What gap am I trying to close?
+3. constraints → What can't change?
+4. currentApproach → What have I tried? (optional — it's OK to have no approach yet)
+5. uncertainties → What am I not sure about?`
 
-**1. Identify the Right Expert**
-- Determine the problem type: implementation, architecture, or principles.
-- Seek cross-domain expertise (e.g., "algorithms + linguistics") rather than generic skills.
+const DOMAIN_PARAMETER_DESCRIPTION = `The specific expertise needed. Be precise about the intersection of skills.
+Example: "React performance optimization + virtual DOM internals" not just "frontend".`
 
-**2. Define the Goal (The 'Y' in XY Problem)**
-- What is the ultimate business or technical objective you are trying to achieve?
-- Do not confuse the goal with your current proposed solution.
+const PROBLEM_STATEMENT_DESCRIPTION = `Describe the GAP between your current state and desired state. Focus on WHAT is wrong or missing, not HOW you plan to fix it.
 
-**3. Present the Context and Current Thoughts**
-- Known: What you've tried, where you're stuck, and the constraints.
-- Proposed Solutions: What approaches you are considering (A, B, etc.), but remain open to the expert suggesting a completely different approach (C).
+Format: "[Current state] → [Desired state]. [Why the gap matters]"
 
-**4. Construct Good Questions**
-- Ask "What is the best approach to achieve [Goal]?" instead of "Is [Approach A] correct?"
-- Ask for evaluation of your proposed solutions against the goal.
-- Ask for alternative solutions you might have missed.
+✅ "API response time is 3s → Need <200ms. Users are abandoning the checkout flow."
+✅ "Tests pass locally → Fail in CI. Blocking the release pipeline."
+❌ "I need to add Redis caching" (this is a solution, not a problem)
+❌ "How to optimize database queries?" (this is a question, not a statement)`
 
-**Example Good Consultation:**
-Goal: "I need to prevent users from submitting duplicate orders."
-Proposed Solutions: "1. Disable the submit button. 2. Add a unique constraint in the database."
-Question: "What is the most robust architecture to prevent duplicate orders? Are my proposed solutions sufficient, or is there a better pattern like idempotency keys?"
+const CONSTRAINTS_DESCRIPTION = `Non-negotiable constraints that any solution must respect. These are FACTS, not preferences.
 
-**Example Bad Consultation (XY Problem):**
-Question: "How do I disable a button in React after click?" (This hides the real goal of preventing duplicate orders, leading to a fragile solution).`
+Include: tech stack, performance requirements, backward compatibility needs, team size/skill, timeline.
+Exclude: your current approach (that goes in currentApproach).
 
-const DOMAIN_PARAMETER_DESCRIPTION = `Expert domain or specialty (e.g., "UI/UX design and user experience", "Backend architecture and distributed systems", "Database design and optimization", "Security and code review"). Be specific about the expertise needed.`
+Example: "Must work with PostgreSQL 14. Cannot add new infrastructure. Response time SLA is 200ms p99. Team has no Redis experience."`
 
-const TOPIC_PARAMETER_DESCRIPTION = `Brief topic or title of the consultation. Should be concise but descriptive.`
+const CURRENT_APPROACH_DESCRIPTION = `Optional: What you've tried or are considering. Be explicit that this might be wrong — the expert may suggest replacing it entirely.
 
-const ULTIMATE_GOAL_PARAMETER_DESCRIPTION = `The true objective (Y) you are trying to achieve. This must be the underlying problem you want to solve, NOT your proposed implementation or method (X). Example: "Prevent duplicate order submissions" instead of "Disable the submit button".`
+If provided, the expert will evaluate it AND suggest alternatives. If omitted, the expert will recommend approaches from scratch.
 
-const CURRENT_APPROACH_PARAMETER_DESCRIPTION = `What you are currently doing, planning to do, or the options you are considering (A vs B). Be transparent that these are just ideas and might be wrong.`
+Format: "Considering [approach]. Tried [what you tried] → [what happened]."
 
-const QUESTION_PARAMETER_DESCRIPTION = `The specific question for the expert. CRITICAL: Do not ask "Is my approach correct?" or "Should I choose A or B?". Instead, ask "What is the best way to achieve the ultimate goal?" and "What are the flaws in my current approach?" Ask for alternative solutions you might have missed.`
+Example: "Considering adding a database index on user_id. Haven't tried yet because unsure if it addresses the root cause. Also considered query caching but worried about stale data."`
 
-const CONTEXT_PARAMETER_DESCRIPTION = `Relevant background information, constraints, what you've tried, and where you're stuck. This helps the expert understand your starting point.`
+const UNCERTAINTIES_DESCRIPTION = `What you're NOT sure about. These become the expert's primary focus areas.
+
+List the decisions you can't confidently make, the risks you can't assess, or the trade-offs you don't understand.
+
+✅ "Not sure if the bottleneck is query planning or data volume. Don't know the trade-offs between materialized views vs application-level caching for this access pattern."
+❌ "Is my approach correct?" (too vague, not actionable)`
 
 const ATTACHMENTS_PARAMETER_DESCRIPTION = `Optional: File paths or content to provide as context for the expert. Use absolute paths when possible.`
 
-const CONSULT_TYPE_PARAMETER_DESCRIPTION = `Type of consultation that determines the approach and deliverable format:
-- "analysis": Deep analysis report - for understanding root causes, impact assessment, and detailed examination of issues
-- "design": Architecture design proposal - for system design, API design, and technical architecture decisions
-- "comparison": Option comparison evaluation - for comparing multiple solutions with pros/cons analysis
-- "recommendation": Actionable recommendations - for specific action steps with cost-benefit analysis`
+const CONSULT_TYPE_PARAMETER_DESCRIPTION = `Type of consultation:
+- "analysis": Root cause investigation — when you don't understand WHY something is happening
+- "design": Architecture/solution design — when you need to CREATE something new
+- "comparison": Trade-off evaluation — when you have OPTIONS and need to choose
+- "recommendation": Action plan — when you know the goal and need STEPS to get there`
 
 export default {
 	type: "function",
@@ -64,25 +66,21 @@ export default {
 					type: "string",
 					description: DOMAIN_PARAMETER_DESCRIPTION,
 				},
-				topic: {
+				problemStatement: {
 					type: "string",
-					description: TOPIC_PARAMETER_DESCRIPTION,
+					description: PROBLEM_STATEMENT_DESCRIPTION,
 				},
-				ultimateGoal: {
+				constraints: {
 					type: "string",
-					description: ULTIMATE_GOAL_PARAMETER_DESCRIPTION,
+					description: CONSTRAINTS_DESCRIPTION,
 				},
 				currentApproach: {
-					type: "string",
-					description: CURRENT_APPROACH_PARAMETER_DESCRIPTION,
+					type: ["string", "null"],
+					description: CURRENT_APPROACH_DESCRIPTION,
 				},
-				context: {
+				uncertainties: {
 					type: "string",
-					description: CONTEXT_PARAMETER_DESCRIPTION,
-				},
-				question: {
-					type: "string",
-					description: QUESTION_PARAMETER_DESCRIPTION,
+					description: UNCERTAINTIES_DESCRIPTION,
 				},
 				attachments: {
 					type: ["string", "null"],
@@ -94,7 +92,15 @@ export default {
 					description: CONSULT_TYPE_PARAMETER_DESCRIPTION,
 				},
 			},
-			required: ["domain", "topic", "ultimateGoal", "currentApproach", "context", "question", "consultType"],
+			required: [
+				"domain",
+				"problemStatement",
+				"constraints",
+				"currentApproach",
+				"uncertainties",
+				"attachments",
+				"consultType",
+			],
 			additionalProperties: false,
 		},
 	},

@@ -75,9 +75,10 @@ export const toolParamNames = [
 	"context", // apply_edit optional parameter
 	"validate", // apply_edit optional parameter
 	"domain", // consult_expert required parameter
-	"topic", // consult_expert required parameter
-	"knownContext", // consult_expert required parameter
-	"unknownPoints", // consult_expert required parameter
+	"problemStatement", // consult_expert required parameter
+	"constraints", // consult_expert required parameter
+	"currentApproach", // consult_expert optional parameter
+	"uncertainties", // consult_expert required parameter
 	"attachments", // consult_expert optional parameter
 	"consultType", // consult_expert required parameter
 	"artifact_id", // read_command_output parameter
@@ -163,11 +164,11 @@ export type NativeToolArgs = {
 	}
 	consult_expert: {
 		domain: string
-		topic: string
-		question: string
-		knownContext: string
-		unknownPoints: string
-		attachments?: string
+		problemStatement: string
+		constraints: string
+		currentApproach?: string | null
+		uncertainties: string
+		attachments?: string | null
 		consultType: "analysis" | "design" | "comparison" | "recommendation"
 	}
 	// AST 代码智能工具
@@ -378,7 +379,13 @@ export interface ConsultExpertToolUse extends ToolUse<"consult_expert"> {
 	params: Partial<
 		Pick<
 			Record<ToolParamName, string>,
-			"domain" | "topic" | "question" | "knownContext" | "unknownPoints" | "attachments" | "consultType"
+			| "domain"
+			| "problemStatement"
+			| "constraints"
+			| "currentApproach"
+			| "uncertainties"
+			| "attachments"
+			| "consultType"
 		>
 	>
 }

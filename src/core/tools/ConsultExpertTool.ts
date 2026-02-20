@@ -74,35 +74,34 @@ const CONSULT_TYPE_CONFIGS: Record<ConsultType, ConsultTypeConfig> = {
 interface ConsultExpertParams {
 	/**
 	 * 专家领域描述
-	 * @example "UI/UX 设计、用户体验专家"
-	 * @example "后端架构、分布式系统设计"
+	 * @example "React performance optimization + virtual DOM internals"
 	 */
 	domain: string
 
 	/**
-	 * 咨询主题/问题
+	 * 问题陈述：当前状态与期望状态之间的差距
 	 */
-	topic: string
+	problemStatement: string
 
 	/**
-	 * 详细问题描述
+	 * 不可改变的约束条件
 	 */
-	question: string
+	constraints: string
 
 	/**
-	 * 已知上下文：当前状态、已尝试的方法、卡在哪里
+	 * 可选：当前方法或已尝试的方案（可能需要替换）
 	 */
-	knownContext: string
+	currentApproach?: string | null
 
 	/**
-	 * 不确定的点：不理解什么、需要帮助决定什么、不确定的风险
+	 * 不确定的决策、风险、权衡
 	 */
-	unknownPoints: string
+	uncertainties: string
 
 	/**
 	 * 可选:附件 (文件路径或内容)
 	 */
-	attachments?: string
+	attachments?: string | null
 
 	/**
 	 * 咨询类型（必选）
@@ -117,17 +116,18 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 	parseLegacy(params: Partial<Record<string, string>>): ConsultExpertParams {
 		return {
 			domain: params.domain || "",
-			topic: params.topic || "",
-			question: params.question || "",
-			knownContext: params.knownContext || "",
-			unknownPoints: params.unknownPoints || "",
+			problemStatement: params.problemStatement || "",
+			constraints: params.constraints || "",
+			currentApproach: params.currentApproach,
+			uncertainties: params.uncertainties || "",
 			attachments: params.attachments,
 			consultType: (params.consultType as ConsultType) || "analysis",
 		}
 	}
 
 	async execute(params: ConsultExpertParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
-		const { domain, topic, question, knownContext, unknownPoints, attachments, consultType } = params
+		const { domain, problemStatement, constraints, currentApproach, uncertainties, attachments, consultType } =
+			params
 		const { askApproval, handleError, pushToolResult, toolCallId } = callbacks
 
 		// 验证必需参数
@@ -138,31 +138,24 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 			return
 		}
 
-		if (!topic) {
+		if (!problemStatement) {
 			task.consecutiveMistakeCount++
 			task.didToolFailInCurrentTurn = true
-			pushToolResult(await task.sayAndCreateMissingParamError("consult_expert", "topic"))
+			pushToolResult(await task.sayAndCreateMissingParamError("consult_expert", "problemStatement"))
 			return
 		}
 
-		if (!question) {
+		if (!constraints) {
 			task.consecutiveMistakeCount++
 			task.didToolFailInCurrentTurn = true
-			pushToolResult(await task.sayAndCreateMissingParamError("consult_expert", "question"))
+			pushToolResult(await task.sayAndCreateMissingParamError("consult_expert", "constraints"))
 			return
 		}
 
-		if (!knownContext) {
+		if (!uncertainties) {
 			task.consecutiveMistakeCount++
 			task.didToolFailInCurrentTurn = true
-			pushToolResult(await task.sayAndCreateMissingParamError("consult_expert", "knownContext"))
-			return
-		}
-
-		if (!unknownPoints) {
-			task.consecutiveMistakeCount++
-			task.didToolFailInCurrentTurn = true
-			pushToolResult(await task.sayAndCreateMissingParamError("consult_expert", "unknownPoints"))
+			pushToolResult(await task.sayAndCreateMissingParamError("consult_expert", "uncertainties"))
 			return
 		}
 
@@ -178,10 +171,10 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 		// 构建任务消息
 		const taskMessage = this.buildConsultMessage(
 			domain,
-			topic,
-			question,
-			knownContext,
-			unknownPoints,
+			problemStatement,
+			constraints,
+			currentApproach,
+			uncertainties,
 			consultType,
 			attachments,
 		)
@@ -196,13 +189,13 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 		// 创建工具消息用于审批
 		const toolMessage = JSON.stringify({
 			tool: "consultExpert",
-			domain: domain,
-			topic: topic,
-			question: question,
-			knownContext: knownContext,
-			unknownPoints: unknownPoints,
-			attachments: attachments,
-			consultType: consultType,
+			domain,
+			problemStatement,
+			constraints,
+			currentApproach: currentApproach ?? null,
+			uncertainties,
+			attachments: attachments ?? null,
+			consultType,
 		})
 
 		// 请求审批
@@ -235,33 +228,29 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 
 	private buildConsultMessage(
 		domain: string,
-		topic: string,
-		question: string,
-		knownContext: string,
-		unknownPoints: string,
+		problemStatement: string,
+		constraints: string,
+		currentApproach: string | null | undefined,
+		uncertainties: string,
 		consultType: ConsultType,
-		attachments?: string,
+		attachments?: string | null,
 	): string {
 		const config = CONSULT_TYPE_CONFIGS[consultType]
 
-		// 清晰明确的任务要求
 		let message = `<role>
 ${domain} 领域专家
 </role>
 
 <consultation>
-主题：${topic}
+问题陈述：${problemStatement}
 
-问题：${question}
-</consultation>
+约束条件：
+${constraints}
+${currentApproach ? `\n当前方法（可能需要替换）：\n${currentApproach}` : ""}
 
-<context>
-已知信息：
-${knownContext}
-
-不确定的点：
-${unknownPoints}
-</context>`
+需要专家判断的不确定点：
+${uncertainties}
+</consultation>`
 
 		if (attachments) {
 			message += `\n\n<attachments>
@@ -284,7 +273,7 @@ ${config.approach.map((step) => `- ${step}`).join("\n")}
 		return message
 	}
 
-	private buildTodos(consultType: ConsultType, attachments?: string): TodoItem[] {
+	private buildTodos(consultType: ConsultType, attachments?: string | null): TodoItem[] {
 		const config = CONSULT_TYPE_CONFIGS[consultType]
 		const todos: TodoItem[] = []
 
@@ -322,24 +311,25 @@ ${config.approach.map((step) => `- ${step}`).join("\n")}
 
 		return todos
 	}
+
 	override async handlePartial(task: Task, block: ToolUse<"consult_expert">): Promise<void> {
 		const domain: string | undefined = block.params.domain
-		const topic: string | undefined = block.params.topic
-		const question: string | undefined = block.params.question
-		const knownContext: string | undefined = block.params.knownContext
-		const unknownPoints: string | undefined = block.params.unknownPoints
+		const problemStatement: string | undefined = block.params.problemStatement
+		const constraints: string | undefined = block.params.constraints
+		const currentApproach: string | undefined = block.params.currentApproach
+		const uncertainties: string | undefined = block.params.uncertainties
 		const attachments: string | undefined = block.params.attachments
 		const consultType: string | undefined = block.params.consultType
 
 		const partialMessage = JSON.stringify({
 			tool: "consultExpert",
-			domain: domain,
-			topic: topic,
-			question: question,
-			knownContext: knownContext,
-			unknownPoints: unknownPoints,
-			attachments: attachments,
-			consultType: consultType,
+			domain,
+			problemStatement,
+			constraints,
+			currentApproach,
+			uncertainties,
+			attachments,
+			consultType,
 		})
 
 		await task.ask("tool", partialMessage, block.partial).catch(() => {})
