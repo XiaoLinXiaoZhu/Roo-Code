@@ -996,6 +996,70 @@
 				}
 			],
 			"assumption": "A7.1 下的具体实现。修改 CommitIntentTool.execute() 的执行顺序。"
+		},
+		"c887bed9-e014-4ec5-bc06-b1803de639a2": {
+			"id": "c887bed9-e014-4ec5-bc06-b1803de639a2",
+			"shortId": "G8",
+			"type": "goal",
+			"content": "修复 TerminalOutput 组件样式：字体大小不应使用 --vscode-editor-font-size，行高不应使用 --vscode-editor-line-height，且需要添加高度限制",
+			"status": "planned",
+			"parentId": null,
+			"childrenIds": ["4b2f06ca-64e7-4553-92b8-930c17737a58"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8edc-f926-72cc-8024-911be7879905",
+				"timestamp": "2026-02-24T09:03:49.060Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "用户报告工具执行结果（TerminalOutput）的样式异常：字体大小使用了编辑器字体大小变量，行高使用了编辑器行高变量，且没有高度限制。这是 commit 618aa6652 引入的回归。之前用 CodeBlock 渲染时有 0.95em 字体和 window shade 高度限制。",
+			"maxChildIndex": 1
+		},
+		"4b2f06ca-64e7-4553-92b8-930c17737a58": {
+			"id": "4b2f06ca-64e7-4553-92b8-930c17737a58",
+			"shortId": "I8.1",
+			"type": "impl",
+			"content": "null",
+			"status": "done",
+			"parentId": "c887bed9-e014-4ec5-bc06-b1803de639a2",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "cb820d272f07df69a4d8000cdc8f2d610719af74",
+					"commitMessage": "[intent:I8.1] Fix TerminalOutput styling: use relative font-size (0.85em) instead of --vscode-editor-font-size, compact line-height (1.2) instead of --vscode-editor-line-height, and add 500px max-height to output container",
+					"files": [
+						".roo/cache/search/index.json",
+						".roo/intent-tree.json",
+						"webview-ui/src/components/chat/CommandExecution.tsx",
+						"webview-ui/src/components/chat/TerminalOutput.tsx"
+					],
+					"diffSummary": "4 file(s), +128 -6",
+					"timestamp": "2026-02-24T09:05:13.291Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c8edc-f926-72cc-8024-911be7879905",
+				"timestamp": "2026-02-24T09:03:57.014Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8edc-f926-72cc-8024-911be7879905",
+					"timestamp": "2026-02-24T09:04:02.834Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8edc-f926-72cc-8024-911be7879905",
+					"timestamp": "2026-02-24T09:05:13.291Z",
+					"action": "bound commit cb820d2"
+				},
+				{
+					"taskId": "019c8edc-f926-72cc-8024-911be7879905",
+					"timestamp": "2026-02-24T09:05:13.291Z",
+					"action": "updated: status→done"
+				}
+			],
+			"assumption": "TerminalOutput 应该使用与 CodeBlock 类似的相对字体大小（如 0.85em），使用正常行高（如 1.35），而不是编辑器的 font-size 和 line-height 变量。OutputContainer 展开时需要 max-height 限制以避免长输出占满空间。"
 		}
 	},
 	"rootIds": [
@@ -1005,7 +1069,8 @@
 		"71e04f6c-420a-4679-b8a2-ebab36805352",
 		"a13f142e-f381-44bb-80e7-cb0e0b799cb5",
 		"0303bab4-4621-4fe2-84c6-f167dd054107",
-		"27344780-0d11-4174-ada4-18385cf88129"
+		"27344780-0d11-4174-ada4-18385cf88129",
+		"c887bed9-e014-4ec5-bc06-b1803de639a2"
 	],
 	"shortIdIndex": {
 		"G1": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
@@ -1038,7 +1103,9 @@
 		"I6.11": "e907b2e9-a987-444a-8fc1-5960fc224006",
 		"G7": "27344780-0d11-4174-ada4-18385cf88129",
 		"A7.1": "2da7f344-e599-4236-8d9b-141621e48037",
-		"I7.1.1": "6b663bdb-ab18-4a8f-ab87-e6da3dfdc1af"
+		"I7.1.1": "6b663bdb-ab18-4a8f-ab87-e6da3dfdc1af",
+		"G8": "c887bed9-e014-4ec5-bc06-b1803de639a2",
+		"I8.1": "4b2f06ca-64e7-4553-92b8-930c17737a58"
 	},
-	"rootMaxChildIndex": 7
+	"rootMaxChildIndex": 8
 }

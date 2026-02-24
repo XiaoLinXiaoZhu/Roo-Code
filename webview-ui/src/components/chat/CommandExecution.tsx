@@ -224,7 +224,7 @@ const OutputContainerInternal = ({ isExpanded, output }: { isExpanded: boolean; 
 	<div
 		className={cn("overflow-hidden", {
 			"max-h-0": !isExpanded,
-			"max-h-[100%] mt-1 pt-1 border-t border-border/25": isExpanded,
+			"max-h-[500px] mt-1 pt-1 border-t border-border/25 overflow-y-auto": isExpanded,
 		})}>
 		{output.length > 0 && <TerminalOutput content={output} />}
 	</div>

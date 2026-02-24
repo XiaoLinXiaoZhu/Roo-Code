@@ -1712,6 +1712,84 @@
       "gitCommit": "28358c260c338cc732ff7f76cb15f24094a2c9a3",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "68",
+      "query": "How is the pre tag or code block styled in the webview chat UI? Where are vscode-editor-font-family, vscode-editor-font-size CSS variables used?",
+      "tags": [
+        "how",
+        "is",
+        "the",
+        "pre",
+        "tag",
+        "or",
+        "code",
+        "block",
+        "styled",
+        "in",
+        "webview",
+        "chat",
+        "ui",
+        "where",
+        "are",
+        "vscode",
+        "editor",
+        "font",
+        "family",
+        "size",
+        "css",
+        "variables",
+        "used"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/webview-ui",
+        "filePatterns": "*.css,*.tsx,*.ts",
+        "excludes": "node_modules,dist"
+      },
+      "createdAt": "2026-02-24T08:58:43.689Z",
+      "gitCommit": "f343b8b8629117fb688da71a1f83c7bb2c86ac79",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"relevance\":{\"type\":\"string\"}}}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "69",
+      "query": "Where is the execute_command tool result or terminal output rendered in the chat view? How is the command output pre tag styled with vscode-terminal-background and vscode-editor-font-family?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "execute_command",
+        "tool",
+        "result",
+        "or",
+        "terminal",
+        "output",
+        "rendered",
+        "in",
+        "chat",
+        "view",
+        "how",
+        "command",
+        "pre",
+        "tag",
+        "styled",
+        "with",
+        "vscode",
+        "background",
+        "and",
+        "editor",
+        "font",
+        "family"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/webview-ui",
+        "filePatterns": "*.tsx,*.ts",
+        "excludes": "node_modules,dist"
+      },
+      "createdAt": "2026-02-24T09:03:10.324Z",
+      "gitCommit": "f343b8b8629117fb688da71a1f83c7bb2c86ac79",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"relevance\":{\"type\":\"string\"}}}},\"summary\":{\"type\":\"string\"}}}"
     }
   ]
 }
