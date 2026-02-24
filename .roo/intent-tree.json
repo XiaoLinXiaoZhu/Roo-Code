@@ -471,7 +471,7 @@
 			"content": "将 intent_planning 模式的 customInstructions 从声明式改为推理式",
 			"status": "planned",
 			"parentId": "293aa8fe-7667-4d43-9cdb-ebac42370cd9",
-			"childrenIds": [],
+			"childrenIds": ["53ea4218-1b6a-48ce-baea-3fbb08238555"],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
@@ -479,7 +479,8 @@
 				"action": "created"
 			},
 			"modifiedBy": [],
-			"assumption": "intent_planning 是专门管理 intent tree 的模式，其 customInstructions 应该是最详细的推理式指导。当前有 X→Y 工作流和可证伪性测试，但都是声明式的，需要改为推理式。"
+			"assumption": "intent_planning 是专门管理 intent tree 的模式，其 customInstructions 应该是最详细的推理式指导。当前有 X→Y 工作流和可证伪性测试，但都是声明式的，需要改为推理式。",
+			"maxChildIndex": 1
 		},
 		"51952735-79f7-4f61-b60a-82703cca7769": {
 			"id": "51952735-79f7-4f61-b60a-82703cca7769",
@@ -598,6 +599,65 @@
 				}
 			],
 			"assumption": "solo_dev 当前的 customInstructions 是纯声明式 checklist。需要改为推理片段，从 solo_dev 特有的端到端开发场景出发推导规则。spirit.ts Chain 7 已覆盖\"为什么需要 intent tree\"，这里应聚焦\"在实现过程中如何使用\"。"
+		},
+		"53ea4218-1b6a-48ce-baea-3fbb08238555": {
+			"id": "53ea4218-1b6a-48ce-baea-3fbb08238555",
+			"shortId": "A2.3.1",
+			"type": "approach",
+			"content": "采用推理片段改写 intent_planning customInstructions：从\"X→Y 漂移如何发生\"和\"节点质量如何判断\"推导出工作流",
+			"status": "planned",
+			"parentId": "fb2a6611-2a94-4b54-ab51-d6823ffe101c",
+			"childrenIds": ["35f2ff07-5a82-41a9-ab7e-6e56c51ca656"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:28:05.281Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "intent_planning 是专门的 intent 分析模式，不写代码只管理 intent tree。当前有 X→Y 工作流和可证伪性测试，但都是声明式。需要从具体的失败场景推导出这些规则。与 solo_dev 的区别：solo_dev 聚焦\"实现过程中如何使用\"，intent_planning 聚焦\"如何分析和构建高质量的 intent 结构\"。",
+			"maxChildIndex": 1
+		},
+		"35f2ff07-5a82-41a9-ab7e-6e56c51ca656": {
+			"id": "35f2ff07-5a82-41a9-ab7e-6e56c51ca656",
+			"shortId": "I2.3.1.1",
+			"type": "impl",
+			"content": "改写 intent_planning customInstructions 为推理式",
+			"status": "done",
+			"parentId": "53ea4218-1b6a-48ce-baea-3fbb08238555",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "605153c1d884b6324a073c9bb0b9a6a2ce0d23e9",
+					"commitMessage": "[intent:I2.3.1.1] 将 intent_planning customInstructions 从声明式改为推理式：从 X→Y 漂移场景和节点质量判断推导出工作流",
+					"files": [".roo/intent-tree.json", "packages/types/src/mode.ts"],
+					"diffSummary": "2 file(s), +66 -43",
+					"timestamp": "2026-02-24T14:28:57.221Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:28:12.223Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:28:18.638Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:28:57.221Z",
+					"action": "bound commit 605153c"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:28:57.221Z",
+					"action": "updated: status→done"
+				}
+			],
+			"assumption": "intent_planning 当前有较多声明式内容（X→Y 工作流、可证伪性测试、Must NOT Do/Should Do 列表）。需要将核心规则改为推理片段，保留少量声明式骨架。"
 		}
 	},
 	"rootIds": ["7d7be656-3aa0-4b70-8f09-6bbcfaab2135", "293aa8fe-7667-4d43-9cdb-ebac42370cd9"],
@@ -621,7 +681,9 @@
 		"A2.1.1": "51952735-79f7-4f61-b60a-82703cca7769",
 		"I2.1.1.1": "a7549efc-15e1-4e66-82bc-f97fe5d8e164",
 		"A2.2.1": "da2141ea-7bdb-4ac7-8d84-7357ce7cbd06",
-		"I2.2.1.1": "f06b8928-0ebf-4ee8-8538-3857310074a9"
+		"I2.2.1.1": "f06b8928-0ebf-4ee8-8538-3857310074a9",
+		"A2.3.1": "53ea4218-1b6a-48ce-baea-3fbb08238555",
+		"I2.3.1.1": "35f2ff07-5a82-41a9-ab7e-6e56c51ca656"
 	},
 	"rootMaxChildIndex": 2
 }
