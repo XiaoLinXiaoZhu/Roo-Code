@@ -1060,6 +1060,71 @@
 				}
 			],
 			"assumption": "TerminalOutput 应该使用与 CodeBlock 类似的相对字体大小（如 0.85em），使用正常行高（如 1.35），而不是编辑器的 font-size 和 line-height 变量。OutputContainer 展开时需要 max-height 限制以避免长输出占满空间。"
+		},
+		"727f7791-48b7-4d2f-886d-42596ae2c7cd": {
+			"id": "727f7791-48b7-4d2f-886d-42596ae2c7cd",
+			"shortId": "G9",
+			"type": "goal",
+			"content": "实验：将 spirit.ts 从 Soul Document 声明式模式改为重度推理模式（Facts → Heavy Reasoning → Conclusions）",
+			"status": "planned",
+			"parentId": null,
+			"childrenIds": ["1fa54b75-ef5a-40b7-b3e8-3439eb5431b8"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
+				"timestamp": "2026-02-24T11:30:39.165Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "用户明确要求将 spirit.ts 从 Soul Document 模式改为重度推理模式。这是一个实验性质的改造，不涉及其他文件。Intent tree 中没有相关的现有目标。",
+			"maxChildIndex": 1
+		},
+		"1fa54b75-ef5a-40b7-b3e8-3439eb5431b8": {
+			"id": "1fa54b75-ef5a-40b7-b3e8-3439eb5431b8",
+			"shortId": "I9.1",
+			"type": "impl",
+			"content": "null",
+			"status": "done",
+			"parentId": "727f7791-48b7-4d2f-886d-42596ae2c7cd",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "b18e15c81e9fe1c36ee7ce4a4800d70905ab135d",
+					"commitMessage": "[intent:I9.1] Rewrite spirit.ts from Soul Document mode to Heavy Reasoning mode: 5 Facts → 6 reasoning chains (with Deep Reasoning / Self-Reflection / Self-Exploration) → 10 conclusions",
+					"files": [
+						".roo/intent-tree.json",
+						"\"docs/deep-thinking/CoT\\344\\270\\216FewShot\\350\\256\\276\\350\\256\\241\\346\\214\\207\\345\\215\\227.md\"",
+						"docs/todo-migrate-apply-diff-to-edit.md",
+						"src/core/prompts/sections/spirit.ts",
+						"src/package.json"
+					],
+					"diffSummary": "5 file(s), +904 -259",
+					"timestamp": "2026-02-24T11:35:38.049Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
+				"timestamp": "2026-02-24T11:30:46.340Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
+					"timestamp": "2026-02-24T11:31:02.067Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
+					"timestamp": "2026-02-24T11:35:38.049Z",
+					"action": "bound commit b18e15c"
+				},
+				{
+					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
+					"timestamp": "2026-02-24T11:35:38.049Z",
+					"action": "updated: status→done"
+				}
+			],
+			"assumption": "只需修改 spirit.ts 一个文件，函数签名不变，返回字符串即可。核心挑战是设计出微妙的 Facts 和自然的推理链路，使结论与原有行为准则等价但呈现方式完全不同。"
 		}
 	},
 	"rootIds": [
@@ -1070,7 +1135,8 @@
 		"a13f142e-f381-44bb-80e7-cb0e0b799cb5",
 		"0303bab4-4621-4fe2-84c6-f167dd054107",
 		"27344780-0d11-4174-ada4-18385cf88129",
-		"c887bed9-e014-4ec5-bc06-b1803de639a2"
+		"c887bed9-e014-4ec5-bc06-b1803de639a2",
+		"727f7791-48b7-4d2f-886d-42596ae2c7cd"
 	],
 	"shortIdIndex": {
 		"G1": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
@@ -1105,7 +1171,9 @@
 		"A7.1": "2da7f344-e599-4236-8d9b-141621e48037",
 		"I7.1.1": "6b663bdb-ab18-4a8f-ab87-e6da3dfdc1af",
 		"G8": "c887bed9-e014-4ec5-bc06-b1803de639a2",
-		"I8.1": "4b2f06ca-64e7-4553-92b8-930c17737a58"
+		"I8.1": "4b2f06ca-64e7-4553-92b8-930c17737a58",
+		"G9": "727f7791-48b7-4d2f-886d-42596ae2c7cd",
+		"I9.1": "1fa54b75-ef5a-40b7-b3e8-3439eb5431b8"
 	},
-	"rootMaxChildIndex": 8
+	"rootMaxChildIndex": 9
 }
