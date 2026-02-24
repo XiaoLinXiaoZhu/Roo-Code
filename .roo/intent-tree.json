@@ -1114,6 +1114,13 @@
 					"files": ["src/core/prompts/sections/spirit.ts"],
 					"diffSummary": "1 file(s), +101 -80",
 					"timestamp": "2026-02-24T11:58:35.203Z"
+				},
+				{
+					"commitHash": "0f02a9a5fb3be21ff9156426bd21698bc889ae05",
+					"commitMessage": "[intent:I9.1] Clarify ask vs complete: ask_followup_question is primary communication tool during work, attempt_completion is reporting tool for final results",
+					"files": ["src/core/prompts/sections/spirit.ts"],
+					"diffSummary": "1 file(s), +8 -8",
+					"timestamp": "2026-02-24T12:21:21.235Z"
 				}
 			],
 			"createdBy": {
@@ -1155,6 +1162,16 @@
 				{
 					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
 					"timestamp": "2026-02-24T11:58:35.203Z",
+					"action": "updated: status→done"
+				},
+				{
+					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
+					"timestamp": "2026-02-24T12:21:21.235Z",
+					"action": "bound commit 0f02a9a"
+				},
+				{
+					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
+					"timestamp": "2026-02-24T12:21:21.235Z",
 					"action": "updated: status→done"
 				}
 			],
