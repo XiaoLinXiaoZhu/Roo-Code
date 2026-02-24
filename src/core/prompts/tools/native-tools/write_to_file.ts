@@ -10,14 +10,7 @@ const WRITE_TO_FILE_DESCRIPTION = `Write complete content to a file. Creates new
 **Important**: Prefer editing tools (apply_diff, apply_edit) for modifying existing files. This tool is slower and requires complete file content.
 
 **Example**:
-\`\`\`\`\`\`write_to frontend-config.json
-{
-  "apiEndpoint": "https://api.example.com",
-  "theme": {
-    "primaryColor": "#007bff"
-  }
-}
-\`\`\`\`\`\``
+write_to_file({ purpose: "new_file", path: "frontend-config.json", content: "{\n  \\"apiEndpoint\\": \\"https://api.example.com\\"\n}" })`
 
 export default {
 	type: "function",

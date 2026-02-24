@@ -8,10 +8,7 @@
 			"content": "Optimize consult_expert tool: reposition as empowerment tool (knowledge/methodology/best-practices) instead of problem diagnosis",
 			"status": "in_progress",
 			"parentId": null,
-			"childrenIds": [
-				"d5b80c6a-4b28-447f-9f93-581de7184245",
-				"168b6825-a435-4516-91fd-ff80edddcfc2"
-			],
+			"childrenIds": ["d5b80c6a-4b28-447f-9f93-581de7184245", "168b6825-a435-4516-91fd-ff80edddcfc2"],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c78ca-4f9a-7419-8801-7424703a7007",
@@ -40,9 +37,7 @@
 			"content": "修复 sanitizeToolUseId 误清洗 OpenAI 原生 call_id 导致 tool-result 找不到对应 tool-call 的 bug",
 			"status": "planned",
 			"parentId": null,
-			"childrenIds": [
-				"cbf801cc-94cd-4bc7-9416-209664ee665e"
-			],
+			"childrenIds": ["cbf801cc-94cd-4bc7-9416-209664ee665e"],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c78d7-674c-727e-b1cc-fdf53d866618",
@@ -107,10 +102,7 @@
 			"content": "Redesign parameter structure as cognitive scaffolding: remove question/topic/ultimateGoal, add problemStatement+constraints+uncertainties, make currentApproach optional",
 			"status": "planned",
 			"parentId": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
-			"childrenIds": [
-				"0786ae71-444e-4db8-b3b6-64137d2d4fcc",
-				"6b5c9884-90a5-49dd-a5ec-27aa304fbcaa"
-			],
+			"childrenIds": ["0786ae71-444e-4db8-b3b6-64137d2d4fcc", "6b5c9884-90a5-49dd-a5ec-27aa304fbcaa"],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
@@ -204,10 +196,7 @@
 			"content": "Redesign consult_expert as empowerment tool: simplified params focused on domain knowledge, methodology, best practices acquisition",
 			"status": "planned",
 			"parentId": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
-			"childrenIds": [
-				"ccd75032-efa7-4d88-94c4-cb41eaeb2de5",
-				"5eae7f03-dc70-43dc-a28e-ccdbb2e56ad6"
-			],
+			"childrenIds": ["ccd75032-efa7-4d88-94c4-cb41eaeb2de5", "5eae7f03-dc70-43dc-a28e-ccdbb2e56ad6"],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
@@ -277,10 +266,7 @@
 				{
 					"commitHash": "9abcc51cd38eb3228c49acd35cfc6f970638e9f8",
 					"commitMessage": "[intent:I1.2.2] Update expert mode roleDefinition and customInstructions to align with empowerment positioning: teach principles/methodology, not solve specific problems",
-					"files": [
-						".roo/intent-tree.json",
-						"packages/types/src/mode.ts"
-					],
+					"files": [".roo/intent-tree.json", "packages/types/src/mode.ts"],
 					"diffSummary": "2 file(s), +57 -9",
 					"timestamp": "2026-02-20T03:10:32.493Z"
 				}
@@ -316,9 +302,7 @@
 			"content": "将 agent-as-tool-experiment 分支 rebase 到 upstream/main，同步上游更新",
 			"status": "planned",
 			"parentId": null,
-			"childrenIds": [
-				"55c9b850-2810-4ce9-8e5f-85bc914aa2fc"
-			],
+			"childrenIds": ["55c9b850-2810-4ce9-8e5f-85bc914aa2fc"],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
@@ -364,9 +348,7 @@
 			"content": "清理 markdown 工具调用模式的所有残留代码",
 			"status": "planned",
 			"parentId": null,
-			"childrenIds": [
-				"c3faf021-cdb4-4dd2-93e4-3951166940f3"
-			],
+			"childrenIds": ["c3faf021-cdb4-4dd2-93e4-3951166940f3"],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
@@ -426,13 +408,78 @@
 				}
 			],
 			"assumption": "需要删除 MarkdownToolParser 文件及其测试，清理 Task.ts 中的引用，清理 tools.ts 中的 isMarkdownTool 属性，清理测试文件。"
+		},
+		"a13f142e-f381-44bb-80e7-cb0e0b799cb5": {
+			"id": "a13f142e-f381-44bb-80e7-cb0e0b799cb5",
+			"shortId": "G5",
+			"type": "goal",
+			"content": "清理工具描述中的 markdown 工具调用格式说明，并按照新的洞察优化描述模式",
+			"status": "planned",
+			"parentId": null,
+			"childrenIds": ["cf39fd65-3dc7-4c8e-8505-14b235bd32a7", "816e2b35-d111-4a96-9ebc-67ddf0747324"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T07:56:53.955Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "检查了 intent tree，G4 是关于清理 markdown 工具调用模式的残留代码（已完成），但这次是关于清理工具描述中的 markdown 格式说明文本，并优化描述模式。这是一个新的目标。",
+			"maxChildIndex": 2
+		},
+		"cf39fd65-3dc7-4c8e-8505-14b235bd32a7": {
+			"id": "cf39fd65-3dc7-4c8e-8505-14b235bd32a7",
+			"shortId": "I5.1",
+			"type": "impl",
+			"content": "清理 write_to_file.ts 中的 markdown 格式示例（```write_to），改为函数调用风格示例",
+			"status": "in_progress",
+			"parentId": "a13f142e-f381-44bb-80e7-cb0e0b799cb5",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T07:56:59.996Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T07:57:08.308Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
+			"assumption": "G5 下需要具体的实现节点。需要修改 write_to_file.ts 和 apply_diff.ts 中的 markdown 格式示例，改为更自然的函数调用风格示例。execute_command.ts 和 read_file.ts 没有 markdown 格式问题但也需要检查描述质量。"
+		},
+		"816e2b35-d111-4a96-9ebc-67ddf0747324": {
+			"id": "816e2b35-d111-4a96-9ebc-67ddf0747324",
+			"shortId": "I5.2",
+			"type": "impl",
+			"content": "清理 apply_diff.ts 中的 markdown 格式说明和示例，改为函数调用风格",
+			"status": "in_progress",
+			"parentId": "a13f142e-f381-44bb-80e7-cb0e0b799cb5",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T07:57:01.592Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T07:57:24.535Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
+			"assumption": "apply_diff.ts 有明确的 markdown 格式说明：\"Use Markdown code block format with ```apply_diff path syntax\"，需要删除并替换为更好的描述。"
 		}
 	},
 	"rootIds": [
 		"c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
 		"d66da17a-39a6-4c95-baf0-49dfb816c3eb",
 		"dc4abfdf-388e-4fe9-916a-ded030ce29e6",
-		"71e04f6c-420a-4679-b8a2-ebab36805352"
+		"71e04f6c-420a-4679-b8a2-ebab36805352",
+		"a13f142e-f381-44bb-80e7-cb0e0b799cb5"
 	],
 	"shortIdIndex": {
 		"G1": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
@@ -447,7 +494,10 @@
 		"G3": "dc4abfdf-388e-4fe9-916a-ded030ce29e6",
 		"I3.1": "55c9b850-2810-4ce9-8e5f-85bc914aa2fc",
 		"G4": "71e04f6c-420a-4679-b8a2-ebab36805352",
-		"I4.1": "c3faf021-cdb4-4dd2-93e4-3951166940f3"
+		"I4.1": "c3faf021-cdb4-4dd2-93e4-3951166940f3",
+		"G5": "a13f142e-f381-44bb-80e7-cb0e0b799cb5",
+		"I5.1": "cf39fd65-3dc7-4c8e-8505-14b235bd32a7",
+		"I5.2": "816e2b35-d111-4a96-9ebc-67ddf0747324"
 	},
-	"rootMaxChildIndex": 4
+	"rootMaxChildIndex": 5
 }

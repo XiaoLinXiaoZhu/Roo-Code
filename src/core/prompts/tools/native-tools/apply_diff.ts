@@ -7,20 +7,8 @@ const APPLY_DIFF_DESCRIPTION = `Apply precise, surgical text replacements to a f
 - Simple insert/replace where you have exact code
 - Quick changes without validation overhead
 
-Use Markdown code block format with \`\`\`apply_diff path syntax. **Use 6 backticks for maximum compatibility**.
-
 **Example**:
-\`\`\`\`\`\`apply_diff src/utils/config.ts
-<<<<<<< SEARCH
-:start_line:15
--------
-const defaultTimeout = 5000;
-const maxRetries = 3;
-=======
-const defaultTimeout = 10000;
-const maxRetries = 5;
->>>>>>> REPLACE
-\`\`\`\`\`\``
+apply_diff({ path: "src/utils/config.ts", diff: "<<<<<<< SEARCH\\n:start_line:15\\n-------\\nconst defaultTimeout = 5000;\\n=======\\nconst defaultTimeout = 10000;\\n>>>>>>> REPLACE" })`
 
 const DIFF_PARAMETER_DESCRIPTION = `One or more search/replace blocks. The ':start_line:' is required. SEARCH content must exactly match existing code including whitespace.
 
