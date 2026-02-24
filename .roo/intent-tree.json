@@ -1,1412 +1,565 @@
 {
 	"version": 1,
 	"nodes": {
-		"c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf": {
-			"id": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
+		"7d7be656-3aa0-4b70-8f09-6bbcfaab2135": {
+			"id": "7d7be656-3aa0-4b70-8f09-6bbcfaab2135",
 			"shortId": "G1",
 			"type": "goal",
-			"content": "Optimize consult_expert tool: reposition as empowerment tool (knowledge/methodology/best-practices) instead of problem diagnosis",
-			"status": "in_progress",
-			"parentId": null,
-			"childrenIds": ["d5b80c6a-4b28-447f-9f93-581de7184245", "168b6825-a435-4516-91fd-ff80edddcfc2"],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c78ca-4f9a-7419-8801-7424703a7007",
-				"timestamp": "2026-02-20T02:04:22.709Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-					"timestamp": "2026-02-20T02:46:22.440Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-					"timestamp": "2026-02-20T03:01:36.368Z",
-					"action": "updated: content, status→in_progress"
-				}
-			],
-			"assumption": "The user wants to optimize the consult_expert tool to prevent XY problems and improve the quality of questions asked by the model.",
-			"maxChildIndex": 2
-		},
-		"d66da17a-39a6-4c95-baf0-49dfb816c3eb": {
-			"id": "d66da17a-39a6-4c95-baf0-49dfb816c3eb",
-			"shortId": "G2",
-			"type": "goal",
-			"content": "修复 sanitizeToolUseId 误清洗 OpenAI 原生 call_id 导致 tool-result 找不到对应 tool-call 的 bug",
-			"status": "planned",
-			"parentId": null,
-			"childrenIds": ["cbf801cc-94cd-4bc7-9416-209664ee665e"],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c78d7-674c-727e-b1cc-fdf53d866618",
-				"timestamp": "2026-02-20T02:18:54.437Z",
-				"action": "created"
-			},
-			"modifiedBy": [],
-			"assumption": "这是一个独立的 bug 修复任务，与 G1 无关。需要新建 goal。",
-			"maxChildIndex": 1
-		},
-		"cbf801cc-94cd-4bc7-9416-209664ee665e": {
-			"id": "cbf801cc-94cd-4bc7-9416-209664ee665e",
-			"shortId": "I2.1",
-			"type": "impl",
-			"content": "在 sanitizeToolUseId 中增加：若 ID 以 call_ 开头（OpenAI 原生 ID），直接返回原值，跳过字符替换",
-			"status": "done",
-			"parentId": "d66da17a-39a6-4c95-baf0-49dfb816c3eb",
-			"childrenIds": [],
-			"codeBindings": [
-				{
-					"commitHash": "fa92dcebb980f7c605c7866315e004f4802e821e",
-					"commitMessage": "[intent:I2.1] fix: skip sanitization for OpenAI-native call_ IDs to prevent tool-result mismatch\n\nOpenAI generates call IDs with the \"call_\" prefix that may contain base64\ncharacters (+, /) in __thought__ suffixes. Sanitizing these IDs replaces\nthose characters with underscores, but OpenAI internally tracks the original\nID — causing \"tool_result does not match any tool_use\" errors.\n\nFix: return call_ prefixed IDs unchanged in sanitizeToolUseId(). The\nsanitization logic is still needed for Gemini/OpenRouter IDs (e.g.\nfunctions.read_file:0) which contain dots and colons that violate the\n^[a-zA-Z0-9_-]+$ pattern required by the OpenAI API.",
-					"files": [
-						".roo/cache/search/index.json",
-						".roo/intent-tree.json",
-						"src/core/prompts/tools/native-tools/consult_expert.ts",
-						"src/utils/__tests__/tool-id.spec.ts",
-						"src/utils/tool-id.ts"
-					],
-					"diffSummary": "5 file(s), +132 -129",
-					"timestamp": "2026-02-20T02:19:50.249Z"
-				}
-			],
-			"createdBy": {
-				"taskId": "019c78d7-674c-727e-b1cc-fdf53d866618",
-				"timestamp": "2026-02-20T02:18:59.405Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c78d7-674c-727e-b1cc-fdf53d866618",
-					"timestamp": "2026-02-20T02:19:02.687Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c78d7-674c-727e-b1cc-fdf53d866618",
-					"timestamp": "2026-02-20T02:19:50.249Z",
-					"action": "bound commit fa92dce"
-				},
-				{
-					"taskId": "019c78d7-674c-727e-b1cc-fdf53d866618",
-					"timestamp": "2026-02-20T02:19:50.249Z",
-					"action": "updated: status→done"
-				}
-			],
-			"assumption": "修复点在 sanitizeToolUseId：对 call_ 前缀的 ID 跳过清洗。这是唯一需要改动的地方。"
-		},
-		"d5b80c6a-4b28-447f-9f93-581de7184245": {
-			"id": "d5b80c6a-4b28-447f-9f93-581de7184245",
-			"shortId": "A1.1",
-			"type": "approach",
-			"content": "Redesign parameter structure as cognitive scaffolding: remove question/topic/ultimateGoal, add problemStatement+constraints+uncertainties, make currentApproach optional",
-			"status": "planned",
-			"parentId": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
-			"childrenIds": ["0786ae71-444e-4db8-b3b6-64137d2d4fcc", "6b5c9884-90a5-49dd-a5ec-27aa304fbcaa"],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-				"timestamp": "2026-02-20T02:46:36.833Z",
-				"action": "created"
-			},
-			"modifiedBy": [],
-			"assumption": "G1 is about improving consult_expert tool quality. The approach is to redesign parameter structure as cognitive scaffolding - removing question field, splitting context, forcing goal-first thinking. This is the expert-recommended approach combining structural constraints + few-shot examples + cognitive scaffolding.",
-			"maxChildIndex": 2
-		},
-		"0786ae71-444e-4db8-b3b6-64137d2d4fcc": {
-			"id": "0786ae71-444e-4db8-b3b6-64137d2d4fcc",
-			"shortId": "I1.1.1",
-			"type": "impl",
-			"content": "Rewrite consult_expert.ts tool definition with new parameter structure and cognitive scaffolding descriptions",
-			"status": "done",
-			"parentId": "d5b80c6a-4b28-447f-9f93-581de7184245",
-			"childrenIds": [],
-			"codeBindings": [
-				{
-					"commitHash": "19d2f9887c2542e63ef6fb10e419e0d69ecce066",
-					"commitMessage": "[intent:I1.1.1] Rewrite consult_expert tool definition: replace question/topic/ultimateGoal with problemStatement+constraints+uncertainties cognitive scaffolding",
-					"files": [
-						".roo/cache/search/index.json",
-						".roo/intent-tree.json",
-						"src/core/assistant-message/NativeToolCallParser.ts",
-						"src/core/prompts/tools/native-tools/consult_expert.ts",
-						"src/core/tools/ConsultExpertTool.ts",
-						"src/shared/tools.ts"
-					],
-					"diffSummary": "6 file(s), +274 -141",
-					"timestamp": "2026-02-20T02:53:48.247Z"
-				}
-			],
-			"createdBy": {
-				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-				"timestamp": "2026-02-20T02:47:05.210Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-					"timestamp": "2026-02-20T02:47:18.457Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-					"timestamp": "2026-02-20T02:53:48.247Z",
-					"action": "bound commit 19d2f98"
-				},
-				{
-					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-					"timestamp": "2026-02-20T02:53:48.247Z",
-					"action": "updated: status→done"
-				}
-			],
-			"assumption": "Under A1.1 approach. This impl covers the tool definition file which is what the LLM sees. It's the most important change - the parameter structure and descriptions that shape LLM thinking."
-		},
-		"6b5c9884-90a5-49dd-a5ec-27aa304fbcaa": {
-			"id": "6b5c9884-90a5-49dd-a5ec-27aa304fbcaa",
-			"shortId": "I1.1.2",
-			"type": "impl",
-			"content": "Sync tools.ts types, NativeToolCallParser.ts mapping, and ConsultExpertTool.ts execution with new parameter structure",
-			"status": "done",
-			"parentId": "d5b80c6a-4b28-447f-9f93-581de7184245",
-			"childrenIds": [],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-				"timestamp": "2026-02-20T02:48:12.335Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-					"timestamp": "2026-02-20T02:48:31.310Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-					"timestamp": "2026-02-20T02:53:59.331Z",
-					"action": "updated: content, status→done"
-				}
-			],
-			"assumption": "Under A1.1 approach. Need to sync tools.ts type definitions, NativeToolCallParser.ts parameter mapping, and ConsultExpertTool.ts execution logic with the new parameter structure."
-		},
-		"168b6825-a435-4516-91fd-ff80edddcfc2": {
-			"id": "168b6825-a435-4516-91fd-ff80edddcfc2",
-			"shortId": "A1.2",
-			"type": "approach",
-			"content": "Redesign consult_expert as empowerment tool: simplified params focused on domain knowledge, methodology, best practices acquisition",
-			"status": "planned",
-			"parentId": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
-			"childrenIds": ["ccd75032-efa7-4d88-94c4-cb41eaeb2de5", "5eae7f03-dc70-43dc-a28e-ccdbb2e56ad6"],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-				"timestamp": "2026-02-20T03:01:53.263Z",
-				"action": "created"
-			},
-			"modifiedBy": [],
-			"assumption": "G1 goal has shifted to empowerment positioning. The previous approach A1.1 was about cognitive scaffolding for problem diagnosis. Now we need a completely different approach: redesign as knowledge/methodology acquisition tool. This supersedes A1.1's design philosophy.",
-			"maxChildIndex": 2
-		},
-		"ccd75032-efa7-4d88-94c4-cb41eaeb2de5": {
-			"id": "ccd75032-efa7-4d88-94c4-cb41eaeb2de5",
-			"shortId": "I1.2.1",
-			"type": "impl",
-			"content": "Rewrite all consult_expert files: tool definition, ConsultExpertTool, NativeToolCallParser, tools.ts types for empowerment model",
-			"status": "done",
-			"parentId": "168b6825-a435-4516-91fd-ff80edddcfc2",
-			"childrenIds": [],
-			"codeBindings": [
-				{
-					"commitHash": "80e455e9a278a72a2d5f21f12fe5323d428f9167",
-					"commitMessage": "[intent:I1.2.1] Redesign consult_expert as empowerment tool: simplified params (domain, topic, context), new consultTypes (principles, best-practices, methodology, standards)",
-					"files": [
-						".roo/intent-tree.json",
-						"src/core/assistant-message/NativeToolCallParser.ts",
-						"src/core/prompts/tools/native-tools/consult_expert.ts",
-						"src/core/tools/ConsultExpertTool.ts",
-						"src/shared/tools.ts"
-					],
-					"diffSummary": "5 file(s), +199 -223",
-					"timestamp": "2026-02-20T03:07:48.045Z"
-				}
-			],
-			"createdBy": {
-				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-				"timestamp": "2026-02-20T03:02:10.591Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-					"timestamp": "2026-02-20T03:02:21.634Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-					"timestamp": "2026-02-20T03:07:48.045Z",
-					"action": "bound commit 80e455e"
-				},
-				{
-					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-					"timestamp": "2026-02-20T03:07:48.045Z",
-					"action": "updated: status→done"
-				}
-			],
-			"assumption": "Under A1.2. Need to redesign the tool definition, execution logic, parser, and types all at once. The empowerment model means: domain (who), topic (what knowledge area), context (why I need this), attachments, consultType changes to knowledge-oriented types."
-		},
-		"5eae7f03-dc70-43dc-a28e-ccdbb2e56ad6": {
-			"id": "5eae7f03-dc70-43dc-a28e-ccdbb2e56ad6",
-			"shortId": "I1.2.2",
-			"type": "impl",
-			"content": "Update expert mode definition in packages/types/src/mode.ts to align with empowerment positioning",
-			"status": "done",
-			"parentId": "168b6825-a435-4516-91fd-ff80edddcfc2",
-			"childrenIds": [],
-			"codeBindings": [
-				{
-					"commitHash": "9abcc51cd38eb3228c49acd35cfc6f970638e9f8",
-					"commitMessage": "[intent:I1.2.2] Update expert mode roleDefinition and customInstructions to align with empowerment positioning: teach principles/methodology, not solve specific problems",
-					"files": [".roo/intent-tree.json", "packages/types/src/mode.ts"],
-					"diffSummary": "2 file(s), +57 -9",
-					"timestamp": "2026-02-20T03:10:32.493Z"
-				}
-			],
-			"createdBy": {
-				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-				"timestamp": "2026-02-20T03:08:57.950Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-					"timestamp": "2026-02-20T03:09:18.039Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-					"timestamp": "2026-02-20T03:10:32.493Z",
-					"action": "bound commit 9abcc51"
-				},
-				{
-					"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
-					"timestamp": "2026-02-20T03:10:32.493Z",
-					"action": "updated: status→done"
-				}
-			],
-			"assumption": "Under A1.2 approach. The expert mode's roleDefinition and customInstructions still describe it as a problem-solver. Need to align with the empowerment positioning - the expert should teach knowledge/methodology, not diagnose specific problems."
-		},
-		"dc4abfdf-388e-4fe9-916a-ded030ce29e6": {
-			"id": "dc4abfdf-388e-4fe9-916a-ded030ce29e6",
-			"shortId": "G3",
-			"type": "goal",
-			"content": "将 agent-as-tool-experiment 分支 rebase 到 upstream/main，同步上游更新",
-			"status": "planned",
-			"parentId": null,
-			"childrenIds": ["55c9b850-2810-4ce9-8e5f-85bc914aa2fc"],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
-				"timestamp": "2026-02-24T05:45:28.281Z",
-				"action": "created"
-			},
-			"modifiedBy": [],
-			"assumption": "用户要将当前 agent-as-tool-experiment 分支 rebase 到 upstream/main 上。这是一个新的独立目标，与现有 G1/G2 无关。",
-			"maxChildIndex": 1
-		},
-		"55c9b850-2810-4ce9-8e5f-85bc914aa2fc": {
-			"id": "55c9b850-2810-4ce9-8e5f-85bc914aa2fc",
-			"shortId": "I3.1",
-			"type": "impl",
-			"content": "备份当前分支到 backup/agent-as-tool-experiment-pre-rebase (74d4c4af7)",
-			"status": "done",
-			"parentId": "dc4abfdf-388e-4fe9-916a-ded030ce29e6",
-			"childrenIds": [],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
-				"timestamp": "2026-02-24T05:45:33.740Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
-					"timestamp": "2026-02-24T05:45:38.684Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
-					"timestamp": "2026-02-24T05:45:52.968Z",
-					"action": "updated: content, status→done"
-				}
-			],
-			"assumption": "Rebase 前必须备份，防止出问题无法恢复。"
-		},
-		"71e04f6c-420a-4679-b8a2-ebab36805352": {
-			"id": "71e04f6c-420a-4679-b8a2-ebab36805352",
-			"shortId": "G4",
-			"type": "goal",
-			"content": "清理 markdown 工具调用模式的所有残留代码",
-			"status": "planned",
-			"parentId": null,
-			"childrenIds": ["c3faf021-cdb4-4dd2-93e4-3951166940f3"],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
-				"timestamp": "2026-02-24T07:18:23.033Z",
-				"action": "created"
-			},
-			"modifiedBy": [],
-			"assumption": "用户明确要求清理 markdown 工具模式的残留代码。文档说明该功能基于错误理解，完全不需要。涉及 6 个文件。",
-			"maxChildIndex": 1
-		},
-		"c3faf021-cdb4-4dd2-93e4-3951166940f3": {
-			"id": "c3faf021-cdb4-4dd2-93e4-3951166940f3",
-			"shortId": "I4.1",
-			"type": "impl",
-			"content": "删除 MarkdownToolParser.ts 及其测试，清理 Task.ts、tools.ts、apply-diff-merge.spec.ts 中的 markdown 工具引用",
-			"status": "done",
-			"parentId": "71e04f6c-420a-4679-b8a2-ebab36805352",
-			"childrenIds": [],
-			"codeBindings": [
-				{
-					"commitHash": "3fed874c0d4ccf6a084142d1bcb635ab34c69f42",
-					"commitMessage": "[intent:I4.1] Remove markdown tool calling mode: delete MarkdownToolParser, clean up Task.ts, tools.ts, and related tests\n\nRemoved files:\n- src/core/assistant-message/MarkdownToolParser.ts\n- src/core/assistant-message/__tests__/MarkdownToolParser.spec.ts\n- src/core/assistant-message/__tests__/apply-diff-merge.spec.ts\n- src/core/task/__tests__/markdown-tool-history.spec.ts\n\nCleaned up:\n- Task.ts: removed markdownToolParser, pendingApplyDiff, flushPendingApplyDiff(),\n  markdownToolResults, markdown event processing in text chunk handler,\n  markdown finalize logic, isMarkdownTool filtering\n- tools.ts: removed isMarkdownTool property from ToolUse type\n- getEnvironmentDetails.ts: removed markdown tool results injection (done in merge)\n\nThe markdown tool calling mode was based on incorrect assumptions about\nnative tool calling limitations. Native tool calling already handles\nescaping and streaming correctly.",
-					"files": [
-						".roo/intent-tree.json",
-						"docs/better-tools/00-overview.md",
-						"src/core/assistant-message/MarkdownToolParser.ts",
-						"src/core/assistant-message/__tests__/MarkdownToolParser.spec.ts",
-						"src/core/assistant-message/__tests__/apply-diff-merge.spec.ts",
-						"src/core/task/Task.ts",
-						"src/core/task/__tests__/markdown-tool-history.spec.ts",
-						"src/shared/tools.ts"
-					],
-					"diffSummary": "8 file(s), +126 -2088",
-					"timestamp": "2026-02-24T07:25:25.235Z"
-				}
-			],
-			"createdBy": {
-				"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
-				"timestamp": "2026-02-24T07:18:30.981Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
-					"timestamp": "2026-02-24T07:18:37.325Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
-					"timestamp": "2026-02-24T07:25:25.235Z",
-					"action": "bound commit 3fed874"
-				},
-				{
-					"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
-					"timestamp": "2026-02-24T07:25:25.235Z",
-					"action": "updated: status→done"
-				}
-			],
-			"assumption": "需要删除 MarkdownToolParser 文件及其测试，清理 Task.ts 中的引用，清理 tools.ts 中的 isMarkdownTool 属性，清理测试文件。"
-		},
-		"a13f142e-f381-44bb-80e7-cb0e0b799cb5": {
-			"id": "a13f142e-f381-44bb-80e7-cb0e0b799cb5",
-			"shortId": "G5",
-			"type": "goal",
-			"content": "清理工具描述中的 markdown 工具调用格式说明，并按照新的洞察优化描述模式",
-			"status": "done",
-			"parentId": null,
-			"childrenIds": ["cf39fd65-3dc7-4c8e-8505-14b235bd32a7", "816e2b35-d111-4a96-9ebc-67ddf0747324"],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T07:56:53.955Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T07:59:50.995Z",
-					"action": "updated: content, status→done"
-				}
-			],
-			"assumption": "检查了 intent tree，G4 是关于清理 markdown 工具调用模式的残留代码（已完成），但这次是关于清理工具描述中的 markdown 格式说明文本，并优化描述模式。这是一个新的目标。",
-			"maxChildIndex": 2
-		},
-		"cf39fd65-3dc7-4c8e-8505-14b235bd32a7": {
-			"id": "cf39fd65-3dc7-4c8e-8505-14b235bd32a7",
-			"shortId": "I5.1",
-			"type": "impl",
-			"content": "清理 write_to_file.ts 中的 markdown 格式示例（```write_to），改为函数调用风格示例",
-			"status": "done",
-			"parentId": "a13f142e-f381-44bb-80e7-cb0e0b799cb5",
-			"childrenIds": [],
-			"codeBindings": [
-				{
-					"commitHash": "a312c7da85491ce62909e974f9555ccfa142e4f5",
-					"commitMessage": "[intent:I5.1] 清理 write_to_file 和 apply_diff 工具描述中的 markdown 格式说明，改为函数调用风格示例",
-					"files": [
-						".roo/intent-tree.json",
-						"\"docs/better-tools/\\345\\256\\236\\347\\216\\260\\346\\227\\266\\347\\232\\204patch/\\345\\267\\245\\345\\205\\267\\346\\217\\217\\350\\277\\260\\344\\274\\230\\345\\214\\2262.md\"",
-						"src/core/prompts/tools/native-tools/apply_diff.ts",
-						"src/core/prompts/tools/native-tools/write_to_file.ts"
-					],
-					"diffSummary": "4 file(s), +117 -50",
-					"timestamp": "2026-02-24T07:59:43.813Z"
-				}
-			],
-			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T07:56:59.996Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T07:57:08.308Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T07:59:43.813Z",
-					"action": "bound commit a312c7d"
-				},
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T07:59:43.813Z",
-					"action": "updated: status→done"
-				}
-			],
-			"assumption": "G5 下需要具体的实现节点。需要修改 write_to_file.ts 和 apply_diff.ts 中的 markdown 格式示例，改为更自然的函数调用风格示例。execute_command.ts 和 read_file.ts 没有 markdown 格式问题但也需要检查描述质量。"
-		},
-		"816e2b35-d111-4a96-9ebc-67ddf0747324": {
-			"id": "816e2b35-d111-4a96-9ebc-67ddf0747324",
-			"shortId": "I5.2",
-			"type": "impl",
-			"content": "清理 apply_diff.ts 中的 markdown 格式说明和示例，改为函数调用风格（与 I5.1 一起完成）",
-			"status": "done",
-			"parentId": "a13f142e-f381-44bb-80e7-cb0e0b799cb5",
-			"childrenIds": [],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T07:57:01.592Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T07:57:24.535Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T07:59:49.849Z",
-					"action": "updated: content, status→done"
-				}
-			],
-			"assumption": "apply_diff.ts 有明确的 markdown 格式说明：\"Use Markdown code block format with ```apply_diff path syntax\"，需要删除并替换为更好的描述。"
-		},
-		"0303bab4-4621-4fe2-84c6-f167dd054107": {
-			"id": "0303bab4-4621-4fe2-84c6-f167dd054107",
-			"shortId": "G6",
-			"type": "goal",
-			"content": "按照工具描述优化2文档，统一优化所有启用工具的描述模式",
-			"status": "done",
+			"content": "基于 SPIRIT v5.1 实验记录的经验，深化 intent tree 工具描述和相关模式的 customInstructions",
+			"status": "pruned",
 			"parentId": null,
 			"childrenIds": [
-				"988ee2c2-09e3-4528-8bd0-035e255ed159",
-				"218413cc-7efb-4f0a-a0e2-811de4443f31",
-				"ff791e5f-d7f2-4da7-8d92-75dfd809a881",
-				"56c991f2-3074-4d72-a288-329bcf0a02af",
-				"5fd54842-9e8d-495c-8a22-ff39996c0c29",
-				"08ab078a-e1ff-4815-ae33-307e53c983ad",
-				"7598282f-57e8-4c0e-9a87-623d3e78daea",
-				"93f61c9d-1d08-4557-b7c1-e2f0d142c4fe",
-				"cfc21333-02fa-4948-91f6-376170282f36",
-				"649c91af-90db-421e-9514-8f19219fef9c",
-				"e907b2e9-a987-444a-8fc1-5960fc224006"
+				"693db0f7-2b06-489a-96dc-154e6f85ee02",
+				"d86dfc9d-e9b6-4c64-8760-88bf2d1de772",
+				"dad60d6b-9dc6-4e12-9ce4-3f23e245b980"
 			],
 			"codeBindings": [],
 			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T08:23:22.937Z",
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:10:20.067Z",
 				"action": "created"
 			},
 			"modifiedBy": [
 				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:36:24.103Z",
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:17:40.906Z",
 					"action": "updated: content, status→done"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:20:47.367Z",
+					"action": "pruned: 用户认为我没有理解需求，要求撤回所有更改。需要重新理解用户的真实意图后再行动。"
 				}
 			],
-			"assumption": "G5 已完成了 write_to_file 和 apply_diff 的优化。现在需要一个新目标来覆盖所有启用工具的描述优化。",
-			"maxChildIndex": 11
+			"assumption": "用户明确要求基于实验记录的经验来深化 intent tree 工具和模式的 customInstructions。这是一个新的独立目标，intent tree 中没有相关节点。",
+			"maxChildIndex": 3
 		},
-		"988ee2c2-09e3-4528-8bd0-035e255ed159": {
-			"id": "988ee2c2-09e3-4528-8bd0-035e255ed159",
-			"shortId": "I6.1",
-			"type": "impl",
-			"content": "优化 read 组工具描述：codebase_search, find_definition, find_usages, read_media",
+		"693db0f7-2b06-489a-96dc-154e6f85ee02": {
+			"id": "693db0f7-2b06-489a-96dc-154e6f85ee02",
+			"shortId": "O1.1",
+			"type": "objective",
+			"content": "深化 add_intent.ts 工具描述，融入实验经验",
 			"status": "pruned",
-			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
-			"childrenIds": [],
+			"parentId": "7d7be656-3aa0-4b70-8f09-6bbcfaab2135",
+			"childrenIds": ["59e74d23-8f10-457a-91ee-8e0083d4fbca"],
 			"codeBindings": [],
 			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T08:23:29.850Z",
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:10:31.165Z",
 				"action": "created"
 			},
 			"modifiedBy": [
 				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:23:41.162Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:27:40.851Z",
-					"action": "pruned: 重新规划，需要更精确地对齐启用工具列表，且需要重新设计 when-to-use + example 配对模式"
-				}
-			],
-			"assumption": "G6 下按工具分组创建 impl 节点。先处理 read 组工具。"
-		},
-		"218413cc-7efb-4f0a-a0e2-811de4443f31": {
-			"id": "218413cc-7efb-4f0a-a0e2-811de4443f31",
-			"shortId": "I6.2",
-			"type": "impl",
-			"content": "优化 edit 组工具描述：generate_image, edit（apply_diff/write_to_file 已完成）",
-			"status": "pruned",
-			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
-			"childrenIds": [],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T08:23:31.642Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:27:41.302Z",
-					"action": "pruned: 同上"
-				}
-			],
-			"assumption": "G6 下 edit 组工具。apply_diff 和 write_to_file 已在 G5 优化，还需处理 generate_image 和 edit。"
-		},
-		"ff791e5f-d7f2-4da7-8d92-75dfd809a881": {
-			"id": "ff791e5f-d7f2-4da7-8d92-75dfd809a881",
-			"shortId": "I6.3",
-			"type": "impl",
-			"content": "优化 command/modes 组工具描述：execute_command, search_project, apply_edit, consult_expert, build_tool",
-			"status": "pruned",
-			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
-			"childrenIds": [],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T08:23:32.648Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:27:41.949Z",
-					"action": "pruned: 同上"
-				}
-			],
-			"assumption": "G6 下 modes 组和 command 组工具。"
-		},
-		"56c991f2-3074-4d72-a288-329bcf0a02af": {
-			"id": "56c991f2-3074-4d72-a288-329bcf0a02af",
-			"shortId": "I6.4",
-			"type": "impl",
-			"content": "优化 intent 组工具描述：add_intent, update_intent, prune_intent, commit_intent, restructure_intent",
-			"status": "pruned",
-			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
-			"childrenIds": [],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T08:23:33.546Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:27:42.042Z",
-					"action": "pruned: 同上"
-				}
-			],
-			"assumption": "G6 下 intent 组工具。"
-		},
-		"5fd54842-9e8d-495c-8a22-ff39996c0c29": {
-			"id": "5fd54842-9e8d-495c-8a22-ff39996c0c29",
-			"shortId": "I6.5",
-			"type": "impl",
-			"content": "优化 always available 工具描述：ask_followup_question, attempt_completion, update_todo_list, skill",
-			"status": "pruned",
-			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
-			"childrenIds": [],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T08:23:34.566Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:27:42.437Z",
-					"action": "pruned: 同上"
-				}
-			],
-			"assumption": "G6 下 always available 工具。"
-		},
-		"08ab078a-e1ff-4815-ae33-307e53c983ad": {
-			"id": "08ab078a-e1ff-4815-ae33-307e53c983ad",
-			"shortId": "I6.6",
-			"type": "impl",
-			"content": "优化 read_file 工具描述（动态生成的 createReadFileTool）",
-			"status": "pruned",
-			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
-			"childrenIds": [],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T08:23:36.079Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:27:43.166Z",
-					"action": "pruned: read_file 不在启用工具列表中，不需要修改"
-				}
-			],
-			"assumption": "G6 下 read_file 工具需要单独处理，因为它是动态生成的且描述极长。"
-		},
-		"7598282f-57e8-4c0e-9a87-623d3e78daea": {
-			"id": "7598282f-57e8-4c0e-9a87-623d3e78daea",
-			"shortId": "I6.7",
-			"type": "impl",
-			"content": "批次1：优化 codebase_search, find_definition, find_usages 描述",
-			"status": "done",
-			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
-			"childrenIds": [],
-			"codeBindings": [
-				{
-					"commitHash": "fd1569259213dffdc64845f6ed6356b50f51f990",
-					"commitMessage": "[intent:I6.7] 优化 codebase_search, find_definition, find_usages 工具描述：参数说明移到参数描述，when-to-use+example 紧密配对",
-					"files": [
-						".roo/intent-tree.json",
-						"\"docs/better-tools/\\345\\256\\236\\347\\216\\260\\346\\227\\266\\347\\232\\204patch/\\345\\267\\245\\345\\205\\267\\346\\217\\217\\350\\277\\260\\344\\274\\230\\345\\214\\2262.md\"",
-						"src/core/prompts/tools/native-tools/codebase_search.ts",
-						"src/core/prompts/tools/native-tools/find_definition.ts",
-						"src/core/prompts/tools/native-tools/find_usages.ts",
-						"src/shared/tools.ts"
-					],
-					"diffSummary": "6 file(s), +380 -94",
-					"timestamp": "2026-02-24T08:29:21.167Z"
-				}
-			],
-			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T08:28:20.270Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:28:29.327Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:29:21.167Z",
-					"action": "bound commit fd15692"
-				},
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:29:21.167Z",
-					"action": "updated: status→done"
-				}
-			],
-			"assumption": "G6 下重新规划。按照用户反馈，需要确保 when-to-use 和 example 紧密配对，且只修改真正启用的工具。分批处理，每批一个 commit。"
-		},
-		"93f61c9d-1d08-4557-b7c1-e2f0d142c4fe": {
-			"id": "93f61c9d-1d08-4557-b7c1-e2f0d142c4fe",
-			"shortId": "I6.8",
-			"type": "impl",
-			"content": "批次2：优化 generate_image, edit, read_media 描述",
-			"status": "done",
-			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
-			"childrenIds": [],
-			"codeBindings": [
-				{
-					"commitHash": "f60ec90cfcc6c8d2d36cc5605003ee67e55b2dfc",
-					"commitMessage": "[intent:I6.8] 优化 generate_image, edit, read_media 工具描述：when-to-use+example 配对，参数说明移到参数描述",
-					"files": [
-						".roo/intent-tree.json",
-						"src/core/prompts/tools/native-tools/edit.ts",
-						"src/core/prompts/tools/native-tools/generate_image.ts",
-						"src/core/prompts/tools/native-tools/read_media.ts"
-					],
-					"diffSummary": "4 file(s), +72 -63",
-					"timestamp": "2026-02-24T08:30:17.723Z"
-				}
-			],
-			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T08:28:21.132Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:29:30.488Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:30:17.723Z",
-					"action": "bound commit f60ec90"
-				},
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:30:17.723Z",
-					"action": "updated: status→done"
-				}
-			],
-			"assumption": "G6 下第二批。"
-		},
-		"cfc21333-02fa-4948-91f6-376170282f36": {
-			"id": "cfc21333-02fa-4948-91f6-376170282f36",
-			"shortId": "I6.9",
-			"type": "impl",
-			"content": "批次3：优化 execute_command, search_project, apply_edit, consult_expert, build_tool 描述",
-			"status": "done",
-			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
-			"childrenIds": [],
-			"codeBindings": [
-				{
-					"commitHash": "8cb5217eff89388ede96c28791c98079ec0f6c4c",
-					"commitMessage": "[intent:I6.9] 优化 execute_command, search_project, apply_edit, consult_expert, build_tool 工具描述",
-					"files": [
-						".roo/intent-tree.json",
-						"src/core/prompts/tools/native-tools/apply_edit.ts",
-						"src/core/prompts/tools/native-tools/build_tool.ts",
-						"src/core/prompts/tools/native-tools/consult_expert.ts",
-						"src/core/prompts/tools/native-tools/execute_command.ts",
-						"src/core/prompts/tools/native-tools/search_project.ts"
-					],
-					"diffSummary": "6 file(s), +94 -179",
-					"timestamp": "2026-02-24T08:31:44.264Z"
-				}
-			],
-			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T08:28:22.026Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:30:24.366Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:31:44.264Z",
-					"action": "bound commit 8cb5217"
-				},
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:31:44.264Z",
-					"action": "updated: status→done"
-				}
-			],
-			"assumption": "G6 下第三批。"
-		},
-		"649c91af-90db-421e-9514-8f19219fef9c": {
-			"id": "649c91af-90db-421e-9514-8f19219fef9c",
-			"shortId": "I6.10",
-			"type": "impl",
-			"content": "批次4：优化 intent 组工具描述",
-			"status": "done",
-			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
-			"childrenIds": [],
-			"codeBindings": [
-				{
-					"commitHash": "818a02c7a4363f16288860595994d4660dde7159",
-					"commitMessage": "[intent:I6.10] 优化 intent 组工具描述：add_intent 保留教学内容并重组为 when-to-use+example 配对，其余 intent 工具统一格式",
-					"files": [".roo/intent-tree.json", "src/core/prompts/tools/native-tools/add_intent.ts"],
-					"diffSummary": "2 file(s), +66 -7",
-					"timestamp": "2026-02-24T08:34:52.253Z"
-				}
-			],
-			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T08:28:23.049Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:31:50.343Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:34:52.253Z",
-					"action": "bound commit 818a02c"
-				},
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:34:52.253Z",
-					"action": "updated: status→done"
-				}
-			],
-			"assumption": "G6 下第四批。"
-		},
-		"e907b2e9-a987-444a-8fc1-5960fc224006": {
-			"id": "e907b2e9-a987-444a-8fc1-5960fc224006",
-			"shortId": "I6.11",
-			"type": "impl",
-			"content": "批次5：优化 always available 工具描述（ask_followup_question, attempt_completion, update_todo_list, skill）",
-			"status": "done",
-			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
-			"childrenIds": [],
-			"codeBindings": [
-				{
-					"commitHash": "28358c260c338cc732ff7f76cb15f24094a2c9a3",
-					"commitMessage": "[intent:I6.11] 优化 always available 工具描述：ask_followup_question, attempt_completion, update_todo_list, skill 统一 when-to-use+example 配对",
-					"files": [
-						".roo/intent-tree.json",
-						"src/core/prompts/tools/native-tools/ask_followup_question.ts",
-						"src/core/prompts/tools/native-tools/attempt_completion.ts",
-						"src/core/prompts/tools/native-tools/skill.ts",
-						"src/core/prompts/tools/native-tools/update_todo_list.ts"
-					],
-					"diffSummary": "5 file(s), +48 -90",
-					"timestamp": "2026-02-24T08:36:17.484Z"
-				}
-			],
-			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T08:28:24.463Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:34:59.615Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:36:17.484Z",
-					"action": "bound commit 28358c2"
-				},
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:36:17.484Z",
-					"action": "updated: status→done"
-				}
-			],
-			"assumption": "G6 下第五批。"
-		},
-		"27344780-0d11-4174-ada4-18385cf88129": {
-			"id": "27344780-0d11-4174-ada4-18385cf88129",
-			"shortId": "G7",
-			"type": "goal",
-			"content": "修复 commit_intent 执行顺序：先更新 intent-tree.json 再 git commit，避免每次 commit 后残留 dirty intent-tree.json",
-			"status": "planned",
-			"parentId": null,
-			"childrenIds": ["2da7f344-e599-4236-8d9b-141621e48037"],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T08:40:19.838Z",
-				"action": "created"
-			},
-			"modifiedBy": [],
-			"assumption": "这是一个新的独立目标，与 G6 工具描述优化无关。问题是 commit_intent 的执行顺序导致每次 commit 后 intent-tree.json 都是 dirty 的。",
-			"maxChildIndex": 1
-		},
-		"2da7f344-e599-4236-8d9b-141621e48037": {
-			"id": "2da7f344-e599-4236-8d9b-141621e48037",
-			"shortId": "A7.1",
-			"type": "approach",
-			"content": "方案：先 commit 代码变更（不含 intent-tree.json），再更新 intent-tree.json，最后 git add intent-tree.json && git commit --amend",
-			"status": "planned",
-			"parentId": "27344780-0d11-4174-ada4-18385cf88129",
-			"childrenIds": ["6b663bdb-ab18-4a8f-ab87-e6da3dfdc1af"],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T08:40:30.095Z",
-				"action": "created"
-			},
-			"modifiedBy": [],
-			"assumption": "G7 下的实现。需要重排 CommitIntentTool.execute() 中的操作顺序：先 bindCode+updateNode+save，再 git add+commit。但有个问题：commit hash 在 commit 之前不知道，而 bindCode 需要 commitHash。需要分两步：先用占位 hash 保存，commit 后再更新 hash 并 amend；或者先 commit 代码，再更新 intent-tree.json 并 amend commit。",
-			"maxChildIndex": 1
-		},
-		"6b663bdb-ab18-4a8f-ab87-e6da3dfdc1af": {
-			"id": "6b663bdb-ab18-4a8f-ab87-e6da3dfdc1af",
-			"shortId": "I7.1.1",
-			"type": "impl",
-			"content": "重排 CommitIntentTool.execute() 执行顺序",
-			"status": "done",
-			"parentId": "2da7f344-e599-4236-8d9b-141621e48037",
-			"childrenIds": [],
-			"codeBindings": [
-				{
-					"commitHash": "8e58206837f76bbccc844c434247ae6142bf37cf",
-					"commitMessage": "[intent:I7.1.1] 修复 commit_intent 执行顺序：commit 后更新 intent-tree.json 并 amend 到同一 commit，避免残留 dirty 文件",
-					"files": [
-						".roo/cache/search/index.json",
-						".roo/intent-tree.json",
-						"src/core/tools/CommitIntentTool.ts"
-					],
-					"diffSummary": "3 file(s), +141 -8",
-					"timestamp": "2026-02-24T08:42:43.567Z"
-				}
-			],
-			"createdBy": {
-				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-				"timestamp": "2026-02-24T08:40:37.291Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:40:45.007Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:42:43.568Z",
-					"action": "bound commit 8e58206"
-				},
-				{
-					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:42:43.568Z",
-					"action": "updated: status→done"
-				}
-			],
-			"assumption": "A7.1 下的具体实现。修改 CommitIntentTool.execute() 的执行顺序。"
-		},
-		"c887bed9-e014-4ec5-bc06-b1803de639a2": {
-			"id": "c887bed9-e014-4ec5-bc06-b1803de639a2",
-			"shortId": "G8",
-			"type": "goal",
-			"content": "修复 TerminalOutput 组件样式：字体大小不应使用 --vscode-editor-font-size，行高不应使用 --vscode-editor-line-height，且需要添加高度限制",
-			"status": "planned",
-			"parentId": null,
-			"childrenIds": ["4b2f06ca-64e7-4553-92b8-930c17737a58"],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c8edc-f926-72cc-8024-911be7879905",
-				"timestamp": "2026-02-24T09:03:49.060Z",
-				"action": "created"
-			},
-			"modifiedBy": [],
-			"assumption": "用户报告工具执行结果（TerminalOutput）的样式异常：字体大小使用了编辑器字体大小变量，行高使用了编辑器行高变量，且没有高度限制。这是 commit 618aa6652 引入的回归。之前用 CodeBlock 渲染时有 0.95em 字体和 window shade 高度限制。",
-			"maxChildIndex": 1
-		},
-		"4b2f06ca-64e7-4553-92b8-930c17737a58": {
-			"id": "4b2f06ca-64e7-4553-92b8-930c17737a58",
-			"shortId": "I8.1",
-			"type": "impl",
-			"content": "null",
-			"status": "done",
-			"parentId": "c887bed9-e014-4ec5-bc06-b1803de639a2",
-			"childrenIds": [],
-			"codeBindings": [
-				{
-					"commitHash": "cb820d272f07df69a4d8000cdc8f2d610719af74",
-					"commitMessage": "[intent:I8.1] Fix TerminalOutput styling: use relative font-size (0.85em) instead of --vscode-editor-font-size, compact line-height (1.2) instead of --vscode-editor-line-height, and add 500px max-height to output container",
-					"files": [
-						".roo/cache/search/index.json",
-						".roo/intent-tree.json",
-						"webview-ui/src/components/chat/CommandExecution.tsx",
-						"webview-ui/src/components/chat/TerminalOutput.tsx"
-					],
-					"diffSummary": "4 file(s), +128 -6",
-					"timestamp": "2026-02-24T09:05:13.291Z"
-				}
-			],
-			"createdBy": {
-				"taskId": "019c8edc-f926-72cc-8024-911be7879905",
-				"timestamp": "2026-02-24T09:03:57.014Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8edc-f926-72cc-8024-911be7879905",
-					"timestamp": "2026-02-24T09:04:02.834Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c8edc-f926-72cc-8024-911be7879905",
-					"timestamp": "2026-02-24T09:05:13.291Z",
-					"action": "bound commit cb820d2"
-				},
-				{
-					"taskId": "019c8edc-f926-72cc-8024-911be7879905",
-					"timestamp": "2026-02-24T09:05:13.291Z",
-					"action": "updated: status→done"
-				}
-			],
-			"assumption": "TerminalOutput 应该使用与 CodeBlock 类似的相对字体大小（如 0.85em），使用正常行高（如 1.35），而不是编辑器的 font-size 和 line-height 变量。OutputContainer 展开时需要 max-height 限制以避免长输出占满空间。"
-		},
-		"727f7791-48b7-4d2f-886d-42596ae2c7cd": {
-			"id": "727f7791-48b7-4d2f-886d-42596ae2c7cd",
-			"shortId": "G9",
-			"type": "goal",
-			"content": "null",
-			"status": "done",
-			"parentId": null,
-			"childrenIds": ["1fa54b75-ef5a-40b7-b3e8-3439eb5431b8"],
-			"codeBindings": [],
-			"createdBy": {
-				"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-				"timestamp": "2026-02-24T11:30:39.165Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T13:29:28.584Z",
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:17:34.271Z",
 					"action": "updated: content, status→done"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:20:47.367Z",
+					"action": "pruned: 用户认为我没有理解需求，要求撤回所有更改。需要重新理解用户的真实意图后再行动。"
 				}
 			],
-			"assumption": "用户明确要求将 spirit.ts 从 Soul Document 模式改为重度推理模式。这是一个实验性质的改造，不涉及其他文件。Intent tree 中没有相关的现有目标。",
+			"assumption": "add_intent 是 intent tree 的核心入口工具，其描述质量直接影响模型使用 intent tree 的效果。实验记录中的 §3.4（诚实性）、§5.2（区分可推导和外部约束）、Chain 7（为什么需要持久记录）都应体现在工具描述中。",
 			"maxChildIndex": 1
 		},
-		"1fa54b75-ef5a-40b7-b3e8-3439eb5431b8": {
-			"id": "1fa54b75-ef5a-40b7-b3e8-3439eb5431b8",
-			"shortId": "I9.1",
-			"type": "impl",
-			"content": "null",
-			"status": "done",
-			"parentId": "727f7791-48b7-4d2f-886d-42596ae2c7cd",
-			"childrenIds": [],
-			"codeBindings": [
-				{
-					"commitHash": "b18e15c81e9fe1c36ee7ce4a4800d70905ab135d",
-					"commitMessage": "[intent:I9.1] Rewrite spirit.ts from Soul Document mode to Heavy Reasoning mode: 5 Facts → 6 reasoning chains (with Deep Reasoning / Self-Reflection / Self-Exploration) → 10 conclusions",
-					"files": [
-						".roo/intent-tree.json",
-						"\"docs/deep-thinking/CoT\\344\\270\\216FewShot\\350\\256\\276\\350\\256\\241\\346\\214\\207\\345\\215\\227.md\"",
-						"docs/todo-migrate-apply-diff-to-edit.md",
-						"src/core/prompts/sections/spirit.ts",
-						"src/package.json"
-					],
-					"diffSummary": "5 file(s), +904 -259",
-					"timestamp": "2026-02-24T11:35:38.049Z"
-				},
-				{
-					"commitHash": "2a92c96fe806e913baafd0a74c810cb086853ef8",
-					"commitMessage": "[intent:I9.1] Rewrite spirit.ts v5.0: Heavy Reasoning mode with 9 chains (14+ steps each), all content derived from 5 Facts through Deep Reasoning / Self-Reflection / Self-Exploration, including identity, intent tree, and priority rules",
-					"files": ["AGENTS.md", "src/core/prompts/sections/spirit.ts"],
-					"diffSummary": "2 file(s), +189 -86",
-					"timestamp": "2026-02-24T11:48:02.774Z"
-				},
-				{
-					"commitHash": "6fc057a6240b9e35181fd0cf72045b48d843a582",
-					"commitMessage": "[intent:I9.1] spirit.ts v5.1: Add F6 (user cannot see thinking), rewrite all 9 chains with F6 integration, expand each chain to 14+ steps with proper Deep/Reflect/Explore ratio",
-					"files": ["src/core/prompts/sections/spirit.ts"],
-					"diffSummary": "1 file(s), +101 -80",
-					"timestamp": "2026-02-24T11:58:35.203Z"
-				},
-				{
-					"commitHash": "0f02a9a5fb3be21ff9156426bd21698bc889ae05",
-					"commitMessage": "[intent:I9.1] Clarify ask vs complete: ask_followup_question is primary communication tool during work, attempt_completion is reporting tool for final results",
-					"files": ["src/core/prompts/sections/spirit.ts"],
-					"diffSummary": "1 file(s), +8 -8",
-					"timestamp": "2026-02-24T12:21:21.235Z"
-				},
-				{
-					"commitHash": "214f8a8ede16e7424cc2dfc9299a0563a7a814e6",
-					"commitMessage": "[intent:I9.1] Expert review fixes: distinguish ask two modes (info-gathering vs communication), reduce Reflection ratio, add Normal Operation steps, honest about Intent Tree format being design decision not derivation",
-					"files": ["src/core/prompts/sections/spirit.ts"],
-					"diffSummary": "1 file(s), +16 -18",
-					"timestamp": "2026-02-24T12:28:28.232Z"
-				},
-				{
-					"commitHash": "fc9f827ac005f0f9ac869919676ab2c13cc12229",
-					"commitMessage": "[intent:I9.1] Add experiment documentation: SPIRIT v5.1 Heavy Reasoning mode overview, intent, expert review findings, transferable techniques, and evaluation methods",
-					"files": [
-						"\"docs/deep-thinking/SPIRIT-v5-\\351\\207\\215\\345\\272\\246\\346\\216\\250\\347\\220\\206\\345\\256\\236\\351\\252\\214\\350\\256\\260\\345\\275\\225.md\""
-					],
-					"diffSummary": "1 file(s), +191 -0",
-					"timestamp": "2026-02-24T12:36:51.219Z"
-				},
-				{
-					"commitHash": "cb7f4f915a0171c15eda1bd3023bbae198da126a",
-					"commitMessage": "[intent:I9.1] Bump version to 3.52.4, add SPIRIT v5.1 Heavy Reasoning experiment to LOCAL_CHANGELOG",
-					"files": ["LOCAL_CHANGELOG.md", "src/package.json"],
-					"diffSummary": "2 file(s), +13 -1",
-					"timestamp": "2026-02-24T13:29:10.702Z"
-				}
-			],
-			"createdBy": {
-				"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-				"timestamp": "2026-02-24T11:30:46.340Z",
-				"action": "created"
-			},
-			"modifiedBy": [
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T11:31:02.067Z",
-					"action": "updated: content, status→in_progress"
-				},
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T11:35:38.049Z",
-					"action": "bound commit b18e15c"
-				},
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T11:35:38.049Z",
-					"action": "updated: status→done"
-				},
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T11:48:02.775Z",
-					"action": "bound commit 2a92c96"
-				},
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T11:48:02.775Z",
-					"action": "updated: status→done"
-				},
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T11:58:35.203Z",
-					"action": "bound commit 6fc057a"
-				},
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T11:58:35.203Z",
-					"action": "updated: status→done"
-				},
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T12:21:21.235Z",
-					"action": "bound commit 0f02a9a"
-				},
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T12:21:21.235Z",
-					"action": "updated: status→done"
-				},
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T12:28:28.232Z",
-					"action": "bound commit 214f8a8"
-				},
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T12:28:28.232Z",
-					"action": "updated: status→done"
-				},
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T12:36:51.219Z",
-					"action": "bound commit fc9f827"
-				},
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T12:36:51.219Z",
-					"action": "updated: status→done"
-				},
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T13:29:10.702Z",
-					"action": "bound commit cb7f4f9"
-				},
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T13:29:10.702Z",
-					"action": "updated: status→done"
-				},
-				{
-					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
-					"timestamp": "2026-02-24T13:29:20.623Z",
-					"action": "updated: content, status→done"
-				}
-			],
-			"assumption": "只需修改 spirit.ts 一个文件，函数签名不变，返回字符串即可。核心挑战是设计出微妙的 Facts 和自然的推理链路，使结论与原有行为准则等价但呈现方式完全不同。"
-		},
-		"b7e812a7-c301-4116-9e5e-e02248ecba93": {
-			"id": "b7e812a7-c301-4116-9e5e-e02248ecba93",
-			"shortId": "G10",
-			"type": "goal",
-			"content": "修复 update_intent 工具：描述示例不应引导模型传入 \"null\" 字符串，执行层应过滤字符串 \"null\" 的 content",
-			"status": "done",
-			"parentId": null,
-			"childrenIds": ["82a63d6e-3ba4-4c0b-91f5-7c2a86cc4d04", "5d5a76fd-3e22-4d54-8612-2605b516e7c5"],
+		"d86dfc9d-e9b6-4c64-8760-88bf2d1de772": {
+			"id": "d86dfc9d-e9b6-4c64-8760-88bf2d1de772",
+			"shortId": "O1.2",
+			"type": "objective",
+			"content": "深化 solo_dev 和 intent_planning 模式的 customInstructions，融入 F6 渗透效应和实验经验",
+			"status": "pruned",
+			"parentId": "7d7be656-3aa0-4b70-8f09-6bbcfaab2135",
+			"childrenIds": ["1ab68c4b-98a4-4ea0-9e1e-224f36c7639a", "e1039c15-8939-4f49-9418-ed1ba82f0620"],
 			"codeBindings": [],
 			"createdBy": {
-				"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
-				"timestamp": "2026-02-24T13:33:34.395Z",
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:10:31.675Z",
 				"action": "created"
 			},
 			"modifiedBy": [
 				{
-					"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
-					"timestamp": "2026-02-24T13:35:09.975Z",
-					"action": "updated: status→done"
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:17:34.829Z",
+					"action": "updated: content, status→done"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:20:47.367Z",
+					"action": "pruned: 用户认为我没有理解需求，要求撤回所有更改。需要重新理解用户的真实意图后再行动。"
 				}
 			],
-			"assumption": "用户报告了 update_intent 工具的两个问题：(1) 描述示例误导模型传入 \"null\" 字符串 (2) 执行层没有过滤字符串 \"null\"。intent tree 中没有相关的现有目标。",
+			"assumption": "customInstructions 是注入到 system prompt 末尾的模式级指令，直接影响模型在该模式下的行为。实验记录中的 F6 渗透效应、反模式警告、最佳实践都应体现在这里。",
 			"maxChildIndex": 2
 		},
-		"82a63d6e-3ba4-4c0b-91f5-7c2a86cc4d04": {
-			"id": "82a63d6e-3ba4-4c0b-91f5-7c2a86cc4d04",
-			"shortId": "I10.1",
+		"dad60d6b-9dc6-4e12-9ce4-3f23e245b980": {
+			"id": "dad60d6b-9dc6-4e12-9ce4-3f23e245b980",
+			"shortId": "O1.3",
+			"type": "objective",
+			"content": "深化 spirit.ts 中 Chain 7 的推理，融入实验中发现的具体经验",
+			"status": "pruned",
+			"parentId": "7d7be656-3aa0-4b70-8f09-6bbcfaab2135",
+			"childrenIds": ["04e872ae-838e-4f69-8c1b-c9d7e7a049b5"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:10:31.798Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:17:34.889Z",
+					"action": "updated: content, status→done"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:20:47.367Z",
+					"action": "pruned: 用户认为我没有理解需求，要求撤回所有更改。需要重新理解用户的真实意图后再行动。"
+				}
+			],
+			"assumption": "Chain 7 是 SPIRIT 中推导 intent tree 必要性的核心推理链。实验记录中的 §3.4 已经修复了诚实性问题，但还可以融入更多实践经验来强化推理。",
+			"maxChildIndex": 1
+		},
+		"59e74d23-8f10-457a-91ee-8e0083d4fbca": {
+			"id": "59e74d23-8f10-457a-91ee-8e0083d4fbca",
+			"shortId": "A1.1.1",
+			"type": "approach",
+			"content": "在 add_intent 描述中加入：(1) 可证伪性要求强化 (2) \"实现→约束\"升级反模式警告 (3) assumption 字段的推理质量要求",
+			"status": "pruned",
+			"parentId": "693db0f7-2b06-489a-96dc-154e6f85ee02",
+			"childrenIds": ["3f39d30c-0924-4957-80a4-76983c014585"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:10:49.403Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:20:47.367Z",
+					"action": "pruned: 用户认为我没有理解需求，要求撤回所有更改。需要重新理解用户的真实意图后再行动。"
+				}
+			],
+			"assumption": "add_intent 当前描述已有 constraint vs implementation 区分和 intent drift 警告，但缺少：可证伪性测试（§5.2 的经验）、assumption 被证伪时的行动指引、以及从 Chain 7 推导出的\"为什么 assumption 字段如此重要\"的简要推理。",
+			"maxChildIndex": 1
+		},
+		"1ab68c4b-98a4-4ea0-9e1e-224f36c7639a": {
+			"id": "1ab68c4b-98a4-4ea0-9e1e-224f36c7639a",
+			"shortId": "A1.2.1",
+			"type": "approach",
+			"content": "重写 solo_dev 的 customInstructions：从声明式规则改为融入 F6 推理的指导，加入反模式和最佳实践",
+			"status": "pruned",
+			"parentId": "d86dfc9d-e9b6-4c64-8760-88bf2d1de772",
+			"childrenIds": ["4b78bef8-2e39-4c4b-84b2-c11481158653"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:10:49.909Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:20:47.367Z",
+					"action": "pruned: 用户认为我没有理解需求，要求撤回所有更改。需要重新理解用户的真实意图后再行动。"
+				}
+			],
+			"assumption": "当前 solo_dev 的 customInstructions 是纯声明式的（\"Check existing intent\"、\"Create impl nodes\"），缺少\"为什么\"的推理。根据实验记录的核心发现，融入简要推理能让模型更好地内化规则。同时需要加入 F6 渗透效应和实验中发现的反模式。",
+			"maxChildIndex": 1
+		},
+		"e1039c15-8939-4f49-9418-ed1ba82f0620": {
+			"id": "e1039c15-8939-4f49-9418-ed1ba82f0620",
+			"shortId": "A1.2.2",
+			"type": "approach",
+			"content": "重写 intent_planning 的 customInstructions：强化可证伪性测试，加入从实验中学到的 X→Y 漂移检测模式",
+			"status": "pruned",
+			"parentId": "d86dfc9d-e9b6-4c64-8760-88bf2d1de772",
+			"childrenIds": ["43560a8a-b69f-4641-aa56-84205706ea3d"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:10:50.039Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:20:47.367Z",
+					"action": "pruned: 用户认为我没有理解需求，要求撤回所有更改。需要重新理解用户的真实意图后再行动。"
+				}
+			],
+			"assumption": "intent_planning 模式是专门用于管理 intent tree 的，其 customInstructions 应该是最详细的。当前版本已经不错，但可以融入实验记录中的具体经验，特别是 §3.4（诚实标注外部约束）和 §5.2（区分可推导和外部约束）。",
+			"maxChildIndex": 1
+		},
+		"04e872ae-838e-4f69-8c1b-c9d7e7a049b5": {
+			"id": "04e872ae-838e-4f69-8c1b-c9d7e7a049b5",
+			"shortId": "A1.3.1",
+			"type": "approach",
+			"content": "在 Chain 7 末尾加入实践经验段落：从实验中学到的反模式和最佳实践",
+			"status": "pruned",
+			"parentId": "dad60d6b-9dc6-4e12-9ce4-3f23e245b980",
+			"childrenIds": ["9d7a85b3-526f-4262-b778-1c579d489675"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:10:50.163Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:20:47.367Z",
+					"action": "pruned: 用户认为我没有理解需求，要求撤回所有更改。需要重新理解用户的真实意图后再行动。"
+				}
+			],
+			"assumption": "Chain 7 当前已经推导出 intent tree 的必要性并诚实标注了格式是设计决策。可以在 C11 结论之前加入一段实践经验，强化\"不要把实现当约束修补\"和\"assumption 的可证伪性\"这两个从实验中涌现的关键洞察。",
+			"maxChildIndex": 1
+		},
+		"3f39d30c-0924-4957-80a4-76983c014585": {
+			"id": "3f39d30c-0924-4957-80a4-76983c014585",
+			"shortId": "I1.1.1.1",
 			"type": "impl",
-			"content": "修改工具描述示例：省略不需要的可选参数，不再写 content: null / status: null",
-			"status": "done",
-			"parentId": "b7e812a7-c301-4116-9e5e-e02248ecba93",
+			"content": "修改 add_intent.ts 的工具描述和 assumption 字段描述",
+			"status": "pruned",
+			"parentId": "59e74d23-8f10-457a-91ee-8e0083d4fbca",
 			"childrenIds": [],
 			"codeBindings": [
 				{
-					"commitHash": "dfd9de41ed9fddab7c5c764d86c28196daf09954",
-					"commitMessage": "[intent:I10.1] 修改 update_intent 工具描述示例：省略不需要的可选参数，避免引导模型传入 \"null\" 字符串",
+					"commitHash": "2a3d730cb2468386615e6154b85faf57abe91639",
+					"commitMessage": "[intent:I1.1.1.1] 深化 add_intent 工具描述：加入 F4+F6 推理、实现→约束升级反模式、assumption 可证伪性要求",
 					"files": [
 						".roo/cache/search/index.json",
+						".roo/intent-tree-1.json",
 						".roo/intent-tree.json",
-						"src/core/prompts/tools/native-tools/update_intent.ts"
+						"src/core/prompts/tools/native-tools/add_intent.ts"
 					],
-					"diffSummary": "3 file(s), +107 -10",
-					"timestamp": "2026-02-24T13:34:15.589Z"
+					"diffSummary": "4 file(s), +1578 -1332",
+					"timestamp": "2026-02-24T14:12:03.392Z"
 				}
 			],
 			"createdBy": {
-				"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
-				"timestamp": "2026-02-24T13:33:42.193Z",
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:10:55.788Z",
 				"action": "created"
 			},
 			"modifiedBy": [
 				{
-					"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
-					"timestamp": "2026-02-24T13:33:47.178Z",
-					"action": "updated: status→in_progress"
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:11:00.558Z",
+					"action": "updated: content, status→in_progress"
 				},
 				{
-					"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
-					"timestamp": "2026-02-24T13:34:15.589Z",
-					"action": "bound commit dfd9de4"
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:12:03.392Z",
+					"action": "bound commit 2a3d730"
 				},
 				{
-					"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
-					"timestamp": "2026-02-24T13:34:15.589Z",
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:12:03.392Z",
 					"action": "updated: status→done"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:20:47.367Z",
+					"action": "pruned: 用户认为我没有理解需求，要求撤回所有更改。需要重新理解用户的真实意图后再行动。"
 				}
 			],
-			"assumption": "描述中的示例 content: null 引导模型传入字符串 \"null\"，应改为省略不需要的参数"
+			"assumption": "add_intent.ts 已读取，了解当前结构。需要在不大幅增加 token 的前提下融入关键经验。"
 		},
-		"5d5a76fd-3e22-4d54-8612-2605b516e7c5": {
-			"id": "5d5a76fd-3e22-4d54-8612-2605b516e7c5",
-			"shortId": "I10.2",
+		"4b78bef8-2e39-4c4b-84b2-c11481158653": {
+			"id": "4b78bef8-2e39-4c4b-84b2-c11481158653",
+			"shortId": "I1.2.1.1",
 			"type": "impl",
-			"content": "在 UpdateIntentTool 执行层过滤字符串 \"null\" 的 content，并添加对应测试",
-			"status": "done",
-			"parentId": "b7e812a7-c301-4116-9e5e-e02248ecba93",
+			"content": "重写 solo_dev 模式的 customInstructions，融入 F6 推理和实验经验",
+			"status": "pruned",
+			"parentId": "1ab68c4b-98a4-4ea0-9e1e-224f36c7639a",
 			"childrenIds": [],
 			"codeBindings": [
 				{
-					"commitHash": "374bba6a2a84dddde4c23242b329390fe74bcd71",
-					"commitMessage": "[intent:I10.2] 在 UpdateIntentTool 执行层过滤字符串 \"null\" 的 content，防止节点描述被误改为 \"null\"",
-					"files": [
-						".roo/intent-tree.json",
-						"src/core/tools/UpdateIntentTool.ts",
-						"src/core/tools/__tests__/UpdateIntentTool.spec.ts"
-					],
-					"diffSummary": "3 file(s), +34 -4",
-					"timestamp": "2026-02-24T13:35:02.183Z"
+					"commitHash": "cd53b5b744def37bfea8073da3a8be34e3cdddb3",
+					"commitMessage": "[intent:I1.2.1.1] 重写 solo_dev customInstructions：融入 F6 推理、实现→约束升级反模式、可证伪性要求",
+					"files": [".roo/intent-tree.json", "packages/types/src/mode.ts"],
+					"diffSummary": "2 file(s), +47 -10",
+					"timestamp": "2026-02-24T14:12:58.846Z"
 				}
 			],
 			"createdBy": {
-				"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
-				"timestamp": "2026-02-24T13:33:42.746Z",
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:12:15.402Z",
 				"action": "created"
 			},
 			"modifiedBy": [
 				{
-					"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
-					"timestamp": "2026-02-24T13:34:23.603Z",
-					"action": "updated: status→in_progress"
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:12:22.079Z",
+					"action": "updated: content, status→in_progress"
 				},
 				{
-					"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
-					"timestamp": "2026-02-24T13:35:02.183Z",
-					"action": "bound commit 374bba6"
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:12:58.846Z",
+					"action": "bound commit cd53b5b"
 				},
 				{
-					"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
-					"timestamp": "2026-02-24T13:35:02.183Z",
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:12:58.846Z",
+					"action": "updated: status→done"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:20:47.367Z",
+					"action": "pruned: 用户认为我没有理解需求，要求撤回所有更改。需要重新理解用户的真实意图后再行动。"
+				}
+			],
+			"assumption": "solo_dev 的 customInstructions 当前是纯声明式的 checklist。根据实验记录的核心发现（§5.1），融入简要推理能让模型更好地内化规则。需要加入：F6 渗透效应（intent tree 是外化思考的持久记录）、实现→约束升级反模式、assumption 可证伪性。如果这种融入推理的方式导致 token 过多，可以回退到更简洁的版本。"
+		},
+		"43560a8a-b69f-4641-aa56-84205706ea3d": {
+			"id": "43560a8a-b69f-4641-aa56-84205706ea3d",
+			"shortId": "I1.2.2.1",
+			"type": "impl",
+			"content": "重写 intent_planning 模式的 customInstructions，强化可证伪性和 X→Y 漂移检测",
+			"status": "pruned",
+			"parentId": "e1039c15-8939-4f49-9418-ed1ba82f0620",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "590f10108195ea2d10e0f62c9fa0719212b7222b",
+					"commitMessage": "[intent:I1.2.2.1] 重写 intent_planning customInstructions：加入 F6 推理、诚实性原则、反模式合并、可证伪性强化",
+					"files": [".roo/intent-tree.json", "packages/types/src/mode.ts"],
+					"diffSummary": "2 file(s), +46 -12",
+					"timestamp": "2026-02-24T14:13:52.286Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:13:08.999Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:13:14.184Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:13:52.286Z",
+					"action": "bound commit 590f101"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:13:52.286Z",
+					"action": "updated: status→done"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:20:47.367Z",
+					"action": "pruned: 用户认为我没有理解需求，要求撤回所有更改。需要重新理解用户的真实意图后再行动。"
+				}
+			],
+			"assumption": "intent_planning 当前的 customInstructions 已经比较完善，有 X→Y 工作流和可证伪性测试。需要融入：F6 推理（为什么 intent tree 是外化思考的持久记录）、实现→约束升级反模式、§3.4 的诚实性原则（区分可推导和外部约束）。"
+		},
+		"9d7a85b3-526f-4262-b778-1c579d489675": {
+			"id": "9d7a85b3-526f-4262-b778-1c579d489675",
+			"shortId": "I1.3.1.1",
+			"type": "impl",
+			"content": "在 spirit.ts Chain 7 中加入实践经验段落：实现→约束升级反模式和 assumption 可证伪性",
+			"status": "pruned",
+			"parentId": "04e872ae-838e-4f69-8c1b-c9d7e7a049b5",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "fa39672c0d7201c71bb3d54dddfa04db86a6cc4a",
+					"commitMessage": "[intent:I1.3.1.1] 在 Chain 7 中加入实践经验：实现→约束升级反模式和 assumption 可证伪性推理",
+					"files": [".roo/intent-tree.json", "src/core/prompts/sections/spirit.ts"],
+					"diffSummary": "2 file(s), +32 -3",
+					"timestamp": "2026-02-24T14:14:41.720Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:14:04.876Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:14:09.598Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:14:41.720Z",
+					"action": "bound commit fa39672"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:14:41.720Z",
+					"action": "updated: status→done"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:20:47.367Z",
+					"action": "pruned: 用户认为我没有理解需求，要求撤回所有更改。需要重新理解用户的真实意图后再行动。"
+				}
+			],
+			"assumption": "Chain 7 当前在 C11 结论之前已有完整的推理链。需要在\"格式是设计决策\"段落之后、C11 之前加入一段从实验中涌现的实践经验，不破坏推理链的完整性。这段内容应该是 Chain 7 推理的自然延伸，而非外部注入。"
+		},
+		"293aa8fe-7667-4d43-9cdb-ebac42370cd9": {
+			"id": "293aa8fe-7667-4d43-9cdb-ebac42370cd9",
+			"shortId": "G2",
+			"type": "goal",
+			"content": "将 intent tree 工具描述和相关模式的 customInstructions 从声明式改为推理式（重度推理模式），让规则从推理中涌现",
+			"status": "planned",
+			"parentId": null,
+			"childrenIds": [
+				"1783f1cd-a109-4bfc-9c03-362b8c0a8c49",
+				"69856f3b-e5e6-453d-8cc1-856fb8129064",
+				"fb2a6611-2a94-4b54-ab51-d6823ffe101c"
+			],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:22:04.735Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "用户明确确认了方向：把声明式规则改写为类似 spirit.ts Chain 7 风格的推理式结构。这需要遵循 CoT 设计指南中的行为分布和元认知振荡结构。",
+			"maxChildIndex": 3
+		},
+		"1783f1cd-a109-4bfc-9c03-362b8c0a8c49": {
+			"id": "1783f1cd-a109-4bfc-9c03-362b8c0a8c49",
+			"shortId": "O2.1",
+			"type": "objective",
+			"content": "将 add_intent.ts 工具描述从声明式改为推理式",
+			"status": "planned",
+			"parentId": "293aa8fe-7667-4d43-9cdb-ebac42370cd9",
+			"childrenIds": ["51952735-79f7-4f61-b60a-82703cca7769"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:22:19.294Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "add_intent 是 intent tree 的核心入口工具，其描述直接影响模型如何理解和使用 intent tree。当前描述是纯声明式的 checklist，需要改为从事实推理出使用规则的结构。如果工具描述过长导致 token 成本过高，可能需要精简。",
+			"maxChildIndex": 1
+		},
+		"69856f3b-e5e6-453d-8cc1-856fb8129064": {
+			"id": "69856f3b-e5e6-453d-8cc1-856fb8129064",
+			"shortId": "O2.2",
+			"type": "objective",
+			"content": "将 solo_dev 模式的 customInstructions 从声明式改为推理式",
+			"status": "planned",
+			"parentId": "293aa8fe-7667-4d43-9cdb-ebac42370cd9",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:22:19.787Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "solo_dev 的 customInstructions 注入到 system prompt 末尾，是模型在该模式下的行为指导。当前是纯声明式 checklist，需要改为推理式。注意 spirit.ts 中 Chain 7 已经有 intent tree 的推理，这里不应重复，而应补充 Chain 7 未覆盖的实践层面。"
+		},
+		"fb2a6611-2a94-4b54-ab51-d6823ffe101c": {
+			"id": "fb2a6611-2a94-4b54-ab51-d6823ffe101c",
+			"shortId": "O2.3",
+			"type": "objective",
+			"content": "将 intent_planning 模式的 customInstructions 从声明式改为推理式",
+			"status": "planned",
+			"parentId": "293aa8fe-7667-4d43-9cdb-ebac42370cd9",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:22:19.918Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "intent_planning 是专门管理 intent tree 的模式，其 customInstructions 应该是最详细的推理式指导。当前有 X→Y 工作流和可证伪性测试，但都是声明式的，需要改为推理式。"
+		},
+		"51952735-79f7-4f61-b60a-82703cca7769": {
+			"id": "51952735-79f7-4f61-b60a-82703cca7769",
+			"shortId": "A2.1.1",
+			"type": "approach",
+			"content": "采用\"骨架+肌肉\"架构改写 add_intent：声明式骨架（When to Use）+ 推理片段（Constraint vs Implementation 判断、Intent drift 防范、assumption 填写）",
+			"status": "planned",
+			"parentId": "1783f1cd-a109-4bfc-9c03-362b8c0a8c49",
+			"childrenIds": ["a7549efc-15e1-4e66-82bc-f97fe5d8e164"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:25:25.803Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "根据专家建议的杠杆点分析，add_intent 中三个 A 类规则（Constraint vs Implementation、Intent drift、assumption 填写）值得用推理片段，其余用声明式。如果推理片段导致 token 增加 >30%，需要压缩。",
+			"maxChildIndex": 1
+		},
+		"a7549efc-15e1-4e66-82bc-f97fe5d8e164": {
+			"id": "a7549efc-15e1-4e66-82bc-f97fe5d8e164",
+			"shortId": "I2.1.1.1",
+			"type": "impl",
+			"content": "改写 add_intent.ts 的工具描述：骨架+推理片段架构",
+			"status": "done",
+			"parentId": "51952735-79f7-4f61-b60a-82703cca7769",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "8413d6116434df3094c188830c58e68f785aa1c9",
+					"commitMessage": "[intent:I2.1.1.1] 将 add_intent 工具描述从声明式改为推理式：骨架+推理片段架构，Constraint vs Implementation 和 Intent drift 用推理链推导",
+					"files": [".roo/intent-tree.json", "src/core/prompts/tools/native-tools/add_intent.ts"],
+					"diffSummary": "2 file(s), +336 -1200",
+					"timestamp": "2026-02-24T14:26:40.658Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:25:33.871Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:25:41.296Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:26:40.658Z",
+					"action": "bound commit 8413d61"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:26:40.658Z",
 					"action": "updated: status→done"
 				}
 			],
-			"assumption": "模型可能传入字符串 \"null\" 作为 content，执行层应将其视为未提供"
+			"assumption": "已读取当前 add_intent.ts 内容，了解声明式结构。需要保留 When to Use/When NOT to Use 骨架，将 Constraint vs Implementation、Intent drift、assumption 三个高杠杆规则改为推理片段。如果改写后 token 增加超过 30% 则需要压缩。"
 		}
 	},
-	"rootIds": [
-		"c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
-		"d66da17a-39a6-4c95-baf0-49dfb816c3eb",
-		"dc4abfdf-388e-4fe9-916a-ded030ce29e6",
-		"71e04f6c-420a-4679-b8a2-ebab36805352",
-		"a13f142e-f381-44bb-80e7-cb0e0b799cb5",
-		"0303bab4-4621-4fe2-84c6-f167dd054107",
-		"27344780-0d11-4174-ada4-18385cf88129",
-		"c887bed9-e014-4ec5-bc06-b1803de639a2",
-		"727f7791-48b7-4d2f-886d-42596ae2c7cd",
-		"b7e812a7-c301-4116-9e5e-e02248ecba93"
-	],
+	"rootIds": ["7d7be656-3aa0-4b70-8f09-6bbcfaab2135", "293aa8fe-7667-4d43-9cdb-ebac42370cd9"],
 	"shortIdIndex": {
-		"G1": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
-		"G2": "d66da17a-39a6-4c95-baf0-49dfb816c3eb",
-		"I2.1": "cbf801cc-94cd-4bc7-9416-209664ee665e",
-		"A1.1": "d5b80c6a-4b28-447f-9f93-581de7184245",
-		"I1.1.1": "0786ae71-444e-4db8-b3b6-64137d2d4fcc",
-		"I1.1.2": "6b5c9884-90a5-49dd-a5ec-27aa304fbcaa",
-		"A1.2": "168b6825-a435-4516-91fd-ff80edddcfc2",
-		"I1.2.1": "ccd75032-efa7-4d88-94c4-cb41eaeb2de5",
-		"I1.2.2": "5eae7f03-dc70-43dc-a28e-ccdbb2e56ad6",
-		"G3": "dc4abfdf-388e-4fe9-916a-ded030ce29e6",
-		"I3.1": "55c9b850-2810-4ce9-8e5f-85bc914aa2fc",
-		"G4": "71e04f6c-420a-4679-b8a2-ebab36805352",
-		"I4.1": "c3faf021-cdb4-4dd2-93e4-3951166940f3",
-		"G5": "a13f142e-f381-44bb-80e7-cb0e0b799cb5",
-		"I5.1": "cf39fd65-3dc7-4c8e-8505-14b235bd32a7",
-		"I5.2": "816e2b35-d111-4a96-9ebc-67ddf0747324",
-		"G6": "0303bab4-4621-4fe2-84c6-f167dd054107",
-		"I6.1": "988ee2c2-09e3-4528-8bd0-035e255ed159",
-		"I6.2": "218413cc-7efb-4f0a-a0e2-811de4443f31",
-		"I6.3": "ff791e5f-d7f2-4da7-8d92-75dfd809a881",
-		"I6.4": "56c991f2-3074-4d72-a288-329bcf0a02af",
-		"I6.5": "5fd54842-9e8d-495c-8a22-ff39996c0c29",
-		"I6.6": "08ab078a-e1ff-4815-ae33-307e53c983ad",
-		"I6.7": "7598282f-57e8-4c0e-9a87-623d3e78daea",
-		"I6.8": "93f61c9d-1d08-4557-b7c1-e2f0d142c4fe",
-		"I6.9": "cfc21333-02fa-4948-91f6-376170282f36",
-		"I6.10": "649c91af-90db-421e-9514-8f19219fef9c",
-		"I6.11": "e907b2e9-a987-444a-8fc1-5960fc224006",
-		"G7": "27344780-0d11-4174-ada4-18385cf88129",
-		"A7.1": "2da7f344-e599-4236-8d9b-141621e48037",
-		"I7.1.1": "6b663bdb-ab18-4a8f-ab87-e6da3dfdc1af",
-		"G8": "c887bed9-e014-4ec5-bc06-b1803de639a2",
-		"I8.1": "4b2f06ca-64e7-4553-92b8-930c17737a58",
-		"G9": "727f7791-48b7-4d2f-886d-42596ae2c7cd",
-		"I9.1": "1fa54b75-ef5a-40b7-b3e8-3439eb5431b8",
-		"G10": "b7e812a7-c301-4116-9e5e-e02248ecba93",
-		"I10.1": "82a63d6e-3ba4-4c0b-91f5-7c2a86cc4d04",
-		"I10.2": "5d5a76fd-3e22-4d54-8612-2605b516e7c5"
+		"G1": "7d7be656-3aa0-4b70-8f09-6bbcfaab2135",
+		"O1.1": "693db0f7-2b06-489a-96dc-154e6f85ee02",
+		"O1.2": "d86dfc9d-e9b6-4c64-8760-88bf2d1de772",
+		"O1.3": "dad60d6b-9dc6-4e12-9ce4-3f23e245b980",
+		"A1.1.1": "59e74d23-8f10-457a-91ee-8e0083d4fbca",
+		"A1.2.1": "1ab68c4b-98a4-4ea0-9e1e-224f36c7639a",
+		"A1.2.2": "e1039c15-8939-4f49-9418-ed1ba82f0620",
+		"A1.3.1": "04e872ae-838e-4f69-8c1b-c9d7e7a049b5",
+		"I1.1.1.1": "3f39d30c-0924-4957-80a4-76983c014585",
+		"I1.2.1.1": "4b78bef8-2e39-4c4b-84b2-c11481158653",
+		"I1.2.2.1": "43560a8a-b69f-4641-aa56-84205706ea3d",
+		"I1.3.1.1": "9d7a85b3-526f-4262-b778-1c579d489675",
+		"G2": "293aa8fe-7667-4d43-9cdb-ebac42370cd9",
+		"O2.1": "1783f1cd-a109-4bfc-9c03-362b8c0a8c49",
+		"O2.2": "69856f3b-e5e6-453d-8cc1-856fb8129064",
+		"O2.3": "fb2a6611-2a94-4b54-ab51-d6823ffe101c",
+		"A2.1.1": "51952735-79f7-4f61-b60a-82703cca7769",
+		"I2.1.1.1": "a7549efc-15e1-4e66-82bc-f97fe5d8e164"
 	},
-	"rootMaxChildIndex": 10
+	"rootMaxChildIndex": 2
 }
