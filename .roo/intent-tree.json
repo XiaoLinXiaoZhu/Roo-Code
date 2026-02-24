@@ -733,10 +733,23 @@
 			"shortId": "I6.8",
 			"type": "impl",
 			"content": "批次2：优化 generate_image, edit, read_media 描述",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
 			"childrenIds": [],
-			"codeBindings": [],
+			"codeBindings": [
+				{
+					"commitHash": "f60ec90cfcc6c8d2d36cc5605003ee67e55b2dfc",
+					"commitMessage": "[intent:I6.8] 优化 generate_image, edit, read_media 工具描述：when-to-use+example 配对，参数说明移到参数描述",
+					"files": [
+						".roo/intent-tree.json",
+						"src/core/prompts/tools/native-tools/edit.ts",
+						"src/core/prompts/tools/native-tools/generate_image.ts",
+						"src/core/prompts/tools/native-tools/read_media.ts"
+					],
+					"diffSummary": "4 file(s), +72 -63",
+					"timestamp": "2026-02-24T08:30:17.723Z"
+				}
+			],
 			"createdBy": {
 				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
 				"timestamp": "2026-02-24T08:28:21.132Z",
@@ -747,6 +760,16 @@
 					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
 					"timestamp": "2026-02-24T08:29:30.488Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:30:17.723Z",
+					"action": "bound commit f60ec90"
+				},
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:30:17.723Z",
+					"action": "updated: status→done"
 				}
 			],
 			"assumption": "G6 下第二批。"
@@ -756,7 +779,7 @@
 			"shortId": "I6.9",
 			"type": "impl",
 			"content": "批次3：优化 execute_command, search_project, apply_edit, consult_expert, build_tool 描述",
-			"status": "planned",
+			"status": "in_progress",
 			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
 			"childrenIds": [],
 			"codeBindings": [],
@@ -765,7 +788,13 @@
 				"timestamp": "2026-02-24T08:28:22.026Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:30:24.366Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
 			"assumption": "G6 下第三批。"
 		},
 		"649c91af-90db-421e-9514-8f19219fef9c": {

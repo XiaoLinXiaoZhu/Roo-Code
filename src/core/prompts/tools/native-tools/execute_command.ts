@@ -1,33 +1,24 @@
 import type OpenAI from "openai"
 
-const EXECUTE_COMMAND_DESCRIPTION = `Run shell commands for development, system operations, or invoking CLI tools. **For code navigation (finding definitions or references), use find_definition/find_usages instead of grep.**
+const EXECUTE_COMMAND_DESCRIPTION = `Run shell commands for development, system operations, or invoking CLI tools. For code navigation (finding definitions or references), prefer find_definition/find_usages over grep.
 
-**When to Use**:
-- Development: \`npm test\`, \`npm run build\`, \`pip install\`
-- Git operations: \`git status\`, \`git diff\`, \`git log\`
-- System inspection: \`ls\`, \`cat\`, \`ps\`, \`env\`
-- Network requests: \`curl\`, \`wget\`
-- CLI tools (from build_tool): image processing, audio analysis, data conversion
-- Any operation not covered by other specialized tools
+**When to Use**: Running dev/build/test commands.
+- execute_command({ command: "npm test -- --grep 'auth'", cwd: "./backend", timeout: null })
 
-**Example**:
-{ "command": "npm test -- --grep 'auth'", "cwd": "./backend" }`
+**When to Use**: Git operations.
+- execute_command({ command: "git diff HEAD~3 --stat", cwd: ".", timeout: null })
 
-const COMMAND_PARAMETER_DESCRIPTION = `The CLI command to execute.
+**When to Use**: System inspection or file operations.
+- execute_command({ command: "ls -la src/ && cat package.json", cwd: ".", timeout: null })
 
-**Shell Compatibility** (critical):
-- PowerShell: Use \`;\` to chain. Native commands: \`Select-String\`, \`Get-Content\`, \`Remove-Item\`. NEVER use Unix commands.
-- cmd.exe: Use \`&&\` to chain. Native commands: \`type\`, \`del\`, \`findstr\`. NEVER use Unix commands.
-- bash/zsh: Use \`&&\` to chain. All Unix commands available.
+**When to Use**: Long-running processes (dev servers, watchers).
+- execute_command({ command: "npm run dev", cwd: ".", timeout: 10 })`
 
-**Best Practices**:
-- Use relative paths (e.g., \`./src/\` not absolute)
-- Execute complex commands directly, don't create scripts
-- Use pipes: \`grep pattern | head -20\``
+const COMMAND_PARAMETER_DESCRIPTION = `The CLI command to execute. Shell compatibility: PowerShell uses \`;\` to chain (use Select-String, Get-Content, Remove-Item); cmd.exe uses \`&&\` (use type, del, findstr); bash/zsh uses \`&&\` with all Unix commands. Use relative paths (e.g., ./src/) and execute complex commands directly without creating scripts.`
 
-const CWD_PARAMETER_DESCRIPTION = `Optional working directory for the command, relative or absolute`
+const CWD_PARAMETER_DESCRIPTION = `Working directory for the command (relative or absolute). Default: workspace root.`
 
-const TIMEOUT_PARAMETER_DESCRIPTION = `Timeout in seconds. When exceeded, the command continues running in the background and output collected so far is returned. Use this for long-running processes like dev servers, file watchers, or any command that may not exit on its own`
+const TIMEOUT_PARAMETER_DESCRIPTION = `Timeout in seconds. When exceeded, the command continues in the background and output collected so far is returned. Use for long-running processes like dev servers or file watchers.`
 
 export default {
 	type: "function",
