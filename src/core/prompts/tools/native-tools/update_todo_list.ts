@@ -1,45 +1,16 @@
 import type OpenAI from "openai"
 
-const UPDATE_TODO_LIST_DESCRIPTION = `Replace the entire TODO list with an updated checklist reflecting the current state. Always provide the full list; the system will overwrite the previous one.
+const UPDATE_TODO_LIST_DESCRIPTION = `Replace the entire TODO list with an updated checklist reflecting the current state. Always provide the full list — the system overwrites the previous one.
 
-When to Use:
-- Task involves multiple steps or requires ongoing tracking
-- Need to update status of several todos at once
-- New actionable items are discovered during execution
-- Task is complex and benefits from stepwise progress tracking
+**When to Use**: Task involves multiple steps and benefits from progress tracking.
+- update_todo_list({ todos: "[x] Analyze requirements\\n[x] Design architecture\\n[-] Implement core logic\\n[ ] Write tests\\n[ ] Update documentation" })
 
-When NOT to Use:
-- Only a single, trivial task
-- Task can be completed in one or two simple steps
-- Request is purely conversational or informational
+**When to Use**: Updating status after completing a step or discovering new items.
+- update_todo_list({ todos: "[x] Analyze requirements\\n[x] Design architecture\\n[x] Implement core logic\\n[-] Write tests\\n[ ] Update documentation\\n[ ] Add performance benchmarks" })
 
-Checklist Format:
-- Use a single-level markdown checklist (no nesting or subtasks)
-- List todos in the intended execution order
-- Status options: [ ] (pending), [x] (completed), [-] (in progress)
+**When NOT to Use**: Single trivial task, or task completable in one or two simple steps.
 
-Use Markdown code block format with \`\`\`todo_list syntax. This format requires zero escaping for newlines and quotes, making it more natural and readable. **Use 6 backticks (\`\`\`\`\`\`) for maximum compatibility** - this ensures any code blocks within your content won't conflict with the tool fence.
-
-Example: Initial task list
-\`\`\`\`\`\`todo_list
-[x] Analyze requirements
-[x] Design architecture
-[-] Implement core logic
-[ ] Write tests
-[ ] Update documentation
-\`\`\`\`\`\`
-
-Example: After completing implementation
-\`\`\`\`\`\`todo_list
-[x] Analyze requirements
-[x] Design architecture
-[x] Implement core logic
-[-] Write tests
-[ ] Update documentation
-[ ] Add performance benchmarks
-\`\`\`\`\`\``
-
-const TODOS_PARAMETER_DESCRIPTION = `Full markdown checklist in execution order, using [ ] for pending, [x] for completed, and [-] for in progress`
+**Checklist format**: Single-level markdown, in execution order. Status: [ ] pending, [x] completed, [-] in progress.`
 
 export default {
 	type: "function",
@@ -52,7 +23,8 @@ export default {
 			properties: {
 				todos: {
 					type: "string",
-					description: TODOS_PARAMETER_DESCRIPTION,
+					description:
+						"Full markdown checklist in execution order. Use [ ] for pending, [x] for completed, [-] for in progress.",
 				},
 			},
 			required: ["todos"],

@@ -832,18 +832,11 @@
 			"childrenIds": [],
 			"codeBindings": [
 				{
-					"commitHash": "ac1933f18de9dd28a439df91fcf4c37dcef644ca",
-					"commitMessage": "[intent:I6.10] 优化 intent 组工具描述：精简 add_intent 教学内容，所有工具统一 when-to-use+example 配对模式",
-					"files": [
-						".roo/intent-tree.json",
-						"src/core/prompts/tools/native-tools/add_intent.ts",
-						"src/core/prompts/tools/native-tools/commit_intent.ts",
-						"src/core/prompts/tools/native-tools/prune_intent.ts",
-						"src/core/prompts/tools/native-tools/restructure_intent.ts",
-						"src/core/prompts/tools/native-tools/update_intent.ts"
-					],
-					"diffSummary": "6 file(s), +85 -121",
-					"timestamp": "2026-02-24T08:33:00.133Z"
+					"commitHash": "818a02c7a4363f16288860595994d4660dde7159",
+					"commitMessage": "[intent:I6.10] 优化 intent 组工具描述：add_intent 保留教学内容并重组为 when-to-use+example 配对，其余 intent 工具统一格式",
+					"files": [".roo/intent-tree.json", "src/core/prompts/tools/native-tools/add_intent.ts"],
+					"diffSummary": "2 file(s), +66 -7",
+					"timestamp": "2026-02-24T08:34:52.253Z"
 				}
 			],
 			"createdBy": {
@@ -859,12 +852,12 @@
 				},
 				{
 					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:33:00.133Z",
-					"action": "bound commit ac1933f"
+					"timestamp": "2026-02-24T08:34:52.253Z",
+					"action": "bound commit 818a02c"
 				},
 				{
 					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
-					"timestamp": "2026-02-24T08:33:00.133Z",
+					"timestamp": "2026-02-24T08:34:52.253Z",
 					"action": "updated: status→done"
 				}
 			],
@@ -875,7 +868,7 @@
 			"shortId": "I6.11",
 			"type": "impl",
 			"content": "批次5：优化 always available 工具描述（ask_followup_question, attempt_completion, update_todo_list, skill）",
-			"status": "planned",
+			"status": "in_progress",
 			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
 			"childrenIds": [],
 			"codeBindings": [],
@@ -884,7 +877,13 @@
 				"timestamp": "2026-02-24T08:28:24.463Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:34:59.615Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
 			"assumption": "G6 下第五批。"
 		}
 	},

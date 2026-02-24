@@ -2,11 +2,9 @@ import type OpenAI from "openai"
 
 const SKILL_DESCRIPTION = `Load and execute a skill by name. Skills provide specialized instructions for common tasks like creating MCP servers or custom modes.
 
-Use this tool when you need to follow specific procedures documented in a skill. Available skills are listed in the AVAILABLE SKILLS section of the system prompt.`
-
-const SKILL_PARAMETER_DESCRIPTION = `Name of the skill to load (e.g., create-mcp-server, create-mode). Must match a skill name from the available skills list.`
-
-const ARGS_PARAMETER_DESCRIPTION = `Optional context or arguments to pass to the skill`
+**When to Use**: You need to follow specific procedures documented in a skill. Available skills are listed in the AVAILABLE SKILLS section of the system prompt.
+- skill({ skill: "create-mcp-server", args: "Build a weather data MCP server" })
+- skill({ skill: "roo-translation", args: "Add Japanese translations for new settings strings" })`
 
 export default {
 	type: "function",
@@ -19,11 +17,11 @@ export default {
 			properties: {
 				skill: {
 					type: "string",
-					description: SKILL_PARAMETER_DESCRIPTION,
+					description: "Name of the skill to load. Must match a skill name from the available skills list.",
 				},
 				args: {
 					type: ["string", "null"],
-					description: ARGS_PARAMETER_DESCRIPTION,
+					description: "Optional context or arguments to pass to the skill.",
 				},
 			},
 			required: ["skill", "args"],
