@@ -1246,7 +1246,7 @@
 			"shortId": "G10",
 			"type": "goal",
 			"content": "修复 update_intent 工具：描述示例不应引导模型传入 \"null\" 字符串，执行层应过滤字符串 \"null\" 的 content",
-			"status": "planned",
+			"status": "done",
 			"parentId": null,
 			"childrenIds": ["82a63d6e-3ba4-4c0b-91f5-7c2a86cc4d04", "5d5a76fd-3e22-4d54-8612-2605b516e7c5"],
 			"codeBindings": [],
@@ -1255,7 +1255,13 @@
 				"timestamp": "2026-02-24T13:33:34.395Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
+					"timestamp": "2026-02-24T13:35:09.975Z",
+					"action": "updated: status→done"
+				}
+			],
 			"assumption": "用户报告了 update_intent 工具的两个问题：(1) 描述示例误导模型传入 \"null\" 字符串 (2) 执行层没有过滤字符串 \"null\"。intent tree 中没有相关的现有目标。",
 			"maxChildIndex": 2
 		},
