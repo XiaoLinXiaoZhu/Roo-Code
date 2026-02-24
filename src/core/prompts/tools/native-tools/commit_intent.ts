@@ -1,14 +1,12 @@
 import type OpenAI from "openai"
 
-const COMMIT_INTENT_DESCRIPTION = `Commit code changes and bind them to a node in the Intent Tree (the <intent_tree> shown in environment). This tool:
-1. Stages all current changes (\`git add .\`)
-2. Creates a git commit with the provided message (prefixed with the intent node ID)
-3. Records the commit hash in the intent tree node
-4. Updates the node status to \`done\`
+const COMMIT_INTENT_DESCRIPTION = `Commit code changes and bind them to a node in the Intent Tree. Stages all changes (git add .), creates a commit prefixed with the node ID, records the hash, and marks the node as done.
 
-**nodeId**: Optional. Use the short ID (e.g., "I1.1.1"). If omitted, automatically binds to the current in_progress node.
+**When to Use**: After completing code changes that fulfill an intent node.
+- commit_intent({ nodeId: "I1.1.1", message: "Add cache middleware in UserService" })
 
-**When to use:** After completing code changes that fulfill an intent node.`
+**When to Use**: Auto-binding to the current in_progress node (omit nodeId).
+- commit_intent({ message: "Fix validation logic for empty inputs" })`
 
 export default {
 	type: "function",
@@ -25,7 +23,7 @@ export default {
 				},
 				message: {
 					type: "string",
-					description: "Commit message describing the change",
+					description: "Commit message describing the change.",
 				},
 			},
 			required: ["message"],

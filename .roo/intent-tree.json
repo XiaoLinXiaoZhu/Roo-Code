@@ -779,10 +779,25 @@
 			"shortId": "I6.9",
 			"type": "impl",
 			"content": "批次3：优化 execute_command, search_project, apply_edit, consult_expert, build_tool 描述",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
 			"childrenIds": [],
-			"codeBindings": [],
+			"codeBindings": [
+				{
+					"commitHash": "8cb5217eff89388ede96c28791c98079ec0f6c4c",
+					"commitMessage": "[intent:I6.9] 优化 execute_command, search_project, apply_edit, consult_expert, build_tool 工具描述",
+					"files": [
+						".roo/intent-tree.json",
+						"src/core/prompts/tools/native-tools/apply_edit.ts",
+						"src/core/prompts/tools/native-tools/build_tool.ts",
+						"src/core/prompts/tools/native-tools/consult_expert.ts",
+						"src/core/prompts/tools/native-tools/execute_command.ts",
+						"src/core/prompts/tools/native-tools/search_project.ts"
+					],
+					"diffSummary": "6 file(s), +94 -179",
+					"timestamp": "2026-02-24T08:31:44.264Z"
+				}
+			],
 			"createdBy": {
 				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
 				"timestamp": "2026-02-24T08:28:22.026Z",
@@ -793,6 +808,16 @@
 					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
 					"timestamp": "2026-02-24T08:30:24.366Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:31:44.264Z",
+					"action": "bound commit 8cb5217"
+				},
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:31:44.264Z",
+					"action": "updated: status→done"
 				}
 			],
 			"assumption": "G6 下第三批。"
@@ -801,8 +826,8 @@
 			"id": "649c91af-90db-421e-9514-8f19219fef9c",
 			"shortId": "I6.10",
 			"type": "impl",
-			"content": "批次4：优化 intent 组工具描述（add_intent, update_intent, prune_intent, commit_intent, restructure_intent）",
-			"status": "planned",
+			"content": "批次4：优化 intent 组工具描述",
+			"status": "in_progress",
 			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
 			"childrenIds": [],
 			"codeBindings": [],
@@ -811,7 +836,13 @@
 				"timestamp": "2026-02-24T08:28:23.049Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:31:50.343Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
 			"assumption": "G6 下第四批。"
 		},
 		"e907b2e9-a987-444a-8fc1-5960fc224006": {

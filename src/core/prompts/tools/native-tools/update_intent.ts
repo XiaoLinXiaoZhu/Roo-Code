@@ -2,17 +2,17 @@ import type OpenAI from "openai"
 
 const UPDATE_INTENT_DESCRIPTION = `Update an existing node in the Intent Tree (the <intent_tree> shown in environment).
 
-**When to use (instead of add_intent):**
-- User asks to "check/verify/continue/fix" something → find the related node and update it
-- Completing work on a node → mark as done
-- Starting work → mark as in_progress
-- Goal clarified/refined → update content
+**When to Use**: Starting work on a node.
+- update_intent({ nodeId: "I1.1.1", status: "in_progress", content: null })
 
-**Common usage:**
-- Mark in progress: update_intent(nodeId: "P1.1", status: "in_progress")
-- Mark done: update_intent(nodeId: "I1.1.1", status: "done")
-- Revise description: update_intent(nodeId: "G1", content: "revised goal")
-- Mark superseded: update_intent(nodeId: "P1.1", status: "superseded") — when replaced by better approach`
+**When to Use**: Marking work as complete.
+- update_intent({ nodeId: "I1.1.1", status: "done", content: null })
+
+**When to Use**: Revising a node's description after clarification.
+- update_intent({ nodeId: "G1", status: null, content: "Revised: optimize database queries specifically" })
+
+**When to Use**: Marking an approach as superseded by a better one.
+- update_intent({ nodeId: "A1.1", status: "superseded", content: null })`
 
 export default {
 	type: "function",
@@ -25,16 +25,16 @@ export default {
 			properties: {
 				nodeId: {
 					type: "string",
-					description: "Node short ID (e.g., 'G1', 'P1.1', 'I1.1.1')",
+					description: "Node short ID (e.g., 'G1', 'O1.1', 'I1.1.1').",
 				},
 				status: {
 					type: "string",
 					enum: ["in_progress", "done", "superseded"],
-					description: "New status",
+					description: "New status for the node.",
 				},
 				content: {
 					type: "string",
-					description: "Updated description (optional)",
+					description: "Updated description (optional).",
 				},
 			},
 			required: ["nodeId"],

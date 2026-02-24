@@ -1,10 +1,12 @@
 import type OpenAI from "openai"
 
-const PRUNE_INTENT_DESCRIPTION = `Abandon a node in the Intent Tree (the <intent_tree> shown in environment) and all its descendants. Use when the user changes direction.
+const PRUNE_INTENT_DESCRIPTION = `Abandon a node in the Intent Tree and all its descendants. Marks them as "pruned" and lists associated git commits that may need reverting.
 
-This marks the node and all children as "pruned" and lists associated git commits that may need reverting.
+**When to Use**: User changes direction or an approach is failing.
+- prune_intent({ nodeId: "A1.1", reason: "Caching approach too complex, trying a simpler optimization" })
 
-Example: User says "try a different approach" → prune_intent(nodeId: "P1.1", reason: "user wants different approach")`
+**When to Use**: Cleaning up obsolete goals or objectives.
+- prune_intent({ nodeId: "G2", reason: "User no longer needs this feature" })`
 
 export default {
 	type: "function",
@@ -17,14 +19,14 @@ export default {
 			properties: {
 				nodeId: {
 					type: "string",
-					description: "Node short ID to prune (e.g., 'P1.1')",
+					description: "Node short ID to prune (e.g., 'A1.1', 'G2').",
 				},
 				reason: {
 					type: "string",
-					description: "Why this path is being abandoned",
+					description: "Why this path is being abandoned.",
 				},
 			},
-			required: ["nodeId"],
+			required: ["nodeId", "reason"],
 		},
 	},
 } satisfies OpenAI.Chat.ChatCompletionTool
