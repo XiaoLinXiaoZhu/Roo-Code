@@ -957,10 +957,22 @@
 			"shortId": "I7.1.1",
 			"type": "impl",
 			"content": "重排 CommitIntentTool.execute() 执行顺序",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "2da7f344-e599-4236-8d9b-141621e48037",
 			"childrenIds": [],
-			"codeBindings": [],
+			"codeBindings": [
+				{
+					"commitHash": "8e58206837f76bbccc844c434247ae6142bf37cf",
+					"commitMessage": "[intent:I7.1.1] 修复 commit_intent 执行顺序：commit 后更新 intent-tree.json 并 amend 到同一 commit，避免残留 dirty 文件",
+					"files": [
+						".roo/cache/search/index.json",
+						".roo/intent-tree.json",
+						"src/core/tools/CommitIntentTool.ts"
+					],
+					"diffSummary": "3 file(s), +141 -8",
+					"timestamp": "2026-02-24T08:42:43.567Z"
+				}
+			],
 			"createdBy": {
 				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
 				"timestamp": "2026-02-24T08:40:37.291Z",
@@ -971,6 +983,16 @@
 					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
 					"timestamp": "2026-02-24T08:40:45.007Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:42:43.568Z",
+					"action": "bound commit 8e58206"
+				},
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:42:43.568Z",
+					"action": "updated: status→done"
 				}
 			],
 			"assumption": "A7.1 下的具体实现。修改 CommitIntentTool.execute() 的执行顺序。"

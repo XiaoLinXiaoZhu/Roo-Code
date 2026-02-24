@@ -1,5 +1,26 @@
 # Roo Code Changelog
 
+## [3.52.1] - 2026-02-24
+
+### 📝 工具描述统一优化
+
+按照 `工具描述优化2.md` 文档，统一所有 20 个启用工具的描述模式：
+
+- **描述结构统一**：工具描述 = 能力描述 + When to Use（场景+example 紧密配对），参数描述 = 具体参数含义
+- **示例格式统一**：所有示例使用 `tool_name({ param: "value" })` 函数调用风格，不再使用 markdown 代码块或 JSON 对象格式
+- **参数说明归位**：将工具描述中的 `Parameters:` 段落移到各参数的 `description` 字段中
+- **删除 markdown 格式指令**：移除 `apply_diff` 的 "Use Markdown code block format" 说明、`write_to_file` 的 markdown 代码块示例、`update_todo_list` 的 markdown 格式说明
+- **精简冗长描述**：`codebase_search` 移除 CRITICAL 段落、`edit` 精简使用说明、`generate_image` 移除参数段落
+- **intent 工具自包含**：`add_intent` 保留教学内容（constraint vs implementation、node types、atomicity rule、intent drift），因为 intent 工具仅在少数模式中可用，需要自包含
+
+涉及文件：`native-tools/` 下的 `codebase_search.ts`、`find_definition.ts`、`find_usages.ts`、`read_media.ts`、`generate_image.ts`、`edit.ts`、`execute_command.ts`、`search_project.ts`、`apply_edit.ts`、`consult_expert.ts`、`build_tool.ts`、`add_intent.ts`、`update_intent.ts`、`prune_intent.ts`、`commit_intent.ts`、`restructure_intent.ts`、`ask_followup_question.ts`、`attempt_completion.ts`、`update_todo_list.ts`、`skill.ts`、`write_to_file.ts`、`apply_diff.ts`
+
+### 🐛 修复 commit_intent 执行顺序
+
+- **问题**：`commit_intent` 先 git commit，再更新 intent-tree.json（bindCode + updateNode + save），导致每次 commit 后 intent-tree.json 都是 dirty 状态
+- **修复**：commit 后更新 intent-tree.json，然后 `git add .roo/intent-tree.json && git commit --amend --no-edit` 将更新后的文件追加到同一个 commit
+- 涉及文件：`CommitIntentTool.ts`
+
 ## [3.52.0] - 2026-02-24
 
 ### 🔀 上游同步 (upstream/main → v3.50.4)
@@ -23,6 +44,7 @@
 ### 🗑️ 移除 Markdown 工具调用模式
 
 基于实践验证，markdown 工具调用模式（`MarkdownToolParser`）基于对原生工具调用的错误理解，完全不需要：
+
 - 原生工具调用使用 XML-like 格式，不存在 JSON 转义问题
 - 原生工具调用支持流式输出
 
