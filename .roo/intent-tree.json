@@ -8,7 +8,10 @@
 			"content": "Optimize consult_expert tool: reposition as empowerment tool (knowledge/methodology/best-practices) instead of problem diagnosis",
 			"status": "in_progress",
 			"parentId": null,
-			"childrenIds": ["d5b80c6a-4b28-447f-9f93-581de7184245", "168b6825-a435-4516-91fd-ff80edddcfc2"],
+			"childrenIds": [
+				"d5b80c6a-4b28-447f-9f93-581de7184245",
+				"168b6825-a435-4516-91fd-ff80edddcfc2"
+			],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c78ca-4f9a-7419-8801-7424703a7007",
@@ -37,7 +40,9 @@
 			"content": "修复 sanitizeToolUseId 误清洗 OpenAI 原生 call_id 导致 tool-result 找不到对应 tool-call 的 bug",
 			"status": "planned",
 			"parentId": null,
-			"childrenIds": ["cbf801cc-94cd-4bc7-9416-209664ee665e"],
+			"childrenIds": [
+				"cbf801cc-94cd-4bc7-9416-209664ee665e"
+			],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c78d7-674c-727e-b1cc-fdf53d866618",
@@ -102,7 +107,10 @@
 			"content": "Redesign parameter structure as cognitive scaffolding: remove question/topic/ultimateGoal, add problemStatement+constraints+uncertainties, make currentApproach optional",
 			"status": "planned",
 			"parentId": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
-			"childrenIds": ["0786ae71-444e-4db8-b3b6-64137d2d4fcc", "6b5c9884-90a5-49dd-a5ec-27aa304fbcaa"],
+			"childrenIds": [
+				"0786ae71-444e-4db8-b3b6-64137d2d4fcc",
+				"6b5c9884-90a5-49dd-a5ec-27aa304fbcaa"
+			],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
@@ -196,7 +204,10 @@
 			"content": "Redesign consult_expert as empowerment tool: simplified params focused on domain knowledge, methodology, best practices acquisition",
 			"status": "planned",
 			"parentId": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
-			"childrenIds": ["ccd75032-efa7-4d88-94c4-cb41eaeb2de5", "5eae7f03-dc70-43dc-a28e-ccdbb2e56ad6"],
+			"childrenIds": [
+				"ccd75032-efa7-4d88-94c4-cb41eaeb2de5",
+				"5eae7f03-dc70-43dc-a28e-ccdbb2e56ad6"
+			],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c78eb-52c9-77d8-819c-acfd4ccdfda6",
@@ -266,7 +277,10 @@
 				{
 					"commitHash": "9abcc51cd38eb3228c49acd35cfc6f970638e9f8",
 					"commitMessage": "[intent:I1.2.2] Update expert mode roleDefinition and customInstructions to align with empowerment positioning: teach principles/methodology, not solve specific problems",
-					"files": [".roo/intent-tree.json", "packages/types/src/mode.ts"],
+					"files": [
+						".roo/intent-tree.json",
+						"packages/types/src/mode.ts"
+					],
 					"diffSummary": "2 file(s), +57 -9",
 					"timestamp": "2026-02-20T03:10:32.493Z"
 				}
@@ -302,7 +316,9 @@
 			"content": "将 agent-as-tool-experiment 分支 rebase 到 upstream/main，同步上游更新",
 			"status": "planned",
 			"parentId": null,
-			"childrenIds": ["55c9b850-2810-4ce9-8e5f-85bc914aa2fc"],
+			"childrenIds": [
+				"55c9b850-2810-4ce9-8e5f-85bc914aa2fc"
+			],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
@@ -348,7 +364,9 @@
 			"content": "清理 markdown 工具调用模式的所有残留代码",
 			"status": "planned",
 			"parentId": null,
-			"childrenIds": ["c3faf021-cdb4-4dd2-93e4-3951166940f3"],
+			"childrenIds": [
+				"c3faf021-cdb4-4dd2-93e4-3951166940f3"
+			],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
@@ -364,10 +382,27 @@
 			"shortId": "I4.1",
 			"type": "impl",
 			"content": "删除 MarkdownToolParser.ts 及其测试，清理 Task.ts、tools.ts、apply-diff-merge.spec.ts 中的 markdown 工具引用",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "71e04f6c-420a-4679-b8a2-ebab36805352",
 			"childrenIds": [],
-			"codeBindings": [],
+			"codeBindings": [
+				{
+					"commitHash": "3fed874c0d4ccf6a084142d1bcb635ab34c69f42",
+					"commitMessage": "[intent:I4.1] Remove markdown tool calling mode: delete MarkdownToolParser, clean up Task.ts, tools.ts, and related tests\n\nRemoved files:\n- src/core/assistant-message/MarkdownToolParser.ts\n- src/core/assistant-message/__tests__/MarkdownToolParser.spec.ts\n- src/core/assistant-message/__tests__/apply-diff-merge.spec.ts\n- src/core/task/__tests__/markdown-tool-history.spec.ts\n\nCleaned up:\n- Task.ts: removed markdownToolParser, pendingApplyDiff, flushPendingApplyDiff(),\n  markdownToolResults, markdown event processing in text chunk handler,\n  markdown finalize logic, isMarkdownTool filtering\n- tools.ts: removed isMarkdownTool property from ToolUse type\n- getEnvironmentDetails.ts: removed markdown tool results injection (done in merge)\n\nThe markdown tool calling mode was based on incorrect assumptions about\nnative tool calling limitations. Native tool calling already handles\nescaping and streaming correctly.",
+					"files": [
+						".roo/intent-tree.json",
+						"docs/better-tools/00-overview.md",
+						"src/core/assistant-message/MarkdownToolParser.ts",
+						"src/core/assistant-message/__tests__/MarkdownToolParser.spec.ts",
+						"src/core/assistant-message/__tests__/apply-diff-merge.spec.ts",
+						"src/core/task/Task.ts",
+						"src/core/task/__tests__/markdown-tool-history.spec.ts",
+						"src/shared/tools.ts"
+					],
+					"diffSummary": "8 file(s), +126 -2088",
+					"timestamp": "2026-02-24T07:25:25.235Z"
+				}
+			],
 			"createdBy": {
 				"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
 				"timestamp": "2026-02-24T07:18:30.981Z",
@@ -378,6 +413,16 @@
 					"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
 					"timestamp": "2026-02-24T07:18:37.325Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
+					"timestamp": "2026-02-24T07:25:25.235Z",
+					"action": "bound commit 3fed874"
+				},
+				{
+					"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
+					"timestamp": "2026-02-24T07:25:25.235Z",
+					"action": "updated: status→done"
 				}
 			],
 			"assumption": "需要删除 MarkdownToolParser 文件及其测试，清理 Task.ts 中的引用，清理 tools.ts 中的 isMarkdownTool 属性，清理测试文件。"

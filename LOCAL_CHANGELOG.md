@@ -1,5 +1,34 @@
 # Roo Code Changelog
 
+## [3.52.0] - 2026-02-24
+
+### 🔀 上游同步 (upstream/main → v3.50.4)
+
+合并上游 62 个提交，主要变更：
+
+- **AI-SDK 回退**：上游 revert 了 AI-SDK 迁移（约 152 个提交），随后通过 3 批 cherry-pick 重新应用非 AI-SDK 的功能和修复
+- **新模型支持**：Claude Sonnet 4.6、Gemini 3.1 Pro、MiniMax M2.5、GPT-5.3 Codex Spark、恢复 Unbound provider
+- **execute_command 超时参数**：Agent 可指定每条命令的超时秒数，超时后命令转后台运行
+- **TaskHistoryStore**：per-task 文件历史存储，解决多 VSCode 窗口并发写入 globalState 数据丢失
+- **per-workspace 索引控制**：每个工作区独立的索引开关和停止/取消控制
+- **文件变更面板**：每个对话显示文件变更面板，header 显示聚合的 +/- 行数
+- **内联终端 ANSI 渲染**：修复内联终端输出的 ANSI 转义码渲染
+- **Vertex/Gemini 工具偏好**：禁用 apply_diff，启用 edit 工具
+- **翻译和冲突解决 Skills**：提取为可复用的 skill + slash command
+- **移除 Roomote Control**：完全移除远程控制功能
+- **Bug 修复**：Bedrock prompt caching、OpenAI 响应处理、MCP 初始化等待、condensation summary 保留等
+
+冲突解决：多入口 delegation 逻辑适配到 Anthropic 原始消息格式，移除 RooMessage 格式依赖。
+
+### 🗑️ 移除 Markdown 工具调用模式
+
+基于实践验证，markdown 工具调用模式（`MarkdownToolParser`）基于对原生工具调用的错误理解，完全不需要：
+- 原生工具调用使用 XML-like 格式，不存在 JSON 转义问题
+- 原生工具调用支持流式输出
+
+删除文件：`MarkdownToolParser.ts`、`MarkdownToolParser.spec.ts`、`apply-diff-merge.spec.ts`、`markdown-tool-history.spec.ts`
+清理：Task.ts（markdownToolParser、pendingApplyDiff、flushPendingApplyDiff、markdownToolResults、isMarkdownTool 过滤）、tools.ts（isMarkdownTool 属性）
+
 ## [3.51.6] - 2026-02-20
 
 ### 🐛 修复
