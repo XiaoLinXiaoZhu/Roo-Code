@@ -1121,6 +1121,13 @@
 					"files": ["src/core/prompts/sections/spirit.ts"],
 					"diffSummary": "1 file(s), +8 -8",
 					"timestamp": "2026-02-24T12:21:21.235Z"
+				},
+				{
+					"commitHash": "214f8a8ede16e7424cc2dfc9299a0563a7a814e6",
+					"commitMessage": "[intent:I9.1] Expert review fixes: distinguish ask two modes (info-gathering vs communication), reduce Reflection ratio, add Normal Operation steps, honest about Intent Tree format being design decision not derivation",
+					"files": ["src/core/prompts/sections/spirit.ts"],
+					"diffSummary": "1 file(s), +16 -18",
+					"timestamp": "2026-02-24T12:28:28.232Z"
 				}
 			],
 			"createdBy": {
@@ -1172,6 +1179,16 @@
 				{
 					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
 					"timestamp": "2026-02-24T12:21:21.235Z",
+					"action": "updated: status→done"
+				},
+				{
+					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
+					"timestamp": "2026-02-24T12:28:28.232Z",
+					"action": "bound commit 214f8a8"
+				},
+				{
+					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
+					"timestamp": "2026-02-24T12:28:28.232Z",
 					"action": "updated: status→done"
 				}
 			],
