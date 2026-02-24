@@ -1,5 +1,17 @@
 # Roo Code Changelog
 
+## [3.52.4] - 2026-02-24
+
+### 🧪 SPIRIT v5.1：重度推理模式实验
+
+基于《The Molecular Structure of Thought》论文，将系统提示词从"Soul Document"声明式模式改为重度推理模式。
+
+- **核心变化**：从 3 个 Value 直接声明规则 → 6 个 Fact 通过 9 条推理链自然导出 11 个行为结论
+- **新增 F6**（用户看不到思考过程）：渗透所有推理链，强化读代码、多假设、外化验证等行为
+- **推理结构**：每条链包含 Deep Reasoning / Self-Reflection / Self-Exploration 三种思维模式的元认知振荡
+- **专家审查修复**：区分 ask 的两种模式（信息获取 vs 沟通）、降低反思比例、增加 Normal Operation、诚实标注 Intent Tree 格式为设计决策
+- **实验文档**：`docs/deep-thinking/SPIRIT-v5-重度推理实验记录.md`
+
 ## [3.52.2] - 2026-02-24
 
 ### 🐛 修复终端输出样式
