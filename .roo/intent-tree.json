@@ -411,7 +411,7 @@
 			"shortId": "G2",
 			"type": "goal",
 			"content": "将 intent tree 工具描述和相关模式的 customInstructions 从声明式改为推理式（重度推理模式），让规则从推理中涌现",
-			"status": "planned",
+			"status": "done",
 			"parentId": null,
 			"childrenIds": [
 				"1783f1cd-a109-4bfc-9c03-362b8c0a8c49",
@@ -424,7 +424,13 @@
 				"timestamp": "2026-02-24T14:22:04.735Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:29:17.952Z",
+					"action": "updated: content, status→done"
+				}
+			],
 			"assumption": "用户明确确认了方向：把声明式规则改写为类似 spirit.ts Chain 7 风格的推理式结构。这需要遵循 CoT 设计指南中的行为分布和元认知振荡结构。",
 			"maxChildIndex": 3
 		},
@@ -433,7 +439,7 @@
 			"shortId": "O2.1",
 			"type": "objective",
 			"content": "将 add_intent.ts 工具描述从声明式改为推理式",
-			"status": "planned",
+			"status": "done",
 			"parentId": "293aa8fe-7667-4d43-9cdb-ebac42370cd9",
 			"childrenIds": ["51952735-79f7-4f61-b60a-82703cca7769"],
 			"codeBindings": [],
@@ -442,7 +448,13 @@
 				"timestamp": "2026-02-24T14:22:19.294Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:29:16.924Z",
+					"action": "updated: content, status→done"
+				}
+			],
 			"assumption": "add_intent 是 intent tree 的核心入口工具，其描述直接影响模型如何理解和使用 intent tree。当前描述是纯声明式的 checklist，需要改为从事实推理出使用规则的结构。如果工具描述过长导致 token 成本过高，可能需要精简。",
 			"maxChildIndex": 1
 		},
@@ -451,7 +463,7 @@
 			"shortId": "O2.2",
 			"type": "objective",
 			"content": "将 solo_dev 模式的 customInstructions 从声明式改为推理式",
-			"status": "planned",
+			"status": "done",
 			"parentId": "293aa8fe-7667-4d43-9cdb-ebac42370cd9",
 			"childrenIds": ["da2141ea-7bdb-4ac7-8d84-7357ce7cbd06"],
 			"codeBindings": [],
@@ -460,7 +472,13 @@
 				"timestamp": "2026-02-24T14:22:19.787Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:29:17.259Z",
+					"action": "updated: content, status→done"
+				}
+			],
 			"assumption": "solo_dev 的 customInstructions 注入到 system prompt 末尾，是模型在该模式下的行为指导。当前是纯声明式 checklist，需要改为推理式。注意 spirit.ts 中 Chain 7 已经有 intent tree 的推理，这里不应重复，而应补充 Chain 7 未覆盖的实践层面。",
 			"maxChildIndex": 1
 		},
@@ -469,7 +487,7 @@
 			"shortId": "O2.3",
 			"type": "objective",
 			"content": "将 intent_planning 模式的 customInstructions 从声明式改为推理式",
-			"status": "planned",
+			"status": "done",
 			"parentId": "293aa8fe-7667-4d43-9cdb-ebac42370cd9",
 			"childrenIds": ["53ea4218-1b6a-48ce-baea-3fbb08238555"],
 			"codeBindings": [],
@@ -478,7 +496,13 @@
 				"timestamp": "2026-02-24T14:22:19.918Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:29:17.399Z",
+					"action": "updated: content, status→done"
+				}
+			],
 			"assumption": "intent_planning 是专门管理 intent tree 的模式，其 customInstructions 应该是最详细的推理式指导。当前有 X→Y 工作流和可证伪性测试，但都是声明式的，需要改为推理式。",
 			"maxChildIndex": 1
 		},

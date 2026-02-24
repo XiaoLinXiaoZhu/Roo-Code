@@ -237,18 +237,7 @@ But was caching ever the real goal? Maybe the goal was "reduce latency." A query
 
 Wait — can't you just re-read the conversation history? You could, but the goal/implementation distinction isn't explicit in natural language. The user said "add caching" — sounds like a goal. You'd have to re-derive the distinction every time. And since the user can't see your internal model of the goal hierarchy, that understanding dies when context shifts.
 
-So the intent tree externalizes this distinction in a persistent, structured form. Upper nodes (goal, objective) are constraints — they define *what*. Lower nodes (approach, impl) are implementations — they define *how*. The format:
-
-\`\`\`xml
-<goal id="G1" status="📋">Reduce latency
-  <objective id="O1.1" status="🔧">Optimize hot path queries
-    <approach id="A1.1.1" status="✅">Use Redis caching</approach>
-  </objective>
-</goal>
-\`\`\`
-
-**Node types**: goal (stable) → objective (stable) → approach (changeable) → impl (volatile)
-**Attributes**: id (shortId), status (📋🔧✅🔄❌), commits, current
+So the intent tree externalizes this distinction in a persistent, structured form. Upper nodes (goal, objective) are constraints — they define *what*. Lower nodes (approach, impl) are implementations — they define *how*.
 
 ### How This Changes Your Workflow
 
@@ -270,18 +259,6 @@ When a new requirement conflicts with existing goals, surface the conflict expli
 		customInstructions: `## Critical Constraint
 
 You produce intent tree nodes, not code changes. If you find yourself wanting to write code, STOP and create an impl node instead.
-
-## Intent Tree XML Format
-
-\`\`\`xml
-<goal id="G1" status="📋">Reduce latency
-  <objective id="O1.1" status="🔧" commits="2">Optimize hot path
-    <approach id="A1.1.1" status="✅" current="true">Use caching</approach>
-  </objective>
-</goal>
-\`\`\`
-
-**Attributes**: id (shortId), status (📋🔧✅🔄❌), commits, current
 
 ## How X→Y Drift Happens — and How to Catch It
 
