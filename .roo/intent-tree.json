@@ -294,9 +294,59 @@
 				}
 			],
 			"assumption": "Under A1.2 approach. The expert mode's roleDefinition and customInstructions still describe it as a problem-solver. Need to align with the empowerment positioning - the expert should teach knowledge/methodology, not diagnose specific problems."
+		},
+		"dc4abfdf-388e-4fe9-916a-ded030ce29e6": {
+			"id": "dc4abfdf-388e-4fe9-916a-ded030ce29e6",
+			"shortId": "G3",
+			"type": "goal",
+			"content": "将 agent-as-tool-experiment 分支 rebase 到 upstream/main，同步上游更新",
+			"status": "planned",
+			"parentId": null,
+			"childrenIds": ["55c9b850-2810-4ce9-8e5f-85bc914aa2fc"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
+				"timestamp": "2026-02-24T05:45:28.281Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "用户要将当前 agent-as-tool-experiment 分支 rebase 到 upstream/main 上。这是一个新的独立目标，与现有 G1/G2 无关。",
+			"maxChildIndex": 1
+		},
+		"55c9b850-2810-4ce9-8e5f-85bc914aa2fc": {
+			"id": "55c9b850-2810-4ce9-8e5f-85bc914aa2fc",
+			"shortId": "I3.1",
+			"type": "impl",
+			"content": "备份当前分支到 backup/agent-as-tool-experiment-pre-rebase (74d4c4af7)",
+			"status": "done",
+			"parentId": "dc4abfdf-388e-4fe9-916a-ded030ce29e6",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
+				"timestamp": "2026-02-24T05:45:33.740Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
+					"timestamp": "2026-02-24T05:45:38.684Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
+					"timestamp": "2026-02-24T05:45:52.968Z",
+					"action": "updated: content, status→done"
+				}
+			],
+			"assumption": "Rebase 前必须备份，防止出问题无法恢复。"
 		}
 	},
-	"rootIds": ["c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf", "d66da17a-39a6-4c95-baf0-49dfb816c3eb"],
+	"rootIds": [
+		"c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
+		"d66da17a-39a6-4c95-baf0-49dfb816c3eb",
+		"dc4abfdf-388e-4fe9-916a-ded030ce29e6"
+	],
 	"shortIdIndex": {
 		"G1": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
 		"G2": "d66da17a-39a6-4c95-baf0-49dfb816c3eb",
@@ -306,7 +356,9 @@
 		"I1.1.2": "6b5c9884-90a5-49dd-a5ec-27aa304fbcaa",
 		"A1.2": "168b6825-a435-4516-91fd-ff80edddcfc2",
 		"I1.2.1": "ccd75032-efa7-4d88-94c4-cb41eaeb2de5",
-		"I1.2.2": "5eae7f03-dc70-43dc-a28e-ccdbb2e56ad6"
+		"I1.2.2": "5eae7f03-dc70-43dc-a28e-ccdbb2e56ad6",
+		"G3": "dc4abfdf-388e-4fe9-916a-ded030ce29e6",
+		"I3.1": "55c9b850-2810-4ce9-8e5f-85bc914aa2fc"
 	},
-	"rootMaxChildIndex": 2
+	"rootMaxChildIndex": 3
 }
