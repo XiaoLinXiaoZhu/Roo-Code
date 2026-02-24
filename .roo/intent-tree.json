@@ -340,12 +340,54 @@
 				}
 			],
 			"assumption": "Rebase 前必须备份，防止出问题无法恢复。"
+		},
+		"71e04f6c-420a-4679-b8a2-ebab36805352": {
+			"id": "71e04f6c-420a-4679-b8a2-ebab36805352",
+			"shortId": "G4",
+			"type": "goal",
+			"content": "清理 markdown 工具调用模式的所有残留代码",
+			"status": "planned",
+			"parentId": null,
+			"childrenIds": ["c3faf021-cdb4-4dd2-93e4-3951166940f3"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
+				"timestamp": "2026-02-24T07:18:23.033Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "用户明确要求清理 markdown 工具模式的残留代码。文档说明该功能基于错误理解，完全不需要。涉及 6 个文件。",
+			"maxChildIndex": 1
+		},
+		"c3faf021-cdb4-4dd2-93e4-3951166940f3": {
+			"id": "c3faf021-cdb4-4dd2-93e4-3951166940f3",
+			"shortId": "I4.1",
+			"type": "impl",
+			"content": "删除 MarkdownToolParser.ts 及其测试，清理 Task.ts、tools.ts、apply-diff-merge.spec.ts 中的 markdown 工具引用",
+			"status": "in_progress",
+			"parentId": "71e04f6c-420a-4679-b8a2-ebab36805352",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
+				"timestamp": "2026-02-24T07:18:30.981Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8e2a-b88c-739c-9ee0-deabe17a6d35",
+					"timestamp": "2026-02-24T07:18:37.325Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
+			"assumption": "需要删除 MarkdownToolParser 文件及其测试，清理 Task.ts 中的引用，清理 tools.ts 中的 isMarkdownTool 属性，清理测试文件。"
 		}
 	},
 	"rootIds": [
 		"c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
 		"d66da17a-39a6-4c95-baf0-49dfb816c3eb",
-		"dc4abfdf-388e-4fe9-916a-ded030ce29e6"
+		"dc4abfdf-388e-4fe9-916a-ded030ce29e6",
+		"71e04f6c-420a-4679-b8a2-ebab36805352"
 	],
 	"shortIdIndex": {
 		"G1": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
@@ -358,7 +400,9 @@
 		"I1.2.1": "ccd75032-efa7-4d88-94c4-cb41eaeb2de5",
 		"I1.2.2": "5eae7f03-dc70-43dc-a28e-ccdbb2e56ad6",
 		"G3": "dc4abfdf-388e-4fe9-916a-ded030ce29e6",
-		"I3.1": "55c9b850-2810-4ce9-8e5f-85bc914aa2fc"
+		"I3.1": "55c9b850-2810-4ce9-8e5f-85bc914aa2fc",
+		"G4": "71e04f6c-420a-4679-b8a2-ebab36805352",
+		"I4.1": "c3faf021-cdb4-4dd2-93e4-3951166940f3"
 	},
-	"rootMaxChildIndex": 3
+	"rootMaxChildIndex": 4
 }
