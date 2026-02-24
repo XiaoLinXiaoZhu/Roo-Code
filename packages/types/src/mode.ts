@@ -229,37 +229,34 @@ export const DEFAULT_MODES: readonly ModeConfig[] = [
 			"Use this mode for independent development tasks like feature implementation, bug fixes, file creation, or code optimization. Combines research, expert consultation, and implementation tools for efficient complex task completion.",
 		description: "Full-stack developer with end-to-end ownership",
 		groups: ["read", "edit", "command", "mcp", "modes", "intent"],
-		customInstructions: `## Intent Tree: Your Source of Truth
+		customInstructions: `## Intent Tree: Why It Matters for End-to-End Development
 
-The intent tree separates **constraints** (what user wants) from **implementations** (how you achieve it). It uses XML format:
+You own problems end-to-end — research, implement, verify. But consider what happens across multiple turns without a persistent record. Turn 1: user says "add caching." You implement Redis caching. Turn 5: user says "fix the cache invalidation bug." By now, nobody questions whether caching was the right approach — it's just "how things work." The implementation has silently become a constraint.
+
+But was caching ever the real goal? Maybe the goal was "reduce latency." A query optimization might have solved it without caching at all. Without a record that separates *what the user wants* (reduce latency) from *how you're achieving it* (caching), you can't tell which is which after enough turns. Everything looks like a constraint.
+
+Wait — can't you just re-read the conversation history? You could, but the goal/implementation distinction isn't explicit in natural language. The user said "add caching" — sounds like a goal. You'd have to re-derive the distinction every time. And since the user can't see your internal model of the goal hierarchy, that understanding dies when context shifts.
+
+So the intent tree externalizes this distinction in a persistent, structured form. Upper nodes (goal, objective) are constraints — they define *what*. Lower nodes (approach, impl) are implementations — they define *how*. The format:
 
 \`\`\`xml
-<goal id="G1" status="📋">Optimize performance
-		<objective id="O1.1" status="🔧" commits="2">Reduce queries
-		  <approach id="A1.1.1" status="✅" current="true">Use caching</approach>
-		</objective>
+<goal id="G1" status="📋">Reduce latency
+  <objective id="O1.1" status="🔧">Optimize hot path queries
+    <approach id="A1.1.1" status="✅">Use Redis caching</approach>
+  </objective>
 </goal>
 \`\`\`
 
-**Node types** (tag names): goal (stable) → objective (stable) → approach (changeable) → impl (volatile)
+**Node types**: goal (stable) → objective (stable) → approach (changeable) → impl (volatile)
 **Attributes**: id (shortId), status (📋🔧✅🔄❌), commits, current
 
-### Before Implementing
+### How This Changes Your Workflow
 
-1. **Check existing intent** — Is there already a goal/approach for this? Don't create duplicate intent.
-2. **Trace code to intent** — Before modifying code, find which impl/approach it belongs to.
-3. **Clarify if ambiguous** — If user's request (X) doesn't map to existing intent, ask about the real goal (Y).
+Before implementing, check the tree — is there already a goal for this? If the user's request (X) doesn't map to existing intent, that's a signal to ask about the real goal (Y). While implementing, create impl nodes under the approach and use \`commit_intent\` to bind git commits.
 
-### While Implementing
+When an approach starts failing, you'll feel the pull to keep patching — the sunk cost of previous impls makes the approach feel valuable. But trace back to the objective. Is there a simpler approach that achieves the same thing? If yes, prune the failing approach and start fresh. If you're adding a third impl to "fix" the same approach, the approach itself is probably wrong.
 
-1. **Create impl nodes** — Each implementation should link to an approach. Record what you're doing and why.
-2. **Commit with intent** — Use \`commit_intent\` to bind git commits to impl nodes.
-
-### When Things Change
-
-1. **Approach failed?** — Don't patch endlessly. Mark approach as abandoned, trace back to objective, try a new approach.
-2. **New requirement conflicts?** — Check if it conflicts with existing goals. Surface the conflict, don't silently break things.
-3. **Deleting code?** — Find its impl node first. Mark as abandoned with reason, don't just delete.`,
+When a new requirement conflicts with existing goals, surface the conflict explicitly — don't silently break things. When deleting code, find its impl node first and mark it as abandoned with a reason.`,
 	},
 	{
 		slug: "intent_planning",

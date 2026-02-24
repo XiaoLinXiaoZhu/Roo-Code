@@ -453,7 +453,7 @@
 			"content": "将 solo_dev 模式的 customInstructions 从声明式改为推理式",
 			"status": "planned",
 			"parentId": "293aa8fe-7667-4d43-9cdb-ebac42370cd9",
-			"childrenIds": [],
+			"childrenIds": ["da2141ea-7bdb-4ac7-8d84-7357ce7cbd06"],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
@@ -461,7 +461,8 @@
 				"action": "created"
 			},
 			"modifiedBy": [],
-			"assumption": "solo_dev 的 customInstructions 注入到 system prompt 末尾，是模型在该模式下的行为指导。当前是纯声明式 checklist，需要改为推理式。注意 spirit.ts 中 Chain 7 已经有 intent tree 的推理，这里不应重复，而应补充 Chain 7 未覆盖的实践层面。"
+			"assumption": "solo_dev 的 customInstructions 注入到 system prompt 末尾，是模型在该模式下的行为指导。当前是纯声明式 checklist，需要改为推理式。注意 spirit.ts 中 Chain 7 已经有 intent tree 的推理，这里不应重复，而应补充 Chain 7 未覆盖的实践层面。",
+			"maxChildIndex": 1
 		},
 		"fb2a6611-2a94-4b54-ab51-d6823ffe101c": {
 			"id": "fb2a6611-2a94-4b54-ab51-d6823ffe101c",
@@ -538,6 +539,65 @@
 				}
 			],
 			"assumption": "已读取当前 add_intent.ts 内容，了解声明式结构。需要保留 When to Use/When NOT to Use 骨架，将 Constraint vs Implementation、Intent drift、assumption 三个高杠杆规则改为推理片段。如果改写后 token 增加超过 30% 则需要压缩。"
+		},
+		"da2141ea-7bdb-4ac7-8d84-7357ce7cbd06": {
+			"id": "da2141ea-7bdb-4ac7-8d84-7357ce7cbd06",
+			"shortId": "A2.2.1",
+			"type": "approach",
+			"content": "采用推理片段改写 solo_dev customInstructions：从\"为什么 intent tree 对 solo_dev 模式特别重要\"推导出操作规则",
+			"status": "planned",
+			"parentId": "69856f3b-e5e6-453d-8cc1-856fb8129064",
+			"childrenIds": ["f06b8928-0ebf-4ee8-8538-3857310074a9"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:26:53.730Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "solo_dev 的 customInstructions 应该从 spirit.ts Chain 7 未覆盖的角度切入——Chain 7 回答\"为什么需要 intent tree\"，solo_dev 应回答\"在端到端开发中，何时/如何使用 intent tree\"。推理片段应从 solo_dev 特有的失败场景出发。",
+			"maxChildIndex": 1
+		},
+		"f06b8928-0ebf-4ee8-8538-3857310074a9": {
+			"id": "f06b8928-0ebf-4ee8-8538-3857310074a9",
+			"shortId": "I2.2.1.1",
+			"type": "impl",
+			"content": "改写 solo_dev customInstructions 为推理式",
+			"status": "done",
+			"parentId": "da2141ea-7bdb-4ac7-8d84-7357ce7cbd06",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "1cd0482c5a429b1a66ff0f70819ac73936c645aa",
+					"commitMessage": "[intent:I2.2.1.1] 将 solo_dev customInstructions 从声明式改为推理式：从端到端开发的失败场景推导 intent tree 使用规则",
+					"files": [".roo/intent-tree.json", "packages/types/src/mode.ts"],
+					"diffSummary": "2 file(s), +64 -23",
+					"timestamp": "2026-02-24T14:27:52.278Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+				"timestamp": "2026-02-24T14:27:01.515Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:27:09.882Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:27:52.278Z",
+					"action": "bound commit 1cd0482"
+				},
+				{
+					"taskId": "019c8ff9-b338-7516-9962-952118159aa7",
+					"timestamp": "2026-02-24T14:27:52.278Z",
+					"action": "updated: status→done"
+				}
+			],
+			"assumption": "solo_dev 当前的 customInstructions 是纯声明式 checklist。需要改为推理片段，从 solo_dev 特有的端到端开发场景出发推导规则。spirit.ts Chain 7 已覆盖\"为什么需要 intent tree\"，这里应聚焦\"在实现过程中如何使用\"。"
 		}
 	},
 	"rootIds": ["7d7be656-3aa0-4b70-8f09-6bbcfaab2135", "293aa8fe-7667-4d43-9cdb-ebac42370cd9"],
@@ -559,7 +619,9 @@
 		"O2.2": "69856f3b-e5e6-453d-8cc1-856fb8129064",
 		"O2.3": "fb2a6611-2a94-4b54-ab51-d6823ffe101c",
 		"A2.1.1": "51952735-79f7-4f61-b60a-82703cca7769",
-		"I2.1.1.1": "a7549efc-15e1-4e66-82bc-f97fe5d8e164"
+		"I2.1.1.1": "a7549efc-15e1-4e66-82bc-f97fe5d8e164",
+		"A2.2.1": "da2141ea-7bdb-4ac7-8d84-7357ce7cbd06",
+		"I2.2.1.1": "f06b8928-0ebf-4ee8-8538-3857310074a9"
 	},
 	"rootMaxChildIndex": 2
 }
