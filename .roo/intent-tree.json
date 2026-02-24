@@ -1309,16 +1309,44 @@
 			"shortId": "I10.2",
 			"type": "impl",
 			"content": "在 UpdateIntentTool 执行层过滤字符串 \"null\" 的 content，并添加对应测试",
-			"status": "planned",
+			"status": "done",
 			"parentId": "b7e812a7-c301-4116-9e5e-e02248ecba93",
 			"childrenIds": [],
-			"codeBindings": [],
+			"codeBindings": [
+				{
+					"commitHash": "374bba6a2a84dddde4c23242b329390fe74bcd71",
+					"commitMessage": "[intent:I10.2] 在 UpdateIntentTool 执行层过滤字符串 \"null\" 的 content，防止节点描述被误改为 \"null\"",
+					"files": [
+						".roo/intent-tree.json",
+						"src/core/tools/UpdateIntentTool.ts",
+						"src/core/tools/__tests__/UpdateIntentTool.spec.ts"
+					],
+					"diffSummary": "3 file(s), +34 -4",
+					"timestamp": "2026-02-24T13:35:02.183Z"
+				}
+			],
 			"createdBy": {
 				"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
 				"timestamp": "2026-02-24T13:33:42.746Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
+					"timestamp": "2026-02-24T13:34:23.603Z",
+					"action": "updated: status→in_progress"
+				},
+				{
+					"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
+					"timestamp": "2026-02-24T13:35:02.183Z",
+					"action": "bound commit 374bba6"
+				},
+				{
+					"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
+					"timestamp": "2026-02-24T13:35:02.183Z",
+					"action": "updated: status→done"
+				}
+			],
 			"assumption": "模型可能传入字符串 \"null\" 作为 content，执行层应将其视为未提供"
 		}
 	},

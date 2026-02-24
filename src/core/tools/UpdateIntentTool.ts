@@ -33,8 +33,10 @@ export class UpdateIntentTool extends BaseTool<"update_intent"> {
 				return
 			}
 
-			// P1: 与核心层校验一致，空字符串等同于未提供
-			const newContent = params.content?.trim() || undefined
+			// P1: 与核心层校验一致，空字符串和字符串 "null" 等同于未提供
+			// 模型有时会传入字符串 "null" 而非省略参数
+			const rawContent = params.content?.trim()
+			const newContent = rawContent && rawContent !== "null" ? rawContent : undefined
 			const hasValidContent = newContent !== undefined
 			const hasValidStatus = params.status !== undefined
 

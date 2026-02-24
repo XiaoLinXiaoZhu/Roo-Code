@@ -2,6 +2,13 @@
 
 ## [3.52.4] - 2026-02-24
 
+### 🐛 修复 update_intent 工具字符串 "null" 污染节点内容
+
+- **问题**：工具描述示例中使用 `content: null` 引导模型在不需要更新 content 时传入字符串 `"null"`，导致节点描述被覆盖为 "null"
+- **修复**：
+    - `update_intent.ts`：移除示例中的 `content: null` 和 `status: null`，改为省略不需要的可选参数
+    - `UpdateIntentTool.ts`：执行层过滤字符串 `"null"` 的 content，视为未提供
+
 ### 🧪 SPIRIT v5.1：重度推理模式实验
 
 基于《The Molecular Structure of Thought》论文，将系统提示词从"Soul Document"声明式模式改为重度推理模式。

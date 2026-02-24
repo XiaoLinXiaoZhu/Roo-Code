@@ -73,6 +73,28 @@ describe("UpdateIntentTool", () => {
 		expect(task.consecutiveMistakeCount).toBe(1)
 	})
 
+	test("filters string 'null' content as if not provided", async () => {
+		const task = createMockTask(tree)
+		const callbacks = createMockCallbacks()
+
+		await updateIntentTool.execute({ nodeId: "G1", status: "done", content: "null" }, task, callbacks)
+
+		// content should remain unchanged (not become "null")
+		expect(tree.getNode("G1")!.content).toBe("Goal")
+		// status should still be updated
+		const result = callbacks.pushToolResult.mock.calls[0][0]
+		expect(result).toContain('status="done"')
+	})
+
+	test("filters string 'null' content without status errors with missing fields", async () => {
+		const task = createMockTask(tree)
+		const callbacks = createMockCallbacks()
+
+		// content: "null" with no status => neither is valid => should error
+		await updateIntentTool.execute({ nodeId: "G1", content: "null" }, task, callbacks)
+		expect(task.consecutiveMistakeCount).toBe(1)
+	})
+
 	test("errors when node not found", async () => {
 		const task = createMockTask(tree)
 		const callbacks = createMockCallbacks()
