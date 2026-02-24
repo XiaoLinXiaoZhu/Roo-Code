@@ -414,7 +414,7 @@
 			"shortId": "G5",
 			"type": "goal",
 			"content": "清理工具描述中的 markdown 工具调用格式说明，并按照新的洞察优化描述模式",
-			"status": "planned",
+			"status": "done",
 			"parentId": null,
 			"childrenIds": ["cf39fd65-3dc7-4c8e-8505-14b235bd32a7", "816e2b35-d111-4a96-9ebc-67ddf0747324"],
 			"codeBindings": [],
@@ -423,7 +423,13 @@
 				"timestamp": "2026-02-24T07:56:53.955Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T07:59:50.995Z",
+					"action": "updated: content, status→done"
+				}
+			],
 			"assumption": "检查了 intent tree，G4 是关于清理 markdown 工具调用模式的残留代码（已完成），但这次是关于清理工具描述中的 markdown 格式说明文本，并优化描述模式。这是一个新的目标。",
 			"maxChildIndex": 2
 		},
@@ -432,10 +438,23 @@
 			"shortId": "I5.1",
 			"type": "impl",
 			"content": "清理 write_to_file.ts 中的 markdown 格式示例（```write_to），改为函数调用风格示例",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "a13f142e-f381-44bb-80e7-cb0e0b799cb5",
 			"childrenIds": [],
-			"codeBindings": [],
+			"codeBindings": [
+				{
+					"commitHash": "a312c7da85491ce62909e974f9555ccfa142e4f5",
+					"commitMessage": "[intent:I5.1] 清理 write_to_file 和 apply_diff 工具描述中的 markdown 格式说明，改为函数调用风格示例",
+					"files": [
+						".roo/intent-tree.json",
+						"\"docs/better-tools/\\345\\256\\236\\347\\216\\260\\346\\227\\266\\347\\232\\204patch/\\345\\267\\245\\345\\205\\267\\346\\217\\217\\350\\277\\260\\344\\274\\230\\345\\214\\2262.md\"",
+						"src/core/prompts/tools/native-tools/apply_diff.ts",
+						"src/core/prompts/tools/native-tools/write_to_file.ts"
+					],
+					"diffSummary": "4 file(s), +117 -50",
+					"timestamp": "2026-02-24T07:59:43.813Z"
+				}
+			],
 			"createdBy": {
 				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
 				"timestamp": "2026-02-24T07:56:59.996Z",
@@ -446,6 +465,16 @@
 					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
 					"timestamp": "2026-02-24T07:57:08.308Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T07:59:43.813Z",
+					"action": "bound commit a312c7d"
+				},
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T07:59:43.813Z",
+					"action": "updated: status→done"
 				}
 			],
 			"assumption": "G5 下需要具体的实现节点。需要修改 write_to_file.ts 和 apply_diff.ts 中的 markdown 格式示例，改为更自然的函数调用风格示例。execute_command.ts 和 read_file.ts 没有 markdown 格式问题但也需要检查描述质量。"
@@ -454,8 +483,8 @@
 			"id": "816e2b35-d111-4a96-9ebc-67ddf0747324",
 			"shortId": "I5.2",
 			"type": "impl",
-			"content": "清理 apply_diff.ts 中的 markdown 格式说明和示例，改为函数调用风格",
-			"status": "in_progress",
+			"content": "清理 apply_diff.ts 中的 markdown 格式说明和示例，改为函数调用风格（与 I5.1 一起完成）",
+			"status": "done",
 			"parentId": "a13f142e-f381-44bb-80e7-cb0e0b799cb5",
 			"childrenIds": [],
 			"codeBindings": [],
@@ -469,9 +498,278 @@
 					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
 					"timestamp": "2026-02-24T07:57:24.535Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T07:59:49.849Z",
+					"action": "updated: content, status→done"
 				}
 			],
 			"assumption": "apply_diff.ts 有明确的 markdown 格式说明：\"Use Markdown code block format with ```apply_diff path syntax\"，需要删除并替换为更好的描述。"
+		},
+		"0303bab4-4621-4fe2-84c6-f167dd054107": {
+			"id": "0303bab4-4621-4fe2-84c6-f167dd054107",
+			"shortId": "G6",
+			"type": "goal",
+			"content": "按照工具描述优化2文档，统一优化所有启用工具的描述模式：工具描述=能力+何时使用+fewshot，参数描述=具体含义",
+			"status": "planned",
+			"parentId": null,
+			"childrenIds": [
+				"988ee2c2-09e3-4528-8bd0-035e255ed159",
+				"218413cc-7efb-4f0a-a0e2-811de4443f31",
+				"ff791e5f-d7f2-4da7-8d92-75dfd809a881",
+				"56c991f2-3074-4d72-a288-329bcf0a02af",
+				"5fd54842-9e8d-495c-8a22-ff39996c0c29",
+				"08ab078a-e1ff-4815-ae33-307e53c983ad",
+				"7598282f-57e8-4c0e-9a87-623d3e78daea",
+				"93f61c9d-1d08-4557-b7c1-e2f0d142c4fe",
+				"cfc21333-02fa-4948-91f6-376170282f36",
+				"649c91af-90db-421e-9514-8f19219fef9c",
+				"e907b2e9-a987-444a-8fc1-5960fc224006"
+			],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T08:23:22.937Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "G5 已完成了 write_to_file 和 apply_diff 的优化。现在需要一个新目标来覆盖所有启用工具的描述优化。",
+			"maxChildIndex": 11
+		},
+		"988ee2c2-09e3-4528-8bd0-035e255ed159": {
+			"id": "988ee2c2-09e3-4528-8bd0-035e255ed159",
+			"shortId": "I6.1",
+			"type": "impl",
+			"content": "优化 read 组工具描述：codebase_search, find_definition, find_usages, read_media",
+			"status": "pruned",
+			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T08:23:29.850Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:23:41.162Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:27:40.851Z",
+					"action": "pruned: 重新规划，需要更精确地对齐启用工具列表，且需要重新设计 when-to-use + example 配对模式"
+				}
+			],
+			"assumption": "G6 下按工具分组创建 impl 节点。先处理 read 组工具。"
+		},
+		"218413cc-7efb-4f0a-a0e2-811de4443f31": {
+			"id": "218413cc-7efb-4f0a-a0e2-811de4443f31",
+			"shortId": "I6.2",
+			"type": "impl",
+			"content": "优化 edit 组工具描述：generate_image, edit（apply_diff/write_to_file 已完成）",
+			"status": "pruned",
+			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T08:23:31.642Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:27:41.302Z",
+					"action": "pruned: 同上"
+				}
+			],
+			"assumption": "G6 下 edit 组工具。apply_diff 和 write_to_file 已在 G5 优化，还需处理 generate_image 和 edit。"
+		},
+		"ff791e5f-d7f2-4da7-8d92-75dfd809a881": {
+			"id": "ff791e5f-d7f2-4da7-8d92-75dfd809a881",
+			"shortId": "I6.3",
+			"type": "impl",
+			"content": "优化 command/modes 组工具描述：execute_command, search_project, apply_edit, consult_expert, build_tool",
+			"status": "pruned",
+			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T08:23:32.648Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:27:41.949Z",
+					"action": "pruned: 同上"
+				}
+			],
+			"assumption": "G6 下 modes 组和 command 组工具。"
+		},
+		"56c991f2-3074-4d72-a288-329bcf0a02af": {
+			"id": "56c991f2-3074-4d72-a288-329bcf0a02af",
+			"shortId": "I6.4",
+			"type": "impl",
+			"content": "优化 intent 组工具描述：add_intent, update_intent, prune_intent, commit_intent, restructure_intent",
+			"status": "pruned",
+			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T08:23:33.546Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:27:42.042Z",
+					"action": "pruned: 同上"
+				}
+			],
+			"assumption": "G6 下 intent 组工具。"
+		},
+		"5fd54842-9e8d-495c-8a22-ff39996c0c29": {
+			"id": "5fd54842-9e8d-495c-8a22-ff39996c0c29",
+			"shortId": "I6.5",
+			"type": "impl",
+			"content": "优化 always available 工具描述：ask_followup_question, attempt_completion, update_todo_list, skill",
+			"status": "pruned",
+			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T08:23:34.566Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:27:42.437Z",
+					"action": "pruned: 同上"
+				}
+			],
+			"assumption": "G6 下 always available 工具。"
+		},
+		"08ab078a-e1ff-4815-ae33-307e53c983ad": {
+			"id": "08ab078a-e1ff-4815-ae33-307e53c983ad",
+			"shortId": "I6.6",
+			"type": "impl",
+			"content": "优化 read_file 工具描述（动态生成的 createReadFileTool）",
+			"status": "pruned",
+			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T08:23:36.079Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:27:43.166Z",
+					"action": "pruned: read_file 不在启用工具列表中，不需要修改"
+				}
+			],
+			"assumption": "G6 下 read_file 工具需要单独处理，因为它是动态生成的且描述极长。"
+		},
+		"7598282f-57e8-4c0e-9a87-623d3e78daea": {
+			"id": "7598282f-57e8-4c0e-9a87-623d3e78daea",
+			"shortId": "I6.7",
+			"type": "impl",
+			"content": "批次1：优化 codebase_search, find_definition, find_usages 描述",
+			"status": "in_progress",
+			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T08:28:20.270Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:28:29.327Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
+			"assumption": "G6 下重新规划。按照用户反馈，需要确保 when-to-use 和 example 紧密配对，且只修改真正启用的工具。分批处理，每批一个 commit。"
+		},
+		"93f61c9d-1d08-4557-b7c1-e2f0d142c4fe": {
+			"id": "93f61c9d-1d08-4557-b7c1-e2f0d142c4fe",
+			"shortId": "I6.8",
+			"type": "impl",
+			"content": "批次2：优化 generate_image, edit, read_media 描述",
+			"status": "planned",
+			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T08:28:21.132Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "G6 下第二批。"
+		},
+		"cfc21333-02fa-4948-91f6-376170282f36": {
+			"id": "cfc21333-02fa-4948-91f6-376170282f36",
+			"shortId": "I6.9",
+			"type": "impl",
+			"content": "批次3：优化 execute_command, search_project, apply_edit, consult_expert, build_tool 描述",
+			"status": "planned",
+			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T08:28:22.026Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "G6 下第三批。"
+		},
+		"649c91af-90db-421e-9514-8f19219fef9c": {
+			"id": "649c91af-90db-421e-9514-8f19219fef9c",
+			"shortId": "I6.10",
+			"type": "impl",
+			"content": "批次4：优化 intent 组工具描述（add_intent, update_intent, prune_intent, commit_intent, restructure_intent）",
+			"status": "planned",
+			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T08:28:23.049Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "G6 下第四批。"
+		},
+		"e907b2e9-a987-444a-8fc1-5960fc224006": {
+			"id": "e907b2e9-a987-444a-8fc1-5960fc224006",
+			"shortId": "I6.11",
+			"type": "impl",
+			"content": "批次5：优化 always available 工具描述（ask_followup_question, attempt_completion, update_todo_list, skill）",
+			"status": "planned",
+			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T08:28:24.463Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "G6 下第五批。"
 		}
 	},
 	"rootIds": [
@@ -479,7 +777,8 @@
 		"d66da17a-39a6-4c95-baf0-49dfb816c3eb",
 		"dc4abfdf-388e-4fe9-916a-ded030ce29e6",
 		"71e04f6c-420a-4679-b8a2-ebab36805352",
-		"a13f142e-f381-44bb-80e7-cb0e0b799cb5"
+		"a13f142e-f381-44bb-80e7-cb0e0b799cb5",
+		"0303bab4-4621-4fe2-84c6-f167dd054107"
 	],
 	"shortIdIndex": {
 		"G1": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
@@ -497,7 +796,19 @@
 		"I4.1": "c3faf021-cdb4-4dd2-93e4-3951166940f3",
 		"G5": "a13f142e-f381-44bb-80e7-cb0e0b799cb5",
 		"I5.1": "cf39fd65-3dc7-4c8e-8505-14b235bd32a7",
-		"I5.2": "816e2b35-d111-4a96-9ebc-67ddf0747324"
+		"I5.2": "816e2b35-d111-4a96-9ebc-67ddf0747324",
+		"G6": "0303bab4-4621-4fe2-84c6-f167dd054107",
+		"I6.1": "988ee2c2-09e3-4528-8bd0-035e255ed159",
+		"I6.2": "218413cc-7efb-4f0a-a0e2-811de4443f31",
+		"I6.3": "ff791e5f-d7f2-4da7-8d92-75dfd809a881",
+		"I6.4": "56c991f2-3074-4d72-a288-329bcf0a02af",
+		"I6.5": "5fd54842-9e8d-495c-8a22-ff39996c0c29",
+		"I6.6": "08ab078a-e1ff-4815-ae33-307e53c983ad",
+		"I6.7": "7598282f-57e8-4c0e-9a87-623d3e78daea",
+		"I6.8": "93f61c9d-1d08-4557-b7c1-e2f0d142c4fe",
+		"I6.9": "cfc21333-02fa-4948-91f6-376170282f36",
+		"I6.10": "649c91af-90db-421e-9514-8f19219fef9c",
+		"I6.11": "e907b2e9-a987-444a-8fc1-5960fc224006"
 	},
-	"rootMaxChildIndex": 5
+	"rootMaxChildIndex": 6
 }

@@ -429,8 +429,9 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 		tools: ["codebase_search", "find_definition", "find_usages", "read_media"],
 	},
 	edit: {
-		tools: ["apply_diff", "write_to_file", "generate_image"],
-		customTools: ["edit", "search_replace", "edit_file", "apply_patch"],
+		tools: ["apply_diff", "write_to_file", "generate_image", "edit"],
+		// 使用 apply-diff 不再拥有优势，将会逐渐迁移为 edit 工具，edit 工具提供了更灵活的编辑方式，支持单次替换和全局替换，并且在模型需要进行复杂编辑时更容易使用。未来会逐渐迁移到 edit 工具，并最终废弃 apply_diff。
+		// customTools: ["edit", "search_replace", "edit_file", "apply_patch"],
 	},
 	command: {
 		// 移除了  "read_command_output" ，因为 read_command_output 的功能其实可以用 grep/sed + 文件重定向替代。
@@ -447,7 +448,7 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 		alwaysAvailable: true,
 	},
 	intent: {
-		// 意图树工具 - 仅在 solo_dev 模式下可用
+		// 意图树工具 - 仅在 solo_dev 和 intent_planing 模式下可用
 		tools: ["add_intent", "update_intent", "prune_intent", "commit_intent", "restructure_intent"],
 	},
 }
@@ -461,11 +462,6 @@ export const ALWAYS_AVAILABLE_TOOLS: ToolName[] = [
 	"update_todo_list",
 	// "run_slash_command",
 	"skill",
-	// Agent as Tools 架构的新工具 - 在所有模式下都可用
-	// "search_project",
-	// "apply_edit",
-	// "consult_expert",
-	// 意图树工具已移至 intent 组，仅在 solo_dev 模式下可用
 ] as const
 
 /**
