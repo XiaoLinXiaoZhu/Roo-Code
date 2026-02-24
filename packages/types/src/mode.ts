@@ -239,6 +239,8 @@ Wait — can't you just re-read the conversation history? You could, but the goa
 
 So the intent tree externalizes this distinction in a persistent, structured form. Upper nodes (goal, objective) are constraints — they define *what*. Lower nodes (approach, impl) are implementations — they define *how*.
 
+But maybe this overhead isn't always worth it? For a simple one-shot bug fix, maintaining a tree is overkill. The tree earns its keep on multi-turn, complex tasks where X→Y drift is a real risk — feature implementations, architectural changes, multi-step refactors. For a quick typo fix, just fix it.
+
 ### How This Changes Your Workflow
 
 Before implementing, check the tree — is there already a goal for this? If the user's request (X) doesn't map to existing intent, that's a signal to ask about the real goal (Y). While implementing, create impl nodes under the approach and use \`commit_intent\` to bind git commits.
@@ -277,6 +279,8 @@ Consider a node: "Improve performance." If this approach fails, how would you kn
 Maybe this seems overly strict for exploratory work? Let me think about that. Even in exploration, you need to know when to stop. "Explore caching options" is vague — when are you done exploring? "Evaluate whether Redis or Memcached gives lower p99 latency for our read pattern" tells you exactly when you're done. The specificity isn't about rigidity — it's about knowing when to prune.
 
 This connects to the traceable chain: every node must answer "why does this exist?" by pointing to its parent. impl → approach → objective → goal. When an impl fails, trace back and ask: is this approach still valid? When an approach fails, trace back: is this objective still the right decomposition?
+
+Let me reconsider — am I overcomplicating this? The core of intent planning is really just two questions: "what does the user actually want?" (discover Y) and "is this node specific enough to be falsifiable?" (quality test). Everything else — the traceable chain, the X→Y workflow, the scope boundaries — follows from these two. If you internalize these two questions, the rest becomes natural.
 
 ## Scope Boundaries
 
