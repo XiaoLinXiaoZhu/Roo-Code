@@ -88,6 +88,7 @@ export class CommitIntentTool extends BaseTool<"commit_intent"> {
 				return
 			}
 
+			// Step 1: 先提交代码变更（intent-tree.json 可能包含旧状态）
 			const commitResult = await git.commit(commitMessage)
 			const commitHash = commitResult.commit || ""
 
@@ -122,9 +123,18 @@ export class CommitIntentTool extends BaseTool<"commit_intent"> {
 				targetNode = result.node
 			}
 
+			// Step 2: 更新 intent tree 数据并保存到文件
 			task.intentTree.bindCode(targetNode.shortId, binding, task.taskId)
 			task.intentTree.updateNode(targetNode.shortId, { status: "done" }, task.taskId)
 			await task.intentTree.save()
+
+			// Step 3: 将更新后的 intent-tree.json 追加到同一个 commit（amend）
+			try {
+				await git.add([".roo/intent-tree.json"])
+				await git.commit(commitMessage, { "--amend": null, "--no-edit": null })
+			} catch {
+				// amend 失败不影响主流程，intent-tree.json 会在下次 commit 中包含
+			}
 
 			// 标记 intent-tree 已更新（minor：绑定 commit + 状态变更，工具返回已足够说明）
 			task.intentTreeUpdated = "minor"

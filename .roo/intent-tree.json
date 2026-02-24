@@ -511,8 +511,8 @@
 			"id": "0303bab4-4621-4fe2-84c6-f167dd054107",
 			"shortId": "G6",
 			"type": "goal",
-			"content": "按照工具描述优化2文档，统一优化所有启用工具的描述模式：工具描述=能力+何时使用+fewshot，参数描述=具体含义",
-			"status": "planned",
+			"content": "按照工具描述优化2文档，统一优化所有启用工具的描述模式",
+			"status": "done",
 			"parentId": null,
 			"childrenIds": [
 				"988ee2c2-09e3-4528-8bd0-035e255ed159",
@@ -533,7 +533,13 @@
 				"timestamp": "2026-02-24T08:23:22.937Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:36:24.103Z",
+					"action": "updated: content, status→done"
+				}
+			],
 			"assumption": "G5 已完成了 write_to_file 和 apply_diff 的优化。现在需要一个新目标来覆盖所有启用工具的描述优化。",
 			"maxChildIndex": 11
 		},
@@ -868,10 +874,24 @@
 			"shortId": "I6.11",
 			"type": "impl",
 			"content": "批次5：优化 always available 工具描述（ask_followup_question, attempt_completion, update_todo_list, skill）",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
 			"childrenIds": [],
-			"codeBindings": [],
+			"codeBindings": [
+				{
+					"commitHash": "28358c260c338cc732ff7f76cb15f24094a2c9a3",
+					"commitMessage": "[intent:I6.11] 优化 always available 工具描述：ask_followup_question, attempt_completion, update_todo_list, skill 统一 when-to-use+example 配对",
+					"files": [
+						".roo/intent-tree.json",
+						"src/core/prompts/tools/native-tools/ask_followup_question.ts",
+						"src/core/prompts/tools/native-tools/attempt_completion.ts",
+						"src/core/prompts/tools/native-tools/skill.ts",
+						"src/core/prompts/tools/native-tools/update_todo_list.ts"
+					],
+					"diffSummary": "5 file(s), +48 -90",
+					"timestamp": "2026-02-24T08:36:17.484Z"
+				}
+			],
 			"createdBy": {
 				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
 				"timestamp": "2026-02-24T08:28:24.463Z",
@@ -882,9 +902,78 @@
 					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
 					"timestamp": "2026-02-24T08:34:59.615Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:36:17.484Z",
+					"action": "bound commit 28358c2"
+				},
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:36:17.484Z",
+					"action": "updated: status→done"
 				}
 			],
 			"assumption": "G6 下第五批。"
+		},
+		"27344780-0d11-4174-ada4-18385cf88129": {
+			"id": "27344780-0d11-4174-ada4-18385cf88129",
+			"shortId": "G7",
+			"type": "goal",
+			"content": "修复 commit_intent 执行顺序：先更新 intent-tree.json 再 git commit，避免每次 commit 后残留 dirty intent-tree.json",
+			"status": "planned",
+			"parentId": null,
+			"childrenIds": ["2da7f344-e599-4236-8d9b-141621e48037"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T08:40:19.838Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "这是一个新的独立目标，与 G6 工具描述优化无关。问题是 commit_intent 的执行顺序导致每次 commit 后 intent-tree.json 都是 dirty 的。",
+			"maxChildIndex": 1
+		},
+		"2da7f344-e599-4236-8d9b-141621e48037": {
+			"id": "2da7f344-e599-4236-8d9b-141621e48037",
+			"shortId": "A7.1",
+			"type": "approach",
+			"content": "方案：先 commit 代码变更（不含 intent-tree.json），再更新 intent-tree.json，最后 git add intent-tree.json && git commit --amend",
+			"status": "planned",
+			"parentId": "27344780-0d11-4174-ada4-18385cf88129",
+			"childrenIds": ["6b663bdb-ab18-4a8f-ab87-e6da3dfdc1af"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T08:40:30.095Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "G7 下的实现。需要重排 CommitIntentTool.execute() 中的操作顺序：先 bindCode+updateNode+save，再 git add+commit。但有个问题：commit hash 在 commit 之前不知道，而 bindCode 需要 commitHash。需要分两步：先用占位 hash 保存，commit 后再更新 hash 并 amend；或者先 commit 代码，再更新 intent-tree.json 并 amend commit。",
+			"maxChildIndex": 1
+		},
+		"6b663bdb-ab18-4a8f-ab87-e6da3dfdc1af": {
+			"id": "6b663bdb-ab18-4a8f-ab87-e6da3dfdc1af",
+			"shortId": "I7.1.1",
+			"type": "impl",
+			"content": "重排 CommitIntentTool.execute() 执行顺序",
+			"status": "in_progress",
+			"parentId": "2da7f344-e599-4236-8d9b-141621e48037",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+				"timestamp": "2026-02-24T08:40:37.291Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:40:45.007Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
+			"assumption": "A7.1 下的具体实现。修改 CommitIntentTool.execute() 的执行顺序。"
 		}
 	},
 	"rootIds": [
@@ -893,7 +982,8 @@
 		"dc4abfdf-388e-4fe9-916a-ded030ce29e6",
 		"71e04f6c-420a-4679-b8a2-ebab36805352",
 		"a13f142e-f381-44bb-80e7-cb0e0b799cb5",
-		"0303bab4-4621-4fe2-84c6-f167dd054107"
+		"0303bab4-4621-4fe2-84c6-f167dd054107",
+		"27344780-0d11-4174-ada4-18385cf88129"
 	],
 	"shortIdIndex": {
 		"G1": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
@@ -923,7 +1013,10 @@
 		"I6.8": "93f61c9d-1d08-4557-b7c1-e2f0d142c4fe",
 		"I6.9": "cfc21333-02fa-4948-91f6-376170282f36",
 		"I6.10": "649c91af-90db-421e-9514-8f19219fef9c",
-		"I6.11": "e907b2e9-a987-444a-8fc1-5960fc224006"
+		"I6.11": "e907b2e9-a987-444a-8fc1-5960fc224006",
+		"G7": "27344780-0d11-4174-ada4-18385cf88129",
+		"A7.1": "2da7f344-e599-4236-8d9b-141621e48037",
+		"I7.1.1": "6b663bdb-ab18-4a8f-ab87-e6da3dfdc1af"
 	},
-	"rootMaxChildIndex": 6
+	"rootMaxChildIndex": 7
 }
