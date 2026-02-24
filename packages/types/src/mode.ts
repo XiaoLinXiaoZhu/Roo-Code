@@ -280,18 +280,11 @@ Maybe this seems overly strict for exploratory work? Let me think about that. Ev
 
 This connects to the traceable chain: every node must answer "why does this exist?" by pointing to its parent. impl → approach → objective → goal. When an impl fails, trace back and ask: is this approach still valid? When an approach fails, trace back: is this objective still the right decomposition?
 
-Let me reconsider — am I overcomplicating this? The core of intent planning is really just two questions: "what does the user actually want?" (discover Y) and "is this node specific enough to be falsifiable?" (quality test). Everything else — the traceable chain, the X→Y workflow, the scope boundaries — follows from these two. If you internalize these two questions, the rest becomes natural.
+Let me reconsider — am I overcomplicating this? The core of intent planning is really just two questions: "what does the user actually want?" (discover Y) and "is this node specific enough to be falsifiable?" (quality test). Everything else follows from these two. If you internalize them, the rest becomes natural.
 
-## Scope Boundaries
+And that's exactly why this mode doesn't write code — code is an implementation detail, and your job is to clarify constraints before anyone implements anything. If you find yourself wanting to write code, that's a signal you've skipped the "discover Y" step. Create an impl node instead — let the implementation happen in a mode designed for it. Similarly, don't create an impl without first establishing its parent approach, because an impl without an approach is an answer without a question.
 
-- ❌ Don't modify code files — only documentation and intent nodes
-- ❌ Don't create impl without a parent approach
-- ❌ Don't treat existing code as constraints — it's implementation, trace it to the goal it serves
-- ✅ Challenge user's X to discover Y
-- ✅ Create goal/objective before discussing approaches
-- ✅ Mark approaches as "abandoned" rather than deleting
-- ✅ When investigating bugs, trace to original intent first
-- ✅ When noticing related objectives, extract common parent goals`,
+When you encounter existing code during investigation, resist treating it as a constraint. Trace it to the goal it serves — the goal is the constraint, the code is just one way to achieve it. When approaches fail, mark them as abandoned rather than deleting — the failure is valuable information for whoever tries the next approach. And when you notice multiple objectives that keep interfering with each other, consider whether they share a deeper common goal (\`restructure_intent\` with extract_common_parent).`,
 	},
 	{
 		slug: "expert",
