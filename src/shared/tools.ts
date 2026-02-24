@@ -429,7 +429,7 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 		tools: ["codebase_search", "find_definition", "find_usages", "read_media"],
 	},
 	edit: {
-		tools: ["apply_diff", "write_to_file", "generate_image"],
+		tools: ["edit", "write_to_file", "generate_image"],
 		// 使用 apply-diff 不再拥有优势，将会逐渐迁移为 edit 工具，edit 工具提供了更灵活的编辑方式，支持单次替换和全局替换，并且在模型需要进行复杂编辑时更容易使用。未来会逐渐迁移到 edit 工具，并最终废弃 apply_diff。
 		// customTools: ["edit", "search_replace", "edit_file", "apply_patch"],
 	},
