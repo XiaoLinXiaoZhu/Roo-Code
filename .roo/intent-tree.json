@@ -827,10 +827,25 @@
 			"shortId": "I6.10",
 			"type": "impl",
 			"content": "批次4：优化 intent 组工具描述",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
 			"childrenIds": [],
-			"codeBindings": [],
+			"codeBindings": [
+				{
+					"commitHash": "ac1933f18de9dd28a439df91fcf4c37dcef644ca",
+					"commitMessage": "[intent:I6.10] 优化 intent 组工具描述：精简 add_intent 教学内容，所有工具统一 when-to-use+example 配对模式",
+					"files": [
+						".roo/intent-tree.json",
+						"src/core/prompts/tools/native-tools/add_intent.ts",
+						"src/core/prompts/tools/native-tools/commit_intent.ts",
+						"src/core/prompts/tools/native-tools/prune_intent.ts",
+						"src/core/prompts/tools/native-tools/restructure_intent.ts",
+						"src/core/prompts/tools/native-tools/update_intent.ts"
+					],
+					"diffSummary": "6 file(s), +85 -121",
+					"timestamp": "2026-02-24T08:33:00.133Z"
+				}
+			],
 			"createdBy": {
 				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
 				"timestamp": "2026-02-24T08:28:23.049Z",
@@ -841,6 +856,16 @@
 					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
 					"timestamp": "2026-02-24T08:31:50.343Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:33:00.133Z",
+					"action": "bound commit ac1933f"
+				},
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:33:00.133Z",
+					"action": "updated: status→done"
 				}
 			],
 			"assumption": "G6 下第四批。"
