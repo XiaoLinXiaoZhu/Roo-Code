@@ -25,14 +25,15 @@
 		"sharingDisabledByOrganization": "Compartir deshabilitado por la organización",
 		"shareSuccessOrganization": "Enlace de organización copiado al portapapeles",
 		"shareSuccessPublic": "Enlace público copiado al portapapeles",
-		"openInCloud": "Abrir tarea en Roo Code Cloud",
-		"openInCloudIntro": "Continúa monitoreando o interactuando con Roo desde cualquier lugar. Escanea, haz clic o copia para abrir.",
 		"openApiHistory": "Abrir historial de API",
 		"openUiHistory": "Abrir historial de UI",
 		"backToParentTask": "Tarea principal"
 	},
 	"unpin": "Desfijar",
 	"pin": "Fijar",
+	"fileChangesInConversation": {
+		"header": "{{count}} archivo(s) modificado(s) en esta conversación"
+	},
 	"retry": {
 		"title": "Reintentar",
 		"tooltip": "Intenta la operación de nuevo"
@@ -347,8 +348,9 @@
 		},
 		"release": {
 			"heading": "Qué hay de nuevo:",
-			"claudeOpus": "Claude Opus 4.6: Ahora disponible en todos los proveedores—Roo Code Router, Anthropic, AWS Bedrock, Google Vertex y OpenRouter—trayendo el modelo más capaz de Anthropic a tu plataforma preferida.",
-			"gptCodex": "GPT-5.3-Codex: El último modelo de codificación de OpenAI ahora es compatible con el proveedor OpenAI - ChatGPT, ofreciendo generación de código de vanguardia y comprensión."
+			"geminiPro": "Soporte para Gemini 3.1 Pro: Se añadió soporte para el modelo Gemini 3.1 Pro y se estableció como modelo Gemini predeterminado para un mejor rendimiento.",
+			"cliNdjson": "Protocolo NDJSON del CLI: Nuevo protocolo NDJSON por stdin, subcomandos de listado y comando de ejecución modularizado para flujos de trabajo CLI más flexibles.",
+			"cliRelease": "CLI v0.1.0: El CLI de Roo Code alcanza su primera versión oficial con una interfaz de comandos estable."
 		},
 		"cloudAgents": {
 			"heading": "Novedades en la Nube:",
@@ -424,7 +426,8 @@
 		"indexing": "Indexando {{percentage}}%",
 		"indexed": "Indexado",
 		"error": "Error de índice",
-		"status": "Estado del índice"
+		"status": "Estado del índice",
+		"stopping": "Deteniendo la indexación..."
 	},
 	"versionIndicator": {
 		"ariaLabel": "Versión {{version}} - Haz clic para ver las notas de la versión"

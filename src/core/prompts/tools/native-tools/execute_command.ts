@@ -25,7 +25,9 @@ const COMMAND_PARAMETER_DESCRIPTION = `The CLI command to execute.
 - Execute complex commands directly, don't create scripts
 - Use pipes: \`grep pattern | head -20\``
 
-const CWD_PARAMETER_DESCRIPTION = `Working directory for the command (relative or absolute). Default: workspace root.`
+const CWD_PARAMETER_DESCRIPTION = `Optional working directory for the command, relative or absolute`
+
+const TIMEOUT_PARAMETER_DESCRIPTION = `Timeout in seconds. When exceeded, the command continues running in the background and output collected so far is returned. Use this for long-running processes like dev servers, file watchers, or any command that may not exit on its own`
 
 export default {
 	type: "function",
@@ -44,8 +46,12 @@ export default {
 					type: ["string", "null"],
 					description: CWD_PARAMETER_DESCRIPTION,
 				},
+				timeout: {
+					type: ["number", "null"],
+					description: TIMEOUT_PARAMETER_DESCRIPTION,
+				},
 			},
-			required: ["command", "cwd"],
+			required: ["command", "cwd", "timeout"],
 			additionalProperties: false,
 		},
 	},

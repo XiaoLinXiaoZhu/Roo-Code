@@ -43,22 +43,6 @@ export async function getEnvironmentDetails(
 	const messageCount = cline.apiConversationHistory.length
 	let xmlContent = ""
 
-	// ============================================================================
-	// Tool Results Section
-	// ============================================================================
-	if (cline.markdownToolResults && cline.markdownToolResults.length > 0) {
-		xmlContent += "\n  <tool_results>"
-		for (const result of cline.markdownToolResults) {
-			const status = result.status === "success" ? "success" : "error"
-			const pathAttr = result.path ? ` path="${escapeXml(result.path)}"` : ""
-			const messageAttr = result.message ? ` message="${escapeXml(result.message)}"` : ""
-			xmlContent += `\n    <result tool="${escapeXml(result.toolName)}"${pathAttr} status="${status}"${messageAttr}/>`
-		}
-		xmlContent += "\n  </tool_results>"
-		// Clear the results after including them
-		cline.clearMarkdownToolResults()
-	}
-
 	const clineProvider = cline.providerRef.deref()
 	const state = await clineProvider?.getState()
 	const { maxWorkspaceFiles = 200 } = state ?? {}

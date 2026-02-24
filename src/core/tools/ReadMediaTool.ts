@@ -2,7 +2,9 @@ import path from "path"
 import * as fs from "fs/promises"
 
 import type { ClineSayTool } from "@roo-code/types"
-import type { TextPart, ImagePart } from "../task-persistence/rooMessage"
+// Inline type definitions (previously from rooMessage, removed after AI-SDK revert)
+type TextPart = { type: "text"; text: string }
+type ImagePart = { type: "image"; image: string; mediaType: string }
 
 import { Task } from "../task/Task"
 import { isPathOutsideWorkspace } from "../../utils/pathUtils"
@@ -324,7 +326,7 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 			if (mediaBlocks.length > 0) {
 				const textPart: TextPart = { type: "text", text: xmlLines.join("\n") }
 				const response: Array<TextPart | ImagePart> = [textPart, ...(mediaBlocks as ImagePart[])]
-				pushToolResult(response)
+				pushToolResult(response as any)
 			} else {
 				pushToolResult(xmlLines.join("\n"))
 			}

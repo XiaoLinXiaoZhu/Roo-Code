@@ -1,8 +1,8 @@
-import type { TextPart, ImagePart } from "../core/task-persistence/rooMessage"
+import { Anthropic } from "@anthropic-ai/sdk"
 
 import type { ClineAsk, ToolProgressStatus, ToolGroup, ToolName, GenerateImageParams } from "@roo-code/types"
 
-export type ToolResponse = string | Array<TextPart | ImagePart>
+export type ToolResponse = string | Array<Anthropic.TextBlockParam | Anthropic.ImageBlockParam>
 
 export type AskApproval = (
 	type: ClineAsk,
@@ -78,6 +78,7 @@ export const toolParamNames = [
 	"topic", // consult_expert required parameter
 	"attachments", // consult_expert optional parameter
 	"consultType", // consult_expert required parameter
+	"timeout", // execute_command parameter
 	"artifact_id", // read_command_output parameter
 	"search", // read_command_output parameter for grep-like search
 	"offset", // read_command_output and read_file parameter
@@ -121,7 +122,7 @@ export type NativeToolArgs = {
 	read_media: { path: string; focusX?: number; focusY?: number; scale?: number }
 	read_command_output: { artifact_id: string; search?: string; offset?: number; limit?: number }
 	attempt_completion: { result: string }
-	execute_command: { command: string; cwd?: string }
+	execute_command: { command: string; cwd?: string; timeout?: number | null }
 	apply_diff: { path: string; diff: string }
 	edit: { file_path: string; old_string: string; new_string: string; replace_all?: boolean }
 	search_and_replace: { file_path: string; old_string: string; new_string: string; replace_all?: boolean }
@@ -138,7 +139,7 @@ export type NativeToolArgs = {
 	codebase_search: { query: string; path?: string }
 	generate_image: GenerateImageParams
 	run_slash_command: { command: string; args?: string }
-	skill: { skill: string; args?: string | null }
+	skill: { skill: string; args?: string }
 	search_files: { path: string; regex: string; file_pattern?: string | null }
 	update_todo_list: { todos: string }
 	use_mcp_tool: { server_name: string; tool_name: string; arguments?: Record<string, unknown> }
@@ -274,7 +275,7 @@ export interface McpToolUse {
 export interface ExecuteCommandToolUse extends ToolUse<"execute_command"> {
 	name: "execute_command"
 	// Pick<Record<ToolParamName, string>, "command"> makes "command" required, but Partial<> makes it optional
-	params: Partial<Pick<Record<ToolParamName, string>, "command" | "cwd">>
+	params: Partial<Pick<Record<ToolParamName, string>, "command" | "cwd" | "timeout">>
 }
 
 export interface ReadFileToolUse extends ToolUse<"read_file"> {

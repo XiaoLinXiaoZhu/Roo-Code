@@ -185,7 +185,6 @@ vi.mock("../../task/Task", () => ({
 	Task: vi.fn().mockImplementation((options: any) => ({
 		api: undefined,
 		abortTask: vi.fn(),
-		resumeAfterDelegation: vi.fn().mockResolvedValue(undefined),
 		handleWebviewAskResponse: vi.fn(),
 		clineMessages: [],
 		apiConversationHistory: [],
@@ -302,9 +301,6 @@ vi.mock("@roo-code/cloud", () => ({
 			}
 		},
 	},
-	BridgeOrchestrator: {
-		isEnabled: vi.fn().mockReturnValue(false),
-	},
 	getRooCodeApiUrl: vi.fn().mockReturnValue("https://app.roocode.com"),
 }))
 
@@ -318,7 +314,6 @@ describe("ClineProvider", () => {
 			const task: any = {
 				api: undefined,
 				abortTask: vi.fn(),
-				resumeAfterDelegation: vi.fn().mockResolvedValue(undefined),
 				handleWebviewAskResponse: vi.fn(),
 				clineMessages: [],
 				apiConversationHistory: [],
@@ -556,9 +551,7 @@ describe("ClineProvider", () => {
 			diagnosticsEnabled: true,
 			openRouterImageApiKey: undefined,
 			openRouterImageGenerationSelectedModel: undefined,
-			remoteControlEnabled: false,
 			taskSyncEnabled: false,
-			featureRoomoteControlEnabled: false,
 			checkpointTimeout: DEFAULT_CHECKPOINT_TIMEOUT_SECONDS,
 		}
 
@@ -1172,7 +1165,7 @@ describe("ClineProvider", () => {
 			// Setup Task instance with auto-mock from the top of the file
 			const mockCline = new Task(defaultTaskOptions) // Create a new mocked instance
 			mockCline.clineMessages = mockMessages // Set test-specific messages
-			mockCline.apiConversationHistory = mockApiHistory as any // Set API history
+			mockCline.apiConversationHistory = mockApiHistory // Set API history
 			await provider.addClineToStack(mockCline) // Add the mocked instance to the stack
 
 			// Mock getTaskWithId
@@ -1260,7 +1253,7 @@ describe("ClineProvider", () => {
 			// Setup Task instance with auto-mock from the top of the file
 			const mockCline = new Task(defaultTaskOptions) // Create a new mocked instance
 			mockCline.clineMessages = mockMessages // Set test-specific messages
-			mockCline.apiConversationHistory = mockApiHistory as any // Set API history
+			mockCline.apiConversationHistory = mockApiHistory // Set API history
 
 			// Explicitly mock the overwrite methods since they're not being called in the tests
 			mockCline.overwriteClineMessages = vi.fn()
@@ -2475,6 +2468,7 @@ describe("ClineProvider - Router Models", () => {
 		// Verify getModels was called for each provider with correct options
 		expect(getModels).toHaveBeenCalledWith({ provider: "openrouter" })
 		expect(getModels).toHaveBeenCalledWith({ provider: "requesty", apiKey: "requesty-key" })
+		expect(getModels).toHaveBeenCalledWith({ provider: "unbound" })
 		expect(getModels).toHaveBeenCalledWith({ provider: "vercel-ai-gateway" })
 		expect(getModels).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -2494,6 +2488,7 @@ describe("ClineProvider - Router Models", () => {
 			routerModels: {
 				openrouter: mockModels,
 				requesty: mockModels,
+				unbound: mockModels,
 				roo: mockModels,
 				litellm: mockModels,
 				ollama: {},
@@ -2526,6 +2521,7 @@ describe("ClineProvider - Router Models", () => {
 		vi.mocked(getModels)
 			.mockResolvedValueOnce(mockModels) // openrouter success
 			.mockRejectedValueOnce(new Error("Requesty API error")) // requesty fail
+			.mockResolvedValueOnce(mockModels) // unbound success
 			.mockResolvedValueOnce(mockModels) // vercel-ai-gateway success
 			.mockResolvedValueOnce(mockModels) // roo success
 			.mockRejectedValueOnce(new Error("LiteLLM connection failed")) // litellm fail
@@ -2538,6 +2534,7 @@ describe("ClineProvider - Router Models", () => {
 			routerModels: {
 				openrouter: mockModels,
 				requesty: {},
+				unbound: mockModels,
 				roo: mockModels,
 				ollama: {},
 				lmstudio: {},
@@ -2631,6 +2628,7 @@ describe("ClineProvider - Router Models", () => {
 			routerModels: {
 				openrouter: mockModels,
 				requesty: mockModels,
+				unbound: mockModels,
 				roo: mockModels,
 				litellm: {},
 				ollama: {},
@@ -3671,150 +3669,6 @@ describe("ClineProvider - Comprehensive Edit/Delete Edge Cases", () => {
 
 			// Restore the spy
 			vi.mocked(fsUtils.fileExistsAtPath).mockRestore()
-		})
-
-		it("reads v2 envelope format via readRooMessages", async () => {
-			const historyItem = { id: "v2-envelope-task", task: "test task", ts: Date.now() }
-			vi.mocked(mockContext.globalState.get).mockImplementation((key: string) => {
-				if (key === "taskHistory") {
-					return [historyItem]
-				}
-				return undefined
-			})
-
-			const fsUtils = await import("../../../utils/fs")
-			vi.spyOn(fsUtils, "fileExistsAtPath").mockResolvedValue(true)
-
-			const fsp = await import("fs/promises")
-			// First readFile call is consumed by readDelegationMeta (delegation_metadata.json)
-			vi.mocked(fsp.readFile).mockResolvedValueOnce("null" as never)
-			// Second readFile call is consumed by readRooMessages (api_conversation_history.json)
-			vi.mocked(fsp.readFile).mockResolvedValueOnce(
-				JSON.stringify({
-					version: 2,
-					messages: [{ role: "user", content: "hello from v2" }],
-				}) as never,
-			)
-
-			const result = await (provider as any).getTaskWithId("v2-envelope-task")
-
-			expect(result.historyItem).toEqual(historyItem)
-			expect(result.apiConversationHistory).toEqual([{ role: "user", content: "hello from v2" }])
-
-			vi.mocked(fsUtils.fileExistsAtPath).mockRestore()
-		})
-	})
-
-	describe("reopenParentFromDelegation", () => {
-		it("reads/writes Roo messages and appends a tool result for new_task tool-call", async () => {
-			const parentTaskId = "parent-task"
-			const childTaskId = "child-task"
-			const completionResultSummary = "child completed work"
-
-			vi.spyOn(provider, "getTaskWithId").mockImplementation(async (taskId: string) => {
-				if (taskId === parentTaskId) {
-					return {
-						historyItem: { id: parentTaskId, childIds: [] },
-					} as any
-				}
-				return {
-					historyItem: { id: childTaskId, status: "active" },
-				} as any
-			})
-
-			vi.spyOn(provider, "getCurrentTask").mockReturnValue(undefined as any)
-			vi.spyOn(provider, "updateTaskHistory").mockResolvedValue(undefined as any)
-
-			const taskMessages = await import("../../task-persistence/taskMessages")
-			vi.spyOn(taskMessages, "readTaskMessages").mockResolvedValue([])
-			vi.spyOn(taskMessages, "saveTaskMessages").mockResolvedValue(undefined)
-
-			const persistence = await import("../../task-persistence")
-			vi.spyOn(persistence, "readRooMessages").mockResolvedValue([
-				{
-					role: "assistant",
-					content: [{ type: "tool-call", toolCallId: "call_new_task_1", toolName: "new_task", input: {} }],
-					ts: 1,
-				},
-				{ role: "user", content: [{ type: "text", text: "continuation" }], ts: 2 },
-			] as any)
-			const saveRooMessagesSpy = vi.spyOn(persistence, "saveRooMessages").mockResolvedValue(true)
-
-			await provider.reopenParentFromDelegation({ parentTaskId, childTaskId, completionResultSummary })
-
-			expect(persistence.readRooMessages).toHaveBeenCalledWith({
-				taskId: parentTaskId,
-				globalStoragePath: "/test/storage/path",
-			})
-			expect(saveRooMessagesSpy).toHaveBeenCalledTimes(1)
-
-			const savedPayload = saveRooMessagesSpy.mock.calls[0][0]
-			expect(savedPayload.taskId).toBe(parentTaskId)
-			expect(savedPayload.globalStoragePath).toBe("/test/storage/path")
-			expect(savedPayload.messages).toHaveLength(3)
-			const last = savedPayload.messages[2] as any
-			expect(last.role).toBe("tool")
-			expect(last.content[0]).toMatchObject({
-				type: "tool-result",
-				toolCallId: "call_new_task_1",
-				toolName: "new_task",
-			})
-			expect(last.content[0].output.value).toContain(completionResultSummary)
-		})
-
-		it("updates existing trailing tool result instead of appending a duplicate", async () => {
-			const parentTaskId = "parent-task"
-			const childTaskId = "child-task"
-			const completionResultSummary = "updated child summary"
-
-			vi.spyOn(provider, "getTaskWithId").mockImplementation(async (taskId: string) => {
-				if (taskId === parentTaskId) {
-					return {
-						historyItem: { id: parentTaskId, childIds: [] },
-					} as any
-				}
-				return {
-					historyItem: { id: childTaskId, status: "active" },
-				} as any
-			})
-
-			vi.spyOn(provider, "getCurrentTask").mockReturnValue(undefined as any)
-			vi.spyOn(provider, "updateTaskHistory").mockResolvedValue(undefined as any)
-
-			const taskMessages = await import("../../task-persistence/taskMessages")
-			vi.spyOn(taskMessages, "readTaskMessages").mockResolvedValue([])
-			vi.spyOn(taskMessages, "saveTaskMessages").mockResolvedValue(undefined)
-
-			const persistence = await import("../../task-persistence")
-			vi.spyOn(persistence, "readRooMessages").mockResolvedValue([
-				{
-					role: "assistant",
-					content: [{ type: "tool-call", toolCallId: "call_new_task_2", toolName: "new_task", input: {} }],
-					ts: 1,
-				},
-				{
-					role: "tool",
-					content: [
-						{
-							type: "tool-result",
-							toolCallId: "call_new_task_2",
-							toolName: "new_task",
-							output: { type: "text", value: "old summary" },
-						},
-					],
-					ts: 2,
-				},
-			] as any)
-			const saveRooMessagesSpy = vi.spyOn(persistence, "saveRooMessages").mockResolvedValue(true)
-
-			await provider.reopenParentFromDelegation({ parentTaskId, childTaskId, completionResultSummary })
-
-			const savedPayload = saveRooMessagesSpy.mock.calls[0][0]
-			expect(savedPayload.messages).toHaveLength(2)
-			const last = savedPayload.messages[1] as any
-			expect(last.role).toBe("tool")
-			expect(last.content[0].toolCallId).toBe("call_new_task_2")
-			expect(last.content[0].output.value).toContain(completionResultSummary)
 		})
 	})
 })

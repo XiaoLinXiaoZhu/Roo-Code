@@ -34,7 +34,7 @@ export const DEFAULT_CONSECUTIVE_MISTAKE_LIMIT = 3
  * Dynamic provider requires external API calls in order to get the model list.
  */
 
-export const dynamicProviders = ["openrouter", "vercel-ai-gateway", "litellm", "requesty", "roo"] as const
+export const dynamicProviders = ["openrouter", "vercel-ai-gateway", "litellm", "requesty", "roo", "unbound"] as const
 
 export type DynamicProvider = (typeof dynamicProviders)[number]
 
@@ -103,7 +103,6 @@ export const providerNames = [
 	...customProviders,
 	...fauxProviders,
 	"anthropic",
-	"azure",
 	"bedrock",
 	"baseten",
 	"deepseek",
@@ -143,7 +142,6 @@ export const retiredProviderNames = [
 	"groq",
 	"huggingface",
 	"io-intelligence",
-	"unbound",
 ] as const
 
 export const retiredProviderNamesSchema = z.enum(retiredProviderNames)
@@ -328,6 +326,11 @@ const requestySchema = baseProviderSettingsSchema.extend({
 	requestyModelId: z.string().optional(),
 })
 
+const unboundSchema = baseProviderSettingsSchema.extend({
+	unboundApiKey: z.string().optional(),
+	unboundModelId: z.string().optional(),
+})
+
 const fakeAiSchema = baseProviderSettingsSchema.extend({
 	fakeAi: z.unknown().optional(),
 })
@@ -378,20 +381,12 @@ const basetenSchema = apiModelIdProviderModelSchema.extend({
 	basetenApiKey: z.string().optional(),
 })
 
-const azureSchema = apiModelIdProviderModelSchema.extend({
-	azureApiKey: z.string().optional(),
-	azureResourceName: z.string().optional(),
-	azureDeploymentName: z.string().optional(),
-	azureApiVersion: z.string().optional(),
-})
-
 const defaultSchema = z.object({
 	apiProvider: z.undefined(),
 })
 
 export const providerSettingsSchemaDiscriminated = z.discriminatedUnion("apiProvider", [
 	anthropicSchema.merge(z.object({ apiProvider: z.literal("anthropic") })),
-	azureSchema.merge(z.object({ apiProvider: z.literal("azure") })),
 	openRouterSchema.merge(z.object({ apiProvider: z.literal("openrouter") })),
 	bedrockSchema.merge(z.object({ apiProvider: z.literal("bedrock") })),
 	vertexSchema.merge(z.object({ apiProvider: z.literal("vertex") })),
@@ -408,6 +403,7 @@ export const providerSettingsSchemaDiscriminated = z.discriminatedUnion("apiProv
 	moonshotSchema.merge(z.object({ apiProvider: z.literal("moonshot") })),
 	minimaxSchema.merge(z.object({ apiProvider: z.literal("minimax") })),
 	requestySchema.merge(z.object({ apiProvider: z.literal("requesty") })),
+	unboundSchema.merge(z.object({ apiProvider: z.literal("unbound") })),
 	fakeAiSchema.merge(z.object({ apiProvider: z.literal("fake-ai") })),
 	xaiSchema.merge(z.object({ apiProvider: z.literal("xai") })),
 	basetenSchema.merge(z.object({ apiProvider: z.literal("baseten") })),
@@ -424,7 +420,6 @@ export const providerSettingsSchemaDiscriminated = z.discriminatedUnion("apiProv
 export const providerSettingsSchema = z.object({
 	apiProvider: providerNamesWithRetiredSchema.optional(),
 	...anthropicSchema.shape,
-	...azureSchema.shape,
 	...openRouterSchema.shape,
 	...bedrockSchema.shape,
 	...vertexSchema.shape,
@@ -441,6 +436,7 @@ export const providerSettingsSchema = z.object({
 	...moonshotSchema.shape,
 	...minimaxSchema.shape,
 	...requestySchema.shape,
+	...unboundSchema.shape,
 	...fakeAiSchema.shape,
 	...xaiSchema.shape,
 	...basetenSchema.shape,
@@ -478,6 +474,7 @@ export const modelIdKeys = [
 	"lmStudioModelId",
 	"lmStudioDraftModelId",
 	"requestyModelId",
+	"unboundModelId",
 	"litellmModelId",
 	"vercelAiGatewayModelId",
 ] as const satisfies readonly (keyof ProviderSettings)[]
@@ -500,7 +497,6 @@ export const isTypicalProvider = (key: unknown): key is TypicalProvider =>
 
 export const modelIdKeysByProvider: Record<TypicalProvider, ModelIdKey> = {
 	anthropic: "apiModelId",
-	azure: "apiModelId",
 	openrouter: "openRouterModelId",
 	bedrock: "apiModelId",
 	vertex: "apiModelId",
@@ -516,6 +512,7 @@ export const modelIdKeysByProvider: Record<TypicalProvider, ModelIdKey> = {
 	deepseek: "apiModelId",
 	"qwen-code": "apiModelId",
 	requesty: "requestyModelId",
+	unbound: "unboundModelId",
 	xai: "apiModelId",
 	baseten: "apiModelId",
 	litellm: "litellmModelId",
@@ -567,12 +564,6 @@ export const MODELS_BY_PROVIDER: Record<
 		id: "anthropic",
 		label: "Anthropic",
 		models: Object.keys(anthropicModels),
-	},
-	azure: {
-		id: "azure",
-		label: "Azure AI Foundry",
-		// Azure uses deployment names configured by the user (not a fixed upstream model ID list)
-		models: [],
 	},
 	bedrock: {
 		id: "bedrock",
@@ -644,6 +635,7 @@ export const MODELS_BY_PROVIDER: Record<
 	litellm: { id: "litellm", label: "LiteLLM", models: [] },
 	openrouter: { id: "openrouter", label: "OpenRouter", models: [] },
 	requesty: { id: "requesty", label: "Requesty", models: [] },
+	unbound: { id: "unbound", label: "Unbound", models: [] },
 	"vercel-ai-gateway": { id: "vercel-ai-gateway", label: "Vercel AI Gateway", models: [] },
 
 	// Local providers; models discovered from localhost endpoints.

@@ -459,6 +459,7 @@ export class NativeToolCallParser {
 					nativeArgs = {
 						command: partialArgs.command,
 						cwd: partialArgs.cwd,
+						timeout: partialArgs.timeout,
 					}
 				}
 				break
@@ -945,6 +946,7 @@ export class NativeToolCallParser {
 						nativeArgs = {
 							command: args.command,
 							cwd: args.cwd,
+							timeout: args.timeout,
 						} as NativeArgsFor<TName>
 					}
 					break

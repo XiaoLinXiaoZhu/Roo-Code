@@ -1,5 +1,4 @@
 export * from "./anthropic.js"
-export * from "./azure.js"
 export * from "./baseten.js"
 export * from "./bedrock.js"
 export * from "./deepseek.js"
@@ -18,6 +17,7 @@ export * from "./qwen-code.js"
 export * from "./requesty.js"
 export * from "./roo.js"
 export * from "./sambanova.js"
+export * from "./unbound.js"
 export * from "./vertex.js"
 export * from "./vscode-llm.js"
 export * from "./xai.js"
@@ -26,7 +26,6 @@ export * from "./zai.js"
 export * from "./minimax.js"
 
 import { anthropicDefaultModelId } from "./anthropic.js"
-import { azureDefaultModelId } from "./azure.js"
 import { basetenDefaultModelId } from "./baseten.js"
 import { bedrockDefaultModelId } from "./bedrock.js"
 import { deepSeekDefaultModelId } from "./deepseek.js"
@@ -41,6 +40,7 @@ import { qwenCodeDefaultModelId } from "./qwen-code.js"
 import { requestyDefaultModelId } from "./requesty.js"
 import { rooDefaultModelId } from "./roo.js"
 import { sambaNovaDefaultModelId } from "./sambanova.js"
+import { unboundDefaultModelId } from "./unbound.js"
 import { vertexDefaultModelId } from "./vertex.js"
 import { vscodeLlmDefaultModelId } from "./vscode-llm.js"
 import { xaiDefaultModelId } from "./xai.js"
@@ -107,10 +107,10 @@ export function getProviderDefaultModelId(
 			return rooDefaultModelId
 		case "qwen-code":
 			return qwenCodeDefaultModelId
+		case "unbound":
+			return unboundDefaultModelId
 		case "vercel-ai-gateway":
 			return vercelAiGatewayDefaultModelId
-		case "azure":
-			return azureDefaultModelId
 		case "anthropic":
 		case "gemini-cli":
 		case "fake-ai":

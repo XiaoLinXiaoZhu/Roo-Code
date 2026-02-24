@@ -75,13 +75,9 @@ vi.mock("@roo-code/telemetry", () => ({
 	},
 }))
 
-// Mock @roo-code/cloud to prevent socket.io-client initialization issues
 vi.mock("@roo-code/cloud", () => ({
 	CloudService: {
 		isEnabled: () => false,
-	},
-	BridgeOrchestrator: {
-		subscribeToTask: vi.fn(),
 	},
 }))
 
@@ -240,7 +236,7 @@ Sources: [1](https://example.com), [2](https://another.com)
 
 		// Verify the API conversation history contains the cleaned message
 		expect(task.apiConversationHistory).toHaveLength(1)
-		expect((task.apiConversationHistory[0] as any).content).toEqual([
+		expect(task.apiConversationHistory[0].content).toEqual([
 			{ type: "text", text: "This is the main response content." },
 		])
 	})
@@ -273,7 +269,7 @@ Sources: [1](https://example.com), [2](https://another.com)
 		})
 
 		// Message should remain unchanged
-		expect((task.apiConversationHistory[0] as any).content).toEqual([
+		expect(task.apiConversationHistory[0].content).toEqual([
 			{ type: "text", text: "This is a regular response without any sources." },
 		])
 	})

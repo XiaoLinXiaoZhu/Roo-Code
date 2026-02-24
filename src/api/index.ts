@@ -3,14 +3,11 @@ import OpenAI from "openai"
 
 import { isRetiredProvider, type ProviderSettings, type ModelInfo } from "@roo-code/types"
 
-import type { RooMessage } from "../core/task-persistence/rooMessage"
-
 import { ApiStream } from "./transform/stream"
 
 import {
 	AnthropicHandler,
 	AwsBedrockHandler,
-	AzureHandler,
 	OpenRouterHandler,
 	VertexHandler,
 	AnthropicVertexHandler,
@@ -24,6 +21,7 @@ import {
 	MistralHandler,
 	VsCodeLmHandler,
 	RequestyHandler,
+	UnboundHandler,
 	FakeAIHandler,
 	XAIHandler,
 	LiteLLMHandler,
@@ -88,17 +86,14 @@ export interface ApiHandlerCreateMessageMetadata {
 	 * Only applies to providers that support function calling restrictions (e.g., Gemini).
 	 */
 	allowedFunctionNames?: string[]
-	/** Provider-specific options for tool definitions (e.g. cache control). */
-	toolProviderOptions?: Record<string, Record<string, unknown>>
-	/** Provider-specific options for the system prompt (e.g. cache control).
-	 * Cache-aware providers use this to inject the system prompt as a cached
-	 * system message, since AI SDK v6 does not support providerOptions on the
-	 * `system` string parameter. */
-	systemProviderOptions?: Record<string, Record<string, unknown>>
 }
 
 export interface ApiHandler {
-	createMessage(systemPrompt: string, messages: RooMessage[], metadata?: ApiHandlerCreateMessageMetadata): ApiStream
+	createMessage(
+		systemPrompt: string,
+		messages: Anthropic.Messages.MessageParam[],
+		metadata?: ApiHandlerCreateMessageMetadata,
+	): ApiStream
 
 	getModel(): { id: string; info: ModelInfo }
 
@@ -111,15 +106,6 @@ export interface ApiHandler {
 	 * @returns A promise resolving to the token count
 	 */
 	countTokens(content: Array<Anthropic.Messages.ContentBlockParam>): Promise<number>
-
-	/**
-	 * Indicates whether this provider uses the Vercel AI SDK for streaming.
-	 * AI SDK providers handle reasoning blocks differently and need to preserve
-	 * them in conversation history for proper round-tripping.
-	 *
-	 * @returns true if the provider uses AI SDK, false otherwise
-	 */
-	isAiSdkProvider(): boolean
 }
 
 export function buildApiHandler(configuration: ProviderSettings): ApiHandler {
@@ -134,8 +120,6 @@ export function buildApiHandler(configuration: ProviderSettings): ApiHandler {
 	switch (apiProvider) {
 		case "anthropic":
 			return new AnthropicHandler(options)
-		case "azure":
-			return new AzureHandler(options)
 		case "openrouter":
 			return new OpenRouterHandler(options)
 		case "bedrock":
@@ -168,6 +152,8 @@ export function buildApiHandler(configuration: ProviderSettings): ApiHandler {
 			return new MistralHandler(options)
 		case "requesty":
 			return new RequestyHandler(options)
+		case "unbound":
+			return new UnboundHandler(options)
 		case "fake-ai":
 			return new FakeAIHandler(options)
 		case "xai":

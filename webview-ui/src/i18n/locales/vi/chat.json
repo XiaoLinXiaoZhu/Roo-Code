@@ -25,14 +25,15 @@
 		"sharingDisabledByOrganization": "Chia sẻ bị tổ chức vô hiệu hóa",
 		"shareSuccessOrganization": "Liên kết tổ chức đã được sao chép vào clipboard",
 		"shareSuccessPublic": "Liên kết công khai đã được sao chép vào clipboard",
-		"openInCloud": "Mở tác vụ trong Roo Code Cloud",
-		"openInCloudIntro": "Tiếp tục theo dõi hoặc tương tác với Roo từ bất cứ đâu. Quét, nhấp hoặc sao chép để mở.",
 		"openApiHistory": "Mở lịch sử API",
 		"openUiHistory": "Mở lịch sử UI",
 		"backToParentTask": "Nhiệm vụ cha"
 	},
 	"unpin": "Bỏ ghim khỏi đầu",
 	"pin": "Ghim lên đầu",
+	"fileChangesInConversation": {
+		"header": "{{count}} tệp đã thay đổi trong cuộc hội thoại này"
+	},
 	"tokenProgress": {
 		"availableSpace": "Không gian khả dụng: {{amount}} tokens",
 		"tokensUsed": "Tokens đã sử dụng: {{used}} trong {{total}}",
@@ -348,8 +349,9 @@
 		},
 		"release": {
 			"heading": "Tính năng mới:",
-			"claudeOpus": "Claude Opus 4.6: Hiện có sẵn ở tất cả các nhà cung cấp—Roo Code Router, Anthropic, AWS Bedrock, Google Vertex và OpenRouter—mang mô hình mạnh nhất của Anthropic đến nền tảng ưu tiên của bạn.",
-			"gptCodex": "GPT-5.3-Codex: Mô hình lập trình mới nhất của OpenAI hiện được hỗ trợ trong nhà cung cấp OpenAI - ChatGPT, cung cấp tạo mã và hiểu biết tân tiến."
+			"geminiPro": "Hỗ trợ Gemini 3.1 Pro: Đã thêm hỗ trợ model Gemini 3.1 Pro và đặt làm model Gemini mặc định để cải thiện hiệu suất.",
+			"cliNdjson": "Giao thức NDJSON CLI: Giao thức NDJSON stdin mới, lệnh con list, và lệnh run được module hóa cho quy trình CLI linh hoạt hơn.",
+			"cliRelease": "CLI v0.1.0: CLI Roo Code đạt bản phát hành chính thức đầu tiên với giao diện lệnh ổn định."
 		},
 		"cloudAgents": {
 			"heading": "Mới trên Cloud:",
@@ -425,7 +427,8 @@
 		"indexing": "Đang lập chỉ mục {{percentage}}%",
 		"indexed": "Đã lập chỉ mục",
 		"error": "Lỗi chỉ mục",
-		"status": "Trạng thái chỉ mục"
+		"status": "Trạng thái chỉ mục",
+		"stopping": "Đang dừng lập chỉ mục..."
 	},
 	"versionIndicator": {
 		"ariaLabel": "Phiên bản {{version}} - Nhấp để xem ghi chú phát hành"

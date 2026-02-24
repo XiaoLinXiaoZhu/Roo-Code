@@ -18,9 +18,9 @@ import type { CloudUserInfo, CloudOrganizationMembership, OrganizationAllowList,
 import type { SerializedCustomToolDefinition } from "./custom-tool.js"
 import type { GitCommit } from "./git.js"
 import type { McpServer } from "./mcp.js"
-import type { SkillMetadata } from "./skills.js"
 import type { ModelRecord, RouterModels } from "./model.js"
 import type { OpenAiCodexRateLimitInfo } from "./providers/openai-codex-rate-limits.js"
+import type { SkillMetadata } from "./skills.js"
 import type { WorktreeIncludeStatus } from "./worktree.js"
 
 /**
@@ -103,7 +103,10 @@ export interface ExtensionMessage {
 		| "branchWorktreeIncludeResult"
 		| "folderSelected"
 		| "skills"
+		| "fileContent"
 	text?: string
+	/** For fileContent: { path, content, error? } */
+	fileContent?: { path: string; content: string | null; error?: string }
 	payload?: any // eslint-disable-line @typescript-eslint/no-explicit-any
 	checkpointWarning?: {
 		type: "WAIT_TIMEOUT" | "INIT_TIMEOUT"
@@ -176,8 +179,8 @@ export interface ExtensionMessage {
 	list?: string[] // For dismissedUpsells
 	organizationId?: string | null // For organizationSwitchResult
 	tools?: SerializedCustomToolDefinition[] // For customToolsResult
-	modes?: { slug: string; name: string }[] // For modes response
 	skills?: SkillMetadata[] // For skills response
+	modes?: { slug: string; name: string }[] // For modes response
 	aggregatedCosts?: {
 		// For taskWithAggregatedCosts response
 		totalCost: number
@@ -322,6 +325,7 @@ export type ExtensionState = Pick<
 	maxWorkspaceFiles: number // Maximum number of files to include in current working directory details (0-500)
 	showRooIgnoredFiles: boolean // Whether to show .rooignore'd files in listings
 	enableSubfolderRules: boolean // Whether to load rules from subdirectories
+	maxReadFileLine?: number // Maximum line limit for read_file tool (-1 for default)
 	maxImageFileSize: number // Maximum size of image files to process in MB
 	maxTotalImageSize: number // Maximum total size for all images in a single read operation in MB
 
@@ -365,9 +369,7 @@ export type ExtensionState = Pick<
 	apiModelId?: string
 	mcpServers?: McpServer[]
 	mdmCompliant?: boolean
-	remoteControlEnabled: boolean
 	taskSyncEnabled: boolean
-	featureRoomoteControlEnabled: boolean
 	openAiCodexIsAuthenticated?: boolean
 	debug?: boolean
 
@@ -443,6 +445,7 @@ export interface WebviewMessage {
 		| "openImage"
 		| "saveImage"
 		| "openFile"
+		| "readFileContent"
 		| "openMention"
 		| "cancelTask"
 		| "cancelAutoApproval"
@@ -471,7 +474,6 @@ export interface WebviewMessage {
 		| "deleteMessageConfirm"
 		| "submitEditedMessage"
 		| "editMessageConfirm"
-		| "remoteControlEnabled"
 		| "taskSyncEnabled"
 		| "searchCommits"
 		| "setApiConfigPassword"
@@ -507,9 +509,12 @@ export interface WebviewMessage {
 		| "condenseTaskContextRequest"
 		| "requestIndexingStatus"
 		| "startIndexing"
+		| "stopIndexing"
 		| "clearIndexData"
 		| "indexingStatusUpdate"
 		| "indexCleared"
+		| "toggleWorkspaceIndexing"
+		| "setAutoEnableDefault"
 		| "focusPanelRequest"
 		| "openExternal"
 		| "filterMarketplaceItems"
@@ -704,7 +709,7 @@ export const checkoutRestorePayloadSchema = z.object({
 export type CheckpointRestorePayload = z.infer<typeof checkoutRestorePayloadSchema>
 
 export interface IndexingStatusPayload {
-	state: "Standby" | "Indexing" | "Indexed" | "Error"
+	state: "Standby" | "Indexing" | "Indexed" | "Error" | "Stopping"
 	message: string
 }
 
@@ -738,6 +743,8 @@ export interface IndexingStatus {
 	totalItems: number
 	currentItemUnit?: string
 	workspacePath?: string
+	workspaceEnabled?: boolean
+	autoEnableDefault?: boolean
 }
 
 export interface IndexingStatusUpdateMessage {
@@ -802,6 +809,8 @@ export interface ClineSayTool {
 	matchCount?: number
 	diff?: string
 	content?: string
+	// Original file content before first edit (for merged diff display in FileChangesPanel)
+	originalContent?: string
 	// Unified diff statistics computed by the extension
 	diffStats?: { added: number; removed: number }
 	regex?: string
