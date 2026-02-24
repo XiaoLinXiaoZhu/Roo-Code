@@ -1128,6 +1128,15 @@
 					"files": ["src/core/prompts/sections/spirit.ts"],
 					"diffSummary": "1 file(s), +16 -18",
 					"timestamp": "2026-02-24T12:28:28.232Z"
+				},
+				{
+					"commitHash": "fc9f827ac005f0f9ac869919676ab2c13cc12229",
+					"commitMessage": "[intent:I9.1] Add experiment documentation: SPIRIT v5.1 Heavy Reasoning mode overview, intent, expert review findings, transferable techniques, and evaluation methods",
+					"files": [
+						"\"docs/deep-thinking/SPIRIT-v5-\\351\\207\\215\\345\\272\\246\\346\\216\\250\\347\\220\\206\\345\\256\\236\\351\\252\\214\\350\\256\\260\\345\\275\\225.md\""
+					],
+					"diffSummary": "1 file(s), +191 -0",
+					"timestamp": "2026-02-24T12:36:51.219Z"
 				}
 			],
 			"createdBy": {
@@ -1189,6 +1198,16 @@
 				{
 					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
 					"timestamp": "2026-02-24T12:28:28.232Z",
+					"action": "updated: status→done"
+				},
+				{
+					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
+					"timestamp": "2026-02-24T12:36:51.219Z",
+					"action": "bound commit fc9f827"
+				},
+				{
+					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
+					"timestamp": "2026-02-24T12:36:51.219Z",
 					"action": "updated: status→done"
 				}
 			],
