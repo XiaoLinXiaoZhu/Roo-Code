@@ -1,14 +1,14 @@
 import type OpenAI from "openai"
 
-const EDIT_DESCRIPTION = `Performs exact string replacements in files.
+const EDIT_DESCRIPTION = `Perform exact string replacement in a file. Finds old_string and replaces it with new_string.
 
-Usage:
-- You must use your \`Read\` tool at least once in the conversation before editing. This tool will error if you attempt an edit without reading the file.
-- When editing text from Read tool output, ensure you preserve the exact indentation (tabs/spaces) as it appears AFTER the line number prefix. The line number prefix format is: spaces + line number + tab. Everything after that tab is the actual file content to match. Never include any part of the line number prefix in the old_string or new_string.
-- ALWAYS prefer editing existing files in the codebase. NEVER write new files unless explicitly required.
-- Only use emojis if the user explicitly requests it. Avoid adding emojis to files unless asked.
-- The edit will FAIL if \`old_string\` is not unique in the file. Either provide a larger string with more surrounding context to make it unique or use \`replace_all\` to change every instance of \`old_string\`.
-- Use \`replace_all\` for replacing and renaming strings across the file. This parameter is useful if you want to rename a variable for instance.`
+**When to Use**: Single precise text replacement in a file you've already read.
+- edit({ file_path: "src/config.ts", old_string: "const timeout = 5000;", new_string: "const timeout = 10000;" })
+
+**When to Use**: Renaming a variable/function across an entire file.
+- edit({ file_path: "src/utils.ts", old_string: "oldName", new_string: "newName", replace_all: true })
+
+**Constraints**: You must read the file before editing. The edit fails if old_string is not unique — provide more surrounding context to disambiguate, or use replace_all.`
 
 const edit = {
 	type: "function",
@@ -20,22 +20,21 @@ const edit = {
 			properties: {
 				file_path: {
 					type: "string",
-					description: "The path of the file to edit (relative to the working directory)",
+					description: "File path relative to the working directory.",
 				},
 				old_string: {
 					type: "string",
 					description:
-						"The exact text to find in the file. Must match exactly, including all whitespace, indentation, and line endings.",
+						"Exact text to find. Must match exactly including all whitespace, indentation, and line endings. Never include line number prefixes from read output.",
 				},
 				new_string: {
 					type: "string",
-					description:
-						"The replacement text that will replace old_string. Must include all necessary whitespace and indentation.",
+					description: "Replacement text. Must include all necessary whitespace and indentation.",
 				},
 				replace_all: {
 					type: "boolean",
 					description:
-						"When true, replaces ALL occurrences of old_string in the file. When false (default), only replaces the first occurrence and errors if multiple matches exist.",
+						"When true, replaces ALL occurrences. When false (default), replaces only the first and errors if multiple matches exist.",
 					default: false,
 				},
 			},

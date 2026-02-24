@@ -685,10 +685,25 @@
 			"shortId": "I6.7",
 			"type": "impl",
 			"content": "批次1：优化 codebase_search, find_definition, find_usages 描述",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
 			"childrenIds": [],
-			"codeBindings": [],
+			"codeBindings": [
+				{
+					"commitHash": "fd1569259213dffdc64845f6ed6356b50f51f990",
+					"commitMessage": "[intent:I6.7] 优化 codebase_search, find_definition, find_usages 工具描述：参数说明移到参数描述，when-to-use+example 紧密配对",
+					"files": [
+						".roo/intent-tree.json",
+						"\"docs/better-tools/\\345\\256\\236\\347\\216\\260\\346\\227\\266\\347\\232\\204patch/\\345\\267\\245\\345\\205\\267\\346\\217\\217\\350\\277\\260\\344\\274\\230\\345\\214\\2262.md\"",
+						"src/core/prompts/tools/native-tools/codebase_search.ts",
+						"src/core/prompts/tools/native-tools/find_definition.ts",
+						"src/core/prompts/tools/native-tools/find_usages.ts",
+						"src/shared/tools.ts"
+					],
+					"diffSummary": "6 file(s), +380 -94",
+					"timestamp": "2026-02-24T08:29:21.167Z"
+				}
+			],
 			"createdBy": {
 				"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
 				"timestamp": "2026-02-24T08:28:20.270Z",
@@ -699,6 +714,16 @@
 					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
 					"timestamp": "2026-02-24T08:28:29.327Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:29:21.167Z",
+					"action": "bound commit fd15692"
+				},
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:29:21.167Z",
+					"action": "updated: status→done"
 				}
 			],
 			"assumption": "G6 下重新规划。按照用户反馈，需要确保 when-to-use 和 example 紧密配对，且只修改真正启用的工具。分批处理，每批一个 commit。"
@@ -708,7 +733,7 @@
 			"shortId": "I6.8",
 			"type": "impl",
 			"content": "批次2：优化 generate_image, edit, read_media 描述",
-			"status": "planned",
+			"status": "in_progress",
 			"parentId": "0303bab4-4621-4fe2-84c6-f167dd054107",
 			"childrenIds": [],
 			"codeBindings": [],
@@ -717,7 +742,13 @@
 				"timestamp": "2026-02-24T08:28:21.132Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c8ea4-ce88-75cf-b8fa-72e8964dc173",
+					"timestamp": "2026-02-24T08:29:30.488Z",
+					"action": "updated: content, status→in_progress"
+				}
+			],
 			"assumption": "G6 下第二批。"
 		},
 		"cfc21333-02fa-4948-91f6-376170282f36": {
