@@ -1065,8 +1065,8 @@
 			"id": "727f7791-48b7-4d2f-886d-42596ae2c7cd",
 			"shortId": "G9",
 			"type": "goal",
-			"content": "实验：将 spirit.ts 从 Soul Document 声明式模式改为重度推理模式（Facts → Heavy Reasoning → Conclusions）",
-			"status": "planned",
+			"content": "null",
+			"status": "done",
 			"parentId": null,
 			"childrenIds": ["1fa54b75-ef5a-40b7-b3e8-3439eb5431b8"],
 			"codeBindings": [],
@@ -1075,7 +1075,13 @@
 				"timestamp": "2026-02-24T11:30:39.165Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
+					"timestamp": "2026-02-24T13:29:28.584Z",
+					"action": "updated: content, status→done"
+				}
+			],
 			"assumption": "用户明确要求将 spirit.ts 从 Soul Document 模式改为重度推理模式。这是一个实验性质的改造，不涉及其他文件。Intent tree 中没有相关的现有目标。",
 			"maxChildIndex": 1
 		},
@@ -1226,9 +1232,94 @@
 					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
 					"timestamp": "2026-02-24T13:29:10.702Z",
 					"action": "updated: status→done"
+				},
+				{
+					"taskId": "019c8f69-c759-75df-bbce-62f30226d07f",
+					"timestamp": "2026-02-24T13:29:20.623Z",
+					"action": "updated: content, status→done"
 				}
 			],
 			"assumption": "只需修改 spirit.ts 一个文件，函数签名不变，返回字符串即可。核心挑战是设计出微妙的 Facts 和自然的推理链路，使结论与原有行为准则等价但呈现方式完全不同。"
+		},
+		"b7e812a7-c301-4116-9e5e-e02248ecba93": {
+			"id": "b7e812a7-c301-4116-9e5e-e02248ecba93",
+			"shortId": "G10",
+			"type": "goal",
+			"content": "修复 update_intent 工具：描述示例不应引导模型传入 \"null\" 字符串，执行层应过滤字符串 \"null\" 的 content",
+			"status": "planned",
+			"parentId": null,
+			"childrenIds": ["82a63d6e-3ba4-4c0b-91f5-7c2a86cc4d04", "5d5a76fd-3e22-4d54-8612-2605b516e7c5"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
+				"timestamp": "2026-02-24T13:33:34.395Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "用户报告了 update_intent 工具的两个问题：(1) 描述示例误导模型传入 \"null\" 字符串 (2) 执行层没有过滤字符串 \"null\"。intent tree 中没有相关的现有目标。",
+			"maxChildIndex": 2
+		},
+		"82a63d6e-3ba4-4c0b-91f5-7c2a86cc4d04": {
+			"id": "82a63d6e-3ba4-4c0b-91f5-7c2a86cc4d04",
+			"shortId": "I10.1",
+			"type": "impl",
+			"content": "修改工具描述示例：省略不需要的可选参数，不再写 content: null / status: null",
+			"status": "done",
+			"parentId": "b7e812a7-c301-4116-9e5e-e02248ecba93",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "dfd9de41ed9fddab7c5c764d86c28196daf09954",
+					"commitMessage": "[intent:I10.1] 修改 update_intent 工具描述示例：省略不需要的可选参数，避免引导模型传入 \"null\" 字符串",
+					"files": [
+						".roo/cache/search/index.json",
+						".roo/intent-tree.json",
+						"src/core/prompts/tools/native-tools/update_intent.ts"
+					],
+					"diffSummary": "3 file(s), +107 -10",
+					"timestamp": "2026-02-24T13:34:15.589Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
+				"timestamp": "2026-02-24T13:33:42.193Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
+					"timestamp": "2026-02-24T13:33:47.178Z",
+					"action": "updated: status→in_progress"
+				},
+				{
+					"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
+					"timestamp": "2026-02-24T13:34:15.589Z",
+					"action": "bound commit dfd9de4"
+				},
+				{
+					"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
+					"timestamp": "2026-02-24T13:34:15.589Z",
+					"action": "updated: status→done"
+				}
+			],
+			"assumption": "描述中的示例 content: null 引导模型传入字符串 \"null\"，应改为省略不需要的参数"
+		},
+		"5d5a76fd-3e22-4d54-8612-2605b516e7c5": {
+			"id": "5d5a76fd-3e22-4d54-8612-2605b516e7c5",
+			"shortId": "I10.2",
+			"type": "impl",
+			"content": "在 UpdateIntentTool 执行层过滤字符串 \"null\" 的 content，并添加对应测试",
+			"status": "planned",
+			"parentId": "b7e812a7-c301-4116-9e5e-e02248ecba93",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c8fd9-3856-71df-876c-5e728adaea89",
+				"timestamp": "2026-02-24T13:33:42.746Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "模型可能传入字符串 \"null\" 作为 content，执行层应将其视为未提供"
 		}
 	},
 	"rootIds": [
@@ -1240,7 +1331,8 @@
 		"0303bab4-4621-4fe2-84c6-f167dd054107",
 		"27344780-0d11-4174-ada4-18385cf88129",
 		"c887bed9-e014-4ec5-bc06-b1803de639a2",
-		"727f7791-48b7-4d2f-886d-42596ae2c7cd"
+		"727f7791-48b7-4d2f-886d-42596ae2c7cd",
+		"b7e812a7-c301-4116-9e5e-e02248ecba93"
 	],
 	"shortIdIndex": {
 		"G1": "c0b534b7-10c2-4332-9c2c-bd4bc5b0d8cf",
@@ -1277,7 +1369,10 @@
 		"G8": "c887bed9-e014-4ec5-bc06-b1803de639a2",
 		"I8.1": "4b2f06ca-64e7-4553-92b8-930c17737a58",
 		"G9": "727f7791-48b7-4d2f-886d-42596ae2c7cd",
-		"I9.1": "1fa54b75-ef5a-40b7-b3e8-3439eb5431b8"
+		"I9.1": "1fa54b75-ef5a-40b7-b3e8-3439eb5431b8",
+		"G10": "b7e812a7-c301-4116-9e5e-e02248ecba93",
+		"I10.1": "82a63d6e-3ba4-4c0b-91f5-7c2a86cc4d04",
+		"I10.2": "5d5a76fd-3e22-4d54-8612-2605b516e7c5"
 	},
-	"rootMaxChildIndex": 9
+	"rootMaxChildIndex": 10
 }

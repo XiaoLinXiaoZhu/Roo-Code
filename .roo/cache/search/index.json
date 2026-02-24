@@ -1790,6 +1790,30 @@
       "gitCommit": "f343b8b8629117fb688da71a1f83c7bb2c86ac79",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"relevance\":{\"type\":\"string\"}}}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "70",
+      "query": "Where is the update_intent tool defined, including its parameter schema and execution logic?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "update_intent",
+        "tool",
+        "defined",
+        "including",
+        "its",
+        "parameter",
+        "schema",
+        "and",
+        "execution",
+        "logic"
+      ],
+      "scope": null,
+      "createdAt": "2026-02-24T13:33:01.918Z",
+      "gitCommit": "3328e771687fb30132d09bca449e7b5df9ad6fa6",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"definitionFile\":{\"type\":\"string\"},\"executionFile\":{\"type\":\"string\"},\"typesFile\":{\"type\":\"string\"}}}"
     }
   ]
 }
