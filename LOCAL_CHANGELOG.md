@@ -1,5 +1,14 @@
 # Roo Code Changelog
 
+## [3.52.2] - 2026-02-24
+
+### 🐛 修复终端输出样式
+
+- **问题**：commit `618aa6652`（"Inline terminal rendering parity with the VSCode Terminal"）将命令输出从 `CodeBlock` 替换为 `TerminalOutput` 组件，但新组件直接使用了 `--vscode-editor-font-size` 和 `--vscode-editor-line-height` CSS 变量，导致终端输出字体与编辑器一样大，且没有高度限制
+- **修复**：
+    - `TerminalOutput.tsx`：`fontSize` 从 `var(--vscode-editor-font-size)` 改为 `0.85em`（相对字体），`lineHeight` 从 `var(--vscode-editor-line-height)` 改为 `1.2`（紧凑行距）
+    - `CommandExecution.tsx`：OutputContainer 展开时从 `max-h-[100%]` 改为 `max-h-[500px] overflow-y-auto`，与 CodeBlock 的 window shade 默认高度一致
+
 ## [3.52.1] - 2026-02-24
 
 ### 📝 工具描述统一优化
