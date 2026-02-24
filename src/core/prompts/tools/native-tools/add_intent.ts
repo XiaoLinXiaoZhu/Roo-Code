@@ -14,15 +14,11 @@ Wait — does this mean every user request is an approach, never a goal? No. Som
 
 Maybe there's a subtler case: what about existing code that's been around for months? It *feels* like a constraint — nobody questions it. But trace it up the tree. If it serves a goal, it's still an implementation, no matter how old. The goal is the constraint, not the code.
 
-So the principle is: goals and objectives capture *what the user wants* (stable). Approaches and impls capture *how to achieve it* (replaceable). When in doubt, ask yourself the "give up or try different" test.
+So the principle is: \`goal\` and \`objective\` capture *what the user wants* (stable — only create a goal when truly new, objectives are confirmable subsets). \`approach\` and \`impl\` capture *how to achieve it* (replaceable — an approach can fail and be replaced, an impl is ONE atomic code change ≈ one commit). When in doubt, ask yourself the "give up or try different" test.
 
-**Node types (hierarchy: goal > objective > approach > impl):**
-- \`goal\`: User's ultimate objective — stable, rarely changes. Only create when truly new.
-- \`objective\`: A concrete, confirmable subset of the goal. May be revised if the decomposition is wrong.
-- \`approach\`: Replaceable method to achieve an objective (can fail and be replaced).
-- \`impl\`: ONE atomic code change ≈ one commit.
+Could this distinction break down in practice? Consider: what if the user's goal *is* a specific technology — "we must use PostgreSQL because of compliance"? Then PostgreSQL is genuinely a constraint, not an approach. The test still works: if PostgreSQL fails, do we try MySQL (approach) or give up on the project (constraint)? Compliance makes it a constraint. The test adapts to context.
 
-**Atomicity rule:** "Can I describe this in a single commit message without using 'and'?" YES → good. NO → decompose.
+Keep each node atomic — if you can't describe it in a single commit message without "and," decompose it into siblings.
 
 **What happens when you patch a failing approach?**
 You add impl I1 to fix approach A1. It doesn't fully work. You add I2 to patch I1. Still broken. You add I3. Each patch makes the next one harder — you're now debugging your patches, not the original problem. Three turns later, nobody remembers what A1 was supposed to achieve.
@@ -31,7 +27,7 @@ But what if the approach is *almost* right — just needs one more fix? That's e
 
 The rule: if you're adding a third impl to "fix" the same approach, the approach itself is probably wrong. Prune it (\`prune_intent\`), create a sibling approach under the same objective.
 
-**Goal discovery from objectives**: When you notice multiple objectives that seem related, consider whether they share a deeper common goal. Use \`restructure_intent\` (extract_common_parent) to group them.
+Let me also consider the opposite problem — what if you have multiple objectives that seem unrelated, but they keep interfering with each other? Maybe "reduce API latency" and "reduce database load" are both symptoms of the same deeper goal: "improve user experience under load." Discovering this shared goal lets you find solutions that serve both simultaneously. Use \`restructure_intent\` (extract_common_parent) when you notice this pattern.
 
 **When to Use**: User has a genuinely NEW objective with no related node in the tree.
 - add_intent({ assumption: "No existing goal about performance. User wants to optimize API response times.", parentId: null, type: "goal", content: "Optimize API performance" })
