@@ -682,9 +682,94 @@
 				}
 			],
 			"assumption": "intent_planning 当前有较多声明式内容（X→Y 工作流、可证伪性测试、Must NOT Do/Should Do 列表）。需要将核心规则改为推理片段，保留少量声明式骨架。"
+		},
+		"9be2c0ac-d97f-4184-8fed-72b0bf9fa10d": {
+			"id": "9be2c0ac-d97f-4184-8fed-72b0bf9fa10d",
+			"shortId": "G3",
+			"type": "goal",
+			"content": "修复 read_media 工具的 \"Cannot read properties of undefined (reading 'media_type')\" 运行时错误",
+			"status": "planned",
+			"parentId": null,
+			"childrenIds": ["5d206aab-f5ae-4f37-82f5-327d8f823f84"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9af5-71f0-77df-9108-933cfc58d89a",
+				"timestamp": "2026-02-26T17:18:35.184Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "用户报告了 read_media 工具的运行时错误 \"Cannot read properties of undefined (reading 'media_type')\"。这是一个 bug 修复任务，需要追踪 media_type 属性在哪里被读取以及为什么是 undefined。",
+			"maxChildIndex": 1
+		},
+		"5d206aab-f5ae-4f37-82f5-327d8f823f84": {
+			"id": "5d206aab-f5ae-4f37-82f5-327d8f823f84",
+			"shortId": "A3.1",
+			"type": "approach",
+			"content": "将 ReadMediaTool 中构建的 image block 从自定义 ImagePart 格式改为 Anthropic ImageBlockParam 格式（使用 source.media_type 而非 mediaType）",
+			"status": "planned",
+			"parentId": "9be2c0ac-d97f-4184-8fed-72b0bf9fa10d",
+			"childrenIds": ["baf19b33-6d8e-456f-aca1-6bdd7ad9cee6"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9af5-71f0-77df-9108-933cfc58d89a",
+				"timestamp": "2026-02-26T17:23:48.566Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "ReadMediaTool 构建了 {type:\"image\", image:..., mediaType:...} 格式的对象，但 ToolResponse 类型和下游消费者期望 Anthropic 的 {type:\"image\", source:{type:\"base64\", media_type:..., data:...}} 格式。修复后 source 不再是 undefined，media_type 可以正常读取。",
+			"maxChildIndex": 1
+		},
+		"baf19b33-6d8e-456f-aca1-6bdd7ad9cee6": {
+			"id": "baf19b33-6d8e-456f-aca1-6bdd7ad9cee6",
+			"shortId": "I3.1.1",
+			"type": "impl",
+			"content": "修改 ReadMediaTool.ts 中 image block 构建：移除自定义 ImagePart 类型，使用 Anthropic.ImageBlockParam 格式",
+			"status": "done",
+			"parentId": "5d206aab-f5ae-4f37-82f5-327d8f823f84",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "20cf2876b94cbb03d4a3b8a24218873fc56684ab",
+					"commitMessage": "[intent:I3.1.1] Fix \"Cannot read properties of undefined (reading 'media_type')\" in ReadMediaTool\n\nRoot cause: ReadMediaTool was building image blocks using a custom format\n({type:\"image\", image:..., mediaType:...}) instead of the Anthropic\nImageBlockParam format ({type:\"image\", source:{type:\"base64\", media_type:...,\ndata:...}}). Downstream code (provider format converters) expected to read\nblock.source.media_type, but source was undefined.\n\nFix: Replace custom ImagePart type with Anthropic.ImageBlockParam, construct\nimage blocks with proper {source: {type:\"base64\", media_type, data}} structure.",
+					"files": [
+						".roo/cache/search/index.json",
+						".roo/intent-tree.json",
+						"src/core/tools/ReadMediaTool.ts"
+					],
+					"diffSummary": "3 file(s), +117 -13",
+					"timestamp": "2026-02-26T17:29:27.632Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c9af5-71f0-77df-9108-933cfc58d89a",
+				"timestamp": "2026-02-26T17:23:54.938Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9af5-71f0-77df-9108-933cfc58d89a",
+					"timestamp": "2026-02-26T17:24:03.849Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c9af5-71f0-77df-9108-933cfc58d89a",
+					"timestamp": "2026-02-26T17:29:27.632Z",
+					"action": "bound commit 20cf287"
+				},
+				{
+					"taskId": "019c9af5-71f0-77df-9108-933cfc58d89a",
+					"timestamp": "2026-02-26T17:29:27.632Z",
+					"action": "updated: status→done"
+				}
+			],
+			"assumption": "将第 296-303 行的 {type:\"image\", image:..., mediaType:...} 改为 {type:\"image\", source:{type:\"base64\", media_type:..., data:...}}，同时清理不再需要的自定义 ImagePart 类型定义和相关的类型转换。"
 		}
 	},
-	"rootIds": ["7d7be656-3aa0-4b70-8f09-6bbcfaab2135", "293aa8fe-7667-4d43-9cdb-ebac42370cd9"],
+	"rootIds": [
+		"7d7be656-3aa0-4b70-8f09-6bbcfaab2135",
+		"293aa8fe-7667-4d43-9cdb-ebac42370cd9",
+		"9be2c0ac-d97f-4184-8fed-72b0bf9fa10d"
+	],
 	"shortIdIndex": {
 		"G1": "7d7be656-3aa0-4b70-8f09-6bbcfaab2135",
 		"O1.1": "693db0f7-2b06-489a-96dc-154e6f85ee02",
@@ -707,7 +792,10 @@
 		"A2.2.1": "da2141ea-7bdb-4ac7-8d84-7357ce7cbd06",
 		"I2.2.1.1": "f06b8928-0ebf-4ee8-8538-3857310074a9",
 		"A2.3.1": "53ea4218-1b6a-48ce-baea-3fbb08238555",
-		"I2.3.1.1": "35f2ff07-5a82-41a9-ab7e-6e56c51ca656"
+		"I2.3.1.1": "35f2ff07-5a82-41a9-ab7e-6e56c51ca656",
+		"G3": "9be2c0ac-d97f-4184-8fed-72b0bf9fa10d",
+		"A3.1": "5d206aab-f5ae-4f37-82f5-327d8f823f84",
+		"I3.1.1": "baf19b33-6d8e-456f-aca1-6bdd7ad9cee6"
 	},
-	"rootMaxChildIndex": 2
+	"rootMaxChildIndex": 3
 }

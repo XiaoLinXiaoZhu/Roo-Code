@@ -1814,6 +1814,40 @@
       "gitCommit": "3328e771687fb30132d09bca449e7b5df9ad6fa6",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"definitionFile\":{\"type\":\"string\"},\"executionFile\":{\"type\":\"string\"},\"typesFile\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "71",
+      "query": "Where is ToolResponse consumed and how are image blocks from tool results processed before being sent to the API?",
+      "tags": [
+        "where",
+        "is",
+        "toolresponse",
+        "consumed",
+        "and",
+        "how",
+        "are",
+        "image",
+        "blocks",
+        "from",
+        "tool",
+        "results",
+        "processed",
+        "before",
+        "being",
+        "sent",
+        "to",
+        "the",
+        "api"
+      ],
+      "scope": {
+        "directories": "e:/_Project/Roo-Code/src",
+        "filePatterns": "*.ts",
+        "excludes": "*.test.ts,*.spec.ts,node_modules"
+      },
+      "createdAt": "2026-02-26T17:23:05.885Z",
+      "gitCommit": "498c8de9a7d74b93540e07a3472b393449e717d4",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"relevance\":{\"type\":\"string\"}}}}}}"
     }
   ]
 }

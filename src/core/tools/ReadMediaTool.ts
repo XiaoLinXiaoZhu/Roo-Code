@@ -1,10 +1,8 @@
 import path from "path"
 import * as fs from "fs/promises"
 
+import type Anthropic from "@anthropic-ai/sdk"
 import type { ClineSayTool } from "@roo-code/types"
-// Inline type definitions (previously from rooMessage, removed after AI-SDK revert)
-type TextPart = { type: "text"; text: string }
-type ImagePart = { type: "image"; image: string; mediaType: string }
 
 import { Task } from "../task/Task"
 import { isPathOutsideWorkspace } from "../../utils/pathUtils"
@@ -232,7 +230,7 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 
 			// Build result
 			const xmlLines: string[] = []
-			const mediaBlocks: Array<ImagePart | Record<string, unknown>> = []
+			const mediaBlocks: Array<Anthropic.ImageBlockParam | Record<string, unknown>> = []
 
 			const isLoaded = fileResult.status === "approved" && fileResult.mediaDataUrl
 
@@ -297,9 +295,12 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 							const mimeType = fileResult.mimeType || IMAGE_MIME_TYPES[ext] || "image/jpeg"
 							mediaBlocks.push({
 								type: "image",
-								image: fileResult.mediaDataUrl.split(",")[1],
-								mediaType: mimeType,
-							} satisfies ImagePart)
+								source: {
+									type: "base64",
+									media_type: mimeType,
+									data: fileResult.mediaDataUrl.split(",")[1],
+								},
+							} as Anthropic.ImageBlockParam)
 						}
 					}
 					break
@@ -324,9 +325,12 @@ export class ReadMediaTool extends BaseTool<"read_media"> {
 
 			// Push result with media as ToolResponse
 			if (mediaBlocks.length > 0) {
-				const textPart: TextPart = { type: "text", text: xmlLines.join("\n") }
-				const response: Array<TextPart | ImagePart> = [textPart, ...(mediaBlocks as ImagePart[])]
-				pushToolResult(response as any)
+				const textPart: Anthropic.TextBlockParam = { type: "text", text: xmlLines.join("\n") }
+				const response: Array<Anthropic.TextBlockParam | Anthropic.ImageBlockParam> = [
+					textPart,
+					...(mediaBlocks as Anthropic.ImageBlockParam[]),
+				]
+				pushToolResult(response)
 			} else {
 				pushToolResult(xmlLines.join("\n"))
 			}
