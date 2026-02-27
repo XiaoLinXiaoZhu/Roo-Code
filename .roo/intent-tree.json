@@ -1522,6 +1522,112 @@
 				}
 			],
 			"assumption": "文件已重写，TypeScript 编译通过，运行时输出完整。函数签名 getSpiritSection(): string 保持不变，不影响调用方。可证伪：如果 A/B 测试发现行为退化，说明某些被归为 Layer 3 的内容实际是 Layer 2，需要恢复。"
+		},
+		"3714d0db-a009-482e-a8fd-6310c821b8e6": {
+			"id": "3714d0db-a009-482e-a8fd-6310c821b8e6",
+			"shortId": "G7",
+			"type": "goal",
+			"content": "将 spirit.ts 从 v6.0 信息本位模式升级为 v7.0 few-shot 行为锚定模式：Layer 1 纯 local 事实 + Layer 2 few-shot QA 示例展示推理模式",
+			"status": "done",
+			"parentId": null,
+			"childrenIds": ["68d33283-6377-4eaa-bcc6-b67131f5c03e"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9f94-1fdc-74ef-ba1a-c3f724ff2620",
+				"timestamp": "2026-02-27T15:13:49.258Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9f94-1fdc-74ef-ba1a-c3f724ff2620",
+					"timestamp": "2026-02-27T15:14:09.612Z",
+					"action": "cascade: planned→in_progress (child I7.1.1 started)"
+				},
+				{
+					"taskId": "019c9f94-1fdc-74ef-ba1a-c3f724ff2620",
+					"timestamp": "2026-02-27T15:16:09.780Z",
+					"action": "cascade: in_progress→done (all children terminated)"
+				}
+			],
+			"assumption": "G6 已完成 v6.0。用户现在要做 v7.0：基于\"模型已内化工程经验，只需 local 信息 + few-shot 行为锚定\"的洞察，进一步精简 spirit.ts。如果 v7.0 的 few-shot 示例无法有效改变模型行为（相比纯事实声明没有可观测差异），则应回退到纯 Layer 1 方案。",
+			"maxChildIndex": 1
+		},
+		"68d33283-6377-4eaa-bcc6-b67131f5c03e": {
+			"id": "68d33283-6377-4eaa-bcc6-b67131f5c03e",
+			"shortId": "A7.1",
+			"type": "approach",
+			"content": "Layer 1（~300t local 事实声明：用户画像+推理不可见+冲突优先级）+ Layer 2（~600t 2个 few-shot QA 示例，展示 Deep→Reflect→Explore 振荡推理模式，场景：X→Y 目标追溯 + 不确定性处理）",
+			"status": "done",
+			"parentId": "3714d0db-a009-482e-a8fd-6310c821b8e6",
+			"childrenIds": ["b881c773-d9ce-4a0c-837b-ef229466842b"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9f94-1fdc-74ef-ba1a-c3f724ff2620",
+				"timestamp": "2026-02-27T15:13:58.032Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9f94-1fdc-74ef-ba1a-c3f724ff2620",
+					"timestamp": "2026-02-27T15:14:09.612Z",
+					"action": "cascade: planned→in_progress (child I7.1.1 started)"
+				},
+				{
+					"taskId": "019c9f94-1fdc-74ef-ba1a-c3f724ff2620",
+					"timestamp": "2026-02-27T15:16:09.780Z",
+					"action": "cascade: in_progress→done (all children terminated)"
+				}
+			],
+			"assumption": "few-shot 示例的行为分布需要与目标模型对齐（Deep ~50%, Reflect ~25%, Explore ~15%）。示例必须来自同一风格，不能压缩。如果示例的推理结构不被模型模仿（即模型行为与无示例时无显著差异），则此方案失败。",
+			"maxChildIndex": 1
+		},
+		"b881c773-d9ce-4a0c-837b-ef229466842b": {
+			"id": "b881c773-d9ce-4a0c-837b-ef229466842b",
+			"shortId": "I7.1.1",
+			"type": "impl",
+			"content": "重写 spirit.ts 为 v7.0：Layer 1 local 事实 + Layer 2 few-shot QA 示例",
+			"status": "done",
+			"parentId": "68d33283-6377-4eaa-bcc6-b67131f5c03e",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "4bb4efd10ecff4835bf1c17bef5ee0a4d3e40f84",
+					"commitMessage": "[intent:I7.1.1] rewrite spirit.ts to v7.0: Layer 1 local facts + Layer 2 few-shot QA examples with Deep→Reflect→Explore oscillation",
+					"files": [
+						".roo/cache/search/index.json",
+						".roo/intent-tree.json",
+						".roo/skills/roo-conflict-resolution/SKILL.md",
+						".roo/skills/roo-translation/SKILL.md",
+						"src/core/prompts/sections/spirit.ts",
+						"src/package.json"
+					],
+					"diffSummary": "6 file(s), +255 -88",
+					"timestamp": "2026-02-27T15:16:09.780Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c9f94-1fdc-74ef-ba1a-c3f724ff2620",
+				"timestamp": "2026-02-27T15:14:04.900Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9f94-1fdc-74ef-ba1a-c3f724ff2620",
+					"timestamp": "2026-02-27T15:14:09.612Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c9f94-1fdc-74ef-ba1a-c3f724ff2620",
+					"timestamp": "2026-02-27T15:16:09.780Z",
+					"action": "bound commit 4bb4efd"
+				},
+				{
+					"taskId": "019c9f94-1fdc-74ef-ba1a-c3f724ff2620",
+					"timestamp": "2026-02-27T15:16:09.780Z",
+					"action": "updated: status→done"
+				}
+			],
+			"assumption": "spirit.ts 导出 getSpiritSection() 函数，被 system.ts 直接调用拼入系统提示词。接口不变，只改内容。"
 		}
 	},
 	"rootIds": [
@@ -1530,7 +1636,8 @@
 		"a88cd60f-bd83-4b79-845b-21244adddc27",
 		"7739cad8-7ae0-4af8-818e-8b669b589872",
 		"0d6749c8-5643-459d-a3dd-2775873794e1",
-		"b4eaac36-79d1-42f1-8f71-a6d233ee5d83"
+		"b4eaac36-79d1-42f1-8f71-a6d233ee5d83",
+		"3714d0db-a009-482e-a8fd-6310c821b8e6"
 	],
 	"shortIdIndex": {
 		"G1": "7d7be656-3aa0-4b70-8f09-6bbcfaab2135",
@@ -1582,7 +1689,10 @@
 		"G6": "b4eaac36-79d1-42f1-8f71-a6d233ee5d83",
 		"O6.1": "b8766cd8-24db-450d-9200-709d2bd5716a",
 		"A6.1.1": "3a9e5b75-7649-4edb-8d98-08ee3f8136bd",
-		"I6.1.1.1": "8fa3cd8e-81ed-4806-9826-a3c8cacab6c6"
+		"I6.1.1.1": "8fa3cd8e-81ed-4806-9826-a3c8cacab6c6",
+		"G7": "3714d0db-a009-482e-a8fd-6310c821b8e6",
+		"A7.1": "68d33283-6377-4eaa-bcc6-b67131f5c03e",
+		"I7.1.1": "b881c773-d9ce-4a0c-837b-ef229466842b"
 	},
-	"rootMaxChildIndex": 6
+	"rootMaxChildIndex": 7
 }
