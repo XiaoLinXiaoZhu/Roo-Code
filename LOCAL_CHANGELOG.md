@@ -1,5 +1,27 @@
 # Roo Code Changelog
 
+## [3.52.8] - 2026-02-27
+
+### ✨ Intent Tree 父子节点状态联动
+
+为 intent-tree 添加 4 条状态联动规则，使父子节点状态自动保持一致：
+
+- **规则1 — 添加子节点时父链回退**：在已完成的节点下新增子节点时，自动将父链上所有 `done` 状态的祖先回退为 `planned`
+- **规则2 — 完成时递归向上冒泡**：标记节点为 `done` 后，如果父节点的所有子节点都已终结（`done`/`pruned`/`superseded`），父节点自动标记为 `done`，递归向上
+- **规则3 — 进行中递归向上传播**：标记节点为 `in_progress` 后，父链上 `planned` 和 `done` 的祖先都自动设为 `in_progress`（`done→in_progress` 为重新打开语义）
+- **规则4 — 完成时警告未完成子项**：标记拥有未完成子项的节点为 `done` 时，生成警告但不阻止操作
+
+所有联动变更遵循透明原则，在工具返回中通过 `<cascade_updates>` 和 `<warnings>` 明确列出受影响的节点。
+
+**涉及文件**：
+
+- `src/core/intent-tree/types.ts` — 新增 `CascadeUpdate`、`UpdateNodeResult` 类型
+- `src/core/intent-tree/IntentTree.ts` — 新增 4 个联动方法，修改 `addNode`/`updateNode` 返回值
+- `src/core/tools/AddIntentTool.ts` — 集成联动结果到 XML 返回
+- `src/core/tools/UpdateIntentTool.ts` — 集成联动结果和警告到 XML 返回
+- `src/core/tools/CommitIntentTool.ts` — 集成联动结果和警告到 XML 返回
+- `src/core/intent-tree/__tests__/cascade.spec.ts` — 新增 24 个联动测试用例
+
 ## [3.52.7] - 2026-02-27
 
 ### 🔧 Agent-as-Tool 专有系统提示词

@@ -1097,7 +1097,8 @@
 				"75696745-ba4b-4496-b4c1-5b94ddec0726",
 				"6506bcc9-ba23-44df-8e3a-f392302834cd",
 				"a8e7fe14-34ec-42e3-ac1f-b0fe9fe99163",
-				"25478349-e19d-4191-ab31-8de88fb338ac"
+				"25478349-e19d-4191-ab31-8de88fb338ac",
+				"38eb50ed-1121-48bf-a983-090a1ddd182e"
 			],
 			"codeBindings": [],
 			"createdBy": {
@@ -1107,7 +1108,7 @@
 			},
 			"modifiedBy": [],
 			"assumption": "用户明确要求拓展 intent-tree 的状态联动功能。当前 IntentTree 的 addNode/updateNode/bindCode 都是独立操作，不会自动影响父节点或子节点的状态。这是一个新的功能需求，不属于现有任何 goal。",
-			"maxChildIndex": 4
+			"maxChildIndex": 5
 		},
 		"75696745-ba4b-4496-b4c1-5b94ddec0726": {
 			"id": "75696745-ba4b-4496-b4c1-5b94ddec0726",
@@ -1327,6 +1328,41 @@
 					"action": "updated: status→done"
 				}
 			]
+		},
+		"38eb50ed-1121-48bf-a983-090a1ddd182e": {
+			"id": "38eb50ed-1121-48bf-a983-090a1ddd182e",
+			"shortId": "I5.5",
+			"type": "impl",
+			"content": "记录 3.52.8 changelog: Intent Tree 父子节点状态联动",
+			"status": "done",
+			"parentId": "0d6749c8-5643-459d-a3dd-2775873794e1",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "4b773a2ac75a633668c3b6521055e27feeb4c176",
+					"commitMessage": "[intent:G5] 记录 3.52.8 changelog: Intent Tree 父子节点状态联动",
+					"files": ["LOCAL_CHANGELOG.md", "src/package.json"],
+					"diffSummary": "2 file(s), +23 -1",
+					"timestamp": "2026-02-27T09:47:34.858Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+				"timestamp": "2026-02-27T09:47:34.858Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+					"timestamp": "2026-02-27T09:47:34.859Z",
+					"action": "bound commit 4b773a2"
+				},
+				{
+					"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+					"timestamp": "2026-02-27T09:47:34.859Z",
+					"action": "updated: status→done"
+				}
+			]
 		}
 	},
 	"rootIds": [
@@ -1381,7 +1417,8 @@
 		"I5.1.1.2": "8c18e314-58e2-4919-a4d5-914891a8024a",
 		"I5.2.1": "37c58c95-c1f6-4efe-9152-dc350738824a",
 		"I5.3.1": "ad66032c-8253-4552-9c4c-a09447b5f8c9",
-		"I5.4": "25478349-e19d-4191-ab31-8de88fb338ac"
+		"I5.4": "25478349-e19d-4191-ab31-8de88fb338ac",
+		"I5.5": "38eb50ed-1121-48bf-a983-090a1ddd182e"
 	},
 	"rootMaxChildIndex": 5
 }
