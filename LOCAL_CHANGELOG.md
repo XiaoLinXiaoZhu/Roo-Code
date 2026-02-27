@@ -1,5 +1,22 @@
 # Roo Code Changelog
 
+## [3.52.7] - 2026-02-27
+
+### 🔧 Agent-as-Tool 专有系统提示词
+
+将 4 个 agent-as-tool 工具从共享 system-prompt + todo 控制方式，改为每个工具配置专有系统提示词。
+
+- **基础设施**：
+    - `CreateTaskOptions` 新增 `systemPromptOverride` 字段
+    - `Task.getSystemPrompt()` 支持 override 时 early return，跳过模式提示词拼接
+    - `delegateParentAndOpenChild` 透传 `systemPromptOverride`，`initialTodos` 改为可选
+- **咨询专家** (`ConsultExpertTool`)：邮件场景 + deep-thinking 风格提示词，按 consultType 注入方法论指导，专家先写入 `.roo/expert-output/` 再 attempt_completion 引用
+- **代码编辑** (`ApplyEditTool`)：纯代码编辑规范（读→改→验证），不增加额外约束
+- **工具构建** (`BuildToolTool`)：工具构建规范（单一职责 + 输出限制 + 存放位置指导）
+- **项目搜索** (`SearchProjectTool`)：LSP 优先的分析方法（find_definition/find_usages 优先于文本搜索）
+- **模式变更**：expert 模式 groups 新增 `edit`（支持写入文档）
+- **移除**：所有工具的 `buildTodos` 方法和 todo 构建逻辑，行为指导融入系统提示词
+
 ## [3.52.5] - 2026-02-24
 
 ### 🐛 修复 update_intent 工具字符串 "null" 污染节点内容
