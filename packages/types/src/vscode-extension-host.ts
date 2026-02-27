@@ -786,6 +786,10 @@ export interface ClineSayTool {
 		| "pruneIntent"
 		| "commitIntent"
 		| "restructureIntent"
+		| "consultExpert"
+		| "applyEdit"
+		| "buildTool"
+		| "searchProject"
 	path?: string
 	// For readMedia
 	focusX?: number
@@ -848,6 +852,14 @@ export interface ClineSayTool {
 		key: string
 	}>
 	question?: string
+	// Properties for delegation tools (consultExpert, applyEdit, buildTool, searchProject)
+	domain?: string
+	topic?: string
+	context?: string
+	instruction?: string
+	files?: string
+	requirement?: string
+	consultType?: string
 	imageData?: string // Base64 encoded image data for generated images
 	// Properties for runSlashCommand tool
 	command?: string

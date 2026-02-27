@@ -430,6 +430,30 @@ export const ChatRowContent = ({
 				style={{ color: "var(--vscode-foreground)", marginBottom: "-1.5px" }}></span>
 		)
 
+		// All delegation tools that create child tasks via delegateParentAndOpenChild
+		const DELEGATION_TOOLS = new Set(["newTask", "consultExpert", "applyEdit", "buildTool", "searchProject"])
+
+		// Helper: find the child task ID for a delegation tool message
+		const getDelegationChildTaskId = () => {
+			const delegationMessages = clineMessages.filter((msg) => {
+				if (msg.type === "ask" && msg.ask === "tool") {
+					const t = safeJsonParse<ClineSayTool>(msg.text)
+					return t?.tool !== undefined && DELEGATION_TOOLS.has(t.tool)
+				}
+				return false
+			})
+			const thisIndex = delegationMessages.findIndex((msg) => msg.ts === message.ts)
+			const ids = currentTaskItem?.childIds || []
+			return thisIndex >= 0 && thisIndex < ids.length ? ids[thisIndex] : undefined
+		}
+
+		// Helper: check if next message is a subtask_result
+		const getIsFollowedBySubtaskResult = () => {
+			const idx = clineMessages.findIndex((msg) => msg.ts === message.ts)
+			const next = idx >= 0 ? clineMessages[idx + 1] : undefined
+			return next?.type === "say" && next?.say === "subtask_result"
+		}
+
 		switch (tool.tool as string) {
 			case "editedExistingFile":
 			case "appliedDiff":
@@ -1279,30 +1303,9 @@ export const ChatRowContent = ({
 						</div>
 					</>
 				)
-			case "newTask":
-				// Find all newTask messages to determine which child task ID corresponds to this message
-				const newTaskMessages = clineMessages.filter((msg) => {
-					if (msg.type === "ask" && msg.ask === "tool") {
-						const t = safeJsonParse<ClineSayTool>(msg.text)
-						return t?.tool === "newTask"
-					}
-					return false
-				})
-				const thisNewTaskIndex = newTaskMessages.findIndex((msg) => msg.ts === message.ts)
-				const childIds = currentTaskItem?.childIds || []
-
-				// Only get the child task ID if this newTask has been approved (has a corresponding entry in childIds)
-				// This prevents showing a link to a previous task when the current newTask is still awaiting approval
-				// Note: We don't use delegatedToId here because it persists after child tasks complete and would
-				// incorrectly point to the previous task when a new newTask is awaiting approval
-				const childTaskId =
-					thisNewTaskIndex >= 0 && thisNewTaskIndex < childIds.length ? childIds[thisNewTaskIndex] : undefined
-
-				// Check if the next message is a subtask_result - if so, don't show the button
-				// since the result is displayed right after this message
-				const currentMessageIndex = clineMessages.findIndex((msg) => msg.ts === message.ts)
-				const nextMessage = currentMessageIndex >= 0 ? clineMessages[currentMessageIndex + 1] : undefined
-				const isFollowedBySubtaskResult = nextMessage?.type === "say" && nextMessage?.say === "subtask_result"
+			case "newTask": {
+				const newTaskChildId = getDelegationChildTaskId()
+				const newTaskFollowedByResult = getIsFollowedBySubtaskResult()
 
 				return (
 					<>
@@ -1319,11 +1322,11 @@ export const ChatRowContent = ({
 						<div className="border-l border-muted-foreground/80 ml-2 pl-4 pb-1">
 							<MarkdownBlock markdown={tool.content} />
 							<div>
-								{childTaskId && !isFollowedBySubtaskResult && (
+								{newTaskChildId && !newTaskFollowedByResult && (
 									<button
 										className="cursor-pointer flex gap-1 items-center mt-2 text-vscode-descriptionForeground hover:text-vscode-descriptionForeground hover:underline font-normal"
 										onClick={() =>
-											vscode.postMessage({ type: "showTaskWithId", text: childTaskId })
+											vscode.postMessage({ type: "showTaskWithId", text: newTaskChildId })
 										}>
 										{t("chat:subtasks.goToSubtask")}
 										<ArrowRight className="size-3" />
@@ -1333,6 +1336,127 @@ export const ChatRowContent = ({
 						</div>
 					</>
 				)
+			}
+			case "consultExpert": {
+				const expertChildId = getDelegationChildTaskId()
+				const expertFollowedByResult = getIsFollowedBySubtaskResult()
+				return (
+					<>
+						<div style={headerStyle}>
+							{toolIcon("mortar-board")}
+							<span style={{ fontWeight: "bold" }}>
+								{t("chat:subtasks.consultExpert", { domain: tool.domain || "expert" })}
+							</span>
+						</div>
+						<div className="border-l border-muted-foreground/80 ml-2 pl-4 pb-1">
+							<div className="text-sm mb-1">
+								<span className="font-medium">{tool.topic}</span>
+							</div>
+							{tool.context && (
+								<div className="text-xs text-vscode-descriptionForeground">{tool.context}</div>
+							)}
+							<div>
+								{expertChildId && !expertFollowedByResult && (
+									<button
+										className="cursor-pointer flex gap-1 items-center mt-2 text-vscode-descriptionForeground hover:text-vscode-descriptionForeground hover:underline font-normal"
+										onClick={() =>
+											vscode.postMessage({ type: "showTaskWithId", text: expertChildId })
+										}>
+										{t("chat:subtasks.goToSubtask")}
+										<ArrowRight className="size-3" />
+									</button>
+								)}
+							</div>
+						</div>
+					</>
+				)
+			}
+			case "applyEdit": {
+				const editChildId = getDelegationChildTaskId()
+				const editFollowedByResult = getIsFollowedBySubtaskResult()
+				return (
+					<>
+						<div style={headerStyle}>
+							{toolIcon("edit")}
+							<span style={{ fontWeight: "bold" }}>{t("chat:subtasks.applyEdit")}</span>
+						</div>
+						<div className="border-l border-muted-foreground/80 ml-2 pl-4 pb-1">
+							<MarkdownBlock markdown={tool.instruction || tool.content || ""} />
+							{tool.files && (
+								<div className="text-xs text-vscode-descriptionForeground mt-1">
+									{t("chat:subtasks.scope")}: {tool.files}
+								</div>
+							)}
+							<div>
+								{editChildId && !editFollowedByResult && (
+									<button
+										className="cursor-pointer flex gap-1 items-center mt-2 text-vscode-descriptionForeground hover:text-vscode-descriptionForeground hover:underline font-normal"
+										onClick={() =>
+											vscode.postMessage({ type: "showTaskWithId", text: editChildId })
+										}>
+										{t("chat:subtasks.goToSubtask")}
+										<ArrowRight className="size-3" />
+									</button>
+								)}
+							</div>
+						</div>
+					</>
+				)
+			}
+			case "buildTool": {
+				const buildChildId = getDelegationChildTaskId()
+				const buildFollowedByResult = getIsFollowedBySubtaskResult()
+				return (
+					<>
+						<div style={headerStyle}>
+							{toolIcon("tools")}
+							<span style={{ fontWeight: "bold" }}>{t("chat:subtasks.buildTool")}</span>
+						</div>
+						<div className="border-l border-muted-foreground/80 ml-2 pl-4 pb-1">
+							<MarkdownBlock markdown={tool.requirement || tool.content || ""} />
+							<div>
+								{buildChildId && !buildFollowedByResult && (
+									<button
+										className="cursor-pointer flex gap-1 items-center mt-2 text-vscode-descriptionForeground hover:text-vscode-descriptionForeground hover:underline font-normal"
+										onClick={() =>
+											vscode.postMessage({ type: "showTaskWithId", text: buildChildId })
+										}>
+										{t("chat:subtasks.goToSubtask")}
+										<ArrowRight className="size-3" />
+									</button>
+								)}
+							</div>
+						</div>
+					</>
+				)
+			}
+			case "searchProject": {
+				const searchChildId = getDelegationChildTaskId()
+				const searchFollowedByResult = getIsFollowedBySubtaskResult()
+				return (
+					<>
+						<div style={headerStyle}>
+							{toolIcon("search")}
+							<span style={{ fontWeight: "bold" }}>{t("chat:subtasks.searchProject")}</span>
+						</div>
+						<div className="border-l border-muted-foreground/80 ml-2 pl-4 pb-1">
+							<MarkdownBlock markdown={tool.query || tool.content || ""} />
+							<div>
+								{searchChildId && !searchFollowedByResult && (
+									<button
+										className="cursor-pointer flex gap-1 items-center mt-2 text-vscode-descriptionForeground hover:text-vscode-descriptionForeground hover:underline font-normal"
+										onClick={() =>
+											vscode.postMessage({ type: "showTaskWithId", text: searchChildId })
+										}>
+										{t("chat:subtasks.goToSubtask")}
+										<ArrowRight className="size-3" />
+									</button>
+								)}
+							</div>
+						</div>
+					</>
+				)
+			}
 			case "finishTask":
 				return (
 					<>

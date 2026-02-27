@@ -688,7 +688,7 @@
 			"shortId": "G3",
 			"type": "goal",
 			"content": "为 agent-as-tool 工具配置专有系统提示词，替代 todo+instruction 控制方式，提升 token 效率和子任务表现",
-			"status": "planned",
+			"status": "done",
 			"parentId": null,
 			"childrenIds": ["f9daae9f-6b5e-42ec-a5cf-7e4082d8a09e", "b302314f-a6b8-493b-9b46-0cd3185b3ccd"],
 			"codeBindings": [],
@@ -697,7 +697,13 @@
 				"timestamp": "2026-02-27T03:21:44.293Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+					"timestamp": "2026-02-27T03:40:43.235Z",
+					"action": "updated: content, status→done"
+				}
+			],
 			"assumption": "用户的打磨计划明确要求：为4个 agent-as-tool 工具配置专有系统提示词，替代当前的 todo+instruction 控制方式。这是一个新的独立目标，intent tree 中没有相关节点。",
 			"maxChildIndex": 2
 		},
@@ -706,7 +712,7 @@
 			"shortId": "O3.1",
 			"type": "objective",
 			"content": "delegateParentAndOpenChild 支持 systemPromptOverride 参数，子任务创建时可覆盖模式的系统提示词",
-			"status": "planned",
+			"status": "done",
 			"parentId": "a88cd60f-bd83-4b79-845b-21244adddc27",
 			"childrenIds": ["a8a4f37a-26d3-4c34-bfe8-c64831228ffb"],
 			"codeBindings": [],
@@ -715,7 +721,13 @@
 				"timestamp": "2026-02-27T03:21:52.602Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+					"timestamp": "2026-02-27T03:40:03.496Z",
+					"action": "updated: content, status→done"
+				}
+			],
 			"assumption": "当前 delegateParentAndOpenChild 只接受 mode/message/initialTodos，没有系统提示词覆盖机制。需要新增此能力才能让工具定义专有提示词。这是实现 G3 的前提条件。",
 			"maxChildIndex": 1
 		},
@@ -724,7 +736,7 @@
 			"shortId": "O3.2",
 			"type": "objective",
 			"content": "4个工具各自配置专有系统提示词，移除 todo，只将具体问题作为指令传入",
-			"status": "planned",
+			"status": "done",
 			"parentId": "a88cd60f-bd83-4b79-845b-21244adddc27",
 			"childrenIds": ["b9725fe6-550d-4deb-8e01-cd331ff253fa"],
 			"codeBindings": [],
@@ -733,7 +745,13 @@
 				"timestamp": "2026-02-27T03:21:59.600Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+					"timestamp": "2026-02-27T03:40:14.150Z",
+					"action": "updated: content, status→done"
+				}
+			],
 			"assumption": "打磨计划的核心要求：每个工具有专有系统提示词，不再使用 todo，而是用更好的系统提示词和指令分层指导模型行为。依赖 O3.1 提供的基础设施。",
 			"maxChildIndex": 1
 		},
@@ -882,7 +900,7 @@
 			"shortId": "I3.2.1.2",
 			"type": "impl",
 			"content": "改写 ApplyEditTool：设计代码编辑专有系统提示词，移除 todo，简化指令",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "b9725fe6-550d-4deb-8e01-cd331ff253fa",
 			"childrenIds": [],
 			"codeBindings": [],
@@ -896,6 +914,11 @@
 					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
 					"timestamp": "2026-02-27T03:31:25.761Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+					"timestamp": "2026-02-27T03:39:55.271Z",
+					"action": "updated: content, status→done"
 				}
 			],
 			"assumption": "ApplyEditTool 的提示词设计方向：仅提供代码编辑规范，不增加额外约束（因为它不负责 debug 等事情）。移除 todo，简化指令。"
@@ -951,7 +974,7 @@
 			"shortId": "I3.2.1.4",
 			"type": "impl",
 			"content": "改写 SearchProjectTool：设计项目搜索专有系统提示词，移除 todo，简化指令",
-			"status": "in_progress",
+			"status": "done",
 			"parentId": "b9725fe6-550d-4deb-8e01-cd331ff253fa",
 			"childrenIds": [],
 			"codeBindings": [],
@@ -965,15 +988,104 @@
 					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
 					"timestamp": "2026-02-27T03:36:52.118Z",
 					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+					"timestamp": "2026-02-27T03:39:18.708Z",
+					"action": "updated: content, status→done"
 				}
 			],
 			"assumption": "SearchProjectTool 的提示词设计方向：指导如何通过工具和 LSP 快速分析，不增加额外约束。"
+		},
+		"7739cad8-7ae0-4af8-818e-8b669b589872": {
+			"id": "7739cad8-7ae0-4af8-818e-8b669b589872",
+			"shortId": "G4",
+			"type": "goal",
+			"content": "为 4 个 subagent 工具添加 ChatRow UI 渲染，类似 newTask 的子任务样式",
+			"status": "planned",
+			"parentId": null,
+			"childrenIds": ["065e5eb4-9604-4eab-b9bb-ccc64cfb5fd6"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+				"timestamp": "2026-02-27T04:09:48.868Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "当前 4 个 subagent 工具在 ChatRow 的 switch 中走 default: return null，没有任何 UI 渲染。用户希望它们显示类似 newTask 的子任务 UI。",
+			"maxChildIndex": 1
+		},
+		"065e5eb4-9604-4eab-b9bb-ccc64cfb5fd6": {
+			"id": "065e5eb4-9604-4eab-b9bb-ccc64cfb5fd6",
+			"shortId": "A4.1",
+			"type": "approach",
+			"content": "在 ClineSayTool 类型中添加 4 个工具名，在 ChatRow switch 中添加对应 case，复用 newTask 的子任务链接逻辑",
+			"status": "planned",
+			"parentId": "7739cad8-7ae0-4af8-818e-8b669b589872",
+			"childrenIds": ["bc49eba1-3075-4d42-ba8f-12a5d62af1e1"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+				"timestamp": "2026-02-27T04:09:58.899Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "newTask 的 UI 模式（标题 + 内容 + 子任务链接）可以直接复用。4 个工具各自显示不同的标题和内容字段即可。子任务链接逻辑（childIds 匹配）需要适配为匹配所有 delegation 工具。",
+			"maxChildIndex": 1
+		},
+		"bc49eba1-3075-4d42-ba8f-12a5d62af1e1": {
+			"id": "bc49eba1-3075-4d42-ba8f-12a5d62af1e1",
+			"shortId": "I4.1.1",
+			"type": "impl",
+			"content": "在 ClineSayTool 类型添加 4 个工具名，在 ChatRow 添加 delegation 工具的统一 UI 渲染",
+			"status": "done",
+			"parentId": "065e5eb4-9604-4eab-b9bb-ccc64cfb5fd6",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "6293b4dc1e12c9174e63c06c9c257a0f78d780f2",
+					"commitMessage": "[intent:I4.1.1] Add ChatRow UI rendering for 4 subagent delegation tools\n\n- Add consultExpert, applyEdit, buildTool, searchProject to ClineSayTool type\n- Add delegation tool fields (domain, topic, context, instruction, files, requirement, consultType) to ClineSayTool\n- Add UI cases in ChatRow with tool-specific icons and content display\n- Extract shared delegation helpers (getDelegationChildTaskId, getIsFollowedBySubtaskResult)\n- Fix newTask childIds matching to account for all delegation tools\n- Add i18n translations for subtask tool labels",
+					"files": [
+						".roo/intent-tree.json",
+						"packages/types/src/vscode-extension-host.ts",
+						"src/package.json",
+						"webview-ui/src/components/chat/ChatRow.tsx",
+						"webview-ui/src/i18n/locales/en/chat.json"
+					],
+					"diffSummary": "5 file(s), +271 -39",
+					"timestamp": "2026-02-27T05:11:46.798Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+				"timestamp": "2026-02-27T04:10:14.718Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+					"timestamp": "2026-02-27T04:10:35.230Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+					"timestamp": "2026-02-27T05:11:46.798Z",
+					"action": "bound commit 6293b4d"
+				},
+				{
+					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+					"timestamp": "2026-02-27T05:11:46.798Z",
+					"action": "updated: status→done"
+				}
+			],
+			"assumption": "子任务链接逻辑需要匹配所有 delegation 工具（不只是 newTask），因为 childIds 是按所有 delegation 工具的顺序排列的。"
 		}
 	},
 	"rootIds": [
 		"7d7be656-3aa0-4b70-8f09-6bbcfaab2135",
 		"293aa8fe-7667-4d43-9cdb-ebac42370cd9",
-		"a88cd60f-bd83-4b79-845b-21244adddc27"
+		"a88cd60f-bd83-4b79-845b-21244adddc27",
+		"7739cad8-7ae0-4af8-818e-8b669b589872"
 	],
 	"shortIdIndex": {
 		"G1": "7d7be656-3aa0-4b70-8f09-6bbcfaab2135",
@@ -1007,7 +1119,10 @@
 		"I3.2.1.1": "e1e3cebe-5be7-4682-87bf-3577a9d850cc",
 		"I3.2.1.2": "94f22f55-e95c-461b-ba6b-7950299017fc",
 		"I3.2.1.3": "07f5fe51-5908-4c46-a67f-3a3e2ab771c1",
-		"I3.2.1.4": "4a43a8c1-dc82-44a7-9a6f-1b793058c379"
+		"I3.2.1.4": "4a43a8c1-dc82-44a7-9a6f-1b793058c379",
+		"G4": "7739cad8-7ae0-4af8-818e-8b669b589872",
+		"A4.1": "065e5eb4-9604-4eab-b9bb-ccc64cfb5fd6",
+		"I4.1.1": "bc49eba1-3075-4d42-ba8f-12a5d62af1e1"
 	},
-	"rootMaxChildIndex": 3
+	"rootMaxChildIndex": 4
 }
