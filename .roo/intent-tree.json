@@ -1603,6 +1603,13 @@
 					],
 					"diffSummary": "6 file(s), +255 -88",
 					"timestamp": "2026-02-27T15:16:09.780Z"
+				},
+				{
+					"commitHash": "60fa00480c59b7ae79fa35aa388fccb1136884d8",
+					"commitMessage": "[intent:I7.1.1] add 2 more few-shot examples: incremental delivery (JWT migration) + consult_expert (multi-tenant DB isolation)",
+					"files": ["src/core/prompts/sections/spirit.ts"],
+					"diffSummary": "1 file(s), +39 -2",
+					"timestamp": "2026-02-27T15:19:02.329Z"
 				}
 			],
 			"createdBy": {
@@ -1624,6 +1631,16 @@
 				{
 					"taskId": "019c9f94-1fdc-74ef-ba1a-c3f724ff2620",
 					"timestamp": "2026-02-27T15:16:09.780Z",
+					"action": "updated: status→done"
+				},
+				{
+					"taskId": "019c9f94-1fdc-74ef-ba1a-c3f724ff2620",
+					"timestamp": "2026-02-27T15:19:02.329Z",
+					"action": "bound commit 60fa004"
+				},
+				{
+					"taskId": "019c9f94-1fdc-74ef-ba1a-c3f724ff2620",
+					"timestamp": "2026-02-27T15:19:02.329Z",
 					"action": "updated: status→done"
 				}
 			],

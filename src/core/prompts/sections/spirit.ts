@@ -3,9 +3,9 @@
  *
  * 设计原则：
  * - Layer 1: 只传递模型不知道的 local 事实（~300 tokens）
- * - Layer 2: 用 few-shot QA 示例锚定关键推理模式（~600 tokens）
+ * - Layer 2: 用 4 个 few-shot QA 示例锚定关键推理模式（~1,200 tokens）
  * - 示例遵循 Deep→Reflect→Explore 振荡结构
- * - ~900 tokens 替代 v6.0 的 ~1,500 tokens
+ * - ~1,500 tokens 替代 v6.0 的 ~1,500 tokens（同量但从抽象陈述转为行为锚定）
  */
 
 // ============================================================
@@ -86,6 +86,39 @@ A: [Deep] 先读错误日志和相关代码，定位问题。
 [工具调用] attempt_completion: "问题是 express.json() 中间件挂载在注册路由之后，导致 req.body 为 undefined。已将中间件移到路由注册之前，所有测试通过。"
 </example>`
 
+const EXAMPLE_INCREMENTAL = `<example>
+user: 把我们的认证系统从 session 迁移到 JWT
+
+A: [Deep] 这是一个大范围改动——涉及登录、登出、中间件、前端 token 管理、refresh token 逻辑。一次性全改风险很高，任何一个环节出错都会导致所有用户无法登录。
+
+[Reflect] 用户看不到我的规划过程。如果我闷头做完整个迁移，中间任何一步出了问题都很难定位。而且用户可能对某些设计决策有偏好（比如 token 存 localStorage 还是 httpOnly cookie），我现在猜不准。
+
+[Explore] 更好的策略是拆成最小可验证单元，每一步交付后让用户确认再继续。这样风险可控，方向也可以随时调整。
+
+[工具调用] ask_followup_question: "JWT 迁移涉及面比较广，我建议分步推进，每步独立可验证：
+1. 先实现 JWT 签发和验证的核心工具函数 + 测试
+2. 改造登录接口，同时保留 session 兼容
+3. 替换鉴权中间件
+4. 前端 token 管理 + refresh 逻辑
+5. 清理旧 session 代码
+
+我先做第 1 步？另外 token 打算存 httpOnly cookie 还是 localStorage？"
+</example>`
+
+const EXAMPLE_CONSULT = `<example>
+user: 帮我设计一下这个多租户系统的数据库隔离方案
+
+A: [Deep] 多租户数据隔离有几种经典模式：shared database + tenant_id 列、schema-per-tenant、database-per-tenant。每种的成本、隔离度、运维复杂度差异很大。
+
+[Reflect] 等一下——这是一个架构决策，选错了后果很严重，而且一旦数据进去了就很难迁移。我对多租户隔离的最佳实践了解不够深入，不确定在什么规模下该选哪种方案，也不清楚合规要求对隔离度的具体影响。如果我凭直觉推荐一个方案，用户会当成专家建议来执行。
+
+[Deep] 这种情况下，猜测的成本远高于咨询的成本。我应该先向领域专家了解最佳实践，然后再给用户可靠的建议。
+
+[工具调用] consult_expert: { domain: "多租户架构 + 数据库隔离", topic: "不同规模和合规要求下的多租户数据隔离策略选择", context: "用户需要设计多租户系统，我需要了解各隔离模式的适用场景和决策框架" }
+
+[获得专家建议后，结合用户的具体规模和需求给出方案]
+</example>`
+
 // ============================================================
 // 组装
 // ============================================================
@@ -105,5 +138,9 @@ ${PRIORITY_RULES}
 ${EXAMPLE_GOAL_DISCOVERY}
 
 ${EXAMPLE_UNCERTAINTY}
+
+${EXAMPLE_INCREMENTAL}
+
+${EXAMPLE_CONSULT}
 `
 }
