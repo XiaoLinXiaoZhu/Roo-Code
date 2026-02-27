@@ -17,6 +17,15 @@
 - **模式变更**：expert 模式 groups 新增 `edit`（支持写入文档）
 - **移除**：所有工具的 `buildTodos` 方法和 todo 构建逻辑，行为指导融入系统提示词
 
+### 🎨 Subagent 工具 UI 渲染
+
+为 4 个 delegation 工具（consultExpert、applyEdit、buildTool、searchProject）添加 ChatRow UI 渲染，与 newTask 风格一致。
+
+- **ClineSayTool 类型**：新增 4 个工具名和 delegation 工具字段（domain、topic、context、instruction、files、requirement、consultType）
+- **ChatRow**：为每个工具添加专属图标和内容展示（mortar-board/edit/tools/search）
+- **childIds 匹配修复**：提取统一的 delegation 工具集合，修复 newTask 只匹配自身导致的索引错位问题
+- **i18n**：新增 subtask 工具标签翻译
+
 ## [3.52.5] - 2026-02-24
 
 ### 🐛 修复 update_intent 工具字符串 "null" 污染节点内容
