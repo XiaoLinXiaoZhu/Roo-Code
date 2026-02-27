@@ -193,26 +193,26 @@ describe("IntentTree", () => {
 		test("updates status only", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Goal", parentId: null, taskId: "t1" })
-			const updated = tree.updateNode("G1", { status: "in_progress" }, "t1")
-			expect(updated).not.toBeNull()
-			expect(updated!.status).toBe("in_progress")
-			expect(updated!.content).toBe("Goal")
+			const result = tree.updateNode("G1", { status: "in_progress" }, "t1")
+			expect(result).not.toBeNull()
+			expect(result!.node.status).toBe("in_progress")
+			expect(result!.node.content).toBe("Goal")
 		})
 
 		test("updates content only", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Old", parentId: null, taskId: "t1" })
-			const updated = tree.updateNode("G1", { content: "New" }, "t1")
-			expect(updated!.content).toBe("New")
-			expect(updated!.status).toBe("planned")
+			const result = tree.updateNode("G1", { content: "New" }, "t1")
+			expect(result!.node.content).toBe("New")
+			expect(result!.node.status).toBe("planned")
 		})
 
 		test("updates both status and content", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Old", parentId: null, taskId: "t1" })
-			const updated = tree.updateNode("G1", { status: "done", content: "New" }, "t1")
-			expect(updated!.status).toBe("done")
-			expect(updated!.content).toBe("New")
+			const result = tree.updateNode("G1", { status: "done", content: "New" }, "t1")
+			expect(result!.node.status).toBe("done")
+			expect(result!.node.content).toBe("New")
 		})
 
 		test("returns null for unknown node", () => {
@@ -233,9 +233,9 @@ describe("IntentTree", () => {
 			const tree = new IntentTree(treePath)
 			tree.addNode({ type: "goal", content: "Original content", parentId: null, taskId: "t1" })
 			// Simulate model passing empty content when only updating status
-			const updated = tree.updateNode("G1", { status: "in_progress", content: "" }, "t2")
-			expect(updated!.status).toBe("in_progress")
-			expect(updated!.content).toBe("Original content") // Should NOT be cleared
+			const result = tree.updateNode("G1", { status: "in_progress", content: "" }, "t2")
+			expect(result!.node.status).toBe("in_progress")
+			expect(result!.node.content).toBe("Original content") // Should NOT be cleared
 		})
 	})
 

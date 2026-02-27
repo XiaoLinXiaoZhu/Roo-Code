@@ -67,13 +67,13 @@ export class UpdateIntentTool extends BaseTool<"update_intent"> {
 			const oldStatus = oldNode.status
 
 			// 执行更新
-			const updated = task.intentTree.updateNode(
+			const result = task.intentTree.updateNode(
 				params.nodeId,
 				{ content: newContent, status: params.status },
 				task.taskId,
 			)
 
-			if (!updated) {
+			if (!result) {
 				task.consecutiveMistakeCount++
 				task.recordToolError("update_intent")
 				task.didToolFailInCurrentTurn = true
@@ -83,6 +83,8 @@ export class UpdateIntentTool extends BaseTool<"update_intent"> {
 				)
 				return
 			}
+
+			const updated = result.node
 
 			await task.intentTree.save()
 
@@ -112,6 +114,8 @@ export class UpdateIntentTool extends BaseTool<"update_intent"> {
 					codeBindings: updated.codeBindings,
 				},
 				changes,
+				cascadeUpdates: result.cascadeUpdates,
+				warnings: result.warnings,
 				tree: task.intentTree.getData(),
 			}
 
@@ -131,9 +135,25 @@ export class UpdateIntentTool extends BaseTool<"update_intent"> {
 
 			// 构建返回给 LLM 的 XML 结果（与 toSummary 格式一致）
 			const tagName = updated.type
-			pushToolResult(
-				`<${tagName} id="${updated.shortId}" status="${updated.status}">${updated.content}</${tagName}>`,
-			)
+			let response = `<${tagName} id="${updated.shortId}" status="${updated.status}">${updated.content}</${tagName}>`
+
+			// 附加联动变更信息
+			if (result.cascadeUpdates.length > 0) {
+				const cascadeLines = result.cascadeUpdates
+					.map(
+						(c) =>
+							`  <cascade node="${c.shortId}" from="${c.oldStatus}" to="${c.newStatus}">${c.reason}</cascade>`,
+					)
+					.join("\n")
+				response += `\n<cascade_updates>\n${cascadeLines}\n</cascade_updates>`
+			}
+
+			// 附加警告信息
+			if (result.warnings.length > 0) {
+				response += `\n<warnings>\n${result.warnings.map((w) => `  <warning>${w}</warning>`).join("\n")}\n</warnings>`
+			}
+
+			pushToolResult(response)
 		} catch (error) {
 			await handleError("update intent", error as Error)
 		}

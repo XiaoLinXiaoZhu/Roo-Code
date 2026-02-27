@@ -106,6 +106,7 @@ export class AddIntentTool extends BaseTool<"add_intent"> {
 				typeAdjusted: result.typeAdjusted,
 				requestedType: result.requestedType,
 				adjustmentReason: result.adjustmentReason,
+				cascadeUpdates: result.cascadeUpdates,
 				tree: task.intentTree.getData(),
 			}
 
@@ -134,6 +135,17 @@ export class AddIntentTool extends BaseTool<"add_intent"> {
 			}
 
 			response += `</${tagName}>`
+
+			// 附加联动变更信息
+			if (result.cascadeUpdates.length > 0) {
+				const cascadeLines = result.cascadeUpdates
+					.map(
+						(c) =>
+							`  <cascade node="${c.shortId}" from="${c.oldStatus}" to="${c.newStatus}">${c.reason}</cascade>`,
+					)
+					.join("\n")
+				response += `\n<cascade_updates>\n${cascadeLines}\n</cascade_updates>`
+			}
 
 			pushToolResult(response)
 		} catch (error) {

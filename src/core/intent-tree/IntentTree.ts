@@ -21,6 +21,8 @@ import type {
 	IntentTreeData,
 	AddNodeResult,
 	ReparentResult,
+	CascadeUpdate,
+	UpdateNodeResult,
 } from "./types"
 
 /**
@@ -308,22 +310,27 @@ export class IntentTree {
 
 		this.dirty = true
 
+		// 规则1：添加子节点后，将父链上 done 的祖先回退为 planned
+		const cascadeUpdates = this.cascadeParentPlannedOnAdd(id, params.taskId)
+
 		return {
 			node,
 			typeAdjusted: typeAdjustment.adjusted,
 			requestedType: typeAdjustment.adjusted ? params.type : undefined,
 			adjustmentReason: typeAdjustment.reason,
+			cascadeUpdates,
 		}
 	}
 
 	/**
 	 * 更新节点内容/状态。nodeId 支持 shortId。
+	 * 返回 UpdateNodeResult，包含联动变更和警告。
 	 */
 	updateNode(
 		nodeId: string,
 		updates: { content?: string; status?: IntentNodeStatus },
 		taskId: string,
-	): IntentNode | null {
+	): UpdateNodeResult | null {
 		const resolvedId = this.resolveId(nodeId)
 		if (!resolvedId) {
 			return null
@@ -358,7 +365,21 @@ export class IntentTree {
 			this.dirty = true
 		}
 
-		return node
+		// 状态联动
+		let cascadeUpdates: CascadeUpdate[] = []
+		let warnings: string[] = []
+
+		if (updates.status === "done") {
+			// 规则4：检查未完成子项，生成警告
+			warnings = this.checkIncompleteChildren(resolvedId)
+			// 规则2：递归向上冒泡完成
+			cascadeUpdates = this.cascadeDoneUpward(resolvedId, taskId)
+		} else if (updates.status === "in_progress") {
+			// 规则3：递归向上传播进行中
+			cascadeUpdates = this.cascadeInProgressUpward(resolvedId, taskId)
+		}
+
+		return { node, cascadeUpdates, warnings }
 	}
 
 	/**
@@ -424,6 +445,161 @@ export class IntentTree {
 
 		this.dirty = true
 		return pruned
+	}
+
+	// ========================================================================
+	// 状态联动（cascade）
+	// ========================================================================
+
+	/**
+	 * 规则1：添加子节点后，将父链上所有 done 状态的祖先回退为 planned。
+	 * 理由：如果一个节点已完成但又新增了子任务，说明它实际上还没完成。
+	 */
+	private cascadeParentPlannedOnAdd(childNodeId: string, taskId: string): CascadeUpdate[] {
+		const updates: CascadeUpdate[] = []
+		const child = this.data.nodes[childNodeId]
+		if (!child?.parentId) return updates
+
+		let currentId: string | null = child.parentId
+		while (currentId) {
+			const ancestor: IntentNode | undefined = this.data.nodes[currentId]
+			if (!ancestor) break
+
+			if (ancestor.status === "done") {
+				const oldStatus = ancestor.status
+				ancestor.status = "planned"
+				ancestor.modifiedBy.push({
+					taskId,
+					timestamp: new Date().toISOString(),
+					action: `cascade: done→planned (child added: ${child.shortId})`,
+				})
+				updates.push({
+					shortId: ancestor.shortId,
+					oldStatus,
+					newStatus: "planned",
+					reason: `子节点 ${child.shortId} 被添加，父项重新标记为未完成`,
+				})
+			}
+
+			currentId = ancestor.parentId
+		}
+
+		if (updates.length > 0) this.dirty = true
+		return updates
+	}
+
+	/**
+	 * 规则2：标记完成后，递归向上冒泡——如果父节点的所有子节点都已终结，则父节点也标记为 done。
+	 * "已终结"包括 done、pruned、superseded。
+	 */
+	private cascadeDoneUpward(nodeId: string, taskId: string): CascadeUpdate[] {
+		const updates: CascadeUpdate[] = []
+		const node = this.data.nodes[nodeId]
+		if (!node?.parentId) return updates
+
+		let currentParentId: string | null = node.parentId
+		while (currentParentId) {
+			const parent: IntentNode | undefined = this.data.nodes[currentParentId]
+			if (!parent) break
+
+			// 如果父节点已经是 pruned 或 superseded，不参与冒泡
+			if (parent.status === "pruned" || parent.status === "superseded") break
+
+			// 检查所有子节点是否都已终结
+			const allChildrenTerminated = parent.childrenIds.every((cid: string) => {
+				const child = this.data.nodes[cid]
+				if (!child) return true
+				return child.status === "done" || child.status === "pruned" || child.status === "superseded"
+			})
+
+			if (allChildrenTerminated && parent.status !== "done") {
+				const oldStatus = parent.status
+				parent.status = "done"
+				parent.modifiedBy.push({
+					taskId,
+					timestamp: new Date().toISOString(),
+					action: `cascade: ${oldStatus}→done (all children terminated)`,
+				})
+				updates.push({
+					shortId: parent.shortId,
+					oldStatus,
+					newStatus: "done",
+					reason: `所有子节点已终结，自动标记为完成`,
+				})
+				// 继续向上检查
+				currentParentId = parent.parentId
+			} else {
+				break
+			}
+		}
+
+		if (updates.length > 0) this.dirty = true
+		return updates
+	}
+
+	/**
+	 * 规则3：标记进行中后，递归向上传播——将父链上 planned 和 done 的祖先都设为 in_progress。
+	 * done→in_progress 表示"重新打开"语义。
+	 */
+	private cascadeInProgressUpward(nodeId: string, taskId: string): CascadeUpdate[] {
+		const updates: CascadeUpdate[] = []
+		const node = this.data.nodes[nodeId]
+		if (!node?.parentId) return updates
+
+		let currentId: string | null = node.parentId
+		while (currentId) {
+			const parent: IntentNode | undefined = this.data.nodes[currentId]
+			if (!parent) break
+
+			// pruned/superseded 不参与传播
+			if (parent.status === "pruned" || parent.status === "superseded") break
+
+			if (parent.status === "planned" || parent.status === "done") {
+				const oldStatus = parent.status
+				parent.status = "in_progress"
+				parent.modifiedBy.push({
+					taskId,
+					timestamp: new Date().toISOString(),
+					action: `cascade: ${oldStatus}→in_progress (child ${node.shortId} started)`,
+				})
+				updates.push({
+					shortId: parent.shortId,
+					oldStatus,
+					newStatus: "in_progress",
+					reason: `子节点 ${node.shortId} 进入进行中，父项同步更新`,
+				})
+			}
+
+			// 如果父节点已经是 in_progress，仍然继续向上检查（更上层可能是 planned/done）
+			currentId = parent.parentId
+		}
+
+		if (updates.length > 0) this.dirty = true
+		return updates
+	}
+
+	/**
+	 * 规则4：检查节点是否有未完成的子项，返回警告信息。
+	 * 不阻止操作，仅生成警告。
+	 */
+	private checkIncompleteChildren(nodeId: string): string[] {
+		const warnings: string[] = []
+		const node = this.data.nodes[nodeId]
+		if (!node || node.childrenIds.length === 0) return warnings
+
+		const incompleteChildren = node.childrenIds
+			.map((cid) => this.data.nodes[cid])
+			.filter((child): child is IntentNode => {
+				if (!child) return false
+				return child.status === "planned" || child.status === "in_progress"
+			})
+
+		if (incompleteChildren.length > 0) {
+			const childList = incompleteChildren.map((c) => `${c.shortId}(${c.status})`).join(", ")
+			warnings.push(`Warning: 节点存在 ${incompleteChildren.length} 个未完成的子项: ${childList}`)
+		}
+
+		return warnings
 	}
 
 	// ========================================================================

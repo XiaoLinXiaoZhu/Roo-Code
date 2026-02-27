@@ -125,7 +125,9 @@ export class CommitIntentTool extends BaseTool<"commit_intent"> {
 
 			// Step 2: 更新 intent tree 数据并保存到文件
 			task.intentTree.bindCode(targetNode.shortId, binding, task.taskId)
-			task.intentTree.updateNode(targetNode.shortId, { status: "done" }, task.taskId)
+			const updateResult = task.intentTree.updateNode(targetNode.shortId, { status: "done" }, task.taskId)
+			const cascadeUpdates = updateResult?.cascadeUpdates ?? []
+			const warnings = updateResult?.warnings ?? []
 			await task.intentTree.save()
 
 			// Step 3: 将更新后的 intent-tree.json 追加到同一个 commit（amend）
@@ -155,6 +157,8 @@ export class CommitIntentTool extends BaseTool<"commit_intent"> {
 				binding,
 				autoCreated: targetNode !== node,
 				originalNodeId: targetNode !== node ? node.shortId : undefined,
+				cascadeUpdates,
+				warnings,
 				tree: task.intentTree.getData(),
 			}
 
@@ -174,13 +178,30 @@ export class CommitIntentTool extends BaseTool<"commit_intent"> {
 
 			// 构建返回给 LLM 的 XML 结果（不包含 tree_summary，通过 environment 提供）
 			const autoCreatedInfo = targetNode !== node ? ` (auto-created under ${node.shortId})` : ""
-			pushToolResult(
+			let commitResponse =
 				`<intent_commit_result status="committed">\n` +
-					`  <commit hash="${commitHash}" node="${targetNode.shortId}"${autoCreatedInfo}>${commitMessage}</commit>\n` +
-					`  <files>${changedFiles.join(", ")}</files>\n` +
-					`  <diff_summary>${diffSummary}</diff_summary>\n` +
-					`</intent_commit_result>`,
-			)
+				`  <commit hash="${commitHash}" node="${targetNode.shortId}"${autoCreatedInfo}>${commitMessage}</commit>\n` +
+				`  <files>${changedFiles.join(", ")}</files>\n` +
+				`  <diff_summary>${diffSummary}</diff_summary>\n` +
+				`</intent_commit_result>`
+
+			// 附加联动变更信息
+			if (cascadeUpdates.length > 0) {
+				const cascadeLines = cascadeUpdates
+					.map(
+						(c) =>
+							`  <cascade node="${c.shortId}" from="${c.oldStatus}" to="${c.newStatus}">${c.reason}</cascade>`,
+					)
+					.join("\n")
+				commitResponse += `\n<cascade_updates>\n${cascadeLines}\n</cascade_updates>`
+			}
+
+			// 附加警告信息
+			if (warnings.length > 0) {
+				commitResponse += `\n<warnings>\n${warnings.map((w) => `  <warning>${w}</warning>`).join("\n")}\n</warnings>`
+			}
+
+			pushToolResult(commitResponse)
 		} catch (error) {
 			await handleError("commit intent", error as Error)
 		}

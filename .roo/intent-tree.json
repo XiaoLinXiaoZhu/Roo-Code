@@ -1085,13 +1085,256 @@
 				}
 			],
 			"assumption": "子任务链接逻辑需要匹配所有 delegation 工具（不只是 newTask），因为 childIds 是按所有 delegation 工具的顺序排列的。"
+		},
+		"0d6749c8-5643-459d-a3dd-2775873794e1": {
+			"id": "0d6749c8-5643-459d-a3dd-2775873794e1",
+			"shortId": "G5",
+			"type": "goal",
+			"content": "为 intent-tree 添加父子节点状态联动机制：添加子节点时父项回退为未完成、标记完成时递归向上冒泡、标记进行中时递归向上传播、标记完成时警告未完成子项",
+			"status": "planned",
+			"parentId": null,
+			"childrenIds": [
+				"75696745-ba4b-4496-b4c1-5b94ddec0726",
+				"6506bcc9-ba23-44df-8e3a-f392302834cd",
+				"a8e7fe14-34ec-42e3-ac1f-b0fe9fe99163",
+				"25478349-e19d-4191-ab31-8de88fb338ac"
+			],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+				"timestamp": "2026-02-27T08:44:23.323Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "用户明确要求拓展 intent-tree 的状态联动功能。当前 IntentTree 的 addNode/updateNode/bindCode 都是独立操作，不会自动影响父节点或子节点的状态。这是一个新的功能需求，不属于现有任何 goal。",
+			"maxChildIndex": 4
+		},
+		"75696745-ba4b-4496-b4c1-5b94ddec0726": {
+			"id": "75696745-ba4b-4496-b4c1-5b94ddec0726",
+			"shortId": "O5.1",
+			"type": "objective",
+			"content": "在 IntentTree 核心类中实现 4 条状态联动规则，返回联动变更列表",
+			"status": "planned",
+			"parentId": "0d6749c8-5643-459d-a3dd-2775873794e1",
+			"childrenIds": ["223cc375-ee93-4e23-abcf-db6e9f2e00f2"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+				"timestamp": "2026-02-27T08:46:25.629Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "联动逻辑属于核心层职责（IntentTree.ts），不应散落在各工具中。工具层只负责将联动结果格式化后返回给 LLM。",
+			"maxChildIndex": 1
+		},
+		"6506bcc9-ba23-44df-8e3a-f392302834cd": {
+			"id": "6506bcc9-ba23-44df-8e3a-f392302834cd",
+			"shortId": "O5.2",
+			"type": "objective",
+			"content": "在 AddIntentTool、UpdateIntentTool、CommitIntentTool 中集成联动结果，透明返回给 LLM",
+			"status": "planned",
+			"parentId": "0d6749c8-5643-459d-a3dd-2775873794e1",
+			"childrenIds": ["37c58c95-c1f6-4efe-9152-dc350738824a"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+				"timestamp": "2026-02-27T08:46:46.443Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "工具层需要调用核心层的联动方法，并将联动变更列表格式化到 XML 返回和 UI JSON 中，确保 LLM 和用户都能看到联动效果。",
+			"maxChildIndex": 1
+		},
+		"a8e7fe14-34ec-42e3-ac1f-b0fe9fe99163": {
+			"id": "a8e7fe14-34ec-42e3-ac1f-b0fe9fe99163",
+			"shortId": "O5.3",
+			"type": "objective",
+			"content": "为状态联动逻辑编写完整的单元测试",
+			"status": "planned",
+			"parentId": "0d6749c8-5643-459d-a3dd-2775873794e1",
+			"childrenIds": ["ad66032c-8253-4552-9c4c-a09447b5f8c9"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+				"timestamp": "2026-02-27T08:47:09.589Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "联动逻辑涉及递归和多种边界情况，必须有充分的测试覆盖才能确保正确性。",
+			"maxChildIndex": 1
+		},
+		"223cc375-ee93-4e23-abcf-db6e9f2e00f2": {
+			"id": "223cc375-ee93-4e23-abcf-db6e9f2e00f2",
+			"shortId": "A5.1.1",
+			"type": "approach",
+			"content": "在 IntentTree 中添加联动方法：addNode 返回 cascadeUpdates、updateNode 返回 cascadeUpdates 和 warnings，通过新的 StatusCascadeResult 类型传递",
+			"status": "planned",
+			"parentId": "75696745-ba4b-4496-b4c1-5b94ddec0726",
+			"childrenIds": ["7f249da5-46af-4bfd-8163-86471dd8f54c", "8c18e314-58e2-4919-a4d5-914891a8024a"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+				"timestamp": "2026-02-27T08:47:28.476Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "将联动逻辑封装为 private 辅助方法（cascadeParentPlanned、cascadeDoneUpward、cascadeInProgressUpward、checkIncompleteChildren），在 addNode 和 updateNode 中调用。返回类型扩展为包含 cascadeUpdates 数组。这样核心层职责清晰，工具层只需读取返回值。",
+			"maxChildIndex": 2
+		},
+		"7f249da5-46af-4bfd-8163-86471dd8f54c": {
+			"id": "7f249da5-46af-4bfd-8163-86471dd8f54c",
+			"shortId": "I5.1.1.1",
+			"type": "impl",
+			"content": "在 types.ts 中添加 CascadeUpdate 类型，扩展 AddNodeResult 和新增 UpdateNodeResult",
+			"status": "done",
+			"parentId": "223cc375-ee93-4e23-abcf-db6e9f2e00f2",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+				"timestamp": "2026-02-27T08:48:01.950Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+					"timestamp": "2026-02-27T08:48:22.401Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+					"timestamp": "2026-02-27T09:11:34.132Z",
+					"action": "updated: content, status→done"
+				}
+			],
+			"assumption": "需要在 types.ts 中添加 CascadeUpdate 和扩展 AddNodeResult/UpdateNodeResult 类型，然后在 IntentTree.ts 中实现联动逻辑，最后更新工具层。"
+		},
+		"8c18e314-58e2-4919-a4d5-914891a8024a": {
+			"id": "8c18e314-58e2-4919-a4d5-914891a8024a",
+			"shortId": "I5.1.1.2",
+			"type": "impl",
+			"content": "在 IntentTree.ts 中实现 4 个联动方法并集成到 addNode/updateNode",
+			"status": "done",
+			"parentId": "223cc375-ee93-4e23-abcf-db6e9f2e00f2",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+				"timestamp": "2026-02-27T09:11:42.532Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+					"timestamp": "2026-02-27T09:11:50.892Z",
+					"action": "updated: content, status→done"
+				}
+			],
+			"assumption": "核心联动逻辑已在 IntentTree.ts 中实现（4个 private 方法 + addNode/updateNode 集成），需要在 A5.1.1 下记录这个 impl。"
+		},
+		"37c58c95-c1f6-4efe-9152-dc350738824a": {
+			"id": "37c58c95-c1f6-4efe-9152-dc350738824a",
+			"shortId": "I5.2.1",
+			"type": "impl",
+			"content": "修改 AddIntentTool、UpdateIntentTool、CommitIntentTool 集成联动结果到 XML 返回和 UI JSON",
+			"status": "done",
+			"parentId": "6506bcc9-ba23-44df-8e3a-f392302834cd",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+				"timestamp": "2026-02-27T09:12:01.287Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+					"timestamp": "2026-02-27T09:12:09.142Z",
+					"action": "updated: content, status→done"
+				}
+			],
+			"assumption": "三个工具文件已修改完成：AddIntentTool 返回 cascadeUpdates、UpdateIntentTool 返回 cascadeUpdates+warnings、CommitIntentTool 返回 cascadeUpdates+warnings。"
+		},
+		"ad66032c-8253-4552-9c4c-a09447b5f8c9": {
+			"id": "ad66032c-8253-4552-9c4c-a09447b5f8c9",
+			"shortId": "I5.3.1",
+			"type": "impl",
+			"content": "在 IntentTree.spec.ts 中添加状态联动测试：规则1-4 各自的正常路径和边界情况",
+			"status": "done",
+			"parentId": "a8e7fe14-34ec-42e3-ac1f-b0fe9fe99163",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+				"timestamp": "2026-02-27T09:12:26.651Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+					"timestamp": "2026-02-27T09:12:33.500Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+					"timestamp": "2026-02-27T09:16:13.236Z",
+					"action": "updated: content, status→done"
+				}
+			],
+			"assumption": "联动逻辑涉及 4 条规则，每条规则都有多种边界情况需要覆盖。测试应放在现有测试文件中新增 describe 块。"
+		},
+		"25478349-e19d-4191-ab31-8de88fb338ac": {
+			"id": "25478349-e19d-4191-ab31-8de88fb338ac",
+			"shortId": "I5.4",
+			"type": "impl",
+			"content": "为 intent-tree 添加父子节点状态联动机制：添加时父链回退、完成时递归冒泡、进行中递归传播、完成时警告未完成子项",
+			"status": "done",
+			"parentId": "0d6749c8-5643-459d-a3dd-2775873794e1",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "d3d2861f6c763df474f42ffefe0b940ae6b2f925",
+					"commitMessage": "[intent:G5] 为 intent-tree 添加父子节点状态联动机制：添加时父链回退、完成时递归冒泡、进行中递归传播、完成时警告未完成子项",
+					"files": [
+						".roo/intent-tree.json",
+						"src/core/intent-tree/IntentTree.ts",
+						"src/core/intent-tree/__tests__/IntentTree.spec.ts",
+						"src/core/intent-tree/__tests__/cascade.spec.ts",
+						"src/core/intent-tree/index.ts",
+						"src/core/intent-tree/types.ts",
+						"src/core/tools/AddIntentTool.ts",
+						"src/core/tools/CommitIntentTool.ts",
+						"src/core/tools/UpdateIntentTool.ts"
+					],
+					"diffSummary": "9 file(s), +836 -30",
+					"timestamp": "2026-02-27T09:16:32.814Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+				"timestamp": "2026-02-27T09:16:32.814Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+					"timestamp": "2026-02-27T09:16:32.814Z",
+					"action": "bound commit d3d2861"
+				},
+				{
+					"taskId": "019c9e43-7bcc-76da-a764-100551d333ee",
+					"timestamp": "2026-02-27T09:16:32.814Z",
+					"action": "updated: status→done"
+				}
+			]
 		}
 	},
 	"rootIds": [
 		"7d7be656-3aa0-4b70-8f09-6bbcfaab2135",
 		"293aa8fe-7667-4d43-9cdb-ebac42370cd9",
 		"a88cd60f-bd83-4b79-845b-21244adddc27",
-		"7739cad8-7ae0-4af8-818e-8b669b589872"
+		"7739cad8-7ae0-4af8-818e-8b669b589872",
+		"0d6749c8-5643-459d-a3dd-2775873794e1"
 	],
 	"shortIdIndex": {
 		"G1": "7d7be656-3aa0-4b70-8f09-6bbcfaab2135",
@@ -1128,7 +1371,17 @@
 		"I3.2.1.4": "4a43a8c1-dc82-44a7-9a6f-1b793058c379",
 		"G4": "7739cad8-7ae0-4af8-818e-8b669b589872",
 		"A4.1": "065e5eb4-9604-4eab-b9bb-ccc64cfb5fd6",
-		"I4.1.1": "bc49eba1-3075-4d42-ba8f-12a5d62af1e1"
+		"I4.1.1": "bc49eba1-3075-4d42-ba8f-12a5d62af1e1",
+		"G5": "0d6749c8-5643-459d-a3dd-2775873794e1",
+		"O5.1": "75696745-ba4b-4496-b4c1-5b94ddec0726",
+		"O5.2": "6506bcc9-ba23-44df-8e3a-f392302834cd",
+		"O5.3": "a8e7fe14-34ec-42e3-ac1f-b0fe9fe99163",
+		"A5.1.1": "223cc375-ee93-4e23-abcf-db6e9f2e00f2",
+		"I5.1.1.1": "7f249da5-46af-4bfd-8163-86471dd8f54c",
+		"I5.1.1.2": "8c18e314-58e2-4919-a4d5-914891a8024a",
+		"I5.2.1": "37c58c95-c1f6-4efe-9152-dc350738824a",
+		"I5.3.1": "ad66032c-8253-4552-9c4c-a09447b5f8c9",
+		"I5.4": "25478349-e19d-4191-ab31-8de88fb338ac"
 	},
-	"rootMaxChildIndex": 4
+	"rootMaxChildIndex": 5
 }
