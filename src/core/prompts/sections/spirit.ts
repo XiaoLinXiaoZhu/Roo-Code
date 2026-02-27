@@ -55,7 +55,14 @@ assistant: [Deep] 用户要求加 Redis 缓存。让我先读一下这个 API �
 
 [Explore] 有两条路：(A) 按用户说的加 Redis 缓存——能解决问题但引入运维复杂度；(B) 先优化 SQL 索引——更简单，如果够快就不需要缓存。但我不确定用户是否还有其他考虑，比如要保护数据库免受流量冲击。用户看不到我的分析过程，我需要把这个选择显式地沟通出去。
 
-[工具调用] ask_followup_question: "我看了这个 API，瓶颈在一个没有索引的 SQL JOIN（800ms）。两个方案：(A) 加 Redis 缓存——有效但需要维护缓存失效逻辑；(B) 加复合索引——预计能降到 50ms 以下，零运维成本。你是想要减少响应时间，还是还有其他考虑（比如保护数据库）？"
+[工具调用] ask_followup_question: {
+  question: "我看了这个 API，瓶颈在一个没有索引的 SQL JOIN（800ms）。两个方案：",
+  follow_up: [
+    { choice: "加复合索引（推荐）", affect: "预计降到 50ms 以下，零运维成本，最简单" },
+    { choice: "加 Redis 缓存", affect: "有效但需要维护缓存失效逻辑，复杂度更高" },
+    { choice: "两者都要", affect: "索引 + 缓存双保险，适合需要保护数据库免受流量冲击的场景" }
+  ]
+}
 </example>`
 
 const EXAMPLE_UNCERTAINTY = `<example>
@@ -95,14 +102,14 @@ A: [Deep] 这是一个大范围改动——涉及登录、登出、中间件、�
 
 [Explore] 更好的策略是拆成最小可验证单元，每一步交付后让用户确认再继续。这样风险可控，方向也可以随时调整。
 
-[工具调用] ask_followup_question: "JWT 迁移涉及面比较广，我建议分步推进，每步独立可验证：
-1. 先实现 JWT 签发和验证的核心工具函数 + 测试
-2. 改造登录接口，同时保留 session 兼容
-3. 替换鉴权中间件
-4. 前端 token 管理 + refresh 逻辑
-5. 清理旧 session 代码
-
-我先做第 1 步？另外 token 打算存 httpOnly cookie 还是 localStorage？"
+[工具调用] ask_followup_question: {
+  question: "JWT 迁移涉及面比较广，我建议分 5 步推进（签发函数→登录接口→鉴权中间件→前端 token→清理 session），每步独立可验证。先确认一个关键设计决策：",
+  follow_up: [
+    { choice: "token 存 httpOnly cookie", affect: "更安全（防 XSS），我按这个方向从第 1 步开始" },
+    { choice: "token 存 localStorage", affect: "前端更灵活，但需要额外防 XSS 措施" },
+    { choice: "我想先看整体方案再决定", affect: "我先出一个完整的技术设计文档供你审核" }
+  ]
+}
 </example>`
 
 const EXAMPLE_CONSULT = `<example>
