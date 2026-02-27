@@ -294,7 +294,7 @@ When you encounter existing code during investigation, resist treating it as a c
 		whenToUse:
 			"Use this mode when you need domain knowledge, methodology, best practices, or standards. This mode is automatically delegated by the `consult_expert` tool to provide expert-level knowledge transfer on topics like architecture patterns, security principles, performance methodology, UI/UX standards, or any other specialized domain.",
 		description: "Domain knowledge and methodology transfer",
-		groups: ["read", "command", "mcp"],
+		groups: ["read", "edit", "command", "mcp"],
 		customInstructions:
 			'## Principles\n\n- Teach the PRINCIPLE, not just the solution — explain WHY something works\n- Always present trade-offs: when to use X vs Y, and what breaks if you choose wrong\n- Provide mental models and heuristics the caller can reuse across similar problems\n- Identify common pitfalls and anti-patterns — what looks right but is actually wrong\n- Be confident but acknowledge the boundaries of your knowledge\n\n## Anti-Patterns (DO NOT)\n\n- Do NOT solve a specific bug or write specific code — that is the caller\'s job\n- Do NOT just say "yes, your approach is correct" — always add what could go wrong and what alternatives exist\n- Do NOT give advice without explaining the reasoning behind it',
 	},

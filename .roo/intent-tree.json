@@ -726,7 +726,7 @@
 			"content": "4个工具各自配置专有系统提示词，移除 todo，只将具体问题作为指令传入",
 			"status": "planned",
 			"parentId": "a88cd60f-bd83-4b79-845b-21244adddc27",
-			"childrenIds": [],
+			"childrenIds": ["b9725fe6-550d-4deb-8e01-cd331ff253fa"],
 			"codeBindings": [],
 			"createdBy": {
 				"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
@@ -734,7 +734,8 @@
 				"action": "created"
 			},
 			"modifiedBy": [],
-			"assumption": "打磨计划的核心要求：每个工具有专有系统提示词，不再使用 todo，而是用更好的系统提示词和指令分层指导模型行为。依赖 O3.1 提供的基础设施。"
+			"assumption": "打磨计划的核心要求：每个工具有专有系统提示词，不再使用 todo，而是用更好的系统提示词和指令分层指导模型行为。依赖 O3.1 提供的基础设施。",
+			"maxChildIndex": 1
 		},
 		"a8a4f37a-26d3-4c34-bfe8-c64831228ffb": {
 			"id": "a8a4f37a-26d3-4c34-bfe8-c64831228ffb",
@@ -807,6 +808,69 @@
 				}
 			],
 			"assumption": "修改 packages/types/src/task.ts、src/core/task/Task.ts 两个文件即可完成基础设施。delegateParentAndOpenChild 在 ClineProvider.ts 中需要透传该参数。"
+		},
+		"b9725fe6-550d-4deb-8e01-cd331ff253fa": {
+			"id": "b9725fe6-550d-4deb-8e01-cd331ff253fa",
+			"shortId": "A3.2.1",
+			"type": "approach",
+			"content": "每个工具在 execute 方法中构建专有 systemPromptOverride 并传入 delegateParentAndOpenChild，移除 buildTodos，简化 buildMessage 为纯指令",
+			"status": "planned",
+			"parentId": "b302314f-a6b8-493b-9b46-0cd3185b3ccd",
+			"childrenIds": ["e1e3cebe-5be7-4682-87bf-3577a9d850cc"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+				"timestamp": "2026-02-27T03:25:12.747Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "打磨计划要求：直接配置不同的专有系统提示词，只将具体问题作为指令传入，不再使用 todo。每个工具的提示词设计方向已在 polish-1.md 中明确。",
+			"maxChildIndex": 1
+		},
+		"e1e3cebe-5be7-4682-87bf-3577a9d850cc": {
+			"id": "e1e3cebe-5be7-4682-87bf-3577a9d850cc",
+			"shortId": "I3.2.1.1",
+			"type": "impl",
+			"content": "改写 ConsultExpertTool：设计专有系统提示词，移除 todo，简化指令",
+			"status": "done",
+			"parentId": "b9725fe6-550d-4deb-8e01-cd331ff253fa",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "08523dee37eef2db23ea8b3bf7cab994db5f9212",
+					"commitMessage": "[intent:I3.2.1.1] Rewrite ConsultExpertTool with dedicated system prompt\n\n- Design email-scenario deep-thinking style system prompt\n- Dynamic expert identity via domain slot\n- Per-consultType methodology guidance\n- Remove todos, simplify task message to pure instruction\n- Expert writes to .roo/expert-output/ then references in attempt_completion\n- Add edit group to expert mode for file writing",
+					"files": [
+						".roo/intent-tree.json",
+						"packages/types/src/mode.ts",
+						"src/core/tools/ConsultExpertTool.ts"
+					],
+					"diffSummary": "3 file(s), +149 -142",
+					"timestamp": "2026-02-27T03:31:00.957Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+				"timestamp": "2026-02-27T03:25:23.674Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+					"timestamp": "2026-02-27T03:25:30.059Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+					"timestamp": "2026-02-27T03:31:00.957Z",
+					"action": "bound commit 08523de"
+				},
+				{
+					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+					"timestamp": "2026-02-27T03:31:00.957Z",
+					"action": "updated: status→done"
+				}
+			],
+			"assumption": "咨询专家需要：按问题分类设计不同提示词 + 通过插槽灵活赋予角色 + 情景驱动的 long-cot deep-thinking 风格。当前的 CONSULT_TYPE_CONFIGS 中的 approach/deliverable 信息可以融入系统提示词。"
 		}
 	},
 	"rootIds": [
@@ -841,7 +905,9 @@
 		"O3.1": "f9daae9f-6b5e-42ec-a5cf-7e4082d8a09e",
 		"O3.2": "b302314f-a6b8-493b-9b46-0cd3185b3ccd",
 		"A3.1.1": "a8a4f37a-26d3-4c34-bfe8-c64831228ffb",
-		"I3.1.1.1": "9b496670-070a-4d59-8e9d-2779467fae97"
+		"I3.1.1.1": "9b496670-070a-4d59-8e9d-2779467fae97",
+		"A3.2.1": "b9725fe6-550d-4deb-8e01-cd331ff253fa",
+		"I3.2.1.1": "e1e3cebe-5be7-4682-87bf-3577a9d850cc"
 	},
 	"rootMaxChildIndex": 3
 }
