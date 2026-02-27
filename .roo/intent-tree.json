@@ -1363,6 +1363,165 @@
 					"action": "updated: status→done"
 				}
 			]
+		},
+		"b4eaac36-79d1-42f1-8f71-a6d233ee5d83": {
+			"id": "b4eaac36-79d1-42f1-8f71-a6d233ee5d83",
+			"shortId": "G6",
+			"type": "goal",
+			"content": "设计信息本位的系统提示词，替代 SPIRIT Kernel：以用户体验期望为核心，只传递模型不知道的信息",
+			"status": "done",
+			"parentId": null,
+			"childrenIds": ["b8766cd8-24db-450d-9200-709d2bd5716a"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+				"timestamp": "2026-02-27T10:39:44.371Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+					"timestamp": "2026-02-27T10:40:04.435Z",
+					"action": "cascade: planned→in_progress (child A6.1.1 started)"
+				},
+				{
+					"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+					"timestamp": "2026-02-27T10:42:15.886Z",
+					"action": "cascade: in_progress→done (all children terminated)"
+				},
+				{
+					"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+					"timestamp": "2026-02-27T10:52:09.754Z",
+					"action": "cascade: done→planned (child added: I6.1.1.1)"
+				},
+				{
+					"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+					"timestamp": "2026-02-27T10:52:26.337Z",
+					"action": "cascade: planned→done (all children terminated)"
+				}
+			],
+			"assumption": "用户正在重新设计系统提示词，从 SPIRIT v5.1 的推理式转向信息本位。这是一个全新的目标，与现有 intent tree 中的 G1-G5 无关。用户的真实目标是：设计一个以用户体验为中心、信息本位的系统提示词，替代当前的 SPIRIT Kernel。可证伪假设：信息本位的提示词在保持行为质量的同时，token 消耗减少 50%+。",
+			"maxChildIndex": 1
+		},
+		"b8766cd8-24db-450d-9200-709d2bd5716a": {
+			"id": "b8766cd8-24db-450d-9200-709d2bd5716a",
+			"shortId": "O6.1",
+			"type": "objective",
+			"content": "体系化用户体验期望，补充遗漏维度，形成完整的提示词内容框架",
+			"status": "done",
+			"parentId": "b4eaac36-79d1-42f1-8f71-a6d233ee5d83",
+			"childrenIds": ["3a9e5b75-7649-4edb-8d98-08ee3f8136bd"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+				"timestamp": "2026-02-27T10:39:51.821Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+					"timestamp": "2026-02-27T10:40:04.435Z",
+					"action": "cascade: planned→in_progress (child A6.1.1 started)"
+				},
+				{
+					"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+					"timestamp": "2026-02-27T10:42:15.886Z",
+					"action": "cascade: in_progress→done (all children terminated)"
+				},
+				{
+					"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+					"timestamp": "2026-02-27T10:52:09.754Z",
+					"action": "cascade: done→planned (child added: I6.1.1.1)"
+				},
+				{
+					"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+					"timestamp": "2026-02-27T10:52:26.337Z",
+					"action": "cascade: planned→done (all children terminated)"
+				}
+			],
+			"assumption": "在写提示词之前，需要先把用户的 6 条期望体系化、补充遗漏，形成完整的内容需求。这是设计的前置步骤。可证伪：如果体系化后发现用户的 6 条期望已经完备无遗漏，则此步骤产出较少。",
+			"maxChildIndex": 1
+		},
+		"3a9e5b75-7649-4edb-8d98-08ee3f8136bd": {
+			"id": "3a9e5b75-7649-4edb-8d98-08ee3f8136bd",
+			"shortId": "A6.1.1",
+			"type": "approach",
+			"content": "基于专家方法论的三层模型，完成用户期望体系化 + 信息分类 + 提示词正文设计",
+			"status": "done",
+			"parentId": "b8766cd8-24db-450d-9200-709d2bd5716a",
+			"childrenIds": ["8fa3cd8e-81ed-4806-9826-a3c8cacab6c6"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+				"timestamp": "2026-02-27T10:39:59.648Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+					"timestamp": "2026-02-27T10:40:04.435Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+					"timestamp": "2026-02-27T10:42:15.886Z",
+					"action": "updated: content, status→done"
+				},
+				{
+					"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+					"timestamp": "2026-02-27T10:52:09.754Z",
+					"action": "cascade: done→planned (child added: I6.1.1.1)"
+				},
+				{
+					"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+					"timestamp": "2026-02-27T10:52:26.337Z",
+					"action": "cascade: planned→done (all children terminated)"
+				}
+			],
+			"assumption": "专家方法论提供了清晰的分类框架和表达策略。直接应用这个框架来组织内容，比从零设计更高效。可证伪：如果三层模型无法覆盖所有内容类型，需要扩展框架。",
+			"maxChildIndex": 1
+		},
+		"8fa3cd8e-81ed-4806-9826-a3c8cacab6c6": {
+			"id": "8fa3cd8e-81ed-4806-9826-a3c8cacab6c6",
+			"shortId": "I6.1.1.1",
+			"type": "impl",
+			"content": "将 spirit.ts 从 SPIRIT v5.1 推理链模式重写为 v6.0 信息本位模式",
+			"status": "done",
+			"parentId": "3a9e5b75-7649-4edb-8d98-08ee3f8136bd",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "73096b9f5f19c88404e6d86105a4c5b08dc00a4d",
+					"commitMessage": "[intent:I6.1.1.1] rewrite spirit.ts from v5.1 reasoning chains to v6.0 information-first design (~1500 chars vs ~15000 tokens)",
+					"files": [
+						".roo/expert-output/information-first-system-prompt-methodology.md",
+						".roo/expert-output/system-prompt-v6-draft.md",
+						".roo/intent-tree.json",
+						"src/core/prompts/sections/spirit.backup.ts",
+						"src/core/prompts/sections/spirit.ts"
+					],
+					"diffSummary": "5 file(s), +1466 -287",
+					"timestamp": "2026-02-27T10:52:26.337Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+				"timestamp": "2026-02-27T10:52:09.754Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+					"timestamp": "2026-02-27T10:52:26.337Z",
+					"action": "bound commit 73096b9"
+				},
+				{
+					"taskId": "019c9e80-d183-74e9-8e99-fcb4db012c0c",
+					"timestamp": "2026-02-27T10:52:26.337Z",
+					"action": "updated: status→done"
+				}
+			],
+			"assumption": "文件已重写，TypeScript 编译通过，运行时输出完整。函数签名 getSpiritSection(): string 保持不变，不影响调用方。可证伪：如果 A/B 测试发现行为退化，说明某些被归为 Layer 3 的内容实际是 Layer 2，需要恢复。"
 		}
 	},
 	"rootIds": [
@@ -1370,7 +1529,8 @@
 		"293aa8fe-7667-4d43-9cdb-ebac42370cd9",
 		"a88cd60f-bd83-4b79-845b-21244adddc27",
 		"7739cad8-7ae0-4af8-818e-8b669b589872",
-		"0d6749c8-5643-459d-a3dd-2775873794e1"
+		"0d6749c8-5643-459d-a3dd-2775873794e1",
+		"b4eaac36-79d1-42f1-8f71-a6d233ee5d83"
 	],
 	"shortIdIndex": {
 		"G1": "7d7be656-3aa0-4b70-8f09-6bbcfaab2135",
@@ -1418,7 +1578,11 @@
 		"I5.2.1": "37c58c95-c1f6-4efe-9152-dc350738824a",
 		"I5.3.1": "ad66032c-8253-4552-9c4c-a09447b5f8c9",
 		"I5.4": "25478349-e19d-4191-ab31-8de88fb338ac",
-		"I5.5": "38eb50ed-1121-48bf-a983-090a1ddd182e"
+		"I5.5": "38eb50ed-1121-48bf-a983-090a1ddd182e",
+		"G6": "b4eaac36-79d1-42f1-8f71-a6d233ee5d83",
+		"O6.1": "b8766cd8-24db-450d-9200-709d2bd5716a",
+		"A6.1.1": "3a9e5b75-7649-4edb-8d98-08ee3f8136bd",
+		"I6.1.1.1": "8fa3cd8e-81ed-4806-9826-a3c8cacab6c6"
 	},
-	"rootMaxChildIndex": 5
+	"rootMaxChildIndex": 6
 }
