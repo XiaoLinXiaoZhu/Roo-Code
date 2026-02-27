@@ -553,6 +553,9 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 	// Initial status for the task's history item (set at creation time to avoid race conditions)
 	private readonly initialStatus?: "active" | "delegated" | "completed"
 
+	// When set, completely replaces the mode-based system prompt (used by delegation tools)
+	private readonly systemPromptOverride?: string
+
 	// MessageManager for high-level message operations (lazy initialized)
 	private _messageManager?: MessageManager
 
@@ -574,6 +577,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		initialTodos,
 		workspacePath,
 		initialStatus,
+		systemPromptOverride,
 	}: TaskOptions) {
 		super()
 
@@ -636,6 +640,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		this.parentTask = parentTask
 		this.taskNumber = taskNumber
 		this.initialStatus = initialStatus
+		this.systemPromptOverride = systemPromptOverride
 
 		// Store the task's mode and API config name when it's created.
 		// For history items, use the stored values; for new tasks, we'll set them
@@ -3959,6 +3964,10 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 	}
 
 	private async getSystemPrompt(): Promise<string> {
+		if (this.systemPromptOverride) {
+			return this.systemPromptOverride
+		}
+
 		const { mcpEnabled } = (await this.providerRef.deref()?.getState()) ?? {}
 		let mcpHub: McpHub | undefined
 		if (mcpEnabled ?? true) {

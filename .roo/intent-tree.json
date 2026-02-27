@@ -682,9 +682,138 @@
 				}
 			],
 			"assumption": "intent_planning 当前有较多声明式内容（X→Y 工作流、可证伪性测试、Must NOT Do/Should Do 列表）。需要将核心规则改为推理片段，保留少量声明式骨架。"
+		},
+		"a88cd60f-bd83-4b79-845b-21244adddc27": {
+			"id": "a88cd60f-bd83-4b79-845b-21244adddc27",
+			"shortId": "G3",
+			"type": "goal",
+			"content": "为 agent-as-tool 工具配置专有系统提示词，替代 todo+instruction 控制方式，提升 token 效率和子任务表现",
+			"status": "planned",
+			"parentId": null,
+			"childrenIds": ["f9daae9f-6b5e-42ec-a5cf-7e4082d8a09e", "b302314f-a6b8-493b-9b46-0cd3185b3ccd"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+				"timestamp": "2026-02-27T03:21:44.293Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "用户的打磨计划明确要求：为4个 agent-as-tool 工具配置专有系统提示词，替代当前的 todo+instruction 控制方式。这是一个新的独立目标，intent tree 中没有相关节点。",
+			"maxChildIndex": 2
+		},
+		"f9daae9f-6b5e-42ec-a5cf-7e4082d8a09e": {
+			"id": "f9daae9f-6b5e-42ec-a5cf-7e4082d8a09e",
+			"shortId": "O3.1",
+			"type": "objective",
+			"content": "delegateParentAndOpenChild 支持 systemPromptOverride 参数，子任务创建时可覆盖模式的系统提示词",
+			"status": "planned",
+			"parentId": "a88cd60f-bd83-4b79-845b-21244adddc27",
+			"childrenIds": ["a8a4f37a-26d3-4c34-bfe8-c64831228ffb"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+				"timestamp": "2026-02-27T03:21:52.602Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "当前 delegateParentAndOpenChild 只接受 mode/message/initialTodos，没有系统提示词覆盖机制。需要新增此能力才能让工具定义专有提示词。这是实现 G3 的前提条件。",
+			"maxChildIndex": 1
+		},
+		"b302314f-a6b8-493b-9b46-0cd3185b3ccd": {
+			"id": "b302314f-a6b8-493b-9b46-0cd3185b3ccd",
+			"shortId": "O3.2",
+			"type": "objective",
+			"content": "4个工具各自配置专有系统提示词，移除 todo，只将具体问题作为指令传入",
+			"status": "planned",
+			"parentId": "a88cd60f-bd83-4b79-845b-21244adddc27",
+			"childrenIds": [],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+				"timestamp": "2026-02-27T03:21:59.600Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "打磨计划的核心要求：每个工具有专有系统提示词，不再使用 todo，而是用更好的系统提示词和指令分层指导模型行为。依赖 O3.1 提供的基础设施。"
+		},
+		"a8a4f37a-26d3-4c34-bfe8-c64831228ffb": {
+			"id": "a8a4f37a-26d3-4c34-bfe8-c64831228ffb",
+			"shortId": "A3.1.1",
+			"type": "approach",
+			"content": "通过 CreateTaskOptions.systemPromptOverride 字段，让 Task.getSystemPrompt() 在有 override 时直接返回它，跳过模式提示词拼接",
+			"status": "planned",
+			"parentId": "f9daae9f-6b5e-42ec-a5cf-7e4082d8a09e",
+			"childrenIds": ["9b496670-070a-4d59-8e9d-2779467fae97"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+				"timestamp": "2026-02-27T03:22:49.594Z",
+				"action": "created"
+			},
+			"modifiedBy": [],
+			"assumption": "这是最小侵入的方案：只需在 CreateTaskOptions 加一个字段，Task.getSystemPrompt() 加一个 early return。不需要修改 SYSTEM_PROMPT 函数签名或模式定义。假设：systemPromptOverride 足以完全替代模式的系统提示词，子任务不需要模式提示词中的任何内容。",
+			"maxChildIndex": 1
+		},
+		"9b496670-070a-4d59-8e9d-2779467fae97": {
+			"id": "9b496670-070a-4d59-8e9d-2779467fae97",
+			"shortId": "I3.1.1.1",
+			"type": "impl",
+			"content": "在 CreateTaskOptions 添加 systemPromptOverride 字段，Task 存储并在 getSystemPrompt 中使用",
+			"status": "done",
+			"parentId": "a8a4f37a-26d3-4c34-bfe8-c64831228ffb",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "d90256a5c29665bd5e59c0250554338bfc912ce6",
+					"commitMessage": "[intent:I3.1.1.1] Add systemPromptOverride support to delegation infrastructure\n\n- Add systemPromptOverride field to CreateTaskOptions (packages/types)\n- Store and use override in Task.getSystemPrompt() with early return\n- Pass through delegateParentAndOpenChild → createTask chain\n- Make initialTodos optional in delegateParentAndOpenChild params",
+					"files": [
+						".roo/intent-tree.json",
+						"docs/agent-as-tools/{ => design-legacy}/00-overview.md",
+						"docs/agent-as-tools/{ => design-legacy}/01-tools-design.md",
+						"docs/agent-as-tools/{ => design-legacy}/02-boundaries.md",
+						"docs/agent-as-tools/{ => design-legacy}/03-migration-plan.md",
+						"docs/agent-as-tools/{ => design-legacy}/04-prompts.md",
+						"docs/agent-as-tools/{ => design-legacy}/05-implementation.md",
+						"docs/agent-as-tools/{ => design-legacy}/agent-as-tools-implementation.md",
+						"docs/agent-as-tools/polish-1.md",
+						"packages/types/src/task.ts",
+						"src/core/task/Task.ts",
+						"src/core/webview/ClineProvider.ts"
+					],
+					"diffSummary": "12 file(s), +173 -10",
+					"timestamp": "2026-02-27T03:24:57.780Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+				"timestamp": "2026-02-27T03:22:56.163Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+					"timestamp": "2026-02-27T03:23:01.297Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+					"timestamp": "2026-02-27T03:24:57.780Z",
+					"action": "bound commit d90256a"
+				},
+				{
+					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+					"timestamp": "2026-02-27T03:24:57.780Z",
+					"action": "updated: status→done"
+				}
+			],
+			"assumption": "修改 packages/types/src/task.ts、src/core/task/Task.ts 两个文件即可完成基础设施。delegateParentAndOpenChild 在 ClineProvider.ts 中需要透传该参数。"
 		}
 	},
-	"rootIds": ["7d7be656-3aa0-4b70-8f09-6bbcfaab2135", "293aa8fe-7667-4d43-9cdb-ebac42370cd9"],
+	"rootIds": [
+		"7d7be656-3aa0-4b70-8f09-6bbcfaab2135",
+		"293aa8fe-7667-4d43-9cdb-ebac42370cd9",
+		"a88cd60f-bd83-4b79-845b-21244adddc27"
+	],
 	"shortIdIndex": {
 		"G1": "7d7be656-3aa0-4b70-8f09-6bbcfaab2135",
 		"O1.1": "693db0f7-2b06-489a-96dc-154e6f85ee02",
@@ -707,7 +836,12 @@
 		"A2.2.1": "da2141ea-7bdb-4ac7-8d84-7357ce7cbd06",
 		"I2.2.1.1": "f06b8928-0ebf-4ee8-8538-3857310074a9",
 		"A2.3.1": "53ea4218-1b6a-48ce-baea-3fbb08238555",
-		"I2.3.1.1": "35f2ff07-5a82-41a9-ab7e-6e56c51ca656"
+		"I2.3.1.1": "35f2ff07-5a82-41a9-ab7e-6e56c51ca656",
+		"G3": "a88cd60f-bd83-4b79-845b-21244adddc27",
+		"O3.1": "f9daae9f-6b5e-42ec-a5cf-7e4082d8a09e",
+		"O3.2": "b302314f-a6b8-493b-9b46-0cd3185b3ccd",
+		"A3.1.1": "a8a4f37a-26d3-4c34-bfe8-c64831228ffb",
+		"I3.1.1.1": "9b496670-070a-4d59-8e9d-2779467fae97"
 	},
-	"rootMaxChildIndex": 2
+	"rootMaxChildIndex": 3
 }

@@ -3191,10 +3191,11 @@ export class ClineProvider
 	public async delegateParentAndOpenChild(params: {
 		parentTaskId: string
 		message: string
-		initialTodos: TodoItem[]
+		initialTodos?: TodoItem[]
 		mode: string
+		systemPromptOverride?: string
 	}): Promise<Task> {
-		const { parentTaskId, message, initialTodos, mode } = params
+		const { parentTaskId, message, initialTodos, mode, systemPromptOverride } = params
 
 		// Metadata-driven delegation is always enabled
 
@@ -3285,6 +3286,7 @@ export class ClineProvider
 			initialTodos,
 			initialStatus: "active",
 			startTask: false,
+			systemPromptOverride,
 		})
 
 		// 5) Persist parent delegation metadata BEFORE the child starts writing.
@@ -3398,11 +3400,7 @@ export class ClineProvider
 				const msg = parentApiMessages[i]
 				if (msg.role === "assistant" && Array.isArray(msg.content)) {
 					for (const block of msg.content) {
-						if (
-							block.type === "tool_use" &&
-							block.name === "search_project" &&
-							block.id === toolUseId
-						) {
+						if (block.type === "tool_use" && block.name === "search_project" && block.id === toolUseId) {
 							const input = block.input as {
 								query?: string
 								scope?: any
