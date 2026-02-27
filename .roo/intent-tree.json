@@ -1002,7 +1002,7 @@
 			"shortId": "G4",
 			"type": "goal",
 			"content": "为 4 个 subagent 工具添加 ChatRow UI 渲染，类似 newTask 的子任务样式",
-			"status": "planned",
+			"status": "done",
 			"parentId": null,
 			"childrenIds": ["065e5eb4-9604-4eab-b9bb-ccc64cfb5fd6"],
 			"codeBindings": [],
@@ -1011,7 +1011,13 @@
 				"timestamp": "2026-02-27T04:09:48.868Z",
 				"action": "created"
 			},
-			"modifiedBy": [],
+			"modifiedBy": [
+				{
+					"taskId": "019c9d19-26a8-705d-aa06-434412d9d879",
+					"timestamp": "2026-02-27T05:11:57.377Z",
+					"action": "updated: content, status→done"
+				}
+			],
 			"assumption": "当前 4 个 subagent 工具在 ChatRow 的 switch 中走 default: return null，没有任何 UI 渲染。用户希望它们显示类似 newTask 的子任务 UI。",
 			"maxChildIndex": 1
 		},

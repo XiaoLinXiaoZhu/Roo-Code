@@ -34,7 +34,7 @@ export default {
 				content: {
 					type: "string",
 					description:
-						"Complete file content. Must be the FULL intended content - no placeholders or partial updates allowed.",
+						"Complete file content. Must be the FULL intended content - no placeholders or partial updates allowed. For large files: write a skeleton with placeholders first, then use edit() to fill each placeholder one at a time. Keep each write_to_file call under 500 characters to prevent tool call timeouts.",
 				},
 			},
 			required: ["purpose", "path", "content"],

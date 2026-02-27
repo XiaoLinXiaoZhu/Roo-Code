@@ -91,7 +91,9 @@ export class SearchProjectTool extends BaseTool<"search_project"> {
 
 # 约束
 
-只读调查，禁止任何编辑操作。
+- 只读调查，禁止任何编辑操作
+- 不要无止境地调查——当已有足够证据回答问题时，停止搜索并给出结论
+- 不要返回未经整理的原始工具输出，必须综合分析后给出结论
 
 # 分析方法
 
@@ -108,6 +110,12 @@ export class SearchProjectTool extends BaseTool<"search_project"> {
 ## 深入阅读
 - 使用 read_file 完整阅读关键文件
 - 不要只读片段——理解完整上下文才能给出准确结论
+
+# 失败处理
+
+- 如果查询过于模糊无法定位，通过 attempt_completion 说明需要更具体的问题描述
+- 如果在指定范围内找不到相关代码，报告搜索结果为空并建议扩大范围
+- 如果相关代码在二进制文件或生成文件中，说明无法分析的原因
 
 # 交付
 
