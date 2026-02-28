@@ -1817,37 +1817,72 @@
     },
     {
       "id": "71",
-      "query": "Where is ToolResponse consumed and how are image blocks from tool results processed before being sent to the API?",
+      "query": "Where is the Vertex AI or Gemini API request building logic, especially related to cached content and context caching?",
       "tags": [
         "where",
         "is",
-        "toolresponse",
-        "consumed",
-        "and",
-        "how",
-        "are",
-        "image",
-        "blocks",
-        "from",
-        "tool",
-        "results",
-        "processed",
-        "before",
-        "being",
-        "sent",
-        "to",
         "the",
-        "api"
+        "vertex",
+        "ai",
+        "or",
+        "gemini",
+        "api",
+        "request",
+        "building",
+        "logic",
+        "especially",
+        "related",
+        "to",
+        "cached",
+        "content",
+        "and",
+        "context",
+        "caching"
       ],
       "scope": {
-        "directories": "e:/_Project/Roo-Code/src",
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src",
         "filePatterns": "*.ts",
-        "excludes": "*.test.ts,*.spec.ts,node_modules"
+        "excludes": "*.spec.ts,*.test.ts,__tests__,node_modules,dist"
       },
-      "createdAt": "2026-02-26T17:23:05.885Z",
-      "gitCommit": "498c8de9a7d74b93540e07a3472b393449e717d4",
+      "createdAt": "2026-02-27T13:05:26.800Z",
+      "gitCommit": "2c245d60aa4d53b5542899d9236069ff17e6b7bd",
       "ttlHours": 168,
-      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"relevance\":{\"type\":\"string\"}}}}}}"
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}}}},\"cacheRelatedCode\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "72",
+      "query": "How does the OpenAI provider handler build completion requests, especially how it sends tools and system instructions? Looking for the openai.ts handler file.",
+      "tags": [
+        "how",
+        "does",
+        "the",
+        "openai",
+        "provider",
+        "handler",
+        "build",
+        "completion",
+        "requests",
+        "especially",
+        "it",
+        "sends",
+        "tools",
+        "and",
+        "system",
+        "instructions",
+        "looking",
+        "for",
+        "ts",
+        "file"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code/src",
+        "filePatterns": "*.ts",
+        "excludes": "*.spec.ts,*.test.ts,__tests__,node_modules,dist"
+      },
+      "createdAt": "2026-02-27T13:07:06.752Z",
+      "gitCommit": "2c245d60aa4d53b5542899d9236069ff17e6b7bd",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"handlerFile\":{\"type\":\"string\"},\"relevantMethods\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
     }
   ]
 }

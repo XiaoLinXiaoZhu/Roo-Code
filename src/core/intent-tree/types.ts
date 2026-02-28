@@ -109,6 +109,20 @@ export interface IntentTreeData {
 }
 
 /**
+ * 联动状态变更记录：记录因规则触发而自动更新的节点
+ */
+export interface CascadeUpdate {
+	/** 被联动更新的节点 shortId */
+	shortId: string
+	/** 变更前的状态 */
+	oldStatus: IntentNodeStatus
+	/** 变更后的状态 */
+	newStatus: IntentNodeStatus
+	/** 触发原因 */
+	reason: string
+}
+
+/**
  * addNode 的返回结果，包含类型调整信息
  */
 export interface AddNodeResult {
@@ -120,6 +134,20 @@ export interface AddNodeResult {
 	requestedType?: IntentNodeType
 	/** 调整原因（如果发生了调整） */
 	adjustmentReason?: string
+	/** 联动状态变更列表（规则1：父链 done→planned） */
+	cascadeUpdates: CascadeUpdate[]
+}
+
+/**
+ * updateNode 的返回结果，包含联动变更和警告
+ */
+export interface UpdateNodeResult {
+	/** 更新后的节点 */
+	node: IntentNode
+	/** 联动状态变更列表 */
+	cascadeUpdates: CascadeUpdate[]
+	/** 警告信息（如：标记完成时存在未完成子项） */
+	warnings: string[]
 }
 
 /**

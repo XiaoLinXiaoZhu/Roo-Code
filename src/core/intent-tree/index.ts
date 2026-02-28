@@ -6,4 +6,6 @@ export type {
 	IntentCodeBinding,
 	IntentProvenance,
 	IntentTreeData,
+	CascadeUpdate,
+	UpdateNodeResult,
 } from "./types"

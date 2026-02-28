@@ -98,6 +98,10 @@ export interface CreateTaskOptions {
 	/** Whether to start the task loop immediately (default: true).
 	 *  When false, the caller must invoke `task.start()` manually. */
 	startTask?: boolean
+	/** When provided, completely replaces the mode-based system prompt for this task.
+	 *  Used by delegation tools (e.g., consult_expert, apply_edit) to inject
+	 *  tool-specific system prompts instead of relying on the mode's default prompt. */
+	systemPromptOverride?: string
 }
 
 export enum TaskStatus {
