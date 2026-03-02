@@ -788,9 +788,29 @@ export class NativeToolCallParser {
 				if (partialArgs.path) {
 					nativeArgs = {
 						path: partialArgs.path,
-						focusX: partialArgs.focusX,
-						focusY: partialArgs.focusY,
+						focus_x: partialArgs.focus_x,
+						focus_y: partialArgs.focus_y,
 						scale: partialArgs.scale,
+					}
+				}
+				break
+
+			case "write":
+				if (partialArgs.path) {
+					nativeArgs = {
+						path: partialArgs.path,
+						content: partialArgs.content,
+						search: partialArgs.search,
+						expected_matches: partialArgs.expected_matches,
+					}
+				}
+				break
+
+			case "reminder":
+				if (partialArgs.content) {
+					nativeArgs = {
+						content: partialArgs.content,
+						delay: partialArgs.delay,
 					}
 				}
 				break
@@ -1264,6 +1284,26 @@ export class NativeToolCallParser {
 							focus_x: args.focus_x,
 							focus_y: args.focus_y,
 							scale: args.scale,
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "write":
+					if (args.path !== undefined && args.content !== undefined) {
+						nativeArgs = {
+							path: args.path,
+							content: args.content,
+							search: args.search,
+							expected_matches: args.expected_matches,
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "reminder":
+					if (args.content !== undefined) {
+						nativeArgs = {
+							content: args.content,
+							delay: args.delay,
 						} as NativeArgsFor<TName>
 					}
 					break

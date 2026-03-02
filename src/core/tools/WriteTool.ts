@@ -7,7 +7,7 @@ interface WriteParams {
 	path: string
 	content: string
 	search?: string | null
-	expectedMatches?: number | null
+	expected_matches?: number | null
 }
 
 /**
@@ -18,7 +18,7 @@ export class WriteTool extends BaseTool<"write"> {
 	readonly name = "write" as const
 
 	async execute(params: WriteParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
-		const { path: filePath, content, search, expectedMatches } = params
+		const { path: filePath, content, search, expected_matches } = params
 
 		if (search) {
 			// Search & replace mode → delegate to EditTool
@@ -27,7 +27,7 @@ export class WriteTool extends BaseTool<"write"> {
 					file_path: filePath,
 					old_string: search,
 					new_string: content,
-					replace_all: expectedMatches !== 1 && expectedMatches !== null && expectedMatches !== undefined,
+					replace_all: expected_matches !== 1 && expected_matches !== null && expected_matches !== undefined,
 				},
 				task,
 				callbacks,
