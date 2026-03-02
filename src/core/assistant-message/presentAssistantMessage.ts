@@ -48,6 +48,8 @@ import { updateIntentTool } from "../tools/UpdateIntentTool"
 import { pruneIntentTool } from "../tools/PruneIntentTool"
 import { commitIntentTool } from "../tools/CommitIntentTool"
 import { restructureIntentTool } from "../tools/RestructureIntentTool"
+import { writeTool } from "../tools/WriteTool"
+import { reminderTool } from "../tools/ReminderTool"
 
 import { formatResponse } from "../prompts/responses"
 import { sanitizeToolUseId } from "../../utils/tool-id"
@@ -963,6 +965,20 @@ export async function presentAssistantMessage(cline: Task) {
 					break
 				case "restructure_intent":
 					await restructureIntentTool.handle(cline, block as ToolUse<"restructure_intent">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+					})
+					break
+				case "write":
+					await writeTool.handle(cline, block as ToolUse<"write">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+					})
+					break
+				case "reminder":
+					await reminderTool.handle(cline, block as ToolUse<"reminder">, {
 						askApproval,
 						handleError,
 						pushToolResult,
