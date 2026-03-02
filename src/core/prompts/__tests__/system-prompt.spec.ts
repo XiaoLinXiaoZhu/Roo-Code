@@ -439,6 +439,7 @@ describe("SYSTEM_PROMPT", () => {
 	it("should exclude update_todo_list tool when todoListEnabled is false", async () => {
 		const settings = {
 			todoListEnabled: false,
+			intentTreeEnabled: false,
 			useAgentRules: true,
 			newTaskRequireTodos: false,
 		}
@@ -467,6 +468,7 @@ describe("SYSTEM_PROMPT", () => {
 	it("should include update_todo_list tool when todoListEnabled is true", async () => {
 		const settings = {
 			todoListEnabled: true,
+			intentTreeEnabled: false,
 			useAgentRules: true,
 			newTaskRequireTodos: false,
 		}
@@ -495,6 +497,7 @@ describe("SYSTEM_PROMPT", () => {
 	it("should include update_todo_list tool when todoListEnabled is undefined", async () => {
 		const settings = {
 			todoListEnabled: true,
+			intentTreeEnabled: false,
 			useAgentRules: true,
 			newTaskRequireTodos: false,
 		}
@@ -523,6 +526,7 @@ describe("SYSTEM_PROMPT", () => {
 	it("should include native tool instructions", async () => {
 		const settings = {
 			todoListEnabled: true,
+			intentTreeEnabled: false,
 			useAgentRules: true,
 			newTaskRequireTodos: false,
 		}

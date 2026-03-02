@@ -1948,6 +1948,30 @@
       "gitCommit": "795a0bde8adc47f97eac56fccc0e760b38e5832c",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"terminal_behavior\":{\"type\":\"string\"},\"what_it_shows\":{\"type\":\"string\"},\"when_injected\":{\"type\":\"string\"},\"relevant_code\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "75",
+      "query": "Where is the todo list toggle (enableTodoList or similar) implemented in model settings?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "todo",
+        "list",
+        "toggle",
+        "enabletodolist",
+        "or",
+        "similar",
+        "implemented",
+        "in",
+        "model",
+        "settings"
+      ],
+      "scope": "null",
+      "createdAt": "2026-03-02T11:53:27.229Z",
+      "gitCommit": "8094b206139348a2ee9051ad74f69b57b795853d",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"settingKey\":{\"type\":\"string\"},\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
     }
   ]
 }

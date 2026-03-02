@@ -71,6 +71,7 @@ describe("getRulesSection", () => {
 	it("includes vendor confidentiality section when isStealthModel is true", () => {
 		const settings = {
 			todoListEnabled: true,
+			intentTreeEnabled: false,
 			useAgentRules: true,
 			newTaskRequireTodos: false,
 			isStealthModel: true,
@@ -88,6 +89,7 @@ describe("getRulesSection", () => {
 	it("excludes vendor confidentiality section when isStealthModel is false", () => {
 		const settings = {
 			todoListEnabled: true,
+			intentTreeEnabled: false,
 			useAgentRules: true,
 			newTaskRequireTodos: false,
 			isStealthModel: false,
@@ -102,6 +104,7 @@ describe("getRulesSection", () => {
 	it("excludes vendor confidentiality section when isStealthModel is undefined", () => {
 		const settings = {
 			todoListEnabled: true,
+			intentTreeEnabled: false,
 			useAgentRules: true,
 			newTaskRequireTodos: false,
 		}

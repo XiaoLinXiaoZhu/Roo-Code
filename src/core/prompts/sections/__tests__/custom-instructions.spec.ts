@@ -544,6 +544,7 @@ describe("addCustomInstructions", () => {
 			{
 				settings: {
 					todoListEnabled: true,
+					intentTreeEnabled: false,
 					useAgentRules: true,
 					newTaskRequireTodos: false,
 				},
@@ -575,6 +576,7 @@ describe("addCustomInstructions", () => {
 			{
 				settings: {
 					todoListEnabled: true,
+					intentTreeEnabled: false,
 					useAgentRules: false,
 					newTaskRequireTodos: false,
 				},
@@ -635,6 +637,7 @@ describe("addCustomInstructions", () => {
 			{
 				settings: {
 					todoListEnabled: true,
+					intentTreeEnabled: false,
 					useAgentRules: true,
 					newTaskRequireTodos: false,
 				},
@@ -680,6 +683,7 @@ describe("addCustomInstructions", () => {
 			{
 				settings: {
 					todoListEnabled: true,
+					intentTreeEnabled: false,
 					useAgentRules: true,
 					newTaskRequireTodos: false,
 				},
@@ -747,6 +751,7 @@ describe("addCustomInstructions", () => {
 			{
 				settings: {
 					todoListEnabled: true,
+					intentTreeEnabled: false,
 					useAgentRules: true,
 					newTaskRequireTodos: false,
 				},
@@ -798,6 +803,7 @@ describe("addCustomInstructions", () => {
 			{
 				settings: {
 					todoListEnabled: true,
+					intentTreeEnabled: false,
 					useAgentRules: true,
 					newTaskRequireTodos: false,
 				},
@@ -851,6 +857,7 @@ describe("addCustomInstructions", () => {
 			{
 				settings: {
 					todoListEnabled: true,
+					intentTreeEnabled: false,
 					useAgentRules: true,
 					newTaskRequireTodos: false,
 				},
@@ -896,6 +903,7 @@ describe("addCustomInstructions", () => {
 			{
 				settings: {
 					todoListEnabled: true,
+					intentTreeEnabled: false,
 					useAgentRules: true,
 					newTaskRequireTodos: false,
 				},
@@ -1622,6 +1630,7 @@ describe("Rules directory reading", () => {
 			{
 				settings: {
 					todoListEnabled: true,
+					intentTreeEnabled: false,
 					useAgentRules: true,
 					newTaskRequireTodos: false,
 				},
@@ -1666,6 +1675,7 @@ describe("Rules directory reading", () => {
 			{
 				settings: {
 					todoListEnabled: true,
+					intentTreeEnabled: false,
 					useAgentRules: true,
 					newTaskRequireTodos: false,
 				},
@@ -1708,6 +1718,7 @@ describe("Rules directory reading", () => {
 			{
 				settings: {
 					todoListEnabled: true,
+					intentTreeEnabled: false,
 					useAgentRules: true,
 					newTaskRequireTodos: false,
 				},

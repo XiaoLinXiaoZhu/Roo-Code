@@ -281,7 +281,12 @@ export async function getEnvironmentDetails(
 	// 不注入的情况：
 	// - minor 变化（add/update/prune/commit）- 工具返回值已足够说明变更结果
 	// ============================================================================
-	const shouldIncludeIntentTree = cline.intentTree && (isFirstMessage || cline.intentTreeUpdated === "structural")
+	const intentTreeEnabled =
+		state && typeof state.apiConfiguration?.intentTreeEnabled === "boolean"
+			? state.apiConfiguration.intentTreeEnabled
+			: false
+	const shouldIncludeIntentTree =
+		intentTreeEnabled && cline.intentTree && (isFirstMessage || cline.intentTreeUpdated === "structural")
 	if (shouldIncludeIntentTree) {
 		const intentSummary = cline.intentTree!.toSummary()
 		// 解释 intent-tree 是什么，让所有模式都能理解上下文

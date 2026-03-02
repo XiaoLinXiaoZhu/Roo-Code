@@ -1662,6 +1662,93 @@
 				}
 			],
 			"assumption": "spirit.ts 导出 getSpiritSection() 函数，被 system.ts 直接调用拼入系统提示词。接口不变，只改内容。"
+		},
+		"efa8cef4-bc9e-4ba6-9840-2dc4f757d9a6": {
+			"id": "efa8cef4-bc9e-4ba6-9840-2dc4f757d9a6",
+			"shortId": "G8",
+			"type": "goal",
+			"content": "在模型设置中增加 Intent Tree 开关，默认关闭。关闭后隐藏所有 intent tree 相关工具和提示注入。",
+			"status": "done",
+			"parentId": null,
+			"childrenIds": ["d7cd982b-b35b-47fb-b079-6152d15160f6"],
+			"codeBindings": [],
+			"createdBy": {
+				"taskId": "019cae5e-ef4c-738a-8c22-c82a1d5ab158",
+				"timestamp": "2026-03-02T11:56:55.877Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019cae5e-ef4c-738a-8c22-c82a1d5ab158",
+					"timestamp": "2026-03-02T11:57:13.448Z",
+					"action": "cascade: planned→in_progress (child I8.1 started)"
+				},
+				{
+					"taskId": "019cae5e-ef4c-738a-8c22-c82a1d5ab158",
+					"timestamp": "2026-03-02T12:05:09.961Z",
+					"action": "cascade: in_progress→done (all children terminated)"
+				}
+			],
+			"assumption": "No existing goal for this. User explicitly requested implementing the Intent Tree toggle from stage-2 todo.md item 1. This is a genuine new goal — if it fails, we don't try a different approach, we fix it.",
+			"maxChildIndex": 1
+		},
+		"d7cd982b-b35b-47fb-b079-6152d15160f6": {
+			"id": "d7cd982b-b35b-47fb-b079-6152d15160f6",
+			"shortId": "I8.1",
+			"type": "impl",
+			"content": "Add intentTreeEnabled toggle: types schema, tool filtering, env injection skip, UI checkbox, i18n keys",
+			"status": "done",
+			"parentId": "efa8cef4-bc9e-4ba6-9840-2dc4f757d9a6",
+			"childrenIds": [],
+			"codeBindings": [
+				{
+					"commitHash": "36be5d56984e936913b6b423bea20c24f90ed7e7",
+					"commitMessage": "[intent:I8.1] Add intentTreeEnabled toggle in model settings (default off): types schema, tool filtering, env injection skip, UI checkbox, i18n",
+					"files": [
+						".roo/cache/search/index.json",
+						".roo/intent-tree.json",
+						"packages/types/src/provider-settings.ts",
+						"src/core/environment/getEnvironmentDetails.ts",
+						"src/core/prompts/__tests__/sections.spec.ts",
+						"src/core/prompts/__tests__/system-prompt.spec.ts",
+						"src/core/prompts/sections/__tests__/custom-instructions.spec.ts",
+						"src/core/prompts/tools/filter-tools-for-mode.ts",
+						"src/core/prompts/types.ts",
+						"src/core/task/Task.ts",
+						"src/core/task/build-tools.ts",
+						"src/core/webview/generateSystemPrompt.ts",
+						"webview-ui/src/components/settings/ApiOptions.tsx",
+						"webview-ui/src/components/settings/IntentTreeSettingsControl.tsx",
+						"webview-ui/src/i18n/locales/en/settings.json",
+						"webview-ui/src/i18n/locales/zh-CN/settings.json"
+					],
+					"diffSummary": "16 file(s), +163 -4",
+					"timestamp": "2026-03-02T12:05:09.961Z"
+				}
+			],
+			"createdBy": {
+				"taskId": "019cae5e-ef4c-738a-8c22-c82a1d5ab158",
+				"timestamp": "2026-03-02T11:57:04.607Z",
+				"action": "created"
+			},
+			"modifiedBy": [
+				{
+					"taskId": "019cae5e-ef4c-738a-8c22-c82a1d5ab158",
+					"timestamp": "2026-03-02T11:57:13.448Z",
+					"action": "updated: content, status→in_progress"
+				},
+				{
+					"taskId": "019cae5e-ef4c-738a-8c22-c82a1d5ab158",
+					"timestamp": "2026-03-02T12:05:09.961Z",
+					"action": "bound commit 36be5d5"
+				},
+				{
+					"taskId": "019cae5e-ef4c-738a-8c22-c82a1d5ab158",
+					"timestamp": "2026-03-02T12:05:09.961Z",
+					"action": "updated: status→done"
+				}
+			],
+			"assumption": "G8 is the intent tree toggle goal. This is one atomic commit covering all layers: types, tool filtering, env injection, UI, i18n."
 		}
 	},
 	"rootIds": [
@@ -1671,7 +1758,8 @@
 		"7739cad8-7ae0-4af8-818e-8b669b589872",
 		"0d6749c8-5643-459d-a3dd-2775873794e1",
 		"b4eaac36-79d1-42f1-8f71-a6d233ee5d83",
-		"3714d0db-a009-482e-a8fd-6310c821b8e6"
+		"3714d0db-a009-482e-a8fd-6310c821b8e6",
+		"efa8cef4-bc9e-4ba6-9840-2dc4f757d9a6"
 	],
 	"shortIdIndex": {
 		"G1": "7d7be656-3aa0-4b70-8f09-6bbcfaab2135",
@@ -1726,7 +1814,9 @@
 		"I6.1.1.1": "8fa3cd8e-81ed-4806-9826-a3c8cacab6c6",
 		"G7": "3714d0db-a009-482e-a8fd-6310c821b8e6",
 		"A7.1": "68d33283-6377-4eaa-bcc6-b67131f5c03e",
-		"I7.1.1": "b881c773-d9ce-4a0c-837b-ef229466842b"
+		"I7.1.1": "b881c773-d9ce-4a0c-837b-ef229466842b",
+		"G8": "efa8cef4-bc9e-4ba6-9840-2dc4f757d9a6",
+		"I8.1": "d7cd982b-b35b-47fb-b079-6152d15160f6"
 	},
-	"rootMaxChildIndex": 7
+	"rootMaxChildIndex": 8
 }

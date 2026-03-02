@@ -4029,6 +4029,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				rooIgnoreInstructions,
 				{
 					todoListEnabled: apiConfiguration?.todoListEnabled ?? true,
+					intentTreeEnabled: apiConfiguration?.intentTreeEnabled ?? false,
 					useAgentRules:
 						vscode.workspace.getConfiguration(Package.name).get<boolean>("useAgentRules") ?? true,
 					enableSubfolderRules: enableSubfolderRules ?? false,

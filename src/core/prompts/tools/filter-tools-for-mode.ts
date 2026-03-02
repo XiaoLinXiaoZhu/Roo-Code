@@ -281,6 +281,15 @@ export function filterNativeToolsForMode(
 		allowedToolNames.delete("update_todo_list")
 	}
 
+	// Conditionally exclude intent tree tools if disabled in settings
+	if (settings?.intentTreeEnabled === false || !settings?.intentTreeEnabled) {
+		allowedToolNames.delete("add_intent")
+		allowedToolNames.delete("update_intent")
+		allowedToolNames.delete("prune_intent")
+		allowedToolNames.delete("commit_intent")
+		allowedToolNames.delete("restructure_intent")
+	}
+
 	// Conditionally exclude read_media if model does not support images
 	if (!modelInfo?.supportsImages) {
 		allowedToolNames.delete("read_media")

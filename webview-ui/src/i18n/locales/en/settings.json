@@ -824,6 +824,10 @@
 		"todoList": {
 			"label": "Enable todo list tool",
 			"description": "When enabled, Roo can create and manage todo lists to track task progress. This helps organize complex tasks into manageable steps."
+		},
+		"intentTree": {
+			"label": "Enable intent tree",
+			"description": "When enabled, Roo can use intent tree tools to track goals, approaches, and implementations across conversations. Helps maintain goal-implementation separation on complex tasks."
 		}
 	},
 	"experimental": {
