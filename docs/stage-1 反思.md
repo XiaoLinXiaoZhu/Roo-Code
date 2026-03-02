@@ -113,6 +113,14 @@ Intent Tree 最重要的一点是**将想法和代码实现绑定，使得每一
 
 **结论**：intent tree 作为独立数据结构的方式开销过大，更好的方式是将意图融入已有的关键路径——git commit message + 模块注释。
 
+### Reminder 工具：更好的长任务管理
+
+Intent Tree 试图解决的另一个问题是"长任务中的上下文漂移"。Reminder 工具用更轻量的方式解决了这个问题：
+
+1. **从"被动广播"到"主动预期"**：Todo List 每轮都在，模型每轮都忽略。Reminder 建立了"预期"——模型调用 `reminder(7轮)` 时，实际上是与自己签订契约："我预期在 7 轮内完成当前阶段"。触发时如果未完成，这本身就是强烈的反思信号
+2. **解决上下文漂移**：Reminder 在时间轴上打桩，将无限延伸的对话流切分为有限的、有明确目标的片段。模型不再模糊地认为"我之前做了很多事"，而是清晰界定"在这个周期内，我完成了什么"
+3. **Token 经济性**：相比每轮注入 Todo List，Reminder 只在到期时唤醒注意力。模型根据任务难度自主设定轮数（简单 3 轮，复杂 20 轮），实现计算资源的动态分配
+
 ---
 
 ## 6. Context Archive（上下文归档）
@@ -124,6 +132,10 @@ Intent Tree 最重要的一点是**将想法和代码实现绑定，使得每一
 ## 7. Environment（环境信息优化）
 
 优化方向正确且有价值，已落地的改动（XML 格式、目录树展示、相似文件折叠、.rooignore 控制）均为有效改进。
+
+### Stage 2 更新：完全移除 Environment 注入
+
+Environment details 作为 user message text block 注入，每次都会打断支持 Interleaved Thinking 的模型（如 GLM-4.7/5）的 reasoning 链路。已移除 `<vscode>`、`<git>`、`<workspace>`、`<terminals>`、`<recently_modified>` 注入，仅保留 `<intent_tree>`、`<todos>`、`<reminder>` 作为按需注入。无内容时不产生 user message，避免打断 thinking chain。
 
 ---
 
