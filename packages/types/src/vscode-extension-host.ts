@@ -789,6 +789,7 @@ export interface ClineSayTool {
 		| "consultExpert"
 		| "applyEdit"
 		| "buildTool"
+		| "write"
 		| "reminder"
 		| "searchProject"
 	path?: string

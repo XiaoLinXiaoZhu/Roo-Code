@@ -40,6 +40,7 @@ import { addIntentTool } from "./AddIntentTool"
 import { updateIntentTool } from "./UpdateIntentTool"
 import { pruneIntentTool } from "./PruneIntentTool"
 import { commitIntentTool } from "./CommitIntentTool"
+import { writeTool } from "./WriteTool"
 import { reminderTool } from "./ReminderTool"
 
 /**
@@ -80,6 +81,7 @@ const allTools: BaseTool<ToolName>[] = [
 	updateIntentTool,
 	pruneIntentTool,
 	commitIntentTool,
+	writeTool,
 	reminderTool,
 ]
 

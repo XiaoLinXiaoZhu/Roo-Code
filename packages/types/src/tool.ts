@@ -55,6 +55,8 @@ export const toolNames = [
 	"find_usages",
 	// 工具构建工具
 	"build_tool",
+	// 统一写入工具
+	"write",
 	// 提醒工具
 	"reminder",
 	// 意图树工具

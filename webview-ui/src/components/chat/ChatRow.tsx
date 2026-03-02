@@ -735,6 +735,10 @@ export const ChatRowContent = ({
 
 				return <TodoChangeDisplay previousTodos={previousTodos} newTodos={todos} />
 			}
+			case "write": {
+				// write tool delegates to edit or write_to_file, their existing UI handles rendering
+				return null
+			}
 			case "reminder": {
 				const reminderTool = tool as any
 				return (

@@ -109,6 +109,7 @@ export const toolParamNames = [
 	"status", // update_intent optional parameter
 	"reason", // prune_intent optional parameter
 	"delay", // reminder optional parameter
+	"expectedMatches", // write optional parameter
 ] as const
 
 export type ToolParamName = (typeof toolParamNames)[number]
@@ -217,6 +218,13 @@ export type NativeToolArgs = {
 		newParentId?: string | null
 		nodeIds?: string[]
 		commonContent?: string
+	}
+	// 统一写入工具
+	write: {
+		path: string
+		content: string
+		search?: string | null
+		expectedMatches?: number | null
 	}
 	// 提醒工具
 	reminder: {
@@ -424,6 +432,7 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	prune_intent: "prune intent",
 	commit_intent: "commit intent",
 	restructure_intent: "restructure intent tree",
+	write: "write",
 	reminder: "set reminder",
 } as const
 
@@ -436,9 +445,8 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 		tools: ["codebase_search", "find_definition", "find_usages", "read_media"],
 	},
 	edit: {
-		tools: ["edit", "write_to_file", "generate_image"],
-		// 使用 apply-diff 不再拥有优势，将会逐渐迁移为 edit 工具，edit 工具提供了更灵活的编辑方式，支持单次替换和全局替换，并且在模型需要进行复杂编辑时更容易使用。未来会逐渐迁移到 edit 工具，并最终废弃 apply_diff。
-		// customTools: ["edit", "search_replace", "edit_file", "apply_patch"],
+		tools: ["write", "generate_image"],
+		// write 统一了 edit 和 write_to_file：search 有值时搜索替换，search 为空时完整写入
 	},
 	command: {
 		// 移除了  "read_command_output" ，因为 read_command_output 的功能其实可以用 grep/sed + 文件重定向替代。
