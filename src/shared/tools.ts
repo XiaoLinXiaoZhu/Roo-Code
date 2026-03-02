@@ -461,7 +461,8 @@ export const ALWAYS_AVAILABLE_TOOLS: ToolName[] = [
 	// "new_task",
 	"update_todo_list",
 	// "run_slash_command",
-	"skill",
+	// disable skill for test
+	// "skill",
 ] as const
 
 /**

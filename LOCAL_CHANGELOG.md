@@ -1,5 +1,27 @@
 # Roo Code Changelog
 
+## [3.52.11] - 2026-03-02
+
+### ⚙️ Intent Tree 开关
+
+在模型设置 Advanced Settings 中新增 `intentTreeEnabled` 开关（默认关闭），控制 intent tree 功能的可见性。
+
+- **关闭时**：从工具列表中移除 5 个 intent tree 工具（add/update/prune/commit/restructure_intent）
+- **关闭时**：从 environment 中移除 `<intent_tree>` XML 注入
+- **前端 UI**：新增 `IntentTreeSettingsControl` 复选框组件，位于 TodoList 控件下方
+- **i18n**：新增 en/zh-CN 翻译
+
+**涉及文件**：
+
+- `packages/types/src/provider-settings.ts` — `baseProviderSettingsSchema` 新增 `intentTreeEnabled`
+- `src/core/prompts/types.ts` — `SystemPromptSettings` 新增 `intentTreeEnabled`
+- `src/core/prompts/tools/filter-tools-for-mode.ts` — 禁用时过滤 5 个 intent 工具
+- `src/core/task/build-tools.ts` — `filterSettings` 传递 `intentTreeEnabled`
+- `src/core/environment/getEnvironmentDetails.ts` — 禁用时跳过 intent tree 注入
+- `src/core/task/Task.ts`、`src/core/webview/generateSystemPrompt.ts` — 构造 `SystemPromptSettings` 补充字段
+- `webview-ui/src/components/settings/IntentTreeSettingsControl.tsx` — 新建 UI 组件
+- `webview-ui/src/components/settings/ApiOptions.tsx` — 集成到 Advanced Settings
+
 ## [3.52.8] - 2026-02-27
 
 ### ✨ Intent Tree 父子节点状态联动

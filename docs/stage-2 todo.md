@@ -10,10 +10,10 @@
 
 **参考**：类似 todo list 的开关机制。
 
-- [ ] 在模型设置中添加 `enableIntentTree` 开关（默认 `false`）
-- [ ] 关闭时：从工具列表中移除 intent tree 系列工具（add/update/prune/commit/restructure）
-- [ ] 关闭时：从 environment 中移除 `<intent_tree>` 注入
-- [ ] 前端设置 UI 适配
+- [x] 在模型设置中添加 `enableIntentTree` 开关（默认 `false`）
+- [x] 关闭时：从工具列表中移除 intent tree 系列工具（add/update/prune/commit/restructure）
+- [x] 关闭时：从 environment 中移除 `<intent_tree>` 注入
+- [x] 前端设置 UI 适配
 
 ---
 
