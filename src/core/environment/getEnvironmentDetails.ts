@@ -75,6 +75,17 @@ export async function getEnvironmentDetails(
 	}
 
 	// ============================================================================
+	// First-message reminder prompt
+	// ============================================================================
+	const reminderEnabled =
+		state && typeof state.apiConfiguration?.reminderEnabled === "boolean"
+			? state.apiConfiguration.reminderEnabled
+			: true
+	if (isFirstMessage && reminderEnabled && !cline.pendingReminder) {
+		xmlContent += `\n  <reminder_hint>You have the reminder tool enabled. After analyzing the task, set a reminder with your OKR breakdown and next steps.</reminder_hint>`
+	}
+
+	// ============================================================================
 	// Pending Reminder Section (reminder tool)
 	// ============================================================================
 	if (cline.pendingReminder) {
