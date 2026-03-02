@@ -18,26 +18,27 @@ export default {
 	type: "function",
 	function: {
 		name: "update_intent",
+		strict: true,
 		description: UPDATE_INTENT_DESCRIPTION,
-		strict: false,
 		parameters: {
 			type: "object",
+			additionalProperties: false,
 			properties: {
 				node_id: {
 					type: "string",
 					description: "Node short ID (e.g., 'G1', 'O1.1', 'I1.1.1').",
 				},
 				status: {
-					type: "string",
+					type: ["string", "null"],
 					enum: ["in_progress", "done", "superseded"],
 					description: "New status for the node.",
 				},
 				content: {
-					type: "string",
+					type: ["string", "null"],
 					description: "Updated description (optional).",
 				},
 			},
-			required: ["node_id"],
+			required: ["node_id", "status", "content"],
 		},
 	},
 } satisfies OpenAI.Chat.ChatCompletionTool

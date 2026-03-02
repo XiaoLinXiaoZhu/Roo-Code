@@ -12,17 +12,18 @@ export default {
 	type: "function",
 	function: {
 		name: "prune_intent",
+		strict: true,
 		description: PRUNE_INTENT_DESCRIPTION,
-		strict: false,
 		parameters: {
 			type: "object",
+			additionalProperties: false,
 			properties: {
 				node_id: {
 					type: "string",
 					description: "Node short ID to prune (e.g., 'A1.1', 'G2').",
 				},
 				reason: {
-					type: "string",
+					type: ["string", "null"],
 					description: "Why this path is being abandoned.",
 				},
 			},

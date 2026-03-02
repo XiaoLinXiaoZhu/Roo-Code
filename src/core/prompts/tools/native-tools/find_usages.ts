@@ -46,11 +46,11 @@ export default {
 						"Optional 1-based line number to begin search, useful for locating symbols in specific regions.",
 				},
 				include_declaration: {
-					type: "boolean",
+					type: ["boolean", "null"],
 					description: "Include the declaration itself in results (default: true).",
 				},
 				max_results: {
-					type: "number",
+					type: ["number", "null"],
 					description: "Maximum results to return (default: 50).",
 				},
 			},

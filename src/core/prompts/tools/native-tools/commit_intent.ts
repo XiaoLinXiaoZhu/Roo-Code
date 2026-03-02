@@ -12,10 +12,11 @@ export default {
 	type: "function",
 	function: {
 		name: "commit_intent",
+		strict: true,
 		description: COMMIT_INTENT_DESCRIPTION,
-		strict: false,
 		parameters: {
 			type: "object",
+			additionalProperties: false,
 			properties: {
 				node_id: {
 					type: "string",
@@ -26,7 +27,7 @@ export default {
 					description: "Commit message describing the change.",
 				},
 			},
-			required: ["message"],
+			required: ["node_id", "message"],
 		},
 	},
 } satisfies OpenAI.Chat.ChatCompletionTool

@@ -44,10 +44,11 @@ export default {
 	type: "function",
 	function: {
 		name: "add_intent",
+		strict: true,
 		description: ADD_INTENT_DESCRIPTION,
-		strict: false,
 		parameters: {
 			type: "object",
+			additionalProperties: false,
 			properties: {
 				assumption: {
 					type: "string",
@@ -59,8 +60,8 @@ export default {
 						"When a falsifiable assumption is disproven, the node should be pruned, not patched.",
 				},
 				parent_id: {
-					type: "string",
-					description: "Parent node's short ID (e.g., 'G1', 'O1.1'). Omit to create a new root node.",
+					type: ["string", "null"],
+					description: "Parent node's short ID (e.g., 'G1', 'O1.1'). Null to create a new root node.",
 				},
 				type: {
 					type: "string",
@@ -73,7 +74,7 @@ export default {
 					description: "Natural language description of the intent.",
 				},
 			},
-			required: ["assumption", "type", "content"],
+			required: ["type", "content", "parent_id", "assumption"],
 		},
 	},
 } satisfies OpenAI.Chat.ChatCompletionTool

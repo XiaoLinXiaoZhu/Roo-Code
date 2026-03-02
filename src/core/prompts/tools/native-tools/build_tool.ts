@@ -30,7 +30,7 @@ export default {
 					description: "Optional: Hint about expected outputs to help design the interface.",
 				},
 			},
-			required: ["requirement"],
+			required: ["requirement", "input_hint", "output_hint"],
 			additionalProperties: false,
 		},
 	},

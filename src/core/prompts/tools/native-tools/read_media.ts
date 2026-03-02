@@ -26,15 +26,15 @@ const readMedia: OpenAI.Chat.ChatCompletionTool = {
 					description: "Path to the media file, relative to the workspace.",
 				},
 				focus_x: {
-					type: "number",
+					type: ["number", "null"],
 					description: "Horizontal focus point (0.0-1.0, left to right). Default: 0.5 (center).",
 				},
 				focus_y: {
-					type: "number",
+					type: ["number", "null"],
 					description: "Vertical focus point (0.0-1.0, top to bottom). Default: 0.5 (center).",
 				},
 				scale: {
-					type: "number",
+					type: ["number", "null"],
 					description:
 						"Zoom level (1-8). 1 = full overview, 2 = 2x zoom (50% of image), 4 = 4x zoom (25%), 8 = 8x zoom (12.5%). Default: 1.",
 				},

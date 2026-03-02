@@ -17,10 +17,11 @@ export default {
 	type: "function",
 	function: {
 		name: "restructure_intent",
+		strict: true,
 		description: RESTRUCTURE_INTENT_DESCRIPTION,
-		strict: false,
 		parameters: {
 			type: "object",
+			additionalProperties: false,
 			properties: {
 				operation: {
 					type: "string",
@@ -28,24 +29,24 @@ export default {
 					description: "The restructuring operation to perform.",
 				},
 				node_id: {
-					type: "string",
+					type: ["string", "null"],
 					description: "Node to operate on (for reparent/promote).",
 				},
 				new_parent_id: {
-					type: "string",
-					description: "New parent node ID (for reparent). Omit or null to make root.",
+					type: ["string", "null"],
+					description: "New parent node ID (for reparent). Null to make root.",
 				},
 				node_ids: {
-					type: "array",
+					type: ["array", "null"],
 					items: { type: "string" },
 					description: "Nodes to extract common parent from (for extract_common_parent).",
 				},
 				common_content: {
-					type: "string",
+					type: ["string", "null"],
 					description: "Description of the common goal (for extract_common_parent).",
 				},
 			},
-			required: ["operation"],
+			required: ["operation", "node_id", "new_parent_id", "node_ids", "common_content"],
 		},
 	},
 } satisfies OpenAI.Chat.ChatCompletionTool
