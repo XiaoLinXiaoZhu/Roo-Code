@@ -115,6 +115,24 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 	// Cline.abort).
 	const task = useMemo(() => messages.at(0), [messages])
 
+	const latestReminder = useMemo(() => {
+		// Extract latest reminder from messages (tool say with tool: "reminder")
+		for (let i = messages.length - 1; i >= 0; i--) {
+			const msg = messages[i]
+			if (msg.type === "say" && msg.say === "tool" && msg.text) {
+				try {
+					const parsed = JSON.parse(msg.text)
+					if (parsed.tool === "reminder" && parsed.content) {
+						return { content: parsed.content, delay: parsed.delay ?? 7 }
+					}
+				} catch {
+					// ignore non-JSON messages
+				}
+			}
+		}
+		return null
+	}, [messages])
+
 	const latestTodos = useMemo(() => {
 		// First check if we have initial todos from the state (for new subtasks)
 		if (currentTaskTodos && currentTaskTodos.length > 0) {
@@ -1575,6 +1593,7 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 						buttonsDisabled={sendingDisabled}
 						handleCondenseContext={handleCondenseContext}
 						todos={latestTodos}
+						reminder={latestReminder}
 					/>
 
 					{checkpointWarning && (

@@ -41,6 +41,7 @@ export interface TaskHeaderProps {
 	buttonsDisabled: boolean
 	handleCondenseContext: (taskId: string) => void
 	todos?: any[]
+	reminder?: { content: string; delay: number } | null
 }
 
 const TaskHeader = ({
@@ -58,6 +59,7 @@ const TaskHeader = ({
 	buttonsDisabled,
 	handleCondenseContext,
 	todos,
+	reminder,
 }: TaskHeaderProps) => {
 	const { t } = useTranslation()
 	const { apiConfiguration, currentTaskItem, clineMessages } = useExtensionState()
@@ -465,6 +467,18 @@ const TaskHeader = ({
 				)}
 				{/* Todo list - always shown at bottom when todos exist */}
 				{hasTodos && <TodoListDisplay todos={todos ?? (task as any)?.tool?.todos ?? []} />}
+				{reminder && (
+					<div className="px-3 py-2 border-t border-vscode-panel-border">
+						<div className="flex items-center gap-1.5 text-xs text-vscode-descriptionForeground">
+							<span className="codicon codicon-bell" />
+							<span className="font-medium">Reminder</span>
+							<span className="opacity-60">({reminder.delay} rounds)</span>
+						</div>
+						<div className="mt-1 text-xs text-vscode-foreground opacity-80 whitespace-pre-wrap line-clamp-3">
+							{reminder.content}
+						</div>
+					</div>
+				)}
 			</div>
 			<CloudUpsellDialog open={isOpen} onOpenChange={closeUpsell} onConnect={handleConnect} />
 		</div>
