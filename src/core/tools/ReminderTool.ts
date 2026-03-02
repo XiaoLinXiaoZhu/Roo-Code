@@ -25,8 +25,12 @@ export class ReminderTool extends BaseTool<"reminder"> {
 
 		const delay = params.delay ?? 7
 
+		// Increment counter and assign id
+		task.reminderCounter++
+		const id = task.reminderCounter
+
 		// Overwrite any existing reminder (only one active at a time)
-		task.pendingReminder = { content, roundsLeft: delay }
+		task.pendingReminder = { content, roundsLeft: delay, id }
 
 		// Show in UI
 		await task.say(
@@ -35,10 +39,11 @@ export class ReminderTool extends BaseTool<"reminder"> {
 				tool: "reminder",
 				content,
 				delay,
+				id,
 			}),
 		)
 
-		pushToolResult(`Reminder set. Will fire in ${delay} rounds.`)
+		pushToolResult(`Reminder #${id} set. Will fire in ${delay} rounds.`)
 	}
 }
 

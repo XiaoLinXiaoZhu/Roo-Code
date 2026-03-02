@@ -307,7 +307,8 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 	diffStrategy?: DiffStrategy
 	didEditFile: boolean = false
 	intentTreeUpdated: "structural" | "minor" | false = false // 标记 intent-tree 变化级别：structural=需要注入完整树摘要, minor=工具返回已足够
-	pendingReminder: { content: string; roundsLeft: number } | null = null
+	pendingReminder: { content: string; roundsLeft: number; id: number } | null = null
+	reminderCounter: number = 0
 
 	// LLM Messages & Chat Messages
 	apiConversationHistory: ApiMessage[] = []

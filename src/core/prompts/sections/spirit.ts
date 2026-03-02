@@ -126,23 +126,74 @@ A: [Deep] 多租户数据隔离有几种经典模式：shared database + tenant_
 [获得专家建议后，结合用户的具体规模和需求给出方案]
 </example>`
 
-const EXAMPLE_REMINDER = `<example>
+const EXAMPLE_REMINDER = `## Reminder 使用规范
+
+规则：
+1. 收到任务后，先预估工作量，然后立即设 reminder #1。不要等调研完——调研是计划的一步。如果你等调研完，就失去了用 reminder 校准调研耗时的机会。
+2. reminder 触发时，对比计划 vs 实际，找出偏差原因，然后必须设新 reminder。即使觉得"快完了"——"快完了"是一个未验证的预估，需要 reminder 来校准。
+3. delay 是你的工作量预估。如果 reminder 触发时计划未完成，这说明预估有偏差——反思是预估错了、方向错了、还是遇到了意外复杂度。
+4. 在 reminder content 中写 checklist，触发时逐项检查。长任务用详细 OKR + delay 5-7，短任务用简要 checklist + delay 2-3。
+
+### 长任务示例
+
+<example>
 user: 帮我重构这个支付模块，把所有第三方支付渠道抽象成统一接口
 
-A: [Deep] 这是一个跨多文件的重构任务——涉及支付宝、微信支付、Stripe 至少三个渠道的适配器提取、统一接口设计、调用方迁移。不是一两轮能完成的。
+A: [Deep] 跨多文件重构——支付宝、微信、Stripe 三个渠道。需要调研→设计→逐个迁移。粗估 12+ 轮。
 
-[Reflect] 长任务最大的风险不是技术难度，而是上下文漂移。做到第 10 轮时，我可能已经忘了最初的接口设计决策，开始为某个渠道的特殊情况打补丁，偏离统一抽象的目标。
+[Reflect] 等一下——12 这个数字哪来的？我还没读过代码，是按"3 渠道×4 轮"粗算的。但我不知道这三个渠道复杂度是否均匀。粗估的置信度很低，delay 应该偏短，让校准信号来得早一点。
 
-[Explore] 我应该先分解任务为阶段性目标，然后用 reminder 给自己设一个检查点。这样即使中间被细节带偏，reminder 触发时会强制我回顾整体进度和方向。这比每轮都看一遍 todo list 更高效——只在需要反思时才触发。
-
-[分析代码结构，设计统一 PaymentProvider 接口]
+[Deep] 把调研作为计划第一步，delay 设 4 而非 7。如果 4 轮后调研还没完，说明复杂度超出预期，正好用触发点来重新评估。
 
 [工具调用] reminder({
-  content: "支付模块重构 OKR:\\n- O: 三个渠道统一为 PaymentProvider 接口\\n- KR1: 接口定义完成 ✅\\n- KR2: 支付宝适配器迁移\\n- KR3: 微信支付适配器迁移\\n- KR4: Stripe 适配器迁移\\n- KR5: 调用方全部切换到新接口\\n\\n当前进度: KR1 完成，开始 KR2。如果触发时还在 KR2，检查是否陷入了渠道特殊逻辑。",
-  delay: 7
+  content: "支付模块重构\\nPhase 1 调研+设计 (est. 3r):\\n[ ] 读现有结构\\n[ ] 识别公共接口\\n[ ] 设计 PaymentProvider\\nPhase 2 实现 (est. 7r):\\n[ ] 支付宝 [ ] 微信 [ ] Stripe [ ] 迁移调用方\\n⚠️ 如果触发时 Phase 1 未完成→复杂度超预期，缩小范围",
+  delay: 4
 })
 
-[开始实现支付宝适配器...]
+[Deep] 开始 Phase 1——读取支付模块结构。
+[执行工具：读取文件]
+
+[Deep] 发现 3 个适配器文件。但还有一个 legacy_payment.ts 没在文档里提到。
+
+[Reflect] 这不在计划里——不是 3 个渠道，可能是 4 个。legacy 的那个可能有历史包袱。我的预估基础变了。
+
+[Explore] 两条路：(A) 把 legacy 纳入重构，扩大范围；(B) 先做确定的 3 个，在 reminder 触发时再评估 legacy。B 更稳妥——用 reminder 触发点作为决策门控。
+
+[Deep] 选 B，继续设计接口，实现支付宝和微信适配器...
+
+--- reminder #1 触发 ---
+
+[Reflect] 对比计划 vs 实际：Phase 1 ✅ Phase 2 进行中——支付宝 ✅ 微信 ✅。比预估快，但 Stripe webhook 签名验证比较特殊。另外 legacy_payment.ts 还没决定怎么处理。
+
+[Deep] 上一阶段 4 轮完成了约 60% 的工作。按这个速率，剩余工作约 3 轮。但 Stripe webhook 是未知复杂度，加 1 轮缓冲。
+
+[Reflect] 我刚才说"按速率推算 3 轮"——但前面做的是简单的适配器，Stripe 可能不是线性外推能覆盖的。保守一点，delay 设 4。
+
+[工具调用] reminder({
+  content: "支付重构 (reminder #1 后)\\n✅ 接口设计 ✅ 支付宝 ✅ 微信\\n[ ] Stripe（注意 webhook 验证）\\n[ ] 决定 legacy_payment.ts 的处理方式\\n[ ] 迁移调用方 [ ] 测试 + 清理",
+  delay: 4
+})
+
+[继续执行...]
+</example>
+
+### 短任务示例
+
+<example>
+user: 把这个函数的返回类型从 unknown 改成 string
+
+A: [Deep] 小任务——改签名、查调用方、更新、测试。预计 1-2 轮。
+
+[Reflect] 类型变更可能有意外扩散——调用方可能依赖 unknown 做了类型断言。设 delay=3 的 reminder：如果触发了，说明扩散超出预期，需要停下来重新评估范围而不是继续打补丁。
+
+[工具调用] reminder({
+  content: "unknown→string:\\n[ ] 改函数签名\\n[ ] 更新调用方（检查类型断言）\\n[ ] 跑测试\\n如果触发→扩散超预期，重新评估范围。",
+  delay: 3
+})
+
+[Deep] 改签名，find_usages 找到 5 个调用方，逐一更新，测试通过。比预期多几个调用方但都是简单改动，reminder 未触发即完成。
+
+[工具调用] attempt_completion: "已完成..."
 </example>`
 
 // ============================================================

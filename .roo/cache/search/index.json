@@ -1996,6 +1996,31 @@
       "gitCommit": "6e2200ccbbf7c295b3c3dfe2cf7570d2b80d4e69",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"relevance\":{\"type\":\"string\"}}}},\"renderingComponents\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+    },
+    {
+      "id": "77",
+      "query": "Are there any test files for ReminderTool or reminder functionality?",
+      "tags": [
+        "are",
+        "there",
+        "any",
+        "test",
+        "files",
+        "for",
+        "remindertool",
+        "or",
+        "reminder",
+        "functionality"
+      ],
+      "scope": {
+        "directories": "e:/_Project/Roo-Code/src",
+        "filePatterns": "*.test.ts,*.spec.ts",
+        "excludes": "node_modules,dist"
+      },
+      "createdAt": "2026-03-02T17:33:48.979Z",
+      "gitCommit": "45756e06453d3c342935fc9248a25f5db26bdbac",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"testFiles\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
     }
   ]
 }

@@ -82,7 +82,7 @@ export async function getEnvironmentDetails(
 			? state.apiConfiguration.reminderEnabled
 			: true
 	if (isFirstMessage && reminderEnabled && !cline.pendingReminder) {
-		xmlContent += `\n  <reminder_hint>You have the reminder tool enabled. After analyzing the task, set a reminder with your OKR breakdown and next steps.</reminder_hint>`
+		xmlContent += `\n  <reminder_hint>You have the reminder tool enabled. You MUST set a reminder for every task — it is your "estimate → execute → reflect → re-evaluate" rhythm anchor. First: quickly estimate the task scope and rounds needed. Then: set reminder #1 with your plan (investigation steps, implementation steps, estimated rounds). Investigation itself is a step in your plan, not something that happens before planning.</reminder_hint>`
 	}
 
 	// ============================================================================
@@ -91,7 +91,13 @@ export async function getEnvironmentDetails(
 	if (cline.pendingReminder) {
 		cline.pendingReminder.roundsLeft--
 		if (cline.pendingReminder.roundsLeft <= 0) {
-			xmlContent += `\n  <reminder>${cline.pendingReminder.content}\n\n⏰ Reminder fired. Reflect now:\n1. Is progress on track? If not, am I stuck in a dead end or unnecessary complexity?\n2. Should I consult_expert for external guidance?\n3. Set a new reminder with updated OKR and a reasonable delay for the next phase.</reminder>`
+			const reminderId = cline.pendingReminder.id
+			xmlContent += `\n  <reminder id="${reminderId}">${cline.pendingReminder.content}</reminder>`
+			xmlContent += `\n  <reminder_instruction>⏰ Reminder #${reminderId} fired. Your cognitive anchor: everything between reminder #${reminderId > 1 ? reminderId - 1 : 1} and now is one work phase. Reflect:
+1. Compare your plan (above) against actual progress — what's done, what drifted, what's blocked?
+2. Did this phase take more rounds than estimated? If yes, why — wrong estimate, unexpected complexity, or wrong approach entirely?
+3. Should you continue the current approach, pivot, or consult_expert for guidance?
+4. You MUST set reminder #${reminderId + 1} now with: updated progress, next phase plan, and estimated rounds. No exceptions.</reminder_instruction>`
 			cline.pendingReminder = null
 		}
 	}
