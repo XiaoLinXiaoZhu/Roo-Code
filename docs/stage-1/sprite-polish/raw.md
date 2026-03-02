@@ -7,12 +7,12 @@
 </user_message>
 
 <file*content path="src/core/prompts/sections/spirit.ts">
-1 | /**
+1 | /\*\*
 2 | * SPIRIT Section - 精神内核
-3 | *
-4 | * 结构：Overview → 简要解释 → Few-shot 示例
-5 | * - Overview 提供高层次理解
-6 | * - 简要解释提供快速参考
+3 | _
+4 | _ 结构：Overview → 简要解释 → Few-shot 示例
+5 | _ - Overview 提供高层次理解
+6 | _ - 简要解释提供快速参考
 7 | * - Few-shot 示例聚焦边缘情景，提供深度指导
 8 | \*/
 9 |
@@ -151,7 +151,7 @@
 142 | 🧭CERTAINTY:
 143 | 问题位置未知：可能是前端截断、网络传输转码、还是数据库编码问题？
 144 | 我决定执行 **数据溯源**：
-145 | 1. **构造示踪剂\*\*：生成一个包含特殊字符的唯一字符串 \`Title*🦄*Test_End\`。
+145 | 1. \*\*构造示踪剂\*\*：生成一个包含特殊字符的唯一字符串 \`Title*🦄*Test_End\`。
 146 | 2. **全程追踪**：
 147 | - 检查前端发送的 Payload。
 148 | - 检查后端接收到的 Request Body。
