@@ -1,7 +1,7 @@
 import type OpenAI from "openai"
 
 const REMINDER_DESCRIPTION = `Set a memo/reminder for yourself (overwrites any previous reminder — only one active at a time).
-The content will be injected as a user message after N rounds (1 round = 1 assistant response).
+The content will appear as a \`<reminder>\` tag inside the \`<environment>\` block after N rounds (1 round = 1 assistant response).
 
 **When to Use**: After breaking down a complex task, create a reminder summarizing:
 1. The overall Objective

@@ -23,7 +23,7 @@
 
 **参考**：`docs/better-tools/reminder.ts`
 
-- [x] 实现 `ReminderTool`：agent 为自己设置延迟提醒，内容在 N 轮后作为 user message 注入（一轮 = 模型输出 + 工具返回）
+- [x] 实现 `ReminderTool`：agent 为自己设置延迟提醒，内容在 N 轮后作为 `<reminder>` 标签注入到 `<environment>` 块中
 - [x] 只保留最新一条 reminder（覆盖旧的）
 - [x] 工具描述引导：分解任务为 OKR 后创建 reminder，reminder 触发时必须设置新 reminder
 - [x] 前端 ChatRow 渲染适配
