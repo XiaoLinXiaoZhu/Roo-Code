@@ -91,7 +91,7 @@ export async function getEnvironmentDetails(
 	if (cline.pendingReminder) {
 		cline.pendingReminder.roundsLeft--
 		if (cline.pendingReminder.roundsLeft <= 0) {
-			xmlContent += `\n  <reminder>${cline.pendingReminder.content}</reminder>`
+			xmlContent += `\n  <reminder>${cline.pendingReminder.content}\n\n⏰ Reminder fired. Reflect now:\n1. Is progress on track? If not, am I stuck in a dead end or unnecessary complexity?\n2. Should I consult_expert for external guidance?\n3. Set a new reminder with updated OKR and a reasonable delay for the next phase.</reminder>`
 			cline.pendingReminder = null
 		}
 	}
