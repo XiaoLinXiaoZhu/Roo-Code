@@ -3,16 +3,16 @@ import type OpenAI from "openai"
 const EXECUTE_COMMAND_DESCRIPTION = `Run shell commands for development, system operations, or invoking CLI tools. For code navigation (finding definitions or references), prefer find_definition/find_usages over grep.
 
 **When to Use**: Running dev/build/test commands.
-- execute_command({ command: "npm test -- --grep 'auth'", cwd: "./backend", timeout: null })
+- exec({ command: "npm test -- --grep 'auth'", cwd: "./backend", timeout: null })
 
 **When to Use**: Git operations.
-- execute_command({ command: "git diff HEAD~3 --stat", cwd: ".", timeout: null })
+- exec({ command: "git diff HEAD~3 --stat", cwd: ".", timeout: null })
 
 **When to Use**: System inspection or file operations.
-- execute_command({ command: "ls -la src/ && cat package.json", cwd: ".", timeout: null })
+- exec({ command: "ls -la src/ && cat package.json", cwd: ".", timeout: null })
 
 **When to Use**: Long-running processes (dev servers, watchers).
-- execute_command({ command: "npm run dev", cwd: ".", timeout: 10 })`
+- exec({ command: "npm run dev", cwd: ".", timeout: 10 })`
 
 const COMMAND_PARAMETER_DESCRIPTION = `The CLI command to execute. Shell compatibility: PowerShell uses \`;\` to chain (use Select-String, Get-Content, Remove-Item); cmd.exe uses \`&&\` (use type, del, findstr); bash/zsh uses \`&&\` with all Unix commands. Use relative paths (e.g., ./src/) and execute complex commands directly without creating scripts.`
 
@@ -23,7 +23,7 @@ const TIMEOUT_PARAMETER_DESCRIPTION = `Timeout in seconds. When exceeded, the co
 export default {
 	type: "function",
 	function: {
-		name: "execute_command",
+		name: "exec",
 		description: EXECUTE_COMMAND_DESCRIPTION,
 		strict: true,
 		parameters: {

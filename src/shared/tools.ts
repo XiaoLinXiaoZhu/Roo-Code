@@ -486,6 +486,7 @@ export const ALWAYS_AVAILABLE_TOOLS: ToolName[] = [
 export const TOOL_ALIASES: Record<string, ToolName> = {
 	write_file: "write_to_file",
 	search_and_replace: "edit",
+	exec: "execute_command",
 } as const
 
 export type DiffResult =
