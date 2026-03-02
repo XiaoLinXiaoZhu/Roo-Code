@@ -2021,6 +2021,37 @@
       "gitCommit": "45756e06453d3c342935fc9248a25f5db26bdbac",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"testFiles\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+    },
+    {
+      "id": "78",
+      "query": "How does Task persist and restore state when resuming from history? Where is pendingReminder saved/loaded?",
+      "tags": [
+        "how",
+        "does",
+        "task",
+        "persist",
+        "and",
+        "restore",
+        "state",
+        "when",
+        "resuming",
+        "from",
+        "history",
+        "where",
+        "is",
+        "pendingreminder",
+        "saved",
+        "loaded"
+      ],
+      "scope": {
+        "directories": "e:/_Project/Roo-Code/src/core/task",
+        "filePatterns": "*.ts",
+        "excludes": "node_modules,dist"
+      },
+      "createdAt": "2026-03-02T18:36:39.186Z",
+      "gitCommit": "ccb7e753d7aef59f57c28c18105f0d94766de97d",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"persistMechanism\":{\"type\":\"string\"},\"relevantFiles\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"pendingReminderPersisted\":{\"type\":\"boolean\"}}}"
     }
   ]
 }

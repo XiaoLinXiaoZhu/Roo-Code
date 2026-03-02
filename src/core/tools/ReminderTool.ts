@@ -48,3 +48,59 @@ export class ReminderTool extends BaseTool<"reminder"> {
 }
 
 export const reminderTool = new ReminderTool()
+
+/**
+ * Restore pendingReminder and reminderCounter from persisted clineMessages.
+ * Called on task resume (similar to restoreTodoListForTask).
+ */
+export function restoreReminderForTask(task: Task): void {
+	const messages = task.clineMessages
+	if (!messages?.length) return
+
+	// Find all reminder tool messages to restore counter
+	const reminderMessages: { index: number; content: string; delay: number; id: number }[] = []
+	for (let i = 0; i < messages.length; i++) {
+		const msg = messages[i]
+		if (msg.type === "say" && msg.say === "tool") {
+			try {
+				const parsed = JSON.parse(msg.text ?? "{}")
+				if (parsed.tool === "reminder" && parsed.content) {
+					reminderMessages.push({
+						index: i,
+						content: parsed.content,
+						delay: parsed.delay ?? 7,
+						id: parsed.id ?? reminderMessages.length + 1,
+					})
+				}
+			} catch {
+				// skip malformed
+			}
+		}
+	}
+
+	if (reminderMessages.length === 0) return
+
+	// Restore counter to highest id seen
+	task.reminderCounter = Math.max(...reminderMessages.map((r) => r.id))
+
+	// Restore the last reminder with adjusted roundsLeft
+	const last = reminderMessages[reminderMessages.length - 1]
+
+	// Count api rounds (api_req_started messages) after the last reminder
+	let roundsSince = 0
+	for (let i = last.index + 1; i < messages.length; i++) {
+		if (messages[i].type === "say" && messages[i].say === "api_req_started") {
+			roundsSince++
+		}
+	}
+
+	const roundsLeft = last.delay - roundsSince
+	if (roundsLeft > 0) {
+		task.pendingReminder = { content: last.content, roundsLeft, id: last.id }
+	}
+	// If roundsLeft <= 0, the reminder already fired (or will fire on next getEnvironmentDetails)
+	// In that case, set roundsLeft to 1 so it fires immediately on resume
+	else {
+		task.pendingReminder = { content: last.content, roundsLeft: 1, id: last.id }
+	}
+}

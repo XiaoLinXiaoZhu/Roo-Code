@@ -100,6 +100,7 @@ import { buildNativeToolsArrayWithRestrictions } from "./build-tools"
 // core modules
 import { ToolRepetitionDetector } from "../tools/ToolRepetitionDetector"
 import { restoreTodoListForTask } from "../tools/UpdateTodoListTool"
+import { restoreReminderForTask } from "../tools/ReminderTool"
 import { FileContextTracker } from "../context-tracking/FileContextTracker"
 import { RooIgnoreController } from "../ignore/RooIgnoreController"
 import { RooProtectedController } from "../protect/RooProtectedController"
@@ -1343,6 +1344,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 	public async overwriteClineMessages(newMessages: ClineMessage[]) {
 		this.clineMessages = newMessages
 		restoreTodoListForTask(this)
+		restoreReminderForTask(this)
 		await this.saveClineMessages()
 
 		// When overwriting messages (e.g., during task resume), repopulate the cloud sync tracking Set

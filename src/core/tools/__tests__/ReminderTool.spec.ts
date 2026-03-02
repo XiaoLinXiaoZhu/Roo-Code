@@ -1,4 +1,4 @@
-import { reminderTool } from "../ReminderTool"
+import { reminderTool, restoreReminderForTask } from "../ReminderTool"
 import { Task } from "../../task/Task"
 
 describe("ReminderTool", () => {
@@ -49,5 +49,69 @@ describe("ReminderTool", () => {
 		await reminderTool.execute({ content: "test" }, mockTask as Task, callbacks)
 		expect(mockTask.pendingReminder).toEqual({ content: "test", roundsLeft: 7, id: 1 })
 		expect(pushToolResult).toHaveBeenCalledWith("Reminder #1 set. Will fire in 7 rounds.")
+	})
+})
+
+describe("restoreReminderForTask", () => {
+	function makeMsg(say: string, text: string): any {
+		return { type: "say", say, text, ts: Date.now() }
+	}
+
+	it("should restore counter and pendingReminder from messages", () => {
+		const task: any = {
+			reminderCounter: 0,
+			pendingReminder: null,
+			clineMessages: [
+				makeMsg("tool", JSON.stringify({ tool: "reminder", content: "plan A", delay: 5, id: 1 })),
+				makeMsg("api_req_started", "{}"),
+				makeMsg("api_req_started", "{}"),
+			],
+		}
+		restoreReminderForTask(task)
+		expect(task.reminderCounter).toBe(1)
+		expect(task.pendingReminder).toEqual({ content: "plan A", roundsLeft: 3, id: 1 })
+	})
+
+	it("should restore latest reminder when multiple exist", () => {
+		const task: any = {
+			reminderCounter: 0,
+			pendingReminder: null,
+			clineMessages: [
+				makeMsg("tool", JSON.stringify({ tool: "reminder", content: "plan A", delay: 5, id: 1 })),
+				makeMsg("api_req_started", "{}"),
+				makeMsg("api_req_started", "{}"),
+				makeMsg("tool", JSON.stringify({ tool: "reminder", content: "plan B", delay: 4, id: 2 })),
+				makeMsg("api_req_started", "{}"),
+			],
+		}
+		restoreReminderForTask(task)
+		expect(task.reminderCounter).toBe(2)
+		expect(task.pendingReminder).toEqual({ content: "plan B", roundsLeft: 3, id: 2 })
+	})
+
+	it("should set roundsLeft to 1 when reminder should have already fired", () => {
+		const task: any = {
+			reminderCounter: 0,
+			pendingReminder: null,
+			clineMessages: [
+				makeMsg("tool", JSON.stringify({ tool: "reminder", content: "plan", delay: 2, id: 1 })),
+				makeMsg("api_req_started", "{}"),
+				makeMsg("api_req_started", "{}"),
+				makeMsg("api_req_started", "{}"),
+			],
+		}
+		restoreReminderForTask(task)
+		expect(task.pendingReminder).toEqual({ content: "plan", roundsLeft: 1, id: 1 })
+	})
+
+	it("should do nothing when no reminder messages exist", () => {
+		const task: any = {
+			reminderCounter: 0,
+			pendingReminder: null,
+			clineMessages: [makeMsg("api_req_started", "{}")],
+		}
+		restoreReminderForTask(task)
+		expect(task.reminderCounter).toBe(0)
+		expect(task.pendingReminder).toBeNull()
 	})
 })
