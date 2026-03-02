@@ -108,6 +108,7 @@ export const toolParamNames = [
 	"nodeId", // update_intent/prune_intent/commit_intent required parameter
 	"status", // update_intent optional parameter
 	"reason", // prune_intent optional parameter
+	"delay", // reminder optional parameter
 ] as const
 
 export type ToolParamName = (typeof toolParamNames)[number]
@@ -216,6 +217,11 @@ export type NativeToolArgs = {
 		newParentId?: string | null
 		nodeIds?: string[]
 		commonContent?: string
+	}
+	// 提醒工具
+	reminder: {
+		content: string
+		delay?: number
 	}
 	// Add more tools as they are migrated to native protocol
 }
@@ -418,6 +424,7 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	prune_intent: "prune intent",
 	commit_intent: "commit intent",
 	restructure_intent: "restructure intent tree",
+	reminder: "set reminder",
 } as const
 
 // Define available tool groups.
@@ -460,6 +467,7 @@ export const ALWAYS_AVAILABLE_TOOLS: ToolName[] = [
 	// "switch_mode",
 	// "new_task",
 	"update_todo_list",
+	"reminder",
 	// "run_slash_command",
 	// disable skill for test
 	// "skill",

@@ -281,6 +281,11 @@ export function filterNativeToolsForMode(
 		allowedToolNames.delete("update_todo_list")
 	}
 
+	// Conditionally exclude reminder if disabled in settings
+	if (settings?.reminderEnabled === false) {
+		allowedToolNames.delete("reminder")
+	}
+
 	// Conditionally exclude intent tree tools if disabled in settings
 	if (settings?.intentTreeEnabled === false || !settings?.intentTreeEnabled) {
 		allowedToolNames.delete("add_intent")
@@ -386,6 +391,9 @@ export function isToolAllowedInMode(
 		}
 		if (toolName === "update_todo_list") {
 			return settings?.todoListEnabled !== false
+		}
+		if (toolName === "reminder") {
+			return settings?.reminderEnabled !== false
 		}
 		if (toolName === "generate_image") {
 			return experiments?.imageGeneration === true

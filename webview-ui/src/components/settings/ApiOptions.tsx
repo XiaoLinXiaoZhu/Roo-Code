@@ -102,6 +102,7 @@ import { ThinkingBudget } from "./ThinkingBudget"
 import { Verbosity } from "./Verbosity"
 import { TodoListSettingsControl } from "./TodoListSettingsControl"
 import { IntentTreeSettingsControl } from "./IntentTreeSettingsControl"
+import { ReminderSettingsControl } from "./ReminderSettingsControl"
 import { TemperatureControl } from "./TemperatureControl"
 import { RateLimitSecondsControl } from "./RateLimitSecondsControl"
 import { ConsecutiveMistakeLimitControl } from "./ConsecutiveMistakeLimitControl"
@@ -783,6 +784,10 @@ const ApiOptions = ({
 								/>
 								<IntentTreeSettingsControl
 									intentTreeEnabled={apiConfiguration.intentTreeEnabled}
+									onChange={(field, value) => setApiConfigurationField(field, value)}
+								/>
+								<ReminderSettingsControl
+									reminderEnabled={apiConfiguration.reminderEnabled}
 									onChange={(field, value) => setApiConfigurationField(field, value)}
 								/>
 								{selectedModelInfo?.supportsTemperature !== false && (

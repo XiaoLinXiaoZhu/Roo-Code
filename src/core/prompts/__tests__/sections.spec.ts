@@ -72,6 +72,7 @@ describe("getRulesSection", () => {
 		const settings = {
 			todoListEnabled: true,
 			intentTreeEnabled: false,
+			reminderEnabled: true,
 			useAgentRules: true,
 			newTaskRequireTodos: false,
 			isStealthModel: true,
@@ -90,6 +91,7 @@ describe("getRulesSection", () => {
 		const settings = {
 			todoListEnabled: true,
 			intentTreeEnabled: false,
+			reminderEnabled: true,
 			useAgentRules: true,
 			newTaskRequireTodos: false,
 			isStealthModel: false,
@@ -105,6 +107,7 @@ describe("getRulesSection", () => {
 		const settings = {
 			todoListEnabled: true,
 			intentTreeEnabled: false,
+			reminderEnabled: true,
 			useAgentRules: true,
 			newTaskRequireTodos: false,
 		}

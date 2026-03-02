@@ -4,6 +4,7 @@
 export interface SystemPromptSettings {
 	todoListEnabled: boolean
 	intentTreeEnabled: boolean
+	reminderEnabled: boolean
 	useAgentRules: boolean
 	/** When true, recursively discover and load .roo/rules from subdirectories */
 	enableSubfolderRules?: boolean

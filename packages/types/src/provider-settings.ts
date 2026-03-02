@@ -176,6 +176,7 @@ const baseProviderSettingsSchema = z.object({
 	includeMaxTokens: z.boolean().optional(),
 	todoListEnabled: z.boolean().optional(),
 	intentTreeEnabled: z.boolean().optional(),
+	reminderEnabled: z.boolean().optional(),
 	modelTemperature: z.number().nullish(),
 	rateLimitSeconds: z.number().optional(),
 	consecutiveMistakeLimit: z.number().min(0).optional(),

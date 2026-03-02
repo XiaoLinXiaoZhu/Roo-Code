@@ -440,6 +440,7 @@ describe("SYSTEM_PROMPT", () => {
 		const settings = {
 			todoListEnabled: false,
 			intentTreeEnabled: false,
+			reminderEnabled: true,
 			useAgentRules: true,
 			newTaskRequireTodos: false,
 		}
@@ -469,6 +470,7 @@ describe("SYSTEM_PROMPT", () => {
 		const settings = {
 			todoListEnabled: true,
 			intentTreeEnabled: false,
+			reminderEnabled: true,
 			useAgentRules: true,
 			newTaskRequireTodos: false,
 		}
@@ -498,6 +500,7 @@ describe("SYSTEM_PROMPT", () => {
 		const settings = {
 			todoListEnabled: true,
 			intentTreeEnabled: false,
+			reminderEnabled: true,
 			useAgentRules: true,
 			newTaskRequireTodos: false,
 		}
@@ -527,6 +530,7 @@ describe("SYSTEM_PROMPT", () => {
 		const settings = {
 			todoListEnabled: true,
 			intentTreeEnabled: false,
+			reminderEnabled: true,
 			useAgentRules: true,
 			newTaskRequireTodos: false,
 		}

@@ -789,6 +789,7 @@ export interface ClineSayTool {
 		| "consultExpert"
 		| "applyEdit"
 		| "buildTool"
+		| "reminder"
 		| "searchProject"
 	path?: string
 	// For readMedia

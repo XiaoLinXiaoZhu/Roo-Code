@@ -55,6 +55,7 @@ export const generateSystemPrompt = async (provider: ClineProvider, message: Web
 		{
 			todoListEnabled: apiConfiguration?.todoListEnabled ?? true,
 			intentTreeEnabled: apiConfiguration?.intentTreeEnabled ?? false,
+			reminderEnabled: apiConfiguration?.reminderEnabled ?? true,
 			useAgentRules: vscode.workspace.getConfiguration(Package.name).get<boolean>("useAgentRules") ?? true,
 			enableSubfolderRules: enableSubfolderRules ?? false,
 			newTaskRequireTodos: vscode.workspace

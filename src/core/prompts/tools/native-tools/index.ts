@@ -26,6 +26,7 @@ import consultExpert from "./consult_expert"
 import findDefinition from "./find_definition"
 import findUsages from "./find_usages"
 import buildTool from "./build_tool"
+import reminder from "./reminder"
 import addIntent from "./add_intent"
 import updateIntent from "./update_intent"
 import pruneIntent from "./prune_intent"
@@ -88,6 +89,8 @@ export function getNativeTools(options: NativeToolsOptions = {}): OpenAI.Chat.Ch
 		consultExpert,
 		// 工具构建工具
 		buildTool,
+		// 提醒工具
+		reminder,
 		// 意图树工具
 		addIntent,
 		updateIntent,

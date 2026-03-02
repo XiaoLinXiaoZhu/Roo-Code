@@ -318,7 +318,7 @@ export async function getEnvironmentDetails(
 	}
 
 	// ============================================================================
-	// Reminder and Spirit Hint Sections
+	// Todo List, Reminder, and Spirit Hint Sections
 	// ============================================================================
 	const shouldIncludeReminder = isFirstMessage || messageCount % 3 === 0
 	const todoListEnabled =
@@ -347,6 +347,18 @@ export async function getEnvironmentDetails(
 
 	if (shouldIncludeReminder && spriteHintContent) {
 		xmlContent += `\n  <spirit_hint>${escapeXml(spriteHintContent)}</spirit_hint>`
+	}
+
+	// ============================================================================
+	// Pending Reminder Section (reminder tool)
+	// Countdown and inject when roundsLeft reaches 0
+	// ============================================================================
+	if (cline.pendingReminder) {
+		cline.pendingReminder.roundsLeft--
+		if (cline.pendingReminder.roundsLeft <= 0) {
+			xmlContent += `\n  <reminder>${escapeXml(cline.pendingReminder.content)}</reminder>`
+			cline.pendingReminder = null
+		}
 	}
 
 	// ============================================================================

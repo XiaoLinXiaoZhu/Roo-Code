@@ -102,6 +102,7 @@ export async function buildNativeToolsArrayWithRestrictions(options: BuildToolsO
 	const filterSettings = {
 		todoListEnabled: apiConfiguration?.todoListEnabled ?? true,
 		intentTreeEnabled: apiConfiguration?.intentTreeEnabled ?? false,
+		reminderEnabled: apiConfiguration?.reminderEnabled ?? true,
 		disabledTools,
 		modelInfo,
 	}

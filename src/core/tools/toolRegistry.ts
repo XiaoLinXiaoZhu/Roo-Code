@@ -40,6 +40,7 @@ import { addIntentTool } from "./AddIntentTool"
 import { updateIntentTool } from "./UpdateIntentTool"
 import { pruneIntentTool } from "./PruneIntentTool"
 import { commitIntentTool } from "./CommitIntentTool"
+import { reminderTool } from "./ReminderTool"
 
 /**
  * All registered BaseTool instances.
@@ -79,6 +80,7 @@ const allTools: BaseTool<ToolName>[] = [
 	updateIntentTool,
 	pruneIntentTool,
 	commitIntentTool,
+	reminderTool,
 ]
 
 /**

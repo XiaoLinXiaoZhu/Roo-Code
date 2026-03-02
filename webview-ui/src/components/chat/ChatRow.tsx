@@ -735,6 +735,18 @@ export const ChatRowContent = ({
 
 				return <TodoChangeDisplay previousTodos={previousTodos} newTodos={todos} />
 			}
+			case "reminder": {
+				const reminderTool = tool as any
+				return (
+					<div className="flex items-center gap-2 text-sm text-vscode-descriptionForeground">
+						<span className="codicon codicon-bell" />
+						<span>
+							Reminder set ({reminderTool.delay ?? 7} rounds): {reminderTool.content?.slice(0, 100)}
+							{(reminderTool.content?.length ?? 0) > 100 ? "…" : ""}
+						</span>
+					</div>
+				)
+			}
 			case "addIntent": {
 				const intentTool = tool as any
 				let parsedResult: any = null
