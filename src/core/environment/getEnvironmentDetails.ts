@@ -18,7 +18,6 @@ import { RooProtectedController } from "../protect/RooProtectedController"
 
 import { Task } from "../task/Task"
 import { formatReminderSection } from "./reminder"
-import { getContextualSpriteHint } from "./getSpriteHint"
 import { formatWorkspaceTree } from "./formatWorkspaceTree"
 
 /**
@@ -328,14 +327,6 @@ export async function getEnvironmentDetails(
 
 	const reminderContent = todoListEnabled ? formatReminderSection(cline.todoList) : ""
 
-	// 上下文感知提示选择：根据当前操作状态选择最相关的 hint
-	const spriteHintContent = getContextualSpriteHint({
-		consecutiveMistakeCount: cline.consecutiveMistakeCount,
-		lastToolFailed: cline.didToolFailInCurrentTurn,
-		messageCount,
-		hasRecentlyModifiedFiles: recentlyModifiedFiles.length > 0,
-	})
-
 	if (shouldIncludeReminder && todoListEnabled) {
 		if (reminderContent) {
 			// reminderContent is already XML formatted, no need to escape
@@ -343,10 +334,6 @@ export async function getEnvironmentDetails(
 		} else {
 			xmlContent += `\n  <todos hint="Create with update_todo_list if task is complex"/>`
 		}
-	}
-
-	if (shouldIncludeReminder && spriteHintContent) {
-		xmlContent += `\n  <spirit_hint>${escapeXml(spriteHintContent)}</spirit_hint>`
 	}
 
 	// ============================================================================
