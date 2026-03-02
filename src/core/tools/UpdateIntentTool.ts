@@ -5,7 +5,7 @@ import { formatResponse } from "../prompts/responses"
 import { BaseTool, ToolCallbacks } from "./BaseTool"
 
 interface UpdateIntentParams {
-	nodeId: string
+	node_id: string
 	status?: "in_progress" | "done" | "superseded"
 	content?: string
 }
@@ -25,7 +25,7 @@ export class UpdateIntentTool extends BaseTool<"update_intent"> {
 				return
 			}
 
-			if (!params.nodeId) {
+			if (!params.node_id) {
 				task.consecutiveMistakeCount++
 				task.recordToolError("update_intent")
 				task.didToolFailInCurrentTurn = true
@@ -51,14 +51,14 @@ export class UpdateIntentTool extends BaseTool<"update_intent"> {
 			}
 
 			// 获取更新前的节点状态
-			const oldNode = task.intentTree.getNode(params.nodeId)
+			const oldNode = task.intentTree.getNode(params.node_id)
 			if (!oldNode) {
 				task.consecutiveMistakeCount++
 				task.recordToolError("update_intent")
 				task.didToolFailInCurrentTurn = true
 				const availableNodes = task.intentTree.getAvailableNodesList()
 				pushToolResult(
-					formatResponse.toolError(`Node '${params.nodeId}' not found. Available nodes: ${availableNodes}`),
+					formatResponse.toolError(`Node '${params.node_id}' not found. Available nodes: ${availableNodes}`),
 				)
 				return
 			}
@@ -68,7 +68,7 @@ export class UpdateIntentTool extends BaseTool<"update_intent"> {
 
 			// 执行更新
 			const result = task.intentTree.updateNode(
-				params.nodeId,
+				params.node_id,
 				{ content: newContent, status: params.status },
 				task.taskId,
 			)
@@ -79,7 +79,7 @@ export class UpdateIntentTool extends BaseTool<"update_intent"> {
 				task.didToolFailInCurrentTurn = true
 				const availableNodes = task.intentTree.getAvailableNodesList()
 				pushToolResult(
-					formatResponse.toolError(`Node '${params.nodeId}' not found. Available nodes: ${availableNodes}`),
+					formatResponse.toolError(`Node '${params.node_id}' not found. Available nodes: ${availableNodes}`),
 				)
 				return
 			}

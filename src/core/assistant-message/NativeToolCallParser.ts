@@ -663,7 +663,7 @@ export class NativeToolCallParser {
 						topic: partialArgs.topic,
 						context: partialArgs.context,
 						attachments: partialArgs.attachments,
-						consultType: partialArgs.consultType,
+						consult_type: partialArgs.consult_type,
 					}
 				}
 				break
@@ -707,8 +707,8 @@ export class NativeToolCallParser {
 				if (partialArgs.requirement !== undefined) {
 					nativeArgs = {
 						requirement: partialArgs.requirement,
-						inputHint: partialArgs.inputHint,
-						outputHint: partialArgs.outputHint,
+						input_hint: partialArgs.input_hint,
+						output_hint: partialArgs.output_hint,
 					}
 				}
 				break
@@ -718,16 +718,16 @@ export class NativeToolCallParser {
 					nativeArgs = {
 						type: partialArgs.type,
 						content: partialArgs.content,
-						parentId: partialArgs.parentId,
+						parent_id: partialArgs.parent_id,
 						assumption: partialArgs.assumption,
 					}
 				}
 				break
 
 			case "update_intent":
-				if (partialArgs.nodeId !== undefined) {
+				if (partialArgs.node_id !== undefined) {
 					nativeArgs = {
-						nodeId: partialArgs.nodeId,
+						node_id: partialArgs.node_id,
 						status: partialArgs.status,
 						content: partialArgs.content,
 					}
@@ -735,18 +735,18 @@ export class NativeToolCallParser {
 				break
 
 			case "prune_intent":
-				if (partialArgs.nodeId !== undefined) {
+				if (partialArgs.node_id !== undefined) {
 					nativeArgs = {
-						nodeId: partialArgs.nodeId,
+						node_id: partialArgs.node_id,
 						reason: partialArgs.reason,
 					}
 				}
 				break
 
 			case "commit_intent":
-				if (partialArgs.nodeId !== undefined || partialArgs.message !== undefined) {
+				if (partialArgs.node_id !== undefined || partialArgs.message !== undefined) {
 					nativeArgs = {
-						nodeId: partialArgs.nodeId,
+						node_id: partialArgs.node_id,
 						message: partialArgs.message,
 					}
 				}
@@ -756,10 +756,10 @@ export class NativeToolCallParser {
 				if (partialArgs.operation !== undefined) {
 					nativeArgs = {
 						operation: partialArgs.operation,
-						nodeId: partialArgs.nodeId,
-						newParentId: partialArgs.newParentId,
-						nodeIds: partialArgs.nodeIds,
-						commonContent: partialArgs.commonContent,
+						node_id: partialArgs.node_id,
+						new_parent_id: partialArgs.new_parent_id,
+						node_ids: partialArgs.node_ids,
+						common_content: partialArgs.common_content,
 					}
 				}
 				break
@@ -1144,7 +1144,7 @@ export class NativeToolCallParser {
 							topic: args.topic,
 							context: args.context,
 							attachments: args.attachments,
-							consultType: args.consultType,
+							consult_type: args.consult_type,
 						} as NativeArgsFor<TName>
 					}
 					break
@@ -1200,8 +1200,8 @@ export class NativeToolCallParser {
 					if (args.requirement !== undefined) {
 						nativeArgs = {
 							requirement: args.requirement,
-							inputHint: args.inputHint,
-							outputHint: args.outputHint,
+							input_hint: args.input_hint,
+							output_hint: args.output_hint,
 						} as NativeArgsFor<TName>
 					}
 					break
@@ -1211,16 +1211,16 @@ export class NativeToolCallParser {
 						nativeArgs = {
 							type: args.type,
 							content: args.content,
-							parentId: args.parentId,
+							parent_id: args.parent_id,
 							assumption: args.assumption,
 						} as NativeArgsFor<TName>
 					}
 					break
 
 				case "update_intent":
-					if (args.nodeId !== undefined) {
+					if (args.node_id !== undefined) {
 						nativeArgs = {
-							nodeId: args.nodeId,
+							node_id: args.node_id,
 							status: args.status,
 							content: args.content,
 						} as NativeArgsFor<TName>
@@ -1228,9 +1228,9 @@ export class NativeToolCallParser {
 					break
 
 				case "prune_intent":
-					if (args.nodeId !== undefined) {
+					if (args.node_id !== undefined) {
 						nativeArgs = {
-							nodeId: args.nodeId,
+							node_id: args.node_id,
 							reason: args.reason,
 						} as NativeArgsFor<TName>
 					}
@@ -1239,7 +1239,7 @@ export class NativeToolCallParser {
 				case "commit_intent":
 					if (args.message !== undefined) {
 						nativeArgs = {
-							nodeId: args.nodeId,
+							node_id: args.node_id,
 							message: args.message,
 						} as NativeArgsFor<TName>
 					}
@@ -1249,10 +1249,10 @@ export class NativeToolCallParser {
 					if (args.operation !== undefined) {
 						nativeArgs = {
 							operation: args.operation,
-							nodeId: args.nodeId,
-							newParentId: args.newParentId,
-							nodeIds: args.nodeIds,
-							commonContent: args.commonContent,
+							node_id: args.node_id,
+							new_parent_id: args.new_parent_id,
+							node_ids: args.node_ids,
+							common_content: args.common_content,
 						} as NativeArgsFor<TName>
 					}
 					break
@@ -1261,8 +1261,8 @@ export class NativeToolCallParser {
 					if (args.path) {
 						nativeArgs = {
 							path: args.path,
-							focusX: args.focusX,
-							focusY: args.focusY,
+							focus_x: args.focus_x,
+							focus_y: args.focus_y,
 							scale: args.scale,
 						} as NativeArgsFor<TName>
 					}

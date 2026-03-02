@@ -5,7 +5,7 @@ import { formatResponse } from "../prompts/responses"
 import { BaseTool, ToolCallbacks } from "./BaseTool"
 
 interface PruneIntentParams {
-	nodeId: string
+	node_id: string
 	reason?: string
 }
 
@@ -24,7 +24,7 @@ export class PruneIntentTool extends BaseTool<"prune_intent"> {
 				return
 			}
 
-			if (!params.nodeId) {
+			if (!params.node_id) {
 				task.consecutiveMistakeCount++
 				task.recordToolError("prune_intent")
 				task.didToolFailInCurrentTurn = true
@@ -36,14 +36,14 @@ export class PruneIntentTool extends BaseTool<"prune_intent"> {
 			const reason = params.reason?.trim() || undefined
 
 			// 获取要剪枝的节点信息（用于 UI 展示）
-			const nodeToprune = task.intentTree.getNode(params.nodeId)
+			const nodeToprune = task.intentTree.getNode(params.node_id)
 			if (!nodeToprune) {
 				task.consecutiveMistakeCount++
 				task.recordToolError("prune_intent")
 				task.didToolFailInCurrentTurn = true
 				const availableNodes = task.intentTree.getAvailableNodesList()
 				pushToolResult(
-					formatResponse.toolError(`Node '${params.nodeId}' not found. Available nodes: ${availableNodes}`),
+					formatResponse.toolError(`Node '${params.node_id}' not found. Available nodes: ${availableNodes}`),
 				)
 				return
 			}
@@ -59,11 +59,11 @@ export class PruneIntentTool extends BaseTool<"prune_intent"> {
 					}
 				}
 			}
-			collectNodes(params.nodeId)
+			collectNodes(params.node_id)
 
 			// 执行剪枝
-			const commits = task.intentTree.getSubtreeCommits(params.nodeId)
-			const prunedIds = task.intentTree.pruneSubtree(params.nodeId, task.taskId, reason)
+			const commits = task.intentTree.getSubtreeCommits(params.node_id)
+			const prunedIds = task.intentTree.pruneSubtree(params.node_id, task.taskId, reason)
 
 			if (prunedIds.length === 0) {
 				task.consecutiveMistakeCount++
@@ -72,7 +72,7 @@ export class PruneIntentTool extends BaseTool<"prune_intent"> {
 				const availableNodes = task.intentTree.getAvailableNodesList()
 				pushToolResult(
 					formatResponse.toolError(
-						`Node '${params.nodeId}' not found or already pruned. Available nodes: ${availableNodes}`,
+						`Node '${params.node_id}' not found or already pruned. Available nodes: ${availableNodes}`,
 					),
 				)
 				return

@@ -6,7 +6,7 @@ const SEARCH_PROJECT_DESCRIPTION = `Search and investigate the project codebase 
 - search_project({ query: "Where is the user authentication flow implemented?", scope: null, schema: "{\\"type\\":\\"object\\",\\"properties\\":{\\"files\\":{\\"type\\":\\"array\\",\\"items\\":{\\"type\\":\\"string\\"}}}}" })
 
 **When to Use**: Understanding dependencies or data flow with scoped search.
-- search_project({ query: "How are database connections initialized?", scope: { directories: "/workspace/src/db", filePatterns: "*.ts", excludes: "*.test.ts" }, schema: null })
+- search_project({ query: "How are database connections initialized?", scope: { directories: "/workspace/src/db", file_patterns: "*.ts", excludes: "*.test.ts" }, schema: null })
 
 **When NOT to Use**: Already know the file path (use execute_command to read directly), or need simple text search (use execute_command with grep).`
 
@@ -30,13 +30,13 @@ export default {
 				scope: {
 					type: ["object", "null"],
 					description:
-						"Optional search scope. Pass null for entire project, or provide directories/filePatterns/excludes to limit scope.",
+						"Optional search scope. Pass null for entire project, or provide directories/file_patterns/excludes to limit scope.",
 					properties: {
 						directories: {
 							type: ["string", "null"],
 							description: "Comma-separated absolute directory paths to limit search scope.",
 						},
-						filePatterns: {
+						file_patterns: {
 							type: ["string", "null"],
 							description: 'Glob patterns to filter files (e.g., "*.ts,*.tsx").',
 						},
@@ -45,7 +45,7 @@ export default {
 							description: 'Glob patterns to exclude (e.g., "node_modules,*.test.ts,dist").',
 						},
 					},
-					required: ["directories", "filePatterns", "excludes"],
+					required: ["directories", "file_patterns", "excludes"],
 					additionalProperties: false,
 				},
 				schema: {

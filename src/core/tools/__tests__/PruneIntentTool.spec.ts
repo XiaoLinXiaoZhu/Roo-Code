@@ -43,7 +43,7 @@ describe("PruneIntentTool", () => {
 		const task = createMockTask(tree)
 		const callbacks = createMockCallbacks()
 
-		await pruneIntentTool.execute({ nodeId: "A1.1", reason: "wrong approach" }, task, callbacks)
+		await pruneIntentTool.execute({ node_id: "A1.1", reason: "wrong approach" }, task, callbacks)
 
 		const result = callbacks.pushToolResult.mock.calls[0][0]
 		expect(result).toContain('count="2"')
@@ -69,7 +69,7 @@ describe("PruneIntentTool", () => {
 		const task = createMockTask(tree)
 		const callbacks = createMockCallbacks()
 
-		await pruneIntentTool.execute({ nodeId: "A1.1" }, task, callbacks)
+		await pruneIntentTool.execute({ node_id: "A1.1" }, task, callbacks)
 
 		const result = callbacks.pushToolResult.mock.calls[0][0]
 		expect(result).toContain("abc1234")
@@ -80,16 +80,16 @@ describe("PruneIntentTool", () => {
 		const task = createMockTask(tree)
 		const callbacks = createMockCallbacks()
 
-		await pruneIntentTool.execute({ nodeId: "X99" }, task, callbacks)
+		await pruneIntentTool.execute({ node_id: "X99" }, task, callbacks)
 		expect(task.consecutiveMistakeCount).toBe(1)
 		expect(callbacks.pushToolResult.mock.calls[0][0]).toContain("not found")
 	})
 
-	test("errors when nodeId missing", async () => {
+	test("errors when node_id missing", async () => {
 		const task = createMockTask(tree)
 		const callbacks = createMockCallbacks()
 
-		await pruneIntentTool.execute({ nodeId: "" }, task, callbacks)
+		await pruneIntentTool.execute({ node_id: "" }, task, callbacks)
 		expect(task.consecutiveMistakeCount).toBe(1)
 	})
 })

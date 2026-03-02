@@ -77,7 +77,7 @@ export const toolParamNames = [
 	"domain", // consult_expert required parameter
 	"topic", // consult_expert required parameter
 	"attachments", // consult_expert optional parameter
-	"consultType", // consult_expert required parameter
+	"consult_type", // consult_expert required parameter
 	"timeout", // execute_command parameter
 	"artifact_id", // read_command_output parameter
 	"search", // read_command_output parameter for grep-like search
@@ -101,15 +101,15 @@ export const toolParamNames = [
 	"max_results", // find_usages optional parameter
 	// build_tool 参数
 	"requirement", // build_tool required parameter
-	"inputHint", // build_tool optional parameter
-	"outputHint", // build_tool optional parameter
+	"input_hint", // build_tool optional parameter
+	"output_hint", // build_tool optional parameter
 	// intent tree 工具参数
-	"parentId", // add_intent optional parameter
-	"nodeId", // update_intent/prune_intent/commit_intent required parameter
+	"parent_id", // add_intent optional parameter
+	"node_id", // update_intent/prune_intent/commit_intent required parameter
 	"status", // update_intent optional parameter
 	"reason", // prune_intent optional parameter
 	"delay", // reminder optional parameter
-	"expectedMatches", // write optional parameter
+	"expected_matches", // write optional parameter
 ] as const
 
 export type ToolParamName = (typeof toolParamNames)[number]
@@ -121,7 +121,7 @@ export type ToolParamName = (typeof toolParamNames)[number]
 export type NativeToolArgs = {
 	access_mcp_resource: { server_name: string; uri: string }
 	read_file: import("@roo-code/types").ReadFileToolParams
-	read_media: { path: string; focusX?: number; focusY?: number; scale?: number }
+	read_media: { path: string; focus_x?: number; focus_y?: number; scale?: number }
 	read_command_output: { artifact_id: string; search?: string; offset?: number; limit?: number }
 	attempt_completion: { result: string }
 	execute_command: { command: string; cwd?: string; timeout?: number | null }
@@ -151,7 +151,7 @@ export type NativeToolArgs = {
 		query: string
 		scope?: {
 			directories?: string
-			filePatterns?: string
+			file_patterns?: string
 			excludes?: string
 		}
 		schema?: string
@@ -167,7 +167,7 @@ export type NativeToolArgs = {
 		topic: string
 		context: string
 		attachments?: string | null
-		consultType: "principles" | "best-practices" | "methodology" | "standards"
+		consult_type: "principles" | "best-practices" | "methodology" | "standards"
 	}
 	// AST 代码智能工具
 	find_definition: {
@@ -189,42 +189,42 @@ export type NativeToolArgs = {
 	// 工具构建工具
 	build_tool: {
 		requirement: string
-		inputHint?: string
-		outputHint?: string
+		input_hint?: string
+		output_hint?: string
 	}
 	// 意图树工具
 	add_intent: {
 		assumption: string
-		parentId?: string
+		parent_id?: string
 		type: "goal" | "objective" | "approach" | "impl"
 		content: string
 	}
 	update_intent: {
-		nodeId: string
+		node_id: string
 		status?: "in_progress" | "done" | "superseded"
 		content?: string
 	}
 	prune_intent: {
-		nodeId: string
+		node_id: string
 		reason?: string
 	}
 	commit_intent: {
-		nodeId?: string
+		node_id?: string
 		message: string
 	}
 	restructure_intent: {
 		operation: "reparent" | "promote" | "extract_common_parent"
-		nodeId?: string
-		newParentId?: string | null
-		nodeIds?: string[]
-		commonContent?: string
+		node_id?: string
+		new_parent_id?: string | null
+		node_ids?: string[]
+		common_content?: string
 	}
 	// 统一写入工具
 	write: {
 		path: string
 		content: string
 		search?: string | null
-		expectedMatches?: number | null
+		expected_matches?: number | null
 	}
 	// 提醒工具
 	reminder: {
@@ -381,12 +381,14 @@ export interface ApplyEditToolUse extends ToolUse<"apply_edit"> {
 
 export interface ConsultExpertToolUse extends ToolUse<"consult_expert"> {
 	name: "consult_expert"
-	params: Partial<Pick<Record<ToolParamName, string>, "domain" | "topic" | "context" | "attachments" | "consultType">>
+	params: Partial<
+		Pick<Record<ToolParamName, string>, "domain" | "topic" | "context" | "attachments" | "consult_type">
+	>
 }
 
 export interface BuildToolToolUse extends ToolUse<"build_tool"> {
 	name: "build_tool"
-	params: Partial<Pick<Record<ToolParamName, string>, "requirement" | "inputHint" | "outputHint">>
+	params: Partial<Pick<Record<ToolParamName, string>, "requirement" | "input_hint" | "output_hint">>
 }
 
 // Define tool group configuration

@@ -41,7 +41,7 @@ describe("UpdateIntentTool", () => {
 		const task = createMockTask(tree)
 		const callbacks = createMockCallbacks()
 
-		await updateIntentTool.execute({ nodeId: "G1", status: "in_progress" }, task, callbacks)
+		await updateIntentTool.execute({ node_id: "G1", status: "in_progress" }, task, callbacks)
 
 		const result = callbacks.pushToolResult.mock.calls[0][0]
 		expect(result).toContain('status="in_progress"')
@@ -52,16 +52,16 @@ describe("UpdateIntentTool", () => {
 		const task = createMockTask(tree)
 		const callbacks = createMockCallbacks()
 
-		await updateIntentTool.execute({ nodeId: "G1", content: "Updated goal" }, task, callbacks)
+		await updateIntentTool.execute({ node_id: "G1", content: "Updated goal" }, task, callbacks)
 
 		expect(tree.getNode("G1")!.content).toBe("Updated goal")
 	})
 
-	test("errors when nodeId missing", async () => {
+	test("errors when node_id missing", async () => {
 		const task = createMockTask(tree)
 		const callbacks = createMockCallbacks()
 
-		await updateIntentTool.execute({ nodeId: "" }, task, callbacks)
+		await updateIntentTool.execute({ node_id: "" }, task, callbacks)
 		expect(task.consecutiveMistakeCount).toBe(1)
 	})
 
@@ -69,7 +69,7 @@ describe("UpdateIntentTool", () => {
 		const task = createMockTask(tree)
 		const callbacks = createMockCallbacks()
 
-		await updateIntentTool.execute({ nodeId: "G1" }, task, callbacks)
+		await updateIntentTool.execute({ node_id: "G1" }, task, callbacks)
 		expect(task.consecutiveMistakeCount).toBe(1)
 	})
 
@@ -77,7 +77,7 @@ describe("UpdateIntentTool", () => {
 		const task = createMockTask(tree)
 		const callbacks = createMockCallbacks()
 
-		await updateIntentTool.execute({ nodeId: "G1", status: "done", content: "null" }, task, callbacks)
+		await updateIntentTool.execute({ node_id: "G1", status: "done", content: "null" }, task, callbacks)
 
 		// content should remain unchanged (not become "null")
 		expect(tree.getNode("G1")!.content).toBe("Goal")
@@ -91,7 +91,7 @@ describe("UpdateIntentTool", () => {
 		const callbacks = createMockCallbacks()
 
 		// content: "null" with no status => neither is valid => should error
-		await updateIntentTool.execute({ nodeId: "G1", content: "null" }, task, callbacks)
+		await updateIntentTool.execute({ node_id: "G1", content: "null" }, task, callbacks)
 		expect(task.consecutiveMistakeCount).toBe(1)
 	})
 
@@ -99,7 +99,7 @@ describe("UpdateIntentTool", () => {
 		const task = createMockTask(tree)
 		const callbacks = createMockCallbacks()
 
-		await updateIntentTool.execute({ nodeId: "X99", status: "done" }, task, callbacks)
+		await updateIntentTool.execute({ node_id: "X99", status: "done" }, task, callbacks)
 		expect(task.consecutiveMistakeCount).toBe(1)
 		expect(callbacks.pushToolResult.mock.calls[0][0]).toContain("not found")
 	})

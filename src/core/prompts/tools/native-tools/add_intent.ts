@@ -30,13 +30,13 @@ The rule: if you're adding a third impl to "fix" the same approach, the approach
 Let me also consider the opposite problem — what if you have multiple objectives that seem unrelated, but they keep interfering with each other? Maybe "reduce API latency" and "reduce database load" are both symptoms of the same deeper goal: "improve user experience under load." Discovering this shared goal lets you find solutions that serve both simultaneously. Use \`restructure_intent\` (extract_common_parent) when you notice this pattern.
 
 **When to Use**: User has a genuinely NEW objective with no related node in the tree.
-- add_intent({ assumption: "No existing goal about performance. User wants to optimize API response times.", parentId: null, type: "goal", content: "Optimize API performance" })
+- add_intent({ assumption: "No existing goal about performance. User wants to optimize API response times.", parent_id: null, type: "goal", content: "Optimize API performance" })
 
 **When to Use**: Adding a concrete approach under an existing goal.
-- add_intent({ assumption: "G1 is about performance. Caching is one replaceable approach.", parentId: "G1", type: "approach", content: "Use Redis caching for hot queries" })
+- add_intent({ assumption: "G1 is about performance. Caching is one replaceable approach.", parent_id: "G1", type: "approach", content: "Use Redis caching for hot queries" })
 
 **When to Use**: Recording an atomic code change under an approach.
-- add_intent({ assumption: "A1.1 is the caching approach. This impl adds the cache layer.", parentId: "A1.1", type: "impl", content: "Add cache middleware in UserService" })
+- add_intent({ assumption: "A1.1 is the caching approach. This impl adds the cache layer.", parent_id: "A1.1", type: "impl", content: "Add cache middleware in UserService" })
 
 **When NOT to Use**: Node already exists — use update_intent. User asks to check/verify/continue — operate on existing node.`
 
@@ -58,7 +58,7 @@ export default {
 						"'response time will drop below 200ms' is falsifiable, 'this will improve things' is not. " +
 						"When a falsifiable assumption is disproven, the node should be pruned, not patched.",
 				},
-				parentId: {
+				parent_id: {
 					type: "string",
 					description: "Parent node's short ID (e.g., 'G1', 'O1.1'). Omit to create a new root node.",
 				},

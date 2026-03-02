@@ -22,7 +22,7 @@ interface ConsultExpertParams {
 	topic: string
 	context: string
 	attachments?: string | null
-	consultType: ConsultType
+	consult_type: ConsultType
 }
 
 export class ConsultExpertTool extends BaseTool<"consult_expert"> {
@@ -35,12 +35,12 @@ export class ConsultExpertTool extends BaseTool<"consult_expert"> {
 			topic: params.topic || "",
 			context: params.context || "",
 			attachments: params.attachments,
-			consultType: (params.consultType as ConsultType) || "best-practices",
+			consult_type: (params.consult_type as ConsultType) || "best-practices",
 		}
 	}
 
 	async execute(params: ConsultExpertParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
-		const { domain, topic, context, attachments, consultType } = params
+		const { domain, topic, context, attachments, consult_type: consultType } = params
 		const { askApproval, handleError, pushToolResult } = callbacks
 
 		// 验证必需参数
@@ -185,7 +185,7 @@ ${typeGuidance}
 		const topic: string | undefined = block.params.topic
 		const context: string | undefined = block.params.context
 		const attachments: string | undefined = block.params.attachments
-		const consultType: string | undefined = block.params.consultType
+		const consultType: string | undefined = block.params.consult_type
 
 		const partialMessage = JSON.stringify({
 			tool: "consultExpert",

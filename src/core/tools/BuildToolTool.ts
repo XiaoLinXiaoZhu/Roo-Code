@@ -26,8 +26,8 @@ export class BuildToolTool extends BaseTool<"build_tool"> {
 	parseLegacy(params: Partial<Record<string, string>>): BuildToolParams {
 		return {
 			requirement: params.requirement || "",
-			inputHint: params.inputHint,
-			outputHint: params.outputHint,
+			inputHint: params.input_hint,
+			outputHint: params.output_hint,
 		}
 	}
 
@@ -188,8 +188,8 @@ export class BuildToolTool extends BaseTool<"build_tool"> {
 	}
 	override async handlePartial(task: Task, block: ToolUse<"build_tool">): Promise<void> {
 		const requirement: string | undefined = block.params.requirement
-		const inputHint: string | undefined = block.params.inputHint
-		const outputHint: string | undefined = block.params.outputHint
+		const inputHint: string | undefined = block.params.input_hint
+		const outputHint: string | undefined = block.params.output_hint
 
 		const partialMessage = JSON.stringify({
 			tool: "buildTool",
