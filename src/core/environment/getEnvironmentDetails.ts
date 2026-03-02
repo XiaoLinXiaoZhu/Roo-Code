@@ -2,18 +2,6 @@ import { Task } from "../task/Task"
 import { formatReminderSection } from "./reminder"
 
 /**
- * Escape XML special characters in a string
- */
-function escapeXml(value: string): string {
-	return value
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;")
-		.replace(/'/g, "&apos;")
-}
-
-/**
  * Build environment details XML for injection into user messages.
  *
  * After removing vscode/git/workspace/terminals/recently_modified sections,
@@ -96,7 +84,7 @@ export async function getEnvironmentDetails(
 	if (cline.pendingReminder) {
 		cline.pendingReminder.roundsLeft--
 		if (cline.pendingReminder.roundsLeft <= 0) {
-			xmlContent += `\n  <reminder>${escapeXml(cline.pendingReminder.content)}</reminder>`
+			xmlContent += `\n  <reminder>${cline.pendingReminder.content}</reminder>`
 			cline.pendingReminder = null
 		}
 	}

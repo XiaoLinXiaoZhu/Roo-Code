@@ -1,5 +1,23 @@
 # Roo Code Changelog
 
+## [3.52.13] - 2026-03-02
+
+### 🔧 统一 Write 工具
+
+将 `edit` 和 `write_to_file` 合并为统一的 `write` 工具。`search` 有值时搜索替换，`search` 为空/null 时完整写入。`expected_matches` 断言匹配数量。
+
+### 🔧 工具参数命名统一
+
+所有工具参数统一为 snake_case（15 个参数跨 10 个工具定义），如 `parentId` → `parent_id`、`consultType` → `consult_type`。
+
+### 🔧 Strict Mode 统一
+
+所有活跃工具强制 `strict: true`，所有参数放入 `required`，可选参数用 `type: ["xxx", "null"]`。防止长上下文下模型遗忘可选参数。
+
+### 🗑️ 移除 Environment 机制
+
+移除 `getEnvironmentDetails` 中的 `<vscode>`、`<git>`、`<workspace>`、`<terminals>`、`<recently_modified>` 注入。保留 `<intent_tree>`、`<todos>`、`<reminder>`。解决 environment 作为 user message 打断 Interleaved Thinking 链路的问题。
+
 ## [3.52.12] - 2026-03-02
 
 ### ✨ Reminder 工具
