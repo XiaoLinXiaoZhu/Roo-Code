@@ -1289,10 +1289,10 @@ export class NativeToolCallParser {
 					break
 
 				case "write":
-					if (args.path !== undefined && args.content !== undefined) {
+					if (args.path !== undefined && args.replace !== undefined) {
 						nativeArgs = {
 							path: args.path,
-							content: args.content,
+							replace: args.replace,
 							search: args.search,
 							expected_matches: args.expected_matches,
 						} as NativeArgsFor<TName>

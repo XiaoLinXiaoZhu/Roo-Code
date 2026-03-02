@@ -5,7 +5,7 @@ import { writeToFileTool } from "./WriteToFileTool"
 
 interface WriteParams {
 	path: string
-	content: string
+	replace: string
 	search?: string | null
 	expected_matches?: number | null
 }
@@ -18,7 +18,7 @@ export class WriteTool extends BaseTool<"write"> {
 	readonly name = "write" as const
 
 	async execute(params: WriteParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
-		const { path: filePath, content, search, expected_matches } = params
+		const { path: filePath, replace, search, expected_matches } = params
 
 		if (search) {
 			// Search & replace mode → delegate to EditTool
@@ -26,7 +26,7 @@ export class WriteTool extends BaseTool<"write"> {
 				{
 					file_path: filePath,
 					old_string: search,
-					new_string: content,
+					new_string: replace,
 					replace_all: expected_matches !== 1 && expected_matches !== null && expected_matches !== undefined,
 				},
 				task,
@@ -38,7 +38,7 @@ export class WriteTool extends BaseTool<"write"> {
 				{
 					purpose: "complete_rewrite",
 					path: filePath,
-					content,
+					content: replace,
 				},
 				task,
 				callbacks,
@@ -54,7 +54,7 @@ export class WriteTool extends BaseTool<"write"> {
 		}
 		await writeToFileTool.handlePartial(task, {
 			...block,
-			params: { path: block?.nativeArgs?.path, content: block?.nativeArgs?.content },
+			params: { path: block?.nativeArgs?.path, content: block?.nativeArgs?.replace },
 		})
 	}
 }

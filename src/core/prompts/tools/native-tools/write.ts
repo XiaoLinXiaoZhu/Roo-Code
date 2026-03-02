@@ -3,10 +3,10 @@ import type OpenAI from "openai"
 const WRITE_DESCRIPTION = `Write or edit a file. Two modes based on whether \`search\` is provided:
 
 **Full file write** (search omitted/empty): Creates or overwrites the entire file.
-- write({ path: "src/config.ts", content: "export const timeout = 10000;\\n", search: null, expected_matches: null })
+- write({ path: "src/config.ts", replace: "export const timeout = 10000;\\n", search: null, expected_matches: null })
 
 **Search & replace** (search provided): Finds and replaces text in an existing file.
-- write({ path: "src/config.ts", search: "timeout = 5000", content: "timeout = 10000", expected_matches: 1 })
+- write({ path: "src/config.ts", search: "timeout = 5000", replace: "timeout = 10000", expected_matches: 1 })
 
 Constraints:
 - For search & replace: search must match exactly (including whitespace/indentation). Read the file first.
@@ -26,9 +26,10 @@ export default {
 					type: "string",
 					description: "File path relative to the working directory.",
 				},
-				content: {
+				replace: {
 					type: "string",
-					description: "For full write: complete file content. For search & replace: replacement text.",
+					description:
+						"The text to write. When search is null: the complete file content. When search is provided: the replacement for each match.",
 				},
 				search: {
 					type: ["string", "null"],
@@ -40,7 +41,7 @@ export default {
 						"Expected number of matches (default: 1). Mismatch = error. Only for search & replace.",
 				},
 			},
-			required: ["path", "content", "search", "expected_matches"],
+			required: ["path", "replace", "search", "expected_matches"],
 			additionalProperties: false,
 		},
 	},

@@ -51,6 +51,7 @@
 - [x] 实现统一的 `write` 工具：
     - `search` 为空/省略 → 完整文件写入（原 `write_to_file`）
     - `search` 有值 → 搜索替换（原 `edit`）
+    - `replace` 参数为实际内容，完整写入或替换
     - `expected_matches` 参数断言匹配数量，不匹配则报错
 - [x] 移除原 `edit` 工具和 `write_to_file` 工具（从 TOOL_GROUPS 中移除，write 替代）
 - [x] 更新工具解析器和前端渲染

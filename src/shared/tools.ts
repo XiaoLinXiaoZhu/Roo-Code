@@ -109,6 +109,7 @@ export const toolParamNames = [
 	"status", // update_intent optional parameter
 	"reason", // prune_intent optional parameter
 	"delay", // reminder optional parameter
+	"replace", // write parameter (replacement text / full file content)
 	"expected_matches", // write optional parameter
 ] as const
 
@@ -222,7 +223,7 @@ export type NativeToolArgs = {
 	// 统一写入工具
 	write: {
 		path: string
-		content: string
+		replace: string
 		search?: string | null
 		expected_matches?: number | null
 	}
