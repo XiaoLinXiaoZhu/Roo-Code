@@ -23,6 +23,7 @@ import { findMatchingResourceOrTemplate } from "@src/utils/mcp"
 import { vscode } from "@src/utils/vscode"
 import { formatPathTooltip } from "@src/utils/formatPathTooltip"
 
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "../ui/collapsible"
 import { ToolUseBlock, ToolUseBlockHeader } from "../common/ToolUseBlock"
 import UpdateTodoListToolBlock from "./UpdateTodoListToolBlock"
 import { TodoChangeDisplay } from "./TodoChangeDisplay"
@@ -741,15 +742,7 @@ export const ChatRowContent = ({
 			}
 			case "reminder": {
 				const reminderTool = tool as any
-				return (
-					<div className="flex items-center gap-2 text-sm text-vscode-descriptionForeground">
-						<span className="codicon codicon-bell" />
-						<span>
-							Reminder set ({reminderTool.delay ?? 7} rounds): {reminderTool.content?.slice(0, 100)}
-							{(reminderTool.content?.length ?? 0) > 100 ? "…" : ""}
-						</span>
-					</div>
-				)
+				return <ReminderBlock content={reminderTool.content} delay={reminderTool.delay ?? 7} />
 			}
 			case "addIntent": {
 				const intentTool = tool as any
@@ -2197,6 +2190,10 @@ export const ChatRowContent = ({
 								</>
 							)
 						}
+						case "reminder": {
+							const r = sayTool as any
+							return <ReminderBlock content={r.content} delay={r.delay ?? 7} />
+						}
 						default:
 							return null
 					}
@@ -2374,4 +2371,20 @@ export const ChatRowContent = ({
 					return null
 			}
 	}
+}
+
+const ReminderBlock = ({ content, delay }: { content?: string; delay: number }) => {
+	const [isOpen, setIsOpen] = useState(false)
+	return (
+		<Collapsible open={isOpen} onOpenChange={setIsOpen}>
+			<CollapsibleTrigger className="flex items-center gap-2 text-sm text-vscode-descriptionForeground hover:text-vscode-foreground w-full text-left">
+				<span className={`codicon codicon-chevron-${isOpen ? "down" : "right"}`} />
+				<span className="codicon codicon-bell" />
+				<span>Reminder set ({delay} rounds)</span>
+			</CollapsibleTrigger>
+			<CollapsibleContent>
+				<div className="mt-1 ml-6 text-sm text-vscode-foreground opacity-80 whitespace-pre-wrap">{content}</div>
+			</CollapsibleContent>
+		</Collapsible>
+	)
 }

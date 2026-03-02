@@ -3,7 +3,15 @@ import { useTranslation } from "react-i18next"
 import { useCloudUpsell } from "@src/hooks/useCloudUpsell"
 import { CloudUpsellDialog } from "@src/components/cloud/CloudUpsellDialog"
 import DismissibleUpsell from "@src/components/common/DismissibleUpsell"
-import { ChevronUp, ChevronDown, HardDriveDownload, HardDriveUpload, FoldVertical, ArrowLeft } from "lucide-react"
+import {
+	ChevronUp,
+	ChevronDown,
+	ChevronRight,
+	HardDriveDownload,
+	HardDriveUpload,
+	FoldVertical,
+	ArrowLeft,
+} from "lucide-react"
 import prettyBytes from "pretty-bytes"
 
 import type { ClineMessage } from "@roo-code/types"
@@ -23,6 +31,7 @@ import Thumbnails from "../common/Thumbnails"
 import { TaskActions } from "./TaskActions"
 import { ContextWindowProgress } from "./ContextWindowProgress"
 import { Mention } from "./Mention"
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "../ui/collapsible"
 import { TodoListDisplay } from "./TodoListDisplay"
 import { LucideIconButton } from "./LucideIconButton"
 
@@ -467,21 +476,33 @@ const TaskHeader = ({
 				)}
 				{/* Todo list - always shown at bottom when todos exist */}
 				{hasTodos && <TodoListDisplay todos={todos ?? (task as any)?.tool?.todos ?? []} />}
-				{reminder && (
-					<div className="px-3 py-2 border-t border-vscode-panel-border">
-						<div className="flex items-center gap-1.5 text-xs text-vscode-descriptionForeground">
-							<span className="codicon codicon-bell" />
-							<span className="font-medium">Reminder</span>
-							<span className="opacity-60">({reminder.delay} rounds)</span>
-						</div>
-						<div className="mt-1 text-xs text-vscode-foreground opacity-80 whitespace-pre-wrap line-clamp-3">
-							{reminder.content}
-						</div>
-					</div>
-				)}
+				{reminder && <ReminderPanel reminder={reminder} />}
 			</div>
 			<CloudUpsellDialog open={isOpen} onOpenChange={closeUpsell} onConnect={handleConnect} />
 		</div>
+	)
+}
+
+const ReminderPanel = ({ reminder }: { reminder: { content: string; delay: number } }) => {
+	const [isOpen, setIsOpen] = useState(false)
+	return (
+		<Collapsible open={isOpen} onOpenChange={setIsOpen} className="px-3 py-2 border-t border-vscode-panel-border">
+			<CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-vscode-descriptionForeground hover:text-vscode-foreground w-full text-left">
+				{isOpen ? (
+					<ChevronDown className="size-3 shrink-0" aria-hidden />
+				) : (
+					<ChevronRight className="size-3 shrink-0" aria-hidden />
+				)}
+				<span className="codicon codicon-bell" />
+				<span className="font-medium">Reminder</span>
+				<span className="opacity-60">({reminder.delay} rounds)</span>
+			</CollapsibleTrigger>
+			<CollapsibleContent>
+				<div className="mt-1 ml-4 text-xs text-vscode-foreground opacity-80 whitespace-pre-wrap">
+					{reminder.content}
+				</div>
+			</CollapsibleContent>
+		</Collapsible>
 	)
 }
 

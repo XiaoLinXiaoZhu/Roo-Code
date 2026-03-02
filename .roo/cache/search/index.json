@@ -1972,6 +1972,30 @@
       "gitCommit": "8094b206139348a2ee9051ad74f69b57b795853d",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"settingKey\":{\"type\":\"string\"},\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+    },
+    {
+      "id": "76",
+      "query": "Where is the reminder feature implemented in the UI? How is reminder content displayed in chat messages?",
+      "tags": [
+        "where",
+        "is",
+        "the",
+        "reminder",
+        "feature",
+        "implemented",
+        "in",
+        "ui",
+        "how",
+        "content",
+        "displayed",
+        "chat",
+        "messages"
+      ],
+      "scope": "null",
+      "createdAt": "2026-03-02T16:00:41.435Z",
+      "gitCommit": "6e2200ccbbf7c295b3c3dfe2cf7570d2b80d4e69",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"},\"relevance\":{\"type\":\"string\"}}}},\"renderingComponents\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
     }
   ]
 }
