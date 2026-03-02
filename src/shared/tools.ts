@@ -448,8 +448,8 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 		tools: ["codebase_search", "find_definition", "find_usages", "read_media"],
 	},
 	edit: {
-		tools: ["write", "generate_image"],
-		// write 统一了 edit 和 write_to_file：search 有值时搜索替换，search 为空时完整写入
+		tools: ["edit", "write_to_file", "generate_image"],
+		// write 工具暂时禁用（复用旧工具导致错误提示如 old_string 而非 search），等完善后再迁移
 	},
 	command: {
 		// 移除了  "read_command_output" ，因为 read_command_output 的功能其实可以用 grep/sed + 文件重定向替代。
