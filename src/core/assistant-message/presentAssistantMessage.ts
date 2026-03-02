@@ -357,6 +357,7 @@ export async function presentAssistantMessage(cline: Task) {
 					case "fetch_instructions":
 						return `[${block.name} for '${block.params.task}']`
 					case "write_to_file":
+					case "write":
 						return `[${block.name} for '${block.params.path}']`
 					case "apply_diff":
 						// Native-only: tool args are structured (no XML payloads).
@@ -971,6 +972,7 @@ export async function presentAssistantMessage(cline: Task) {
 					})
 					break
 				case "write":
+					await checkpointSaveAndMark(cline)
 					await writeTool.handle(cline, block as ToolUse<"write">, {
 						askApproval,
 						handleError,
