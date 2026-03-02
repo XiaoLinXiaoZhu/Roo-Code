@@ -70,12 +70,8 @@ export async function getEnvironmentDetails(
 
 	const reminderContent = todoListEnabled ? formatReminderSection(cline.todoList) : ""
 
-	if (shouldIncludeReminder && todoListEnabled) {
-		if (reminderContent) {
-			xmlContent += `\n  <todos>\n    ${reminderContent.split("\n").join("\n    ")}\n  </todos>`
-		} else {
-			xmlContent += `\n  <todos hint="Create with update_todo_list if task is complex"/>`
-		}
+	if (shouldIncludeReminder && todoListEnabled && reminderContent) {
+		xmlContent += `\n  <todos>\n    ${reminderContent.split("\n").join("\n    ")}\n  </todos>`
 	}
 
 	// ============================================================================
@@ -90,7 +86,12 @@ export async function getEnvironmentDetails(
 	}
 
 	// ============================================================================
-	// Assemble Final XML
+	// Assemble Final XML — return empty string if no content to inject
+	// This prevents empty user message text blocks from breaking
+	// Interleaved Thinking chains on models like GLM-4.7/5.
 	// ============================================================================
+	if (!xmlContent) {
+		return ""
+	}
 	return `<environment current_time="${currentTime}">${xmlContent}\n</environment>`
 }
