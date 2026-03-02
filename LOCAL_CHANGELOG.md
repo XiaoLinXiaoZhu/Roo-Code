@@ -1,5 +1,29 @@
 # Roo Code Changelog
 
+## [3.52.12] - 2026-03-02
+
+### ✨ Reminder 工具
+
+新增 `reminder` 工具，agent 可为自己设置延迟提醒（覆盖旧提醒，只保留最新一条）。
+
+- **工具定义**：`reminder({ content, delay })` — content 为 OKR 摘要，delay 为轮次（默认 7）
+- **倒计时注入**：每轮 `getEnvironmentDetails` 递减 `roundsLeft`，到 0 时作为 `<reminder>` 注入 environment
+- **设置开关**：`reminderEnabled`（默认 `true`），位于 Advanced Settings
+- **ChatRow 渲染**：bell 图标 + 内容预览
+- **状态存储**：`Task.pendingReminder`，内存中，不持久化
+
+### 🗑️ 移除 Sprite-Hint 机制
+
+移除 `getSpriteHint.ts` 及 `<spirit_hint>` 环境注入，其提醒功能由 reminder 工具替代。
+
+### 🔧 execute_command → exec
+
+将模型看到的工具名从 `execute_command` 改为 `exec`，通过 alias 机制解析回内部 canonical name。
+
+- 工具定义 `name` 改为 `exec`，描述中的示例同步更新
+- `TOOL_ALIASES` 新增 `exec → execute_command`
+- `filterNativeToolsForMode` 修复：过滤时同时检查原名和 canonical name
+
 ## [3.52.11] - 2026-03-02
 
 ### ⚙️ Intent Tree 开关

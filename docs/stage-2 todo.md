@@ -23,11 +23,11 @@
 
 **参考**：`docs/better-tools/reminder.ts`
 
-- [ ] 实现 `ReminderTool`：agent 为自己设置延迟提醒，内容在 N 轮后作为 user message 注入（一轮 = 模型输出 + 工具返回）
-- [ ] 只保留最新一条 reminder（覆盖旧的）
-- [ ] 工具描述引导：分解任务为 OKR 后创建 reminder，reminder 触发时必须设置新 reminder
-- [ ] 前端 ChatRow 渲染适配
-- [ ] 在模型设置中添加 `enableReminder` 开关（默认 `true`）
+- [x] 实现 `ReminderTool`：agent 为自己设置延迟提醒，内容在 N 轮后作为 user message 注入（一轮 = 模型输出 + 工具返回）
+- [x] 只保留最新一条 reminder（覆盖旧的）
+- [x] 工具描述引导：分解任务为 OKR 后创建 reminder，reminder 触发时必须设置新 reminder
+- [x] 前端 ChatRow 渲染适配
+- [x] 在模型设置中添加 `enableReminder` 开关（默认 `true`）
 
 ---
 
@@ -35,10 +35,10 @@
 
 **目标**：移除 sprite-hint 相关机制，其提醒作用被 reminder 工具替代，工程上效果甚微。
 
-- [ ] 移除 `getSpriteHint.ts` / `getContextualSpriteHint` 及相关代码
-- [ ] 移除 environment 中的 `<spirit_hint>` 注入
-- [ ] 清理相关测试文件
-- [ ] 清理相关类型定义和引用
+- [x] 移除 `getSpriteHint.ts` / `getContextualSpriteHint` 及相关代码
+- [x] 移除 environment 中的 `<spirit_hint>` 注入
+- [x] 清理相关测试文件（无测试文件）
+- [x] 清理相关类型定义和引用
 
 ---
 
@@ -62,9 +62,9 @@
 
 **目标**：将 `execute_command` 改名为 `exec`，名称更简洁，容易调用。
 
-- [ ] 工具名 `execute_command` → `exec`
-- [ ] 更新工具描述、实现、解析器、UI 全部同步
-- [ ] 更新系统提示词和所有引用点
+- [x] 工具名 `execute_command` → `exec`
+- [x] 更新工具描述、实现、解析器、UI 全部同步
+- [x] 更新系统提示词和所有引用点
 
 ---
 
