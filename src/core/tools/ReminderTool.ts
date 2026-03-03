@@ -45,7 +45,7 @@ export class ReminderTool extends BaseTool<"reminder"> {
 			}),
 		)
 
-		pushToolResult(`Reminder #${id} set. Will fire in ${delay} rounds.`)
+		pushToolResult(`Reminder set. Will fire in ${delay} rounds.`)
 	}
 }
 

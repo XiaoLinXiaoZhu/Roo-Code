@@ -29,7 +29,7 @@ describe("ReminderTool", () => {
 		expect(mockTask.reminderCounter).toBe(1)
 		// delay=3 → roundsLeft=4 (fires after 3 rounds, on round 4)
 		expect(mockTask.pendingReminder).toEqual({ content: "first", roundsLeft: 4, id: 1 })
-		expect(pushToolResult).toHaveBeenCalledWith("Reminder #1 set. Will fire in 3 rounds.")
+		expect(pushToolResult).toHaveBeenCalledWith("Reminder set. Will fire in 3 rounds.")
 	})
 	it("should increment id across multiple reminders", async () => {
 		await reminderTool.execute({ content: "first", delay: 3 }, mockTask as Task, callbacks)
@@ -37,7 +37,7 @@ describe("ReminderTool", () => {
 		expect(mockTask.reminderCounter).toBe(2)
 		// delay=5 → roundsLeft=6
 		expect(mockTask.pendingReminder).toEqual({ content: "second", roundsLeft: 6, id: 2 })
-		expect(pushToolResult).toHaveBeenLastCalledWith("Reminder #2 set. Will fire in 5 rounds.")
+		expect(pushToolResult).toHaveBeenLastCalledWith("Reminder set. Will fire in 5 rounds.")
 	})
 
 	it("should error when content is missing", async () => {
@@ -51,7 +51,7 @@ describe("ReminderTool", () => {
 		await reminderTool.execute({ content: "test" }, mockTask as Task, callbacks)
 		// default delay=7 → roundsLeft=8
 		expect(mockTask.pendingReminder).toEqual({ content: "test", roundsLeft: 8, id: 1 })
-		expect(pushToolResult).toHaveBeenCalledWith("Reminder #1 set. Will fire in 7 rounds.")
+		expect(pushToolResult).toHaveBeenCalledWith("Reminder set. Will fire in 7 rounds.")
 	})
 })
 

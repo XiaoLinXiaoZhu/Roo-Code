@@ -82,7 +82,7 @@ export async function getEnvironmentDetails(
 			? state.apiConfiguration.reminderEnabled
 			: true
 	if (isFirstMessage && reminderEnabled && !cline.pendingReminder) {
-		xmlContent += `\n  <reminder_hint>You have the reminder tool enabled. You MUST set a reminder for every task — it is your "estimate → execute → reflect → re-evaluate" rhythm anchor. First: quickly estimate the task scope and rounds needed. Then: set reminder #1 with your plan (investigation steps, implementation steps, estimated rounds). Investigation itself is a step in your plan, not something that happens before planning. When a reminder fires, set the next one IMMEDIATELY — before doing any other work. If you finish early, call reminder() with a completion summary to overwrite the stale one.</reminder_hint>`
+		xmlContent += `\n  <reminder_hint>Your FIRST tool call MUST be reminder() with your OKR breakdown — no exceptions. When a reminder fires, set the next one IMMEDIATELY.</reminder_hint>`
 	}
 
 	// ============================================================================
@@ -91,17 +91,8 @@ export async function getEnvironmentDetails(
 	if (cline.pendingReminder) {
 		cline.pendingReminder.roundsLeft--
 		if (cline.pendingReminder.roundsLeft <= 0) {
-			const reminderId = cline.pendingReminder.id
-			xmlContent += `\n  <reminder id="${reminderId}">${cline.pendingReminder.content}</reminder>`
-			xmlContent += `\n  <reminder_instruction>⏰ Reminder #${reminderId} fired. Everything between reminder #${reminderId > 1 ? reminderId - 1 : 1} and now is one work phase.
-
-Reflect on this phase:
-- Compare your checklist (above) against actual progress. What's done? What drifted? What's blocked?
-- Did this phase take MORE rounds than you estimated? → Your estimate was off. Why? Wrong scope, unexpected complexity, or wrong approach? Don't just continue — diagnose first.
-- Did you finish BEFORE this reminder fired? → You overestimated. Calibrate: next delay should be shorter. Also ask yourself if the task was simpler than expected, or if you cut corners.
-- Should you continue the current approach, pivot, or consult_expert?
-
-⚠️ You MUST set reminder #${reminderId + 1} RIGHT NOW — before doing anything else. Include: updated progress, next phase plan, and calibrated delay. No exceptions. If you skip this, you lose your rhythm anchor and will drift.</reminder_instruction>`
+			xmlContent += `\n  <reminder>${cline.pendingReminder.content}</reminder>`
+			xmlContent += `\n  <reminder_instruction>⏰ Your reminder fired. Compare checklist vs actual progress. What's done? What drifted?\n\n⚠️ You MUST set a new reminder with updated progress in your next tool call response.</reminder_instruction>`
 			cline.pendingReminder = null
 		}
 	}

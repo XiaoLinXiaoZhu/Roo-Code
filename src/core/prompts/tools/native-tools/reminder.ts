@@ -1,23 +1,20 @@
 import type OpenAI from "openai"
 
-const REMINDER_DESCRIPTION = `Set a round-based reminder (overwrites any previous — only one active at a time).
-Appears as \`<reminder id="N">\` in \`<environment>\` after the specified delay (1 round = 1 assistant response). delay=n fires after n rounds (on round n+1). IDs auto-increment.
+const REMINDER_DESCRIPTION = `Set a memo/reminder for yourself (overwrites any previous — only one active at a time).
+The content will appear as \`<reminder id="N">\` in \`<environment>\` after the specified delay (1 round = 1 assistant response). delay=n fires after n rounds (on round n+1). IDs auto-increment.
 
-**How to use**:
-1. Receive task → count tool calls (not concept steps!) → set reminder #1 with checklist. "Read module" = N files = N rounds. Always count files.
-2. Execute across rounds.
-3. When reminder fires → compare checklist vs actual → IMMEDIATELY set next reminder before doing anything else.
-4. Finish early? → Call reminder() with completion summary to overwrite the stale one.
+**Usage**: After breaking down the task, create a reminder summarizing:
+1. The overall Objective
+2. Key Results (checklist of concrete steps remaining)
+3. Current progress and next step
+
+When a reminder fires, you MUST set a new reminder (with updated progress) alongside your next tool call. Finish early? Call reminder() with a completion summary to overwrite the stale one.
 
 **delay is a checkpoint interval, not an ETA.** It answers: "how many rounds am I willing to execute without reflecting?"
-- Small task (5-8r total): delay 3-4
-- Medium task (8-15r): delay 4-5
-- Large task (15-30r): delay 5-7
-- Never exceed delay=7. If you need more, break into phases.
-
-- reminder({ content: "Refactor payment (~20r est)\\nPhase 1 Investigate (est. 5-6r):\\n[ ] Read 4 files [ ] find_usages [ ] Design interface\\nPhase 2 Implement (est. 8-10r):\\n[ ] 3 adapters [ ] Migrate 12 callers\\n⚠️ If Phase 1 incomplete → scope exceeded", delay: 5 })
-- reminder({ content: "unknown→string (est. 5-6r):\\n[ ] read file [ ] find_usages [ ] change sig [ ] update callers [ ] test", delay: 3 })
-- reminder({ content: "✅ Done (6r actual vs 5-6r est). 5 callers, all simple. Calibration: delay=3 was right.", delay: 1 })`
+- Small task (5-8r total): delay 5-8
+- Medium task (8-15r): delay 8-15
+- Large task (15-30r): delay 15-30
+- Never exceed delay=30. If you need more, break into phases.`
 
 export default {
 	type: "function",
@@ -30,7 +27,8 @@ export default {
 			properties: {
 				content: {
 					type: "string",
-					description: "Reminder content: include objective, progress checklist, and next steps.",
+					description:
+						"Reminder content: include OKR summary (objective, key results checklist), progress status, and next steps.",
 				},
 				delay: {
 					type: ["number", "null"],
