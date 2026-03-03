@@ -27,14 +27,16 @@ describe("ReminderTool", () => {
 	it("should assign incrementing id to each reminder", async () => {
 		await reminderTool.execute({ content: "first", delay: 3 }, mockTask as Task, callbacks)
 		expect(mockTask.reminderCounter).toBe(1)
-		expect(mockTask.pendingReminder).toEqual({ content: "first", roundsLeft: 3, id: 1 })
+		// delay=3 → roundsLeft=4 (fires after 3 rounds, on round 4)
+		expect(mockTask.pendingReminder).toEqual({ content: "first", roundsLeft: 4, id: 1 })
 		expect(pushToolResult).toHaveBeenCalledWith("Reminder #1 set. Will fire in 3 rounds.")
 	})
 	it("should increment id across multiple reminders", async () => {
 		await reminderTool.execute({ content: "first", delay: 3 }, mockTask as Task, callbacks)
 		await reminderTool.execute({ content: "second", delay: 5 }, mockTask as Task, callbacks)
 		expect(mockTask.reminderCounter).toBe(2)
-		expect(mockTask.pendingReminder).toEqual({ content: "second", roundsLeft: 5, id: 2 })
+		// delay=5 → roundsLeft=6
+		expect(mockTask.pendingReminder).toEqual({ content: "second", roundsLeft: 6, id: 2 })
 		expect(pushToolResult).toHaveBeenLastCalledWith("Reminder #2 set. Will fire in 5 rounds.")
 	})
 
@@ -47,7 +49,8 @@ describe("ReminderTool", () => {
 
 	it("should default delay to 7 when not provided", async () => {
 		await reminderTool.execute({ content: "test" }, mockTask as Task, callbacks)
-		expect(mockTask.pendingReminder).toEqual({ content: "test", roundsLeft: 7, id: 1 })
+		// default delay=7 → roundsLeft=8
+		expect(mockTask.pendingReminder).toEqual({ content: "test", roundsLeft: 8, id: 1 })
 		expect(pushToolResult).toHaveBeenCalledWith("Reminder #1 set. Will fire in 7 rounds.")
 	})
 })
@@ -69,7 +72,8 @@ describe("restoreReminderForTask", () => {
 		}
 		restoreReminderForTask(task)
 		expect(task.reminderCounter).toBe(1)
-		expect(task.pendingReminder).toEqual({ content: "plan A", roundsLeft: 3, id: 1 })
+		// delay=5 → roundsLeft = 5+1-2 = 4
+		expect(task.pendingReminder).toEqual({ content: "plan A", roundsLeft: 4, id: 1 })
 	})
 
 	it("should restore latest reminder when multiple exist", () => {
@@ -86,7 +90,8 @@ describe("restoreReminderForTask", () => {
 		}
 		restoreReminderForTask(task)
 		expect(task.reminderCounter).toBe(2)
-		expect(task.pendingReminder).toEqual({ content: "plan B", roundsLeft: 3, id: 2 })
+		// delay=4 → roundsLeft = 4+1-1 = 4
+		expect(task.pendingReminder).toEqual({ content: "plan B", roundsLeft: 4, id: 2 })
 	})
 
 	it("should set roundsLeft to 1 when reminder should have already fired", () => {

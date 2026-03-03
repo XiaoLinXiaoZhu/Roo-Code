@@ -30,7 +30,9 @@ export class ReminderTool extends BaseTool<"reminder"> {
 		const id = task.reminderCounter
 
 		// Overwrite any existing reminder (only one active at a time)
-		task.pendingReminder = { content, roundsLeft: delay, id }
+		// delay=n means "fire after n rounds", i.e. on round n+1.
+		// roundsLeft is decremented at the start of each round, so we need delay+1.
+		task.pendingReminder = { content, roundsLeft: delay + 1, id }
 
 		// Show in UI
 		await task.say(
@@ -94,7 +96,8 @@ export function restoreReminderForTask(task: Task): void {
 		}
 	}
 
-	const roundsLeft = last.delay - roundsSince
+	// delay=n means roundsLeft was set to n+1 at creation time
+	const roundsLeft = last.delay + 1 - roundsSince
 	if (roundsLeft > 0) {
 		task.pendingReminder = { content: last.content, roundsLeft, id: last.id }
 	}

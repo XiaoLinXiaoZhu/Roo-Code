@@ -130,68 +130,92 @@ const EXAMPLE_REMINDER = `## Reminder 使用规范
 
 规则：
 1. 收到任务后，先预估工作量，然后立即设 reminder #1。不要等调研完——调研是计划的一步。如果你等调研完，就失去了用 reminder 校准调研耗时的机会。
-2. reminder 触发时，对比计划 vs 实际，找出偏差原因，然后必须设新 reminder。即使觉得"快完了"——"快完了"是一个未验证的预估，需要 reminder 来校准。
-3. delay 是你的工作量预估。如果 reminder 触发时计划未完成，这说明预估有偏差——反思是预估错了、方向错了、还是遇到了意外复杂度。
-4. 在 reminder content 中写 checklist，触发时逐项检查。长任务用详细 OKR + delay 5-7，短任务用简要 checklist + delay 2-3。
+2. reminder 触发时，第一件事是设新 reminder——在做任何其他工作之前。即使觉得"快完了"——"快完了"是一个未验证的预估，需要 reminder 来校准。
+3. **数工具调用，不是概念步骤。** "读模块结构"= N 个文件 = N 轮。"更新调用方"= find_usages(1r) + 逐个编辑(Mr)。永远数文件数。
+4. delay 是检查点间隔，不是预计完成时间。它回答的是"我愿意在没有反思的情况下连续执行多少轮"。范围：小任务(5-8r) delay=3-4，中任务(8-15r) delay=4-5，大任务(15-30r) delay=5-7。**永远不超过 7。**
+5. 提前完成时，主动调用 reminder() 覆盖旧的，写入完成总结。这会关闭当前阶段，防止过期的 reminder 在后续触发造成干扰。
+6. 如果 reminder 触发时计划未完成，说明预估有偏差——反思是预估错了、方向错了、还是遇到了意外复杂度。如果提前完成了，说明你高估了——校准下次的 delay 更短。
 
 ### 长任务示例
 
 <example>
 user: 帮我重构这个支付模块，把所有第三方支付渠道抽象成统一接口
 
-A: [Deep] 跨多文件重构——支付宝、微信、Stripe 三个渠道。需要调研→设计→逐个迁移。粗估 12+ 轮。
+A: [Deep] 跨模块重构。先数操作量：
+调查：读 3 个渠道文件 + 入口文件 + find_usages 查调用方 = 至少 5r
+实施：设计接口(1r) + 3 个适配器各 1-2 个文件 + 迁移调用方 = 至少 8r
+验证：跑测试 + 修失败 = 3r
+基础 ~16r，加 30% 缓冲 → ~20r。这是 Tier 3 任务。
 
-[Reflect] 等一下——12 这个数字哪来的？我还没读过代码，是按"3 渠道×4 轮"粗算的。但我不知道这三个渠道复杂度是否均匀。粗估的置信度很低，delay 应该偏短，让校准信号来得早一点。
-
-[Deep] 把调研作为计划第一步，delay 设 4 而非 7。如果 4 轮后调研还没完，说明复杂度超出预期，正好用触发点来重新评估。
+[Reflect] 但我还没读过代码，不知道每个渠道有多少文件、调用方有多少。16r 是乐观估计，置信度低。delay 不应该按完成时间设——而是"我愿意连续执行多少轮不反思"。Tier 3 首次 delay=5。
 
 [工具调用] reminder({
-  content: "支付模块重构\\nPhase 1 调研+设计 (est. 3r):\\n[ ] 读现有结构\\n[ ] 识别公共接口\\n[ ] 设计 PaymentProvider\\nPhase 2 实现 (est. 7r):\\n[ ] 支付宝 [ ] 微信 [ ] Stripe [ ] 迁移调用方\\n⚠️ 如果触发时 Phase 1 未完成→复杂度超预期，缩小范围",
-  delay: 4
+  content: "支付模块重构 (~20r est, 置信度低)\\nPhase 1 调查+设计 (est. 5-6r):\\n[ ] 读 alipay.ts, wechat.ts, stripe.ts\\n[ ] 读入口 payment.ts\\n[ ] find_usages 查调用方数量\\n[ ] 设计 PaymentProvider 接口\\nPhase 2 实现 (est. 8-10r):\\n[ ] 支付宝适配器 [ ] 微信适配器 [ ] Stripe适配器 [ ] 迁移调用方\\nPhase 3 验证 (est. 3r):\\n[ ] 跑测试 [ ] 修失败 [ ] 清理旧代码\\n⚠️ 如果触发时 Phase 1 未完成→复杂度超预期，缩小范围",
+  delay: 5
 })
 
-[Deep] 开始 Phase 1——读取支付模块结构。
-[执行工具：读取文件]
+[Deep] 开始 Phase 1——逐个读取支付渠道文件。
+[读取 alipay.ts, wechat.ts, stripe.ts, payment.ts — 4 轮]
 
-[Deep] 发现 3 个适配器文件。但还有一个 legacy_payment.ts 没在文档里提到。
+[Deep] 发现 4 个文件而非 3 个——还有一个 legacy_payment.ts。find_usages 显示 12 个调用方。
 
-[Reflect] 这不在计划里——不是 3 个渠道，可能是 4 个。legacy 的那个可能有历史包袱。我的预估基础变了。
+[Reflect] 调用方比预期多（12 vs 估计的 5-6），legacy 文件也不在计划里。实施阶段可能需要 12r 而非 8r。总量上修到 ~25r。
 
 [Explore] 两条路：(A) 把 legacy 纳入重构，扩大范围；(B) 先做确定的 3 个，在 reminder 触发时再评估 legacy。B 更稳妥——用 reminder 触发点作为决策门控。
 
-[Deep] 选 B，继续设计接口，实现支付宝和微信适配器...
+[Deep] 选 B，继续设计接口，开始实现适配器...
 
---- reminder #1 触发 ---
+--- reminder #1 触发（5 轮后）---
 
-[Reflect] 对比计划 vs 实际：Phase 1 ✅ Phase 2 进行中——支付宝 ✅ 微信 ✅。比预估快，但 Stripe webhook 签名验证比较特殊。另外 legacy_payment.ts 还没决定怎么处理。
+[Reflect] 对比计划 vs 实际：Phase 1 ✅（用了 5r，符合预期）。Phase 2 进行中——接口设计 ✅ 支付宝 ✅。5 轮完成了约 35% 的总工作量。
 
-[Deep] 上一阶段 4 轮完成了约 60% 的工作。按这个速率，剩余工作约 3 轮。但 Stripe webhook 是未知复杂度，加 1 轮缓冲。
+[Deep] 剩余：微信适配器(2r) + Stripe适配器(2-3r，webhook 验证复杂) + 迁移 12 个调用方(4-5r) + legacy 决策 + 验证(3r) = ~13r。delay=5 继续。
 
-[Reflect] 我刚才说"按速率推算 3 轮"——但前面做的是简单的适配器，Stripe 可能不是线性外推能覆盖的。保守一点，delay 设 4。
+[Reflect] Stripe webhook 是未知复杂度，不能线性外推。保持 delay=5 作为检查点。
 
 [工具调用] reminder({
-  content: "支付重构 (reminder #1 后)\\n✅ 接口设计 ✅ 支付宝 ✅ 微信\\n[ ] Stripe（注意 webhook 验证）\\n[ ] 决定 legacy_payment.ts 的处理方式\\n[ ] 迁移调用方 [ ] 测试 + 清理",
-  delay: 4
+  content: "支付重构 Phase 2 (reminder #1 后, ~13r remaining)\\n✅ 调查 ✅ 接口设计 ✅ 支付宝适配器\\n[ ] 微信适配器 (est. 2r)\\n[ ] Stripe适配器 (est. 2-3r, webhook验证)\\n[ ] 迁移 12 个调用方 (est. 4-5r)\\n[ ] 决定 legacy_payment.ts\\n[ ] 测试+清理 (est. 3r)",
+  delay: 5
 })
 
 [继续执行...]
 </example>
 
-### 短任务示例
+### 短任务示例（提前完成 → 主动覆盖 reminder）
 
 <example>
 user: 把这个函数的返回类型从 unknown 改成 string
 
-A: [Deep] 小任务——改签名、查调用方、更新、测试。预计 1-2 轮。
+A: [Deep] 数操作量：读目标文件(1r) + find_usages(1r) + 改签名(1r) + 改调用方(假设 2-3 个, 1-2r) + 跑测试(1r) = 5-6r。Tier 1 任务，delay=3 作为检查点。
 
-[Reflect] 类型变更可能有意外扩散——调用方可能依赖 unknown 做了类型断言。设 delay=3 的 reminder：如果触发了，说明扩散超出预期，需要停下来重新评估范围而不是继续打补丁。
+[Reflect] 类型变更可能有意外扩散——调用方可能依赖 unknown 做了类型断言。如果 3 轮后还没改完，说明扩散超出预期。
 
 [工具调用] reminder({
-  content: "unknown→string:\\n[ ] 改函数签名\\n[ ] 更新调用方（检查类型断言）\\n[ ] 跑测试\\n如果触发→扩散超预期，重新评估范围。",
+  content: "unknown→string (est. 5-6r):\\n[ ] 读目标文件\\n[ ] find_usages 查调用方\\n[ ] 改函数签名\\n[ ] 更新各调用方（检查类型断言）\\n[ ] 跑测试\\n如果触发时未完成→调用方比预期多或有类型断言依赖，重新评估。",
   delay: 3
 })
 
-[Deep] 改签名，find_usages 找到 5 个调用方，逐一更新，测试通过。比预期多几个调用方但都是简单改动，reminder 未触发即完成。
+[Deep] 读文件，find_usages 找到 5 个调用方，改签名，逐个更新调用方...
+
+--- reminder #1 触发（3 轮后）---
+
+[Reflect] 对比计划：读文件 ✅ find_usages ✅ 改签名 ✅ 更新了 3/5 个调用方。还剩 2 个调用方 + 跑测试 = 2-3r。预估 5-6r 基本准确。
+
+[Deep] 剩余量小，delay=3 继续。
+
+[工具调用] reminder({
+  content: "unknown→string (reminder #1 后)\\n✅ 签名 ✅ 3/5 调用方\\n[ ] 剩余 2 个调用方 (1r)\\n[ ] 跑测试 (1r)\\n[ ] 修失败如有 (1r)",
+  delay: 3
+})
+
+[Deep] 更新剩余 2 个调用方，跑测试，全部通过。
+
+[Reflect] 任务完成，用了 6 轮，和预估的 5-6r 吻合。reminder #2 还没触发，主动覆盖写入总结。
+
+[工具调用] reminder({
+  content: "✅ unknown→string 完成 (6r actual vs 5-6r est)。5 个调用方都是简单替换，无类型断言。校准：类似单签名变更 est=5-6r, delay=3 是合理的。",
+  delay: 1
+})
 
 [工具调用] attempt_completion: "已完成..."
 </example>`
