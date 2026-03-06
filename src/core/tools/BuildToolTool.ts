@@ -3,7 +3,7 @@ import * as os from "os"
 
 import { Task } from "../task/Task"
 import { formatResponse } from "../prompts/responses"
-import { BaseTool, ToolCallbacks } from "./BaseTool"
+import { BaseTool, ToolCallbacks, ToolParams } from "./BaseTool"
 import type { ToolUse } from "../../shared/tools"
 
 /**
@@ -13,26 +13,20 @@ import type { ToolUse } from "../../shared/tools"
  * 通过专有系统提示词提供工具构建规范，不增加额外约束。
  */
 
-interface BuildToolParams {
-	requirement: string
-	inputHint?: string
-	outputHint?: string
-}
-
 export class BuildToolTool extends BaseTool<"build_tool"> {
 	readonly name = "build_tool" as const
 	override readonly isDelegationTool = true
 
-	parseLegacy(params: Partial<Record<string, string>>): BuildToolParams {
+	parseLegacy(params: Partial<Record<string, string>>): ToolParams<"build_tool"> {
 		return {
 			requirement: params.requirement || "",
-			inputHint: params.input_hint,
-			outputHint: params.output_hint,
+			input_hint: params.input_hint,
+			output_hint: params.output_hint,
 		}
 	}
 
-	async execute(params: BuildToolParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
-		const { requirement, inputHint, outputHint } = params
+	async execute(params: ToolParams<"build_tool">, task: Task, callbacks: ToolCallbacks): Promise<void> {
+		const { requirement, input_hint: inputHint, output_hint: outputHint } = params
 		const { askApproval, handleError, pushToolResult } = callbacks
 
 		if (!requirement) {

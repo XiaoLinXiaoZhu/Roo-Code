@@ -2,7 +2,7 @@ import * as vscode from "vscode"
 
 import { Task } from "../task/Task"
 import { formatResponse } from "../prompts/responses"
-import { BaseTool, ToolCallbacks } from "./BaseTool"
+import { BaseTool, ToolCallbacks, ToolParams } from "./BaseTool"
 import type { ToolUse } from "../../shared/tools"
 import { getSearchProjectCache } from "./SearchProjectCache"
 
@@ -15,21 +15,11 @@ const crypto = globalThis.crypto
  * 通过专有系统提示词指导如何通过工具和 LSP 快速分析。
  */
 
-interface SearchProjectParams {
-	query: string
-	scope?: {
-		directories?: string
-		filePatterns?: string
-		excludes?: string
-	}
-	schema?: string
-}
-
 export class SearchProjectTool extends BaseTool<"search_project"> {
 	readonly name = "search_project" as const
 	override readonly isDelegationTool = true
 
-	parseLegacy(params: Partial<Record<string, string>>): SearchProjectParams {
+	parseLegacy(params: Partial<Record<string, string>>): ToolParams<"search_project"> {
 		return {
 			query: params.query || "",
 			scope: params.scope ? JSON.parse(params.scope) : undefined,
@@ -37,7 +27,7 @@ export class SearchProjectTool extends BaseTool<"search_project"> {
 		}
 	}
 
-	async execute(params: SearchProjectParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
+	async execute(params: ToolParams<"search_project">, task: Task, callbacks: ToolCallbacks): Promise<void> {
 		const { query, scope, schema } = params
 		const { askApproval, handleError, pushToolResult } = callbacks
 
@@ -127,18 +117,18 @@ export class SearchProjectTool extends BaseTool<"search_project"> {
 	}
 	private async buildTaskMessage(
 		query: string,
-		scope?: SearchProjectParams["scope"],
+		scope?: ToolParams<"search_project">["scope"],
 		schema?: string,
 	): Promise<string> {
 		let message = `调查问题：${query}`
 
-		if (scope?.directories || scope?.filePatterns || scope?.excludes) {
+		if (scope?.directories || scope?.file_patterns || scope?.excludes) {
 			message += `\n\n搜索范围：`
 			if (scope.directories) {
 				message += `\n- 目录：${scope.directories}`
 			}
-			if (scope.filePatterns) {
-				message += `\n- 文件模式：${scope.filePatterns}`
+			if (scope.file_patterns) {
+				message += `\n- 文件模式：${scope.file_patterns}`
 			}
 			if (scope.excludes) {
 				message += `\n- 排除：${scope.excludes}`

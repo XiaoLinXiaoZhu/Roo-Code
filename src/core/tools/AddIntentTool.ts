@@ -2,20 +2,14 @@ import { type ClineSayTool } from "@roo-code/types"
 
 import { Task } from "../task/Task"
 import { formatResponse } from "../prompts/responses"
-import { BaseTool, ToolCallbacks } from "./BaseTool"
-
-interface AddIntentParams {
-	type: "goal" | "objective" | "approach" | "impl"
-	content: string
-	parentId?: string
-	assumption: string
-}
+import { BaseTool, ToolCallbacks, ToolParams } from "./BaseTool"
 
 export class AddIntentTool extends BaseTool<"add_intent"> {
 	readonly name = "add_intent" as const
 
-	async execute(params: AddIntentParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
+	async execute(params: ToolParams<"add_intent">, task: Task, callbacks: ToolCallbacks): Promise<void> {
 		const { pushToolResult, handleError, askApproval } = callbacks
+		const { type, content, parent_id: parentId, assumption } = params
 
 		try {
 			if (!task.intentTree) {
@@ -27,7 +21,7 @@ export class AddIntentTool extends BaseTool<"add_intent"> {
 			}
 
 			// P2: 显式校验 content 非空
-			if (!params.type || !params.content || params.content.trim() === "") {
+			if (!type || !content || content.trim() === "") {
 				task.consecutiveMistakeCount++
 				task.recordToolError("add_intent")
 				task.didToolFailInCurrentTurn = true
@@ -36,12 +30,12 @@ export class AddIntentTool extends BaseTool<"add_intent"> {
 				)
 				return
 			}
-			const intentContent = params.content.trim()
-			const isNewRoot = !params.parentId
+			const intentContent = content.trim()
+			const isNewRoot = !parentId
 
 			// P3: 创建 new_root 时，如果树非空，检查 assumption 是否有意义
 			if (isNewRoot && !task.intentTree.isEmpty()) {
-				if (!params.assumption || params.assumption.trim().length < 10) {
+				if (!assumption || assumption.trim().length < 10) {
 					task.consecutiveMistakeCount++
 					task.recordToolError("add_intent")
 					task.didToolFailInCurrentTurn = true
@@ -59,15 +53,15 @@ export class AddIntentTool extends BaseTool<"add_intent"> {
 
 			// 先执行操作获取结果
 			const result = task.intentTree.addNode({
-				type: params.type,
+				type,
 				content: intentContent,
-				parentId: params.parentId ?? null,
+				parentId: parentId ?? null,
 				taskId: task.taskId,
 			})
 
 			// 将 assumption 写入节点
-			if (params.assumption) {
-				result.node.assumption = params.assumption.trim()
+			if (assumption) {
+				result.node.assumption = assumption.trim()
 			}
 
 			await task.intentTree.save()

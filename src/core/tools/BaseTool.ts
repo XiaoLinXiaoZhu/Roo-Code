@@ -17,7 +17,7 @@ export interface ToolCallbacks {
  * Helper type to extract the parameter type for a tool based on its name.
  * If the tool has native args defined in NativeToolArgs, use those; otherwise fall back to any.
  */
-type ToolParams<TName extends ToolName> = TName extends keyof NativeToolArgs ? NativeToolArgs[TName] : any
+export type ToolParams<TName extends ToolName> = TName extends keyof NativeToolArgs ? NativeToolArgs[TName] : any
 
 /**
  * Abstract base class for all tools.

@@ -67,7 +67,7 @@ describe("AddIntentTool", () => {
 			{
 				type: "approach",
 				content: "Approach A",
-				parentId: "G1",
+				parent_id: "G1",
 				assumption: "This is an implementation approach for G1",
 			},
 			task,

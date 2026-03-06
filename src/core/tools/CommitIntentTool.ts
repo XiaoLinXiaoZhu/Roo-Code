@@ -3,18 +3,13 @@ import { type ClineSayTool } from "@roo-code/types"
 
 import { Task } from "../task/Task"
 import { formatResponse } from "../prompts/responses"
-import { BaseTool, ToolCallbacks } from "./BaseTool"
+import { BaseTool, ToolCallbacks, type ToolParams } from "./BaseTool"
 import type { IntentCodeBinding } from "../intent-tree"
-
-interface CommitIntentParams {
-	nodeId?: string
-	message: string
-}
 
 export class CommitIntentTool extends BaseTool<"commit_intent"> {
 	readonly name = "commit_intent" as const
 
-	async execute(params: CommitIntentParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
+	async execute(params: ToolParams<"commit_intent">, task: Task, callbacks: ToolCallbacks): Promise<void> {
 		const { pushToolResult, handleError, askApproval } = callbacks
 
 		try {
@@ -37,7 +32,7 @@ export class CommitIntentTool extends BaseTool<"commit_intent"> {
 			const message = params.message.trim()
 
 			// Resolve nodeId: explicit or auto-detect current active node
-			let resolvedNodeId = params.nodeId
+			let resolvedNodeId = params.node_id
 			if (!resolvedNodeId) {
 				const activeNode = task.intentTree.getCurrentActiveNode()
 				if (activeNode) {

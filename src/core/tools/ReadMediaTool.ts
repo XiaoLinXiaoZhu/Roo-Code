@@ -23,17 +23,7 @@ import {
 	type VideoProcessingMethod,
 	type FocusParams,
 } from "./helpers/mediaHelpers"
-import { BaseTool, ToolCallbacks } from "./BaseTool"
-
-/**
- * Parameters for read_media tool
- */
-interface ReadMediaParams {
-	path: string
-	focusX?: number
-	focusY?: number
-	scale?: number
-}
+import { BaseTool, type ToolCallbacks, type ToolParams } from "./BaseTool"
 
 interface MediaFileResult {
 	path: string
@@ -83,9 +73,9 @@ function isVideoSupportedForProvider(_apiProvider: string | undefined, _modelSup
 export class ReadMediaTool extends BaseTool<"read_media"> {
 	readonly name = "read_media" as const
 
-	async execute(params: ReadMediaParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
+	async execute(params: ToolParams<"read_media">, task: Task, callbacks: ToolCallbacks): Promise<void> {
 		const { handleError, pushToolResult } = callbacks
-		const { path: relPath, focusX, focusY, scale } = params
+		const { path: relPath, focus_x: focusX, focus_y: focusY, scale } = params
 		const modelInfo = task.api.getModel().info
 		const apiProvider = task.apiConfiguration.apiProvider
 

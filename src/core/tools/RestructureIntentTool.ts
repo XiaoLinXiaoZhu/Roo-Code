@@ -2,20 +2,12 @@ import { type ClineSayTool } from "@roo-code/types"
 
 import { Task } from "../task/Task"
 import { formatResponse } from "../prompts/responses"
-import { BaseTool, ToolCallbacks } from "./BaseTool"
-
-interface RestructureIntentParams {
-	operation: "reparent" | "promote" | "extract_common_parent"
-	nodeId?: string
-	newParentId?: string | null
-	nodeIds?: string[]
-	commonContent?: string
-}
+import { BaseTool, ToolCallbacks, ToolParams } from "./BaseTool"
 
 export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 	readonly name = "restructure_intent" as const
 
-	async execute(params: RestructureIntentParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
+	async execute(params: ToolParams<"restructure_intent">, task: Task, callbacks: ToolCallbacks): Promise<void> {
 		const { pushToolResult, handleError, askApproval } = callbacks
 
 		try {
@@ -64,21 +56,25 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 		}
 	}
 
-	private async handleReparent(params: RestructureIntentParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
+	private async handleReparent(
+		params: ToolParams<"restructure_intent">,
+		task: Task,
+		callbacks: ToolCallbacks,
+	): Promise<void> {
 		const { pushToolResult, askApproval } = callbacks
 
-		if (!params.nodeId) {
+		if (!params.node_id) {
 			task.consecutiveMistakeCount++
 			task.recordToolError("restructure_intent")
 			task.didToolFailInCurrentTurn = true
-			pushToolResult(formatResponse.toolError("'nodeId' is required for reparent operation."))
+			pushToolResult(formatResponse.toolError("'node_id' is required for reparent operation."))
 			return
 		}
 
-		// 规范化 newParentId：空字符串视为 null（移动到根节点）
-		const newParentId = params.newParentId === "" ? null : (params.newParentId ?? null)
+		// 规范化 new_parent_id：空字符串视为 null（移动到根节点）
+		const newParentId = params.new_parent_id === "" ? null : (params.new_parent_id ?? null)
 
-		const result = task.intentTree!.reparentNode(params.nodeId, newParentId, task.taskId)
+		const result = task.intentTree!.reparentNode(params.node_id, newParentId, task.taskId)
 
 		if (!result.success) {
 			task.consecutiveMistakeCount++
@@ -172,25 +168,29 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 		pushToolResult(response)
 	}
 
-	private async handlePromote(params: RestructureIntentParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
+	private async handlePromote(
+		params: ToolParams<"restructure_intent">,
+		task: Task,
+		callbacks: ToolCallbacks,
+	): Promise<void> {
 		const { pushToolResult, askApproval } = callbacks
 
-		if (!params.nodeId) {
+		if (!params.node_id) {
 			task.consecutiveMistakeCount++
 			task.recordToolError("restructure_intent")
 			task.didToolFailInCurrentTurn = true
-			pushToolResult(formatResponse.toolError("'nodeId' is required for promote operation."))
+			pushToolResult(formatResponse.toolError("'node_id' is required for promote operation."))
 			return
 		}
 
-		const node = task.intentTree!.getNode(params.nodeId)
+		const node = task.intentTree!.getNode(params.node_id)
 		if (!node) {
 			task.consecutiveMistakeCount++
 			task.recordToolError("restructure_intent")
 			task.didToolFailInCurrentTurn = true
 			const availableNodes = task.intentTree!.getAvailableNodesList()
 			pushToolResult(
-				formatResponse.toolError(`Node '${params.nodeId}' not found. Available nodes: ${availableNodes}`),
+				formatResponse.toolError(`Node '${params.node_id}' not found. Available nodes: ${availableNodes}`),
 			)
 			return
 		}
@@ -200,7 +200,7 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 			task.recordToolError("restructure_intent")
 			task.didToolFailInCurrentTurn = true
 			pushToolResult(
-				formatResponse.toolError(`Node '${params.nodeId}' is already a root node, cannot promote further.`),
+				formatResponse.toolError(`Node '${params.node_id}' is already a root node, cannot promote further.`),
 			)
 			return
 		}
@@ -216,7 +216,7 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 
 		const grandparentId = parent.parentId
 
-		const result = task.intentTree!.reparentNode(params.nodeId, grandparentId, task.taskId)
+		const result = task.intentTree!.reparentNode(params.node_id, grandparentId, task.taskId)
 
 		if (!result.success) {
 			task.consecutiveMistakeCount++
@@ -311,29 +311,31 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 	}
 
 	private async handleExtractCommonParent(
-		params: RestructureIntentParams,
+		params: ToolParams<"restructure_intent">,
 		task: Task,
 		callbacks: ToolCallbacks,
 	): Promise<void> {
 		const { pushToolResult, askApproval } = callbacks
 
-		if (!params.nodeIds || params.nodeIds.length < 2) {
+		if (!params.node_ids || params.node_ids.length < 2) {
 			task.consecutiveMistakeCount++
 			task.recordToolError("restructure_intent")
 			task.didToolFailInCurrentTurn = true
 			pushToolResult(
 				formatResponse.toolError(
-					"'nodeIds' must contain at least 2 node IDs for extract_common_parent operation.",
+					"'node_ids' must contain at least 2 node IDs for extract_common_parent operation.",
 				),
 			)
 			return
 		}
 
-		if (!params.commonContent || params.commonContent.trim() === "") {
+		if (!params.common_content || params.common_content.trim() === "") {
 			task.consecutiveMistakeCount++
 			task.recordToolError("restructure_intent")
 			task.didToolFailInCurrentTurn = true
-			pushToolResult(formatResponse.toolError("'commonContent' is required for extract_common_parent operation."))
+			pushToolResult(
+				formatResponse.toolError("'common_content' is required for extract_common_parent operation."),
+			)
 			return
 		}
 
@@ -341,7 +343,7 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 		// 重要：必须在 reparent 循环之前解析，因为每次 reparentNode 都会触发
 		// recalculateShortIds()，导致后续迭代中的 shortId 指向错误的节点
 		const resolvedNodeIds: string[] = []
-		const nodes = params.nodeIds.map((id) => {
+		const nodes = params.node_ids.map((id) => {
 			const resolvedId = task.intentTree!.resolveId(id)
 			if (resolvedId) {
 				resolvedNodeIds.push(resolvedId)
@@ -356,7 +358,7 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 			const availableNodes = task.intentTree!.getAvailableNodesList()
 			pushToolResult(
 				formatResponse.toolError(
-					`Node '${params.nodeIds[missingIndex]}' not found. Available nodes: ${availableNodes}`,
+					`Node '${params.node_ids[missingIndex]}' not found. Available nodes: ${availableNodes}`,
 				),
 			)
 			return
@@ -372,7 +374,7 @@ export class RestructureIntentTool extends BaseTool<"restructure_intent"> {
 		// 创建新的父节点
 		const newParentResult = task.intentTree!.addNode({
 			type: newParentType,
-			content: params.commonContent.trim(),
+			content: params.common_content.trim(),
 			parentId: null,
 			taskId: task.taskId,
 		})

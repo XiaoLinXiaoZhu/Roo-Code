@@ -68,7 +68,7 @@ describe("CommitIntentTool", () => {
 		const task = createMockTask(tree)
 		const cb = createCallbacks()
 
-		await tool.execute({ nodeId: result.node.id, message: "实现A1模块" }, task, cb)
+		await tool.execute({ node_id: result.node.id, message: "实现A1模块" }, task, cb)
 
 		// Verify git operations
 		expect(mockAdd).toHaveBeenCalledWith([".", "--ignore-errors"])
@@ -90,7 +90,7 @@ describe("CommitIntentTool", () => {
 		const task = createMockTask(tree)
 		const cb = createCallbacks()
 
-		await tool.execute({ nodeId: "nonexistent", message: "test" }, task, cb)
+		await tool.execute({ node_id: "nonexistent", message: "test" }, task, cb)
 
 		expect(cb.results[0]).toContain("not found")
 		expect(task.consecutiveMistakeCount).toBe(1)
@@ -102,7 +102,7 @@ describe("CommitIntentTool", () => {
 		const task = createMockTask(tree)
 		const cb = createCallbacks()
 
-		await tool.execute({ nodeId: result.node.id, message: "test" }, task, cb)
+		await tool.execute({ node_id: result.node.id, message: "test" }, task, cb)
 
 		expect(cb.results[0]).toContain('status="no_changes"')
 		expect(mockCommit).not.toHaveBeenCalled()
@@ -114,7 +114,7 @@ describe("CommitIntentTool", () => {
 		const cb = createCallbacks()
 		cb.askApproval.mockResolvedValue(false)
 
-		await tool.execute({ nodeId: result.node.id, message: "test" }, task, cb)
+		await tool.execute({ node_id: result.node.id, message: "test" }, task, cb)
 
 		expect(cb.results[0]).toContain("declined")
 		expect(mockAdd).not.toHaveBeenCalled()
@@ -124,7 +124,7 @@ describe("CommitIntentTool", () => {
 		const task = { ...createMockTask(tree), intentTree: undefined }
 		const cb = createCallbacks()
 
-		await tool.execute({ nodeId: "x", message: "test" }, task, cb)
+		await tool.execute({ node_id: "x", message: "test" }, task, cb)
 
 		expect(cb.results[0]).toContain("not initialized")
 	})
@@ -135,7 +135,7 @@ describe("CommitIntentTool", () => {
 		const task = createMockTask(tree)
 		const cb = createCallbacks()
 
-		await tool.execute({ nodeId: goalResult.node.id, message: "完成功能X的实现" }, task, cb)
+		await tool.execute({ node_id: goalResult.node.id, message: "完成功能X的实现" }, task, cb)
 
 		// Verify an impl child was auto-created and bound to the commit
 		const children = tree.getChildren(goalResult.node.id)
@@ -163,7 +163,7 @@ describe("CommitIntentTool", () => {
 		const task = createMockTask(tree)
 		const cb = createCallbacks()
 
-		await tool.execute({ nodeId: implResult.node.id, message: "完成实现" }, task, cb)
+		await tool.execute({ node_id: implResult.node.id, message: "完成实现" }, task, cb)
 
 		// Verify no child was created
 		const children = tree.getChildren(implResult.node.id)
@@ -183,7 +183,7 @@ describe("CommitIntentTool", () => {
 		const task = createMockTask(tree)
 		const cb = createCallbacks()
 
-		await tool.execute({ nodeId: result.node.id, message: "" }, task, cb)
+		await tool.execute({ node_id: result.node.id, message: "" }, task, cb)
 
 		expect(cb.results[0]).toContain("required")
 		expect(cb.results[0]).toContain("cannot be empty")
@@ -195,7 +195,7 @@ describe("CommitIntentTool", () => {
 		const task = createMockTask(tree)
 		const cb = createCallbacks()
 
-		await tool.execute({ nodeId: result.node.id, message: "   " }, task, cb)
+		await tool.execute({ node_id: result.node.id, message: "   " }, task, cb)
 
 		expect(cb.results[0]).toContain("required")
 		expect(task.consecutiveMistakeCount).toBe(1)
