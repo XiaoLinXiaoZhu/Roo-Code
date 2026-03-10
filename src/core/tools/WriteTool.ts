@@ -11,13 +11,14 @@ interface WriteParams {
 }
 
 /**
+ * @deprecated - Replaced by v2/V2WriteTool. Kept for reference only.
  * Unified write tool — routes to EditTool or WriteToFileTool
  * based on whether `search` is provided.
  */
 export class WriteTool extends BaseTool<"write"> {
 	readonly name = "write" as const
 
-	async execute(params: WriteParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
+	async execute(params: any, task: Task, callbacks: ToolCallbacks): Promise<void> {
 		const { path: filePath, replace, search, expected_matches } = params
 
 		if (search) {

@@ -981,6 +981,16 @@ export class NativeToolCallParser {
 					break
 
 				case "edit":
+					if (args.path !== undefined && args.search !== undefined && args.replace !== undefined) {
+						nativeArgs = {
+							path: args.path,
+							search: args.search,
+							replace: args.replace,
+							expectedMatches: this.coerceOptionalNumber(args.expectedMatches),
+						} as NativeArgsFor<TName>
+					}
+					break
+
 				case "search_and_replace":
 					if (
 						args.file_path !== undefined &&
@@ -1289,12 +1299,10 @@ export class NativeToolCallParser {
 					break
 
 				case "write":
-					if (args.path !== undefined && args.replace !== undefined) {
+					if (args.path !== undefined && args.content !== undefined) {
 						nativeArgs = {
 							path: args.path,
-							replace: args.replace,
-							search: args.search,
-							expected_matches: args.expected_matches,
+							content: args.content,
 						} as NativeArgsFor<TName>
 					}
 					break
@@ -1303,7 +1311,18 @@ export class NativeToolCallParser {
 					if (args.content !== undefined) {
 						nativeArgs = {
 							content: args.content,
-							delay: args.delay,
+							delay: this.coerceOptionalNumber(args.delay),
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "exec":
+					if (args.script !== undefined) {
+						nativeArgs = {
+							script: args.script,
+							runtime: args.runtime,
+							cwd: args.cwd,
+							timeout: this.coerceOptionalNumber(args.timeout),
 						} as NativeArgsFor<TName>
 					}
 					break

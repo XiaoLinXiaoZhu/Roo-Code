@@ -2288,6 +2288,79 @@
       "gitCommit": "b5f949d739b66ee4df26d37a2c2be200d355ec58",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"mismatches\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"toolName\":{\"type\":\"string\"},\"issue\":{\"type\":\"string\"},\"parserLine\":{\"type\":\"number\"}}}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "83",
+      "query": "Where is NativeToolCallParser defined?",
+      "tags": [
+        "where",
+        "is",
+        "nativetoolcallparser",
+        "defined"
+      ],
+      "scope": {
+        "directories": "e:/_Project/Roo-Code/src",
+        "file_patterns": "*.ts",
+        "excludes": "node_modules,dist,__tests__"
+      },
+      "createdAt": "2026-03-10T01:21:23.072Z",
+      "gitCommit": "0db2bc597f77605224475ed0b18a23f6971038a5",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+    },
+    {
+      "id": "84",
+      "query": "Where is presentAssistantMessage function or file located?",
+      "tags": [
+        "where",
+        "is",
+        "presentassistantmessage",
+        "function",
+        "or",
+        "file",
+        "located"
+      ],
+      "scope": {
+        "directories": "e:/_Project/Roo-Code/src",
+        "excludes": "node_modules,dist",
+        "file_patterns": "*.ts"
+      },
+      "createdAt": "2026-03-10T01:22:09.230Z",
+      "gitCommit": "0db2bc597f77605224475ed0b18a23f6971038a5",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+    },
+    {
+      "id": "85",
+      "query": "How does the webview UI render tool approval for execute_command and edit tools? Where is the command approval UI component?",
+      "tags": [
+        "how",
+        "does",
+        "the",
+        "webview",
+        "ui",
+        "render",
+        "tool",
+        "approval",
+        "for",
+        "execute_command",
+        "and",
+        "edit",
+        "tools",
+        "where",
+        "is",
+        "command",
+        "component"
+      ],
+      "scope": {
+        "directories": "e:/_Project/Roo-Code/webview-ui/src",
+        "file_patterns": "*.tsx,*.ts",
+        "excludes": "node_modules,dist"
+      },
+      "createdAt": "2026-03-10T05:42:27.296Z",
+      "gitCommit": "0db2bc597f77605224475ed0b18a23f6971038a5",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
     }
   ]
 }

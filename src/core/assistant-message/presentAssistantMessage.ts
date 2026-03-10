@@ -19,7 +19,8 @@ import { readFileTool } from "../tools/ReadFileTool"
 import { readMediaTool } from "../tools/ReadMediaTool"
 import { readCommandOutputTool } from "../tools/ReadCommandOutputTool"
 import { writeToFileTool } from "../tools/WriteToFileTool"
-import { editTool } from "../tools/EditTool"
+import { editTool } from "../tools/v2/V2EditTool"
+import { editTool as legacyEditTool } from "../tools/EditTool"
 import { searchReplaceTool } from "../tools/SearchReplaceTool"
 import { editFileTool } from "../tools/EditFileTool"
 import { applyPatchTool } from "../tools/ApplyPatchTool"
@@ -48,8 +49,9 @@ import { updateIntentTool } from "../tools/UpdateIntentTool"
 import { pruneIntentTool } from "../tools/PruneIntentTool"
 import { commitIntentTool } from "../tools/CommitIntentTool"
 import { restructureIntentTool } from "../tools/RestructureIntentTool"
-import { writeTool } from "../tools/WriteTool"
-import { reminderTool } from "../tools/ReminderTool"
+import { writeTool } from "../tools/v2/V2WriteTool"
+import { reminderTool } from "../tools/v2/V2ReminderTool"
+import { execTool } from "../tools/v2/V2ExecTool"
 
 import { formatResponse } from "../prompts/responses"
 import { sanitizeToolUseId } from "../../utils/tool-id"
@@ -341,6 +343,8 @@ export async function presentAssistantMessage(cline: Task) {
 				switch (block.name) {
 					case "execute_command":
 						return `[${block.name} for '${block.params.command}']`
+					case "exec":
+						return `[${block.name} runtime=${block.params.runtime ?? "default"}]`
 					case "read_file":
 						// Prefer native typed args when available; fall back to legacy params
 						// Check if nativeArgs exists (native protocol)
@@ -367,6 +371,7 @@ export async function presentAssistantMessage(cline: Task) {
 							block.params.file_pattern ? ` in '${block.params.file_pattern}'` : ""
 						}]`
 					case "edit":
+						return `[${block.name} for '${block.params.path ?? block.params.file_path}']`
 					case "search_and_replace":
 						return `[${block.name} for '${block.params.file_path}']`
 					case "search_replace":
@@ -742,9 +747,16 @@ export async function presentAssistantMessage(cline: Task) {
 					})
 					break
 				case "edit":
-				case "search_and_replace":
 					await checkpointSaveAndMark(cline)
 					await editTool.handle(cline, block as ToolUse<"edit">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+					})
+					break
+				case "search_and_replace":
+					await checkpointSaveAndMark(cline)
+					await legacyEditTool.handle(cline, block as any, {
 						askApproval,
 						handleError,
 						pushToolResult,
@@ -981,6 +993,13 @@ export async function presentAssistantMessage(cline: Task) {
 					break
 				case "reminder":
 					await reminderTool.handle(cline, block as ToolUse<"reminder">, {
+						askApproval,
+						handleError,
+						pushToolResult,
+					})
+					break
+				case "exec":
+					await execTool.handle(cline, block as ToolUse<"exec">, {
 						askApproval,
 						handleError,
 						pushToolResult,

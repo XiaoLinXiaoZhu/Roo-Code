@@ -1,16 +1,10 @@
 /**
  * reminder 工具 — 为 agent 自己设置延迟提醒
- *
- * 提醒存储在内存中，由 agent loop 在适当的轮次注入。
  */
 
-import type { ReminderToolResult } from "../types/domain.ts"
-import type { LLMToolDefinition } from "../types/llm.ts"
+import type { LLMToolDefinition, ReminderToolCall, ReminderToolResult } from "@n0n/types"
 
-interface ReminderArgs {
-	content: string
-	delay?: number
-}
+export { ReminderArgsSchema } from "@n0n/types"
 
 export const REMINDER_TOOL_DEFINITION: LLMToolDefinition = {
 	type: "function",
@@ -48,18 +42,15 @@ export interface PendingReminder {
 	roundsLeft: number
 }
 
-export function reminderTool(callId: string, args: ReminderArgs, reminders: PendingReminder[]): ReminderToolResult {
-	const delay = args.delay ?? 7
-	// 覆盖旧 reminder（只保留最新一条）
+export function reminderTool(call: ReminderToolCall, reminders: PendingReminder[]): ReminderToolResult {
+	const delay = call.args.delay ?? 7
 	reminders.length = 0
-	reminders.push({ content: args.content, roundsLeft: delay })
+	reminders.push({ content: call.args.content, roundsLeft: delay })
 
 	return {
 		type: "tool_result",
-		callId,
-		tool: "reminder",
-		content: args.content,
-		delay,
+		tool: "reminder" as const,
+		call,
 		acknowledged: true,
 	}
 }

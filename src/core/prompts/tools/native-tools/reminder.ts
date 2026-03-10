@@ -10,11 +10,11 @@ The content will appear as \`<reminder id="N">\` in \`<environment>\` after the 
 
 When a reminder fires, you MUST set a new reminder (with updated progress) alongside your next tool call. Finish early? Call reminder() with a completion summary to overwrite the stale one.
 
-**delay is a checkpoint interval, not an ETA.** It answers: "how many rounds am I willing to execute without reflecting?"
+**delay is a checkpoint interval, not an ETA.**
 - Small task (5-8r total): delay 5-8
 - Medium task (8-15r): delay 8-15
 - Large task (15-30r): delay 15-30
-- Never exceed delay=30. If you need more, break into phases.`
+- Never exceed delay=30.`
 
 export default {
 	type: "function",
@@ -27,13 +27,11 @@ export default {
 			properties: {
 				content: {
 					type: "string",
-					description:
-						"Reminder content: include OKR summary (objective, key results checklist), progress status, and next steps.",
+					description: "Reminder content: include OKR summary, progress status, and next steps.",
 				},
 				delay: {
 					type: ["number", "null"],
-					description:
-						"Number of rounds after which the reminder fires (default: 7). delay=n fires after n rounds, on round n+1. 1 round = 1 assistant response.",
+					description: "Number of rounds after which the reminder fires (default: 7).",
 				},
 			},
 			required: ["content", "delay"],

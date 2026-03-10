@@ -127,7 +127,7 @@ export type NativeToolArgs = {
 	attempt_completion: { result: string }
 	execute_command: { command: string; cwd?: string; timeout?: number | null }
 	apply_diff: { path: string; diff: string }
-	edit: { file_path: string; old_string: string; new_string: string; replace_all?: boolean }
+	edit: { path: string; search: string; replace: string; expectedMatches?: number }
 	search_and_replace: { file_path: string; old_string: string; new_string: string; replace_all?: boolean }
 	search_replace: { file_path: string; old_string: string; new_string: string }
 	edit_file: { file_path: string; old_string: string; new_string: string; expected_replacements?: number }
@@ -220,17 +220,22 @@ export type NativeToolArgs = {
 		node_ids?: string[]
 		common_content?: string
 	}
-	// 统一写入工具
+	// write: 文件创建/覆盖（v2 独立实现）
 	write: {
 		path: string
-		replace: string
-		search?: string | null
-		expected_matches?: number | null
+		content: string
 	}
-	// 提醒工具
+	// reminder: 延迟提醒（v2 独立实现）
 	reminder: {
 		content: string
 		delay?: number
+	}
+	// exec: 脚本执行（替代 execute_command，v2 独立实现）
+	exec: {
+		script: string
+		runtime?: string
+		cwd?: string
+		timeout?: number
 	}
 	// Add more tools as they are migrated to native protocol
 }
@@ -435,8 +440,9 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	prune_intent: "prune intent",
 	commit_intent: "commit intent",
 	restructure_intent: "restructure intent tree",
-	write: "write",
+	write: "write file",
 	reminder: "set reminder",
+	exec: "execute script",
 } as const
 
 // Define available tool groups.
@@ -448,12 +454,12 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 		tools: ["codebase_search", "find_definition", "find_usages", "read_media"],
 	},
 	edit: {
-		tools: ["edit", "write_to_file", "generate_image"],
-		// write 工具暂时禁用（复用旧工具导致错误提示如 old_string 而非 search），等完善后再迁移
+		// v2: edit（精确搜索替换）、write（文件创建/覆盖）替代旧 write_to_file
+		tools: ["edit", "write", "generate_image"],
 	},
 	command: {
-		// 移除了  "read_command_output" ，因为 read_command_output 的功能其实可以用 grep/sed + 文件重定向替代。
-		tools: ["execute_command"],
+		// v2: exec（脚本执行）替代旧 execute_command
+		tools: ["exec"],
 	},
 	mcp: {
 		// 	tools: ["use_mcp_tool", "access_mcp_resource"],
@@ -497,7 +503,6 @@ export const ALWAYS_AVAILABLE_TOOLS: ToolName[] = [
 export const TOOL_ALIASES: Record<string, ToolName> = {
 	write_file: "write_to_file",
 	search_and_replace: "edit",
-	exec: "execute_command",
 } as const
 
 export type DiffResult =

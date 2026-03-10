@@ -23,7 +23,7 @@ const TIMEOUT_PARAMETER_DESCRIPTION = `Timeout in seconds. When exceeded, the co
 export default {
 	type: "function",
 	function: {
-		name: "exec",
+		name: "execute_command",
 		description: EXECUTE_COMMAND_DESCRIPTION,
 		strict: true,
 		parameters: {

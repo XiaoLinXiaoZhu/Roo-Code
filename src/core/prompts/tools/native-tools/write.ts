@@ -1,17 +1,14 @@
 import type OpenAI from "openai"
 
-const WRITE_DESCRIPTION = `Write or edit a file. Two modes based on whether \`search\` is provided:
+const WRITE_DESCRIPTION = `Create or overwrite a file with the given content. Directories are created automatically. For modifying existing files, use the edit tool instead.
 
-**Full file write** (search omitted/empty): Creates or overwrites the entire file.
-- write({ path: "src/config.ts", replace: "export const timeout = 10000;\\n", search: null, expected_matches: null })
+**When to Use**: Creating a new file.
+- write({ path: "src/config.ts", content: "export const timeout = 10000;\\n" })
 
-**Search & replace** (search provided): Finds and replaces text in an existing file.
-- write({ path: "src/config.ts", search: "timeout = 5000", replace: "timeout = 10000", expected_matches: 1 })
+**When to Use**: Completely rewriting a small file.
+- write({ path: "README.md", content: "# My Project\\n\\nDescription here.\\n" })
 
-Constraints:
-- For search & replace: search must match exactly (including whitespace/indentation). Read the file first.
-- expected_matches (default 1) asserts match count — mismatch returns an error instead of editing.
-- Prefer editing over full file write for existing files. Full rewrite requires complete content — no placeholders.`
+**Constraints**: Content must be the FULL intended file content — no placeholders or partial updates.`
 
 export default {
 	type: "function",
@@ -26,22 +23,12 @@ export default {
 					type: "string",
 					description: "File path relative to the working directory.",
 				},
-				replace: {
+				content: {
 					type: "string",
-					description:
-						"The text to write. When search is null: the complete file content. When search is provided: the replacement for each match.",
-				},
-				search: {
-					type: ["string", "null"],
-					description: "Text to find. Null/empty = full file write. Must match exactly including whitespace.",
-				},
-				expected_matches: {
-					type: ["number", "null"],
-					description:
-						"Expected number of matches (default: 1). Mismatch = error. Only for search & replace.",
+					description: "Complete file content to write.",
 				},
 			},
-			required: ["path", "replace", "search", "expected_matches"],
+			required: ["path", "content"],
 			additionalProperties: false,
 		},
 	},

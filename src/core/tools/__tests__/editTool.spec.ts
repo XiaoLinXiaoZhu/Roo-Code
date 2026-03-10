@@ -204,7 +204,7 @@ describe("editTool", () => {
 			type: "tool_use",
 			name: "edit",
 			params: fullParams as Partial<Record<string, string>>,
-			nativeArgs: nativeArgs as ToolUse<"edit">["nativeArgs"],
+			nativeArgs: nativeArgs as ToolUse<"search_and_replace">["nativeArgs"],
 			partial: isPartial,
 		}
 
@@ -212,7 +212,7 @@ describe("editTool", () => {
 			toolResult = result
 		})
 
-		await editTool.handle(mockTask, toolUse as ToolUse<"edit">, {
+		await editTool.handle(mockTask, toolUse as ToolUse<"search_and_replace">, {
 			askApproval: mockAskApproval,
 			handleError: mockHandleError,
 			pushToolResult: mockPushToolResult,
@@ -383,7 +383,7 @@ describe("editTool", () => {
 					file_path: testFilePath,
 					old_string: "Line 2",
 					new_string: "Modified",
-				} as ToolUse<"edit">["nativeArgs"],
+				} as ToolUse<"search_and_replace">["nativeArgs"],
 				partial: false,
 			}
 
@@ -392,7 +392,7 @@ describe("editTool", () => {
 				capturedResult = result
 			})
 
-			await editTool.handle(mockTask, toolUse as ToolUse<"edit">, {
+			await editTool.handle(mockTask, toolUse as ToolUse<"search_and_replace">, {
 				askApproval: mockAskApproval,
 				handleError: mockHandleError,
 				pushToolResult: localPushToolResult,

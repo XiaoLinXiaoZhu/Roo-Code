@@ -1,47 +1,43 @@
 import type OpenAI from "openai"
 
-const EDIT_DESCRIPTION = `Perform exact string replacement in a file. Finds old_string and replaces it with new_string.
+const EDIT_DESCRIPTION = `Edit a file by replacing exact text matches. The file must already exist. Use expectedMatches to assert the number of replacements.
 
 **When to Use**: Single precise text replacement in a file you've already read.
-- edit({ file_path: "src/config.ts", old_string: "const timeout = 5000;", new_string: "const timeout = 10000;" })
+- edit({ path: "src/config.ts", search: "const timeout = 5000;", replace: "const timeout = 10000;", expectedMatches: null })
 
-**When to Use**: Renaming a variable/function across an entire file.
-- edit({ file_path: "src/utils.ts", old_string: "oldName", new_string: "newName", replace_all: true })
+**When to Use**: Replacing all occurrences of a pattern.
+- edit({ path: "src/utils.ts", search: "oldName", replace: "newName", expectedMatches: 3 })
 
-**Constraints**: You must read the file before editing. The edit fails if old_string is not unique — provide more surrounding context to disambiguate, or use replace_all.`
+**Constraints**: You must read the file before editing. search must match exactly including whitespace and indentation. expectedMatches defaults to 1 — mismatch returns an error.`
 
-const edit = {
+export default {
 	type: "function",
 	function: {
 		name: "edit",
 		description: EDIT_DESCRIPTION,
+		strict: true,
 		parameters: {
 			type: "object",
 			properties: {
-				file_path: {
+				path: {
 					type: "string",
 					description: "File path relative to the working directory.",
 				},
-				old_string: {
+				search: {
 					type: "string",
-					description:
-						"Exact text to find. Must match exactly including all whitespace, indentation, and line endings. Never include line number prefixes from read output.",
+					description: "Exact text to find in the file. Must match exactly including whitespace.",
 				},
-				new_string: {
+				replace: {
 					type: "string",
-					description: "Replacement text. Must include all necessary whitespace and indentation.",
+					description: "Replacement text.",
 				},
-				replace_all: {
-					type: "boolean",
-					description:
-						"When true, replaces ALL occurrences. When false (default), replaces only the first and errors if multiple matches exist.",
-					default: false,
+				expectedMatches: {
+					type: ["number", "null"],
+					description: "Expected number of matches (default: 1). Mismatch = error.",
 				},
 			},
-			required: ["file_path", "old_string", "new_string"],
+			required: ["path", "search", "replace", "expectedMatches"],
 			additionalProperties: false,
 		},
 	},
 } satisfies OpenAI.Chat.ChatCompletionTool
-
-export default edit

@@ -6,7 +6,8 @@ import askFollowupQuestion from "./ask_followup_question"
 import attemptCompletion from "./attempt_completion"
 import codebaseSearch from "./codebase_search"
 import editTool from "./edit"
-import executeCommand from "./execute_command"
+// executeCommand 已被 v2 exec 工具替代
+// import executeCommand from "./execute_command"
 import generateImage from "./generate_image"
 import listFiles from "./list_files"
 import newTask from "./new_task"
@@ -28,6 +29,7 @@ import findUsages from "./find_usages"
 import buildTool from "./build_tool"
 import write from "./write"
 import reminder from "./reminder"
+import exec from "./exec"
 import addIntent from "./add_intent"
 import updateIntent from "./update_intent"
 import pruneIntent from "./prune_intent"
@@ -69,7 +71,8 @@ export function getNativeTools(options: NativeToolsOptions = {}): OpenAI.Chat.Ch
 		// LSP 代码智能工具 - 优先于 grep 用于符号导航
 		findDefinition,
 		findUsages,
-		executeCommand,
+		// executeCommand 已被 v2 exec 替代
+		// executeCommand,
 		generateImage,
 		listFiles,
 		newTask,
@@ -94,6 +97,8 @@ export function getNativeTools(options: NativeToolsOptions = {}): OpenAI.Chat.Ch
 		write,
 		// 提醒工具
 		reminder,
+		// V2 脚本执行工具
+		exec,
 		// 意图树工具
 		addIntent,
 		updateIntent,

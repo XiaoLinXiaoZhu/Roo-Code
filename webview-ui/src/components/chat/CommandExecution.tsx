@@ -41,7 +41,7 @@ export const CommandExecution = ({ executionId, text, icon, title }: CommandExec
 		setDeniedCommands,
 	} = useExtensionState()
 
-	const { command, output: parsedOutput } = useMemo(() => parseCommandAndOutput(text), [text])
+	const { command, output: parsedOutput, runtime } = useMemo(() => parseCommandAndOutput(text), [text])
 
 	// If we aren't opening the VSCode terminal for this command then we default
 	// to expanding the command execution output.
@@ -151,6 +151,11 @@ export const CommandExecution = ({ executionId, text, icon, title }: CommandExec
 				<div className="flex flex-row items-center gap-2">
 					{icon}
 					{title}
+					{runtime && (
+						<span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-vscode-badge-background text-vscode-badge-foreground">
+							{runtime}
+						</span>
+					)}
 					{status?.status === "exited" && (
 						<div className="flex flex-row items-center gap-2 font-mono text-xs">
 							<StandardTooltip
@@ -201,7 +206,7 @@ export const CommandExecution = ({ executionId, text, icon, title }: CommandExec
 
 			<div className="bg-vscode-editor-background border border-vscode-border rounded-xs ml-6 mt-2">
 				<div className="p-2">
-					<CodeBlock source={command} language="shell" />
+					<CodeBlock source={command} language={runtimeToLanguage(runtime)} />
 					<OutputContainer isExpanded={isExpanded} output={output} />
 				</div>
 				{command && command.trim() && (
@@ -232,19 +237,53 @@ const OutputContainerInternal = ({ isExpanded, output }: { isExpanded: boolean; 
 
 const OutputContainer = memo(OutputContainerInternal)
 
+/** Map exec runtime to syntax highlighting language */
+const runtimeToLanguage = (runtime: string | undefined): string => {
+	switch (runtime) {
+		case "bun":
+		case "deno":
+			return "typescript"
+		case "node":
+			return "javascript"
+		case "python":
+		case "python3":
+		case "uv":
+			return "python"
+		case "pwsh":
+			return "powershell"
+		default:
+			return "shell"
+	}
+}
+
 const parseCommandAndOutput = (text: string | undefined) => {
 	if (!text) {
-		return { command: "", output: "" }
+		return { command: "", output: "", runtime: undefined as string | undefined }
+	}
+
+	// Try parsing as JSON payload from V2ExecTool: {runtime, script}
+	try {
+		const parsed = JSON.parse(text)
+		if (parsed && typeof parsed === "object" && typeof parsed.script === "string") {
+			return {
+				command: parsed.script,
+				output: "",
+				runtime: parsed.runtime as string | undefined,
+			}
+		}
+	} catch {
+		// Not JSON — fall through to legacy parsing
 	}
 
 	const index = text.indexOf(COMMAND_OUTPUT_STRING)
 
 	if (index === -1) {
-		return { command: text, output: "" }
+		return { command: text, output: "", runtime: undefined as string | undefined }
 	}
 
 	return {
 		command: text.slice(0, index),
 		output: text.slice(index + COMMAND_OUTPUT_STRING.length),
+		runtime: undefined as string | undefined,
 	}
 }

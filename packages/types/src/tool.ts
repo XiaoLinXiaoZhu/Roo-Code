@@ -59,6 +59,8 @@ export const toolNames = [
 	"write",
 	// 提醒工具
 	"reminder",
+	// V2 脚本执行工具（替代 execute_command）
+	"exec",
 	// 意图树工具
 	"add_intent",
 	"update_intent",

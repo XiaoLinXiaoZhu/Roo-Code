@@ -14,7 +14,7 @@ import { listFilesTool } from "./ListFilesTool"
 import { readFileTool } from "./ReadFileTool"
 import { readCommandOutputTool } from "./ReadCommandOutputTool"
 import { writeToFileTool } from "./WriteToFileTool"
-import { searchAndReplaceTool } from "./SearchAndReplaceTool"
+// Old searchAndReplaceTool removed - v2 editTool handles "edit", legacy handled via presentAssistantMessage
 import { searchReplaceTool } from "./SearchReplaceTool"
 import { editFileTool } from "./EditFileTool"
 import { applyPatchTool } from "./ApplyPatchTool"
@@ -42,6 +42,10 @@ import { pruneIntentTool } from "./PruneIntentTool"
 import { commitIntentTool } from "./CommitIntentTool"
 import { writeTool } from "./WriteTool"
 import { reminderTool } from "./ReminderTool"
+import { execTool } from "./v2/V2ExecTool"
+import { editTool as v2EditTool } from "./v2/V2EditTool"
+import { writeTool as v2WriteTool } from "./v2/V2WriteTool"
+import { reminderTool as v2ReminderTool } from "./v2/V2ReminderTool"
 
 /**
  * All registered BaseTool instances.
@@ -55,7 +59,6 @@ const allTools: BaseTool<ToolName>[] = [
 	readFileTool,
 	readCommandOutputTool,
 	writeToFileTool,
-	searchAndReplaceTool,
 	searchReplaceTool,
 	editFileTool,
 	applyPatchTool,
@@ -81,8 +84,10 @@ const allTools: BaseTool<ToolName>[] = [
 	updateIntentTool,
 	pruneIntentTool,
 	commitIntentTool,
-	writeTool,
-	reminderTool,
+	v2WriteTool,
+	v2ReminderTool,
+	v2EditTool,
+	execTool,
 ]
 
 /**

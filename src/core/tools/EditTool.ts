@@ -22,8 +22,8 @@ interface EditParams {
 	replace_all?: boolean
 }
 
-export class EditTool extends BaseTool<"edit"> {
-	readonly name = "edit" as const
+export class EditTool extends BaseTool<"search_and_replace"> {
+	readonly name = "search_and_replace" as const
 
 	async execute(params: EditParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
 		const { file_path: relPath, old_string: oldString, new_string: newString, replace_all: replaceAll } = params
@@ -243,7 +243,7 @@ export class EditTool extends BaseTool<"edit"> {
 		}
 	}
 
-	override async handlePartial(task: Task, block: ToolUse<"edit">): Promise<void> {
+	override async handlePartial(task: Task, block: ToolUse<"search_and_replace">): Promise<void> {
 		const relPath: string | undefined = block.params.file_path
 
 		// Wait for path to stabilize before showing UI (prevents truncated paths)
