@@ -581,6 +581,52 @@ Output:
 			expect(terminalOutput.textContent).toContain("45 total")
 		})
 
+		it("should parse V2ExecTool JSON payload (script only, no output)", () => {
+			const jsonPayload = JSON.stringify({ runtime: "python", script: "print('hello')" })
+
+			render(
+				<ExtensionStateWrapper>
+					<CommandExecution executionId="test-v2-1" text={jsonPayload} />
+				</ExtensionStateWrapper>,
+			)
+
+			// Should render the script content, not the raw JSON
+			expect(screen.getByTestId("code-block")).toHaveTextContent("print('hello')")
+			// Should show runtime badge
+			expect(screen.getByText("python")).toBeInTheDocument()
+		})
+
+		it("should parse V2ExecTool JSON payload with consolidated output", () => {
+			// After JSON-aware consolidation, output is inside the JSON object
+			const jsonPayload = JSON.stringify({ runtime: "cmd", script: "echo hello", output: "hello" })
+
+			render(
+				<ExtensionStateWrapper>
+					<CommandExecution executionId="test-v2-2" text={jsonPayload} />
+				</ExtensionStateWrapper>,
+			)
+
+			// Should render the script content, not the raw JSON
+			expect(screen.getByTestId("code-block")).toHaveTextContent("echo hello")
+			// Should show runtime badge
+			expect(screen.getByText("cmd")).toBeInTheDocument()
+			// Should show the output
+			const terminalOutput = screen.getByTestId("terminal-output")
+			expect(terminalOutput).toHaveTextContent("hello")
+		})
+
+		it("should fall back to legacy parsing for non-JSON command text", () => {
+			render(
+				<ExtensionStateWrapper>
+					<CommandExecution executionId="test-v2-3" text="ls -la\nOutput:\nfile1.txt" />
+				</ExtensionStateWrapper>,
+			)
+
+			expect(screen.getByTestId("code-block")).toHaveTextContent("ls -la")
+			const terminalOutput = screen.getByTestId("terminal-output")
+			expect(terminalOutput).toHaveTextContent("file1.txt")
+		})
+
 		it("should handle commands with zero output", () => {
 			const commandWithZeroTotal = `wc -l *.go *.java
 Output:

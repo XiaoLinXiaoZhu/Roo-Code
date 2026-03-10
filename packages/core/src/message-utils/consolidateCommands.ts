@@ -78,10 +78,23 @@ export function consolidateCommands(messages: ClineMessage[]): ClineMessage[] {
 		}
 		// Handle command sequences
 		else if (msg.type === "ask" && msg.ask === "command") {
-			let consolidatedText = msg.text || ""
+			const commandText = msg.text || ""
 			let j = i + 1
 			let previous: { type: "ask" | "say"; text: string } | undefined
 			let lastProcessedIndex = i
+
+			// Detect JSON payload from V2ExecTool: {runtime, script}
+			// Only attempt parse if text looks like JSON to avoid noisy console errors from safeJsonParse
+			type ExecPayload = { runtime?: string; script?: string; output?: string }
+			let jsonObj: ExecPayload | undefined
+			if (commandText.startsWith("{")) {
+				jsonObj = safeJsonParse<ExecPayload>(commandText)
+			}
+			const isJsonPayload = jsonObj !== undefined && typeof jsonObj.script === "string"
+
+			// For JSON payloads, collect output parts separately; for legacy, use text concatenation
+			let consolidatedText = commandText
+			const outputParts: string[] = []
 
 			while (j < messages.length) {
 				const currentMsg = messages[j]
@@ -96,22 +109,29 @@ export function consolidateCommands(messages: ClineMessage[]): ClineMessage[] {
 				}
 
 				if (ask === "command_output" || say === "command_output") {
-					if (!previous) {
-						consolidatedText += `\n${COMMAND_OUTPUT_STRING}`
-					}
-
 					const isDuplicate = previous && previous.type !== type && previous.text === text
 
-					if (text.length > 0 && !isDuplicate) {
-						// Add a newline before adding the text if there's already content
-						if (
-							previous &&
-							consolidatedText.length >
-								consolidatedText.indexOf(COMMAND_OUTPUT_STRING) + COMMAND_OUTPUT_STRING.length
-						) {
-							consolidatedText += "\n"
+					if (isJsonPayload) {
+						// JSON mode: collect output parts into array
+						if (text.length > 0 && !isDuplicate) {
+							outputParts.push(text)
 						}
-						consolidatedText += text
+					} else {
+						// Legacy mode: text concatenation with COMMAND_OUTPUT_STRING separator
+						if (!previous) {
+							consolidatedText += `\n${COMMAND_OUTPUT_STRING}`
+						}
+
+						if (text.length > 0 && !isDuplicate) {
+							if (
+								previous &&
+								consolidatedText.length >
+									consolidatedText.indexOf(COMMAND_OUTPUT_STRING) + COMMAND_OUTPUT_STRING.length
+							) {
+								consolidatedText += "\n"
+							}
+							consolidatedText += text
+						}
 					}
 
 					previous = { type, text }
@@ -120,6 +140,12 @@ export function consolidateCommands(messages: ClineMessage[]): ClineMessage[] {
 				}
 
 				j++
+			}
+
+			// For JSON payloads, merge output into the JSON object
+			if (isJsonPayload && outputParts.length > 0) {
+				jsonObj!.output = outputParts.join("\n")
+				consolidatedText = JSON.stringify(jsonObj)
 			}
 
 			consolidatedMessages.set(msg.ts, { ...msg, text: consolidatedText })

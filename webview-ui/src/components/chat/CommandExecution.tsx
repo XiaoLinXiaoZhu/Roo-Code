@@ -261,29 +261,25 @@ const parseCommandAndOutput = (text: string | undefined) => {
 		return { command: "", output: "", runtime: undefined as string | undefined }
 	}
 
-	// Try parsing as JSON payload from V2ExecTool: {runtime, script}
+	// Split command and output first (consolidateCommands appends "\nOutput:..." to legacy text)
+	const index = text.indexOf(COMMAND_OUTPUT_STRING)
+	const rawCommand = index === -1 ? text : text.slice(0, index)
+	const output = index === -1 ? "" : text.slice(index + COMMAND_OUTPUT_STRING.length)
+
+	// Try parsing as JSON payload from V2ExecTool: {runtime, script, output?}
 	try {
-		const parsed = JSON.parse(text)
+		const parsed = JSON.parse(rawCommand)
 		if (parsed && typeof parsed === "object" && typeof parsed.script === "string") {
 			return {
 				command: parsed.script,
-				output: "",
+				// Prefer JSON output field (from JSON-aware consolidation), fall back to legacy split output
+				output: parsed.output ?? output,
 				runtime: parsed.runtime as string | undefined,
 			}
 		}
 	} catch {
-		// Not JSON — fall through to legacy parsing
+		// Not JSON — fall through to legacy format
 	}
 
-	const index = text.indexOf(COMMAND_OUTPUT_STRING)
-
-	if (index === -1) {
-		return { command: text, output: "", runtime: undefined as string | undefined }
-	}
-
-	return {
-		command: text.slice(0, index),
-		output: text.slice(index + COMMAND_OUTPUT_STRING.length),
-		runtime: undefined as string | undefined,
-	}
+	return { command: rawCommand, output, runtime: undefined as string | undefined }
 }

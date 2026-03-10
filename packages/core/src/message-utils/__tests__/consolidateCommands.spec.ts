@@ -142,4 +142,69 @@ describe("consolidateCommands", () => {
 			expect(result).toEqual([])
 		})
 	})
+
+	describe("V2ExecTool JSON payload commands", () => {
+		it("should consolidate JSON command with output into JSON format", () => {
+			const jsonPayload = JSON.stringify({ runtime: "cmd", script: "echo hello" })
+			const messages: ClineMessage[] = [
+				{ type: "ask", ask: "command", text: jsonPayload, ts: 1000 },
+				{ type: "say", say: "command_output", text: "hello", ts: 1001 },
+			]
+
+			const result = consolidateCommands(messages)
+
+			expect(result.length).toBe(1)
+			const parsed = JSON.parse(result[0]!.text || "{}")
+			expect(parsed.runtime).toBe("cmd")
+			expect(parsed.script).toBe("echo hello")
+			expect(parsed.output).toBe("hello")
+		})
+
+		it("should consolidate JSON command with multiple outputs", () => {
+			const jsonPayload = JSON.stringify({ runtime: "python", script: "print('a'); print('b')" })
+			const messages: ClineMessage[] = [
+				{ type: "ask", ask: "command", text: jsonPayload, ts: 1000 },
+				{ type: "ask", ask: "command_output", text: "a", ts: 1001 },
+				{ type: "say", say: "command_output", text: "b", ts: 1002 },
+			]
+
+			const result = consolidateCommands(messages)
+
+			expect(result.length).toBe(1)
+			const parsed = JSON.parse(result[0]!.text || "{}")
+			expect(parsed.script).toBe("print('a'); print('b')")
+			expect(parsed.output).toBe("a\nb")
+		})
+
+		it("should handle JSON command without output", () => {
+			const jsonPayload = JSON.stringify({ runtime: "sh", script: "true" })
+			const messages: ClineMessage[] = [
+				{ type: "ask", ask: "command", text: jsonPayload, ts: 1000 },
+				{ type: "say", say: "text", text: "some text", ts: 1001 },
+			]
+
+			const result = consolidateCommands(messages)
+
+			expect(result.length).toBe(2)
+			const parsed = JSON.parse(result[0]!.text || "{}")
+			expect(parsed.runtime).toBe("sh")
+			expect(parsed.script).toBe("true")
+			expect(parsed.output).toBeUndefined()
+		})
+
+		it("should handle duplicate outputs in JSON mode", () => {
+			const jsonPayload = JSON.stringify({ runtime: "cmd", script: "echo hi" })
+			const messages: ClineMessage[] = [
+				{ type: "ask", ask: "command", text: jsonPayload, ts: 1000 },
+				{ type: "ask", ask: "command_output", text: "hi", ts: 1001 },
+				{ type: "say", say: "command_output", text: "hi", ts: 1002 },
+			]
+
+			const result = consolidateCommands(messages)
+
+			expect(result.length).toBe(1)
+			const parsed = JSON.parse(result[0]!.text || "{}")
+			expect(parsed.output).toBe("hi")
+		})
+	})
 })
