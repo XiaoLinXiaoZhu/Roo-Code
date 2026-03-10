@@ -1,21 +1,25 @@
 /**
  * V2EditTool — 文件内容修改 (v2)
  *
- * 精确的 search & replace 操作。
- * 独立实现，不复用 EditTool。
+ * 精确的 search & replace 操作，完整功能实现。
+ * 参数格式: { path, search, replace, expectedMatches? }
  */
 
 import fs from "fs/promises"
-import * as path from "path"
+import path from "path"
 
-import type { ClineSayTool, DEFAULT_WRITE_DELAY_MS } from "@roo-code/types"
+import { type ClineSayTool, DEFAULT_WRITE_DELAY_MS } from "@roo-code/types"
 
-import { Task } from "../../task/Task"
-import { formatResponse } from "../../prompts/responses"
 import { getReadablePath } from "../../../utils/path"
 import { isPathOutsideWorkspace } from "../../../utils/pathUtils"
+import { Task } from "../../task/Task"
+import { formatResponse } from "../../prompts/responses"
 import { RecordSource } from "../../context-tracking/FileContextTrackerTypes"
 import { fileExistsAtPath } from "../../../utils/fs"
+import { EXPERIMENT_IDS, experiments } from "../../../shared/experiments"
+import { sanitizeUnifiedDiff, computeDiffStats } from "../../diff/stats"
+import type { ToolUse } from "../../../shared/tools"
+
 import { BaseTool, ToolCallbacks } from "../BaseTool"
 
 interface V2EditParams {
@@ -29,7 +33,7 @@ export class V2EditTool extends BaseTool<"edit"> {
 	readonly name = "edit" as const
 
 	async execute(params: V2EditParams, task: Task, callbacks: ToolCallbacks): Promise<void> {
-		const { pushToolResult, handleError, askApproval } = callbacks
+		const { askApproval, handleError, pushToolResult } = callbacks
 		const { path: relPath, search, replace: replaceText } = params
 		const expectedCount = params.expectedMatches ?? 1
 
@@ -63,7 +67,7 @@ export class V2EditTool extends BaseTool<"edit"> {
 				return
 			}
 
-			// Check rooignore access
+			// Access control
 			const accessAllowed = task.rooIgnoreController?.validateAccess(relPath)
 			if (!accessAllowed) {
 				await task.say("rooignore_error", relPath)
@@ -71,18 +75,35 @@ export class V2EditTool extends BaseTool<"edit"> {
 				return
 			}
 
+			// Write protection check
+			const isWriteProtected = task.rooProtectedController?.isWriteProtected(relPath) || false
+
 			const absolutePath = path.resolve(task.cwd, relPath)
 
-			if (!(await fileExistsAtPath(absolutePath))) {
+			const fileExists = await fileExistsAtPath(absolutePath)
+			if (!fileExists) {
 				task.consecutiveMistakeCount++
 				task.recordToolError("edit")
-				pushToolResult(formatResponse.toolError(`File not found: ${relPath}`))
+				const errorMessage = `File not found: ${relPath}. Cannot perform edit on a non-existent file.`
+				await task.say("error", errorMessage)
+				pushToolResult(formatResponse.toolError(errorMessage))
 				return
 			}
 
 			// Read file and normalize line endings
-			let fileContent = await fs.readFile(absolutePath, "utf8")
-			fileContent = fileContent.replace(/\r\n/g, "\n")
+			let fileContent: string
+			try {
+				fileContent = await fs.readFile(absolutePath, "utf8")
+				fileContent = fileContent.replace(/\r\n/g, "\n")
+			} catch (error) {
+				task.consecutiveMistakeCount++
+				task.recordToolError("edit")
+				const errorMessage = `Failed to read file '${relPath}'. Please verify file permissions and try again.`
+				await task.say("error", errorMessage)
+				pushToolResult(formatResponse.toolError(errorMessage))
+				return
+			}
+
 			const normalizedSearch = search.replace(/\r\n/g, "\n")
 			const normalizedReplace = replaceText.replace(/\r\n/g, "\n")
 
@@ -101,7 +122,7 @@ export class V2EditTool extends BaseTool<"edit"> {
 				task.recordToolError("edit", "no_match")
 				pushToolResult(
 					formatResponse.toolError(
-						`No match found for 'search' in ${relPath}. Make sure the text appears exactly in the file.`,
+						`No match found for 'search' in ${relPath}. Make sure the text appears exactly in the file, including whitespace and indentation.`,
 					),
 				)
 				return
@@ -128,48 +149,96 @@ export class V2EditTool extends BaseTool<"edit"> {
 
 			task.consecutiveMistakeCount = 0
 
-			// Generate diff for approval
+			// Initialize diff view
+			task.diffViewProvider.editType = "modify"
+			task.diffViewProvider.originalContent = fileContent
+
+			// Generate and validate diff
 			const diff = formatResponse.createPrettyPatch(relPath, fileContent, newContent)
 			if (!diff) {
 				pushToolResult(`No changes needed for '${relPath}'`)
+				await task.diffViewProvider.reset()
 				return
 			}
 
+			// Get provider state for experiment flags and settings
+			const provider = task.providerRef.deref()
+			const state = await provider?.getState()
+			const diagnosticsEnabled = state?.diagnosticsEnabled ?? true
+			const writeDelayMs = state?.writeDelayMs ?? DEFAULT_WRITE_DELAY_MS
+			const isPreventFocusDisruptionEnabled = experiments.isEnabled(
+				state?.experiments ?? {},
+				EXPERIMENT_IDS.PREVENT_FOCUS_DISRUPTION,
+			)
+
+			const sanitizedDiff = sanitizeUnifiedDiff(diff)
+			const diffStats = computeDiffStats(sanitizedDiff) || undefined
 			const isOutsideWorkspace = isPathOutsideWorkspace(absolutePath)
+
 			const sharedMessageProps: ClineSayTool = {
 				tool: "appliedDiff",
 				path: getReadablePath(task.cwd, relPath),
-				diff,
+				diff: sanitizedDiff,
 				isOutsideWorkspace,
 			}
 
 			const completeMessage = JSON.stringify({
 				...sharedMessageProps,
-				content: diff,
+				content: sanitizedDiff,
+				isProtected: isWriteProtected,
+				diffStats,
 			} satisfies ClineSayTool)
 
-			const didApprove = await askApproval("tool", completeMessage)
+			// Show diff view if focus disruption prevention is disabled
+			if (!isPreventFocusDisruptionEnabled) {
+				await task.diffViewProvider.open(relPath)
+				await task.diffViewProvider.update(newContent, true)
+				task.diffViewProvider.scrollToFirstDiff()
+			}
+
+			const didApprove = await askApproval("tool", completeMessage, undefined, isWriteProtected)
+
 			if (!didApprove) {
+				if (!isPreventFocusDisruptionEnabled) {
+					await task.diffViewProvider.revertChanges()
+				}
+				pushToolResult("Changes were rejected by the user.")
+				await task.diffViewProvider.reset()
 				return
 			}
 
-			// Write the file directly
-			await fs.writeFile(absolutePath, newContent, "utf8")
+			// Save the changes
+			if (isPreventFocusDisruptionEnabled) {
+				await task.diffViewProvider.saveDirectly(relPath, newContent, false, diagnosticsEnabled, writeDelayMs)
+			} else {
+				await task.diffViewProvider.saveChanges(diagnosticsEnabled, writeDelayMs)
+			}
 
-			// Track file context
-			await task.fileContextTracker.trackFileContext(relPath, "roo_edited" as RecordSource)
+			// Track file edit
+			if (relPath) {
+				await task.fileContextTracker.trackFileContext(relPath, "roo_edited" as RecordSource)
+			}
+
 			task.didEditFile = true
 
-			pushToolResult(`Edited ${relPath}: ${matchCount} replacement(s) applied.`)
+			const message = await task.diffViewProvider.pushToolWriteResult(task, task.cwd, false)
+			pushToolResult(message)
+
+			await task.diffViewProvider.reset()
 			this.resetPartialState()
+
+			task.processQueuedMessages()
 		} catch (error) {
-			await handleError("executing edit", error as Error)
+			await handleError("edit", error as Error)
+			await task.diffViewProvider.reset()
 			this.resetPartialState()
 		}
 	}
 
-	override async handlePartial(task: Task, block: any): Promise<void> {
-		const relPath = block.params?.path ?? block.nativeArgs?.path
+	override async handlePartial(task: Task, block: ToolUse<"edit">): Promise<void> {
+		const relPath: string | undefined = block.params?.path ?? (block as any).nativeArgs?.path
+
+		// Wait for path to stabilize before showing UI
 		if (!this.hasPathStabilized(relPath)) {
 			return
 		}
