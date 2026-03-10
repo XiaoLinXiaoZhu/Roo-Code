@@ -19,6 +19,7 @@ import {
 	getProjectContext,
 	markdownFormattingSection,
 	getSkillsSection,
+	getCodeIntelligenceSection,
 } from "./sections"
 
 // Helper function to get prompt component, filtering out empty objects
@@ -85,6 +86,7 @@ ${getSpiritSection()}
 
 ${markdownFormattingSection()}
 ${skillsSection ? `\n${skillsSection}` : ""}
+${getCodeIntelligenceSection()}
 ${getSystemInfoSection(cwd)}
 ${projectContext}
 ${baseInstructions ? `\n${baseInstructions}` : ""}`

@@ -38,22 +38,22 @@ describe("getCapabilitiesSection", () => {
 		const result = getCapabilitiesSection(cwd)
 
 		expect(result).toContain("CAPABILITIES")
-		expect(result).toContain("execute CLI commands")
-		expect(result).toContain("list files")
-		expect(result).toContain("read and write files")
+		expect(result).toContain("exec")
+		expect(result).toContain("代码智能")
+		expect(result).toContain("脚本执行")
 	})
 
 	it("includes MCP reference when mcpHub is provided", () => {
 		const mockMcpHub = {} as McpHub
 		const result = getCapabilitiesSection(cwd, mockMcpHub)
 
-		expect(result).toContain("MCP servers")
+		expect(result).toContain("MCP 支持")
 	})
 
 	it("excludes MCP reference when mcpHub is undefined", () => {
 		const result = getCapabilitiesSection(cwd, undefined)
 
-		expect(result).not.toContain("MCP servers")
+		expect(result).not.toContain("MCP 支持")
 	})
 })
 
