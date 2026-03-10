@@ -24,8 +24,9 @@ import writeToFile from "./write_to_file"
 import searchProject from "./search_project"
 import applyEdit from "./apply_edit"
 import consultExpert from "./consult_expert"
-import findDefinition from "./find_definition"
-import findUsages from "./find_usages"
+// find_definition/find_usages 已移除：模型通过 exec + ts-morph 等 AST 库实现更灵活的代码分析
+// import findDefinition from "./find_definition"
+// import findUsages from "./find_usages"
 import buildTool from "./build_tool"
 import write from "./write"
 import reminder from "./reminder"
@@ -68,9 +69,9 @@ export function getNativeTools(options: NativeToolsOptions = {}): OpenAI.Chat.Ch
 		askFollowupQuestion,
 		attemptCompletion,
 		codebaseSearch,
-		// LSP 代码智能工具 - 优先于 grep 用于符号导航
-		findDefinition,
-		findUsages,
+		// LSP 代码智能工具已移除，改用 exec + ts-morph 等 AST 库
+		// findDefinition,
+		// findUsages,
 		// executeCommand 已被 v2 exec 替代
 		// executeCommand,
 		generateImage,

@@ -138,14 +138,14 @@ const EXAMPLE_REMINDER = `## Reminder 使用规范
 <example>
 user: 把这个函数的返回类型从 unknown 改成 string
 
-A: [Deep] 数操作量：读文件(1r) + find_usages(1r) + 改签名(1r) + 改调用方(1-2r) + 跑测试(1r) = 5-6r。
+A: [Deep] 数操作量：读文件(1r) + exec ts-morph 查引用(1r) + 改签名(1r) + 改调用方(1-2r) + 跑测试(1r) = 5-6r。
 
 [工具调用] reminder({
-  content: "O: unknown→string\\nKR: [ ] 读文件 [ ] find_usages [ ] 改签名 [ ] 更新调用方 [ ] 跑测试",
+  content: "O: unknown→string\\nKR: [ ] 读文件 [ ] exec ts-morph 查引用 [ ] 改签名 [ ] 更新调用方 [ ] 跑测试",
   delay: 3
 })
 
-[读文件，find_usages 找到 5 个调用方，改签名，逐个更新...]
+[读文件，exec ts-morph 脚本找到 5 个调用方，改签名，逐个更新...]
 
 --- reminder 触发 ---
 

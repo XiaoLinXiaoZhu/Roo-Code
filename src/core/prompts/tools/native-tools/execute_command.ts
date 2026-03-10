@@ -1,6 +1,6 @@
 import type OpenAI from "openai"
 
-const EXECUTE_COMMAND_DESCRIPTION = `Run shell commands for development, system operations, or invoking CLI tools. For code navigation (finding definitions or references), prefer find_definition/find_usages over grep.
+const EXECUTE_COMMAND_DESCRIPTION = `Run shell commands for development, system operations, or invoking CLI tools. For code navigation (finding definitions or references), use exec with ts-morph (TS/JS) or jedi (Python) instead of grep.
 
 **When to Use**: Running dev/build/test commands.
 - exec({ command: "npm test -- --grep 'auth'", cwd: "./backend", timeout: null })

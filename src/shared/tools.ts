@@ -451,7 +451,8 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 		// "read_file", "search_files", "list_files", are now in command
 		// 因为模型可以直接通过命令行工具更加灵活地读取文件内容和搜索文件，所以这些工具未来使用命令行工具来替代
 		// "read_media" 用于多模态 agent 读取媒体文件（图片等），根据 supportsImages 开关控制
-		tools: ["codebase_search", "find_definition", "find_usages", "read_media"],
+		// find_definition/find_usages 已移除：模型通过 exec + ts-morph 等 AST 库实现更灵活的代码分析
+		tools: ["codebase_search", "read_media"],
 	},
 	edit: {
 		// v2: edit（精确搜索替换）、write（文件创建/覆盖）替代旧 write_to_file
