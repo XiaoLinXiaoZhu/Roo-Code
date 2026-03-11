@@ -224,6 +224,13 @@ describe("SYSTEM_PROMPT", () => {
 
 		expect(typeof prompt).toBe("string")
 		expect(prompt.length).toBeGreaterThan(0)
+
+		// Write snapshot for manual review
+		const { writeFileSync, mkdirSync } = await import("fs")
+		const { resolve, dirname } = await import("path")
+		const snapPath = resolve(__dirname, "./__snapshots__/system-prompt/consistent-system-prompt.snap")
+		mkdirSync(dirname(snapPath), { recursive: true })
+		writeFileSync(snapPath, prompt, "utf-8")
 	})
 
 	it("should include MCP server info when mcpHub is provided", async () => {
@@ -246,6 +253,12 @@ describe("SYSTEM_PROMPT", () => {
 
 		expect(typeof prompt).toBe("string")
 		expect(prompt.length).toBeGreaterThan(0)
+
+		const { writeFileSync, mkdirSync } = await import("fs")
+		const { resolve, dirname } = await import("path")
+		const snapPath = resolve(__dirname, "./__snapshots__/system-prompt/with-mcp-hub-provided.snap")
+		mkdirSync(dirname(snapPath), { recursive: true })
+		writeFileSync(snapPath, prompt, "utf-8")
 	})
 
 	it("should explicitly handle undefined mcpHub", async () => {
@@ -266,6 +279,12 @@ describe("SYSTEM_PROMPT", () => {
 
 		expect(typeof prompt).toBe("string")
 		expect(prompt.length).toBeGreaterThan(0)
+
+		const { writeFileSync, mkdirSync } = await import("fs")
+		const { resolve, dirname } = await import("path")
+		const snapPath = resolve(__dirname, "./__snapshots__/system-prompt/with-undefined-mcp-hub.snap")
+		mkdirSync(dirname(snapPath), { recursive: true })
+		writeFileSync(snapPath, prompt, "utf-8")
 	})
 
 	// Assertion-based tests removed — prompt content is validated via snapshots only.
