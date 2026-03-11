@@ -2361,6 +2361,34 @@
       "gitCommit": "0db2bc597f77605224475ed0b18a23f6971038a5",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\"}}}"
+    },
+    {
+      "id": "86",
+      "query": "Where are the tool definitions for exec/execute_command defined, including their parameter names?",
+      "tags": [
+        "where",
+        "are",
+        "the",
+        "tool",
+        "definitions",
+        "for",
+        "exec",
+        "execute_command",
+        "defined",
+        "including",
+        "their",
+        "parameter",
+        "names"
+      ],
+      "scope": {
+        "directories": "e:/_Project/Roo-Code/src",
+        "file_patterns": "*.ts",
+        "excludes": "__tests__,node_modules,dist"
+      },
+      "createdAt": "2026-03-11T04:45:20.684Z",
+      "gitCommit": "bdf259a8fe70daf7ba3f86cf885b0798ffd2bb8b",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"tool_name\":{\"type\":\"string\"},\"parameters\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
     }
   ]
 }

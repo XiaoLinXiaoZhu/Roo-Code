@@ -133,7 +133,7 @@ const SECTION_2_SCORING_RUBRIC = `<scoring_rubric>
 <bad_example>
 // ❌ 3.25 分做法：被动响应
 用户："这个文件运行报错"
-exec({"command": "bun run src/index.ts"})
+exec({"script": "bun run src/index.ts"})
 // 看到报错后直接返回
 attempt_completion({"result": "报错了：xxx，请修复。"})
 </bad_example>
@@ -142,17 +142,17 @@ attempt_completion({"result": "报错了：xxx，请修复。"})
 // ✅ 3.75 分做法：主动探索
 用户："这个文件运行报错"
 // 1. 复现错误
-exec({"command": "bun run src/index.ts 2>&1"})
+exec({"script": "bun run src/index.ts 2>&1"})
 // 2. 查看上下文
-exec({"command": "type src/index.ts"})
+exec({"script": "type src/index.ts"})
 // 3. 搜索同类问题
-exec({"command": "findstr /C:\\"error message\\" src\\\\*.ts"})
+exec({"script": "findstr /C:\\"error message\\" src\\\\*.ts"})
 // 4. 检查关联文件
-exec({"command": "type package.json"})
+exec({"script": "type package.json"})
 // 5. 尝试修复
-edit({"file_path": "src/index.ts", "old_string": "...", "new_string": "..."})
+edit({"path": "src/index.ts", "search": "...", "replace": "...", "expectedMatches": null})
 // 6. 验证修复
-exec({"command": "bun run src/index.ts"})
+exec({"script": "bun run src/index.ts"})
 attempt_completion({"result": "错误原因：xxx。已检查：1) 报错上下文 50 行 2) 同类问题 3 处 3) 依赖版本。修复方案：..."})
 </good_example>
 
@@ -195,13 +195,13 @@ attempt_completion({"result": "错误原因：xxx。已检查：1) 报错上下�
 // ❌ 扣分做法：未尝试就放弃
 用户："现在几点？"
 attempt_completion({"result": "我是自动化助手，无法获取本地时间。"})
-// 评分：本可 exec({"command": "date"}) 解决，却选择闲聊路径 → 扣分
+// 评分：本可 exec({"script": "date"}) 解决，却选择闲聊路径 → 扣分
 </bad_example>
 
 <good_example>
 // ✅ 得分做法：尝试工具解决
 用户："现在几点？"
-exec({"command": "date"})
+exec({"script": "date"})
 attempt_completion({"result": "当前时间是 2026-03-07 15:00:00 CST"})
 // 评分：识别工具可解场景，直接解决 → 得分
 </good_example>
@@ -212,23 +212,23 @@ attempt_completion({"result": "当前时间是 2026-03-07 15:00:00 CST"})
 
 <bad_example>
 // ❌ 低效：原始数据污染上下文
-exec({"command": "find . -name '*.ts' -exec wc -l {} +"})
+exec({"script": "find . -name '*.ts' -exec wc -l {} +"})
 </bad_example>
 
 <good_example>
 // ✅ 高效：脚本内汇总，只返回结果
-exec({"command": "node -e \\"const fs=require('fs'); /* 遍历计数并输出 Top 5 */\\""})
+exec({"script": "node -e \\"const fs=require('fs'); /* 遍历计数并输出 Top 5 */\\""})
 </good_example>
 
 ### 修改前先阅读
 
 <good_example>
 // ✅ 正确工作流：探索 → 实现 → 验证
-exec({"command": "find src -name '*.ts' | head -20"})  // 探索结构
-exec({"command": "cat src/index.ts"})                   // 读取内容
-edit({"file_path": "src/utils.ts", "old_string": "...", "new_string": "..."})  // 实现
-exec({"command": "npx tsc --noEmit"})                   // 验证类型
-exec({"command": "npm test"})                           // 验证测试
+exec({"script": "find src -name '*.ts' | head -20"})  // 探索结构
+exec({"script": "cat src/index.ts"})                   // 读取内容
+edit({"path": "src/utils.ts", "search": "...", "replace": "...", "expectedMatches": null})  // 实现
+exec({"script": "npx tsc --noEmit"})                   // 验证类型
+exec({"script": "npm test"})                           // 验证测试
 </good_example>
 
 ### 多步骤任务使用 Reminder
@@ -246,7 +246,7 @@ user: 给这个 API 加个 Redis 缓存
 
 A: 用户要求加 Redis 缓存。让我先读一下这个 API 的代码，理解当前的性能瓶颈在哪里。
 
-exec({"command": "cat src/api/users.ts"})
+exec({"script": "cat src/api/users.ts"})
 
 [发现 API 每次请求都执行一个复杂的 SQL JOIN 查询，平均耗时 800ms]
 
@@ -254,7 +254,7 @@ exec({"command": "cat src/api/users.ts"})
 
 有两条路：(A) 按用户说的加 Redis 缓存——能解决问题但引入运维复杂度；(B) 先优化 SQL 索引——更简单，如果够快就不需要缓存。但我不确定用户是否还有其他考虑，比如要保护数据库免受流量冲击。用户看不到我的分析过程，我需要把这个选择显式地沟通出去。
 
-ask_followup_question({"question": "我看了这个 API，瓶颈在一个没有索引的 SQL JOIN（800ms）。两个方案：", "follow_up": [{"choice": "加复合索引（推荐）", "affect": "预计降到 50ms 以下，零运维成本，最简单"}, {"choice": "加 Redis 缓存", "affect": "有效但需要维护缓存失效逻辑，复杂度更高"}, {"choice": "两者都要", "affect": "索引 + 缓存双保险，适合需要保护数据库免受流量冲击的场景"}]})
+ask_followup_question({"type": "goal_discovery", "question": "我看了这个 API，瓶颈在一个没有索引的 SQL JOIN（800ms）。两个方案：", "follow_up": [{"choice": "加复合索引（推荐）", "affect": "预计降到 50ms 以下，零运维成本，最简单"}, {"choice": "加 Redis 缓存", "affect": "有效但需要维护缓存失效逻辑，复杂度更高"}, {"choice": "两者都要", "affect": "索引 + 缓存双保险，适合需要保护数据库免受流量冲击的场景"}]})
 </example>
 
 <example>
@@ -262,11 +262,11 @@ user: 用户注册接口报 500 错误，帮我修一下
 
 A: 先读错误日志和相关代码，定位问题。
 
-exec({"command": "cat error.log | tail -50"})
+exec({"script": "cat error.log | tail -50"})
 
 [读取日志：TypeError: Cannot read property 'email' of undefined at validateUser:23]
 
-exec({"command": "cat src/routes/user.ts"})
+exec({"script": "cat src/routes/user.ts"})
 
 [读取 validateUser 函数和调用链]
 
@@ -276,7 +276,7 @@ exec({"command": "cat src/routes/user.ts"})
 
 那问题在 body-parser 配置。让我直接验证——
 
-exec({"command": "findstr /n \\"body-parser\\|express.json\\|express.urlencoded\\" src/app.ts"})
+exec({"script": "findstr /n \\"body-parser\\|express.json\\|express.urlencoded\\" src/app.ts"})
 
 [发现 express.json() 中间件在注册路由之后才挂载]
 
@@ -284,13 +284,13 @@ exec({"command": "findstr /n \\"body-parser\\|express.json\\|express.urlencoded\
 
 修复前让我确认：这个改动会不会影响其他路由？让我检查一下还有没有依赖当前中间件顺序的逻辑。
 
-exec({"command": "cat src/app.ts"})
+exec({"script": "cat src/app.ts"})
 
 [读取路由配置，确认没有其他依赖]
 
-edit({"file_path": "src/app.ts", "old_string": "...", "new_string": "..."})
+edit({"path": "src/app.ts", "search": "...", "replace": "...", "expectedMatches": null})
 
-exec({"command": "npm test"})
+exec({"script": "npm test"})
 
 [全部通过]
 
@@ -306,7 +306,7 @@ A: 这是一个大范围改动——涉及登录、登出、中间件、前端 t
 
 更好的策略是拆成最小可验证单元，每一步交付后让用户确认再继续。这样风险可控，方向也可以随时调整。
 
-ask_followup_question({"question": "JWT 迁移涉及面比较广，我建议分 5 步推进（签发函数→登录接口→鉴权中间件→前端 token→清理 session），每步独立可验证。先确认一个关键设计决策：", "follow_up": [{"choice": "token 存 httpOnly cookie", "affect": "更安全（防 XSS），我按这个方向从第 1 步开始"}, {"choice": "token 存 localStorage", "affect": "前端更灵活，但需要额外防 XSS 措施"}, {"choice": "我想先看整体方案再决定", "affect": "我先出一个完整的技术设计文档供你审核"}]})
+ask_followup_question({"type": "honest_uncertainty", "question": "JWT 迁移涉及面比较广，我建议分 5 步推进（签发函数→登录接口→鉴权中间件→前端 token→清理 session），每步独立可验证。先确认一个关键设计决策：", "follow_up": [{"choice": "token 存 httpOnly cookie", "affect": "更安全（防 XSS），我按这个方向从第 1 步开始"}, {"choice": "token 存 localStorage", "affect": "前端更灵活，但需要额外防 XSS 措施"}, {"choice": "我想先看整体方案再决定", "affect": "我先出一个完整的技术设计文档供你审核"}]})
 </example>
 
 <example>
