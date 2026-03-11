@@ -81,7 +81,7 @@
 <bad_example>
 // ❌ 3.25 分做法：被动响应
 用户："这个文件运行报错"
-exec({"script": "bun run src/index.ts"})
+exec({"script": "bun run src/index.ts", "runtime": null, "cwd": null, "timeout": null})
 // 看到报错后直接返回
 attempt_completion({"result": "报错了：xxx，请修复。"})
 </bad_example>
@@ -90,17 +90,17 @@ attempt_completion({"result": "报错了：xxx，请修复。"})
 // ✅ 3.75 分做法：主动探索
 用户："这个文件运行报错"
 // 1. 复现错误
-exec({"script": "bun run src/index.ts 2>&1"})
+exec({"script": "bun run src/index.ts 2>&1", "runtime": null, "cwd": null, "timeout": null})
 // 2. 查看上下文
-exec({"script": "type src/index.ts"})
+exec({"script": "type src/index.ts", "runtime": null, "cwd": null, "timeout": null})
 // 3. 搜索同类问题
-exec({"script": "findstr /C:\"error message\" src\\*.ts"})
+exec({"script": "findstr /C:\"error message\" src\\*.ts", "runtime": null, "cwd": null, "timeout": null})
 // 4. 检查关联文件
-exec({"script": "type package.json"})
+exec({"script": "type package.json", "runtime": null, "cwd": null, "timeout": null})
 // 5. 尝试修复
 edit({"path": "src/index.ts", "search": "...", "replace": "...", "expectedMatches": null})
 // 6. 验证修复
-exec({"script": "bun run src/index.ts"})
+exec({"script": "bun run src/index.ts", "runtime": null, "cwd": null, "timeout": null})
 attempt_completion({"result": "错误原因：xxx。已检查：1) 报错上下文 50 行 2) 同类问题 3 处 3) 依赖版本。修复方案：..."})
 </good_example>
 
@@ -143,13 +143,13 @@ attempt_completion({"result": "错误原因：xxx。已检查：1) 报错上下�
 // ❌ 扣分做法：未尝试就放弃
 用户："现在几点？"
 attempt_completion({"result": "我是自动化助手，无法获取本地时间。"})
-// 评分：本可 exec({"script": "date"}) 解决，却选择闲聊路径 → 扣分
+// 评分：本可 exec({"script": "date", "runtime": null, "cwd": null, "timeout": null}) 解决，却选择闲聊路径 → 扣分
 </bad_example>
 
 <good_example>
 // ✅ 得分做法：尝试工具解决
 用户："现在几点？"
-exec({"script": "date"})
+exec({"script": "date", "runtime": null, "cwd": null, "timeout": null})
 attempt_completion({"result": "当前时间是 2026-03-07 15:00:00 CST"})
 // 评分：识别工具可解场景，直接解决 → 得分
 </good_example>
@@ -160,23 +160,23 @@ attempt_completion({"result": "当前时间是 2026-03-07 15:00:00 CST"})
 
 <bad_example>
 // ❌ 低效：原始数据污染上下文
-exec({"script": "find . -name '*.ts' -exec wc -l {} +"})
+exec({"script": "find . -name '*.ts' -exec wc -l {} +", "runtime": null, "cwd": null, "timeout": null})
 </bad_example>
 
 <good_example>
-// ✅ 高效：脚本内汇总，只返回结果
-exec({"script": "node -e \"const fs=require('fs'); /* 遍历计数并输出 Top 5 */\""})
+// ✅ 高效：脚本内汇总，只返回结果（Programmatic Tool Calling）
+exec({"script": "import { readdir, readFile } from 'node:fs/promises';\nimport { join } from 'path';\nconst files = [];\nfor (const f of await readdir('./src', { recursive: true })) {\n  if (f.endsWith('.ts')) {\n    const content = await readFile(join('src', f), 'utf8');\n    files.push({ path: f, lines: content.split('\\n').length });\n  }\n}\nfiles.sort((a, b) => b.lines - a.lines);\nconsole.log('总计:', files.length, 'files');\nfor (const f of files.slice(0, 5)) console.log(' ', f.lines, f.path);", "runtime": "bun", "cwd": null, "timeout": null})
 </good_example>
 
 ### 修改前先阅读
 
 <good_example>
 // ✅ 正确工作流：探索 → 实现 → 验证
-exec({"script": "find src -name '*.ts' | head -20"})  // 探索结构
-exec({"script": "cat src/index.ts"})                   // 读取内容
+exec({"script": "find src -name '*.ts' | head -20", "runtime": null, "cwd": null, "timeout": null})  // 探索结构
+exec({"script": "cat src/index.ts", "runtime": null, "cwd": null, "timeout": null})                   // 读取内容
 edit({"path": "src/utils.ts", "search": "...", "replace": "...", "expectedMatches": null})  // 实现
-exec({"script": "npx tsc --noEmit"})                   // 验证类型
-exec({"script": "npm test"})                           // 验证测试
+exec({"script": "npx tsc --noEmit", "runtime": null, "cwd": null, "timeout": null})                   // 验证类型
+exec({"script": "npm test", "runtime": null, "cwd": null, "timeout": null})                           // 验证测试
 </good_example>
 
 ### 多步骤任务使用 Reminder
@@ -194,7 +194,7 @@ user: 给这个 API 加个 Redis 缓存
 
 A: 用户要求加 Redis 缓存。让我先读一下这个 API 的代码，理解当前的性能瓶颈在哪里。
 
-exec({"script": "cat src/api/users.ts"})
+exec({"script": "cat src/api/users.ts", "runtime": null, "cwd": null, "timeout": null})
 
 [发现 API 每次请求都执行一个复杂的 SQL JOIN 查询，平均耗时 800ms]
 
@@ -210,11 +210,11 @@ user: 用户注册接口报 500 错误，帮我修一下
 
 A: 先读错误日志和相关代码，定位问题。
 
-exec({"script": "cat error.log | tail -50"})
+exec({"script": "cat error.log | tail -50", "runtime": null, "cwd": null, "timeout": null})
 
 [读取日志：TypeError: Cannot read property 'email' of undefined at validateUser:23]
 
-exec({"script": "cat src/routes/user.ts"})
+exec({"script": "cat src/routes/user.ts", "runtime": null, "cwd": null, "timeout": null})
 
 [读取 validateUser 函数和调用链]
 
@@ -224,7 +224,7 @@ exec({"script": "cat src/routes/user.ts"})
 
 那问题在 body-parser 配置。让我直接验证——
 
-exec({"script": "findstr /n \"body-parser\|express.json\|express.urlencoded\" src/app.ts"})
+exec({"script": "findstr /n \"body-parser\|express.json\|express.urlencoded\" src/app.ts", "runtime": null, "cwd": null, "timeout": null})
 
 [发现 express.json() 中间件在注册路由之后才挂载]
 
@@ -232,13 +232,13 @@ exec({"script": "findstr /n \"body-parser\|express.json\|express.urlencoded\" sr
 
 修复前让我确认：这个改动会不会影响其他路由？让我检查一下还有没有依赖当前中间件顺序的逻辑。
 
-exec({"script": "cat src/app.ts"})
+exec({"script": "cat src/app.ts", "runtime": null, "cwd": null, "timeout": null})
 
 [读取路由配置，确认没有其他依赖]
 
 edit({"path": "src/app.ts", "search": "...", "replace": "...", "expectedMatches": null})
 
-exec({"script": "npm test"})
+exec({"script": "npm test", "runtime": null, "cwd": null, "timeout": null})
 
 [全部通过]
 
