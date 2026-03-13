@@ -2389,6 +2389,29 @@
       "gitCommit": "bdf259a8fe70daf7ba3f86cf885b0798ffd2bb8b",
       "ttlHours": 168,
       "schema": "{\"type\":\"object\",\"properties\":{\"files\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"tool_name\":{\"type\":\"string\"},\"parameters\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}"
+    },
+    {
+      "id": "87",
+      "query": "项目中在哪里构造发送给 OpenAI/LiteLLM 的请求参数，尤其是可能包含 vector_store_ids 的字段？请给出最相关文件和函数。",
+      "tags": [
+        "项目中在哪里构造发送给",
+        "openai",
+        "litellm",
+        "的请求参数",
+        "尤其是可能包含",
+        "vector_store_ids",
+        "的字段",
+        "请给出最相关文件和函数"
+      ],
+      "scope": {
+        "directories": "/Users/wepie/Documents/pie/project/roo-code",
+        "file_patterns": "*.ts,*.tsx,*.js",
+        "excludes": "node_modules,dist,build,.git,coverage"
+      },
+      "createdAt": "2026-03-13T08:16:00.430Z",
+      "gitCommit": "bbfafb176be30ab382cb7ebf4a2b956ebef0c183",
+      "ttlHours": 168,
+      "schema": "{\"type\":\"object\",\"properties\":{\"locations\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"file\":{\"type\":\"string\"},\"symbols\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"reason\":{\"type\":\"string\"}}}}}"
     }
   ]
 }
