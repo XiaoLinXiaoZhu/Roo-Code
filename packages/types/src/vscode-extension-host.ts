@@ -282,6 +282,7 @@ export type ExtensionState = Pick<
 	| "terminalZshOhMy"
 	| "terminalZshP10k"
 	| "terminalZdotdir"
+	| "execaShellPath"
 	| "diagnosticsEnabled"
 	| "language"
 	| "modeApiConfigs"
@@ -309,6 +310,7 @@ export type ExtensionState = Pick<
 	lockApiConfigAcrossModes?: boolean
 	version: string
 	clineMessages: ClineMessage[]
+	currentTaskId?: string
 	currentTaskItem?: HistoryItem
 	currentTaskTodos?: TodoItem[] // Initial todos for the current task
 	apiConfiguration: ProviderSettings
@@ -580,6 +582,7 @@ export interface WebviewMessage {
 		| "updateSkillModes"
 		| "openSkillFile"
 	text?: string
+	taskId?: string
 	editedMessageContent?: string
 	tab?: "settings" | "history" | "mcp" | "modes" | "chat" | "marketplace" | "cloud"
 	disabled?: boolean
@@ -677,6 +680,8 @@ export interface WebviewMessage {
 		codebaseIndexOpenRouterApiKey?: string
 	}
 	updatedSettings?: RooCodeSettings
+	/** Task configuration applied via `createTask()` when starting a cloud task. */
+	taskConfiguration?: RooCodeSettings
 	// Worktree properties
 	worktreePath?: string
 	worktreeBranch?: string

@@ -28,7 +28,7 @@ import { ToolUseBlock, ToolUseBlockHeader } from "../common/ToolUseBlock"
 import UpdateTodoListToolBlock from "./UpdateTodoListToolBlock"
 import { TodoChangeDisplay } from "./TodoChangeDisplay"
 import { IntentTreeToolBlock } from "../intent-tree"
-import CodeAccordian from "../common/CodeAccordian"
+import CodeAccordion from "../common/CodeAccordion"
 import MarkdownBlock from "../common/MarkdownBlock"
 import { ReasoningBlock } from "./ReasoningBlock"
 import Thumbnails from "../common/Thumbnails"
@@ -253,7 +253,7 @@ export const ChatRowContent = ({
 		return [undefined, undefined, undefined]
 	}, [message.text, message.say])
 
-	// When resuming task, last wont be api_req_failed but a resume_task
+	// When resuming task, last won't be api_req_failed but a resume_task
 	// message, so api_req_started will show loading spinner. That's why we just
 	// remove the last api_req_started that failed without streaming anything.
 	const apiRequestFailedMessage =
@@ -501,7 +501,7 @@ export const ChatRowContent = ({
 							</span>
 						</div>
 						<div className="pl-6">
-							<CodeAccordian
+							<CodeAccordion
 								path={tool.path}
 								code={unifiedDiff ?? tool.content ?? tool.diff ?? ""}
 								language="diff"
@@ -540,7 +540,7 @@ export const ChatRowContent = ({
 							</span>
 						</div>
 						<div className="pl-6">
-							<CodeAccordian
+							<CodeAccordion
 								path={tool.path}
 								code={unifiedDiff ?? tool.diff}
 								language="diff"
@@ -582,7 +582,7 @@ export const ChatRowContent = ({
 					try {
 						parsedResult = JSON.parse(tool.content)
 					} catch {
-						// Not JSON, will use CodeAccordian fallback
+						// Not JSON, will use CodeAccordion fallback
 					}
 				}
 				return (
@@ -602,7 +602,7 @@ export const ChatRowContent = ({
 								{parsedResult ? (
 									<SymbolNavigationResultsDisplay type="definition" data={parsedResult} />
 								) : (
-									<CodeAccordian
+									<CodeAccordion
 										code={tool.content}
 										language="markdown"
 										isLoading={message.partial}
@@ -622,7 +622,7 @@ export const ChatRowContent = ({
 					try {
 						parsedResult = JSON.parse(tool.content)
 					} catch {
-						// Not JSON, will use CodeAccordian fallback
+						// Not JSON, will use CodeAccordion fallback
 					}
 				}
 				return (
@@ -642,7 +642,7 @@ export const ChatRowContent = ({
 								{parsedResult ? (
 									<SymbolNavigationResultsDisplay type="references" data={parsedResult} />
 								) : (
-									<CodeAccordian
+									<CodeAccordion
 										code={tool.content}
 										language="markdown"
 										isLoading={message.partial}
@@ -1027,7 +1027,7 @@ export const ChatRowContent = ({
 							</span>
 						</div>
 						<div className="pl-6">
-							<CodeAccordian
+							<CodeAccordion
 								path={tool.path}
 								code={unifiedDiff ?? ""}
 								language="diff"
@@ -1193,7 +1193,7 @@ export const ChatRowContent = ({
 							</span>
 						</div>
 						<div className="pl-6">
-							<CodeAccordian
+							<CodeAccordion
 								path={tool.path}
 								code={tool.content}
 								language="shell-session"
@@ -1219,7 +1219,7 @@ export const ChatRowContent = ({
 							</span>
 						</div>
 						<div className="pl-6">
-							<CodeAccordian
+							<CodeAccordion
 								path={tool.path}
 								code={tool.content}
 								language="shellsession"
@@ -1259,7 +1259,7 @@ export const ChatRowContent = ({
 							</span>
 						</div>
 						<div className="pl-6">
-							<CodeAccordian
+							<CodeAccordion
 								path={tool.path! + (tool.filePattern ? `/(${tool.filePattern})` : "")}
 								code={tool.content}
 								language="shellsession"
@@ -1862,7 +1862,7 @@ export const ChatRowContent = ({
 					const tool = safeJsonParse<ClineSayTool>(message.text)
 					return (
 						<div style={{ marginTop: -10, width: "100%" }}>
-							<CodeAccordian
+							<CodeAccordion
 								code={tool?.diff}
 								language="diff"
 								isFeedback={true}

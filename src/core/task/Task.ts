@@ -568,6 +568,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		enableCheckpoints = true,
 		checkpointTimeout = DEFAULT_CHECKPOINT_TIMEOUT_SECONDS,
 		consecutiveMistakeLimit = DEFAULT_CONSECUTIVE_MISTAKE_LIMIT,
+		taskId,
 		task,
 		images,
 		historyItem,
@@ -602,7 +603,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			)
 		}
 
-		this.taskId = historyItem ? historyItem.id : uuidv7()
+		this.taskId = historyItem ? historyItem.id : (taskId ?? uuidv7())
 		this.rootTaskId = historyItem ? historyItem.rootTaskId : rootTask?.taskId
 		this.parentTaskId = historyItem ? historyItem.parentTaskId : parentTask?.taskId
 		this.childTaskId = undefined
@@ -1551,6 +1552,9 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		// block (via the `pWaitFor`).
 		const isBlocking = !(this.askResponse !== undefined || this.lastMessageTs !== askTs)
 		const isMessageQueued = !this.messageQueueService.isEmpty()
+		// Keep queued user messages intact during command_output asks. Those asks
+		// are terminal flow-control, not conversational turns.
+		const shouldDrainQueuedMessageForAsk = type !== "command_output"
 		const isStatusMutable = !partial && isBlocking && !isMessageQueued && approval.decision === "ask"
 
 		if (isStatusMutable) {
@@ -1591,7 +1595,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 					}, statusMutationTimeout),
 				)
 			}
-		} else if (isMessageQueued) {
+		} else if (isMessageQueued && shouldDrainQueuedMessageForAsk) {
 			const message = this.messageQueueService.dequeueMessage()
 
 			if (message) {
@@ -1618,7 +1622,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				// If a queued message arrives while we're blocked on an ask (e.g. a follow-up
 				// suggestion click that was incorrectly queued due to UI state), consume it
 				// immediately so the task doesn't hang.
-				if (!this.messageQueueService.isEmpty()) {
+				if (shouldDrainQueuedMessageForAsk && !this.messageQueueService.isEmpty()) {
 					const message = this.messageQueueService.dequeueMessage()
 					if (message) {
 						// If this is a tool approval ask, we need to approve first (yesButtonClicked)
@@ -2767,11 +2771,13 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				}),
 			)
 
-			const {
-				showRooIgnoredFiles = false,
-				includeDiagnosticMessages = true,
-				maxDiagnosticMessages = 50,
-			} = (await this.providerRef.deref()?.getState()) ?? {}
+			const provider = this.providerRef.deref()
+			const state = provider ? await provider.getState() : undefined
+
+			const showRooIgnoredFiles = state?.showRooIgnoredFiles ?? false
+			const includeDiagnosticMessages = state?.includeDiagnosticMessages ?? true
+			const maxDiagnosticMessages = state?.maxDiagnosticMessages ?? 50
+			const currentMode = state?.mode ?? defaultModeSlug
 
 			const { content: parsedUserContent, mode: slashCommandMode } = await processUserContentMentions({
 				userContent: currentUserContent,
@@ -2781,6 +2787,8 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				showRooIgnoredFiles,
 				includeDiagnosticMessages,
 				maxDiagnosticMessages,
+				skillsManager: provider?.getSkillsManager(),
+				currentMode,
 			})
 
 			// Switch mode if specified in a slash command's frontmatter
@@ -4675,6 +4683,12 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 			await this.say("api_req_retry_delayed", headerText, undefined, false)
 		} catch (err) {
+			const message = err instanceof Error ? err.message : String(err)
+
+			if (this.abort && message.includes("Aborted during retry countdown")) {
+				return
+			}
+
 			console.error("Exponential backoff failed:", err)
 		}
 	}
