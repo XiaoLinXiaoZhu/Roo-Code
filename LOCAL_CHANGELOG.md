@@ -1,5 +1,45 @@
 # Roo Code Changelog
 
+## [3.53.0] - 2026-03-13
+
+自 `3.52.14`（2026-03-02）以来的完整整合发布：包含本地 Agent-as-Tools 激进演进 + 上游 `upstream/main`（至 v3.51.1）批量合并。
+
+### 🚀 本地核心演进（Agent-as-Tools / 提示词与工具体系）
+
+- **SWE-benchmark 评分场景重构**：系统提示词改为 5 段式结构，强化“调研→实现→验证”闭环与端到端交付约束。
+- **Reminder 体系强化**：新增提醒触发后的反思提示（进度对比、偏航检测、下一步规划），并支持任务恢复时 reminder 状态恢复与递增 ID。
+- **工具参数与调用一致性治理**：
+    - 统一参数处理（`ToolParams`）并补齐多工具参数类型安全审计。
+    - 修复多处工具参数不匹配与渲染问题（含 JSON-aware 消息合并）。
+- **V2 工具链增强**：引入并完善 `V2EditTool` / `V2WriteTool`，增加差异预览、写保护、内容预处理等能力。
+- **exec 能力增强**：工具描述动态适配平台环境，并补充高分策略与 AST/程序化调用示例，改进复杂代码分析引导。
+- **write/reminder 管线修复**：补齐 NativeToolCallParser 与消息渲染分发中的 write/reminder 分支，修复“Unknown tool”类问题。
+
+### 🌐 上游合并带入（upstream/main）
+
+- **模型与 Provider 更新**：新增/增强 OpenAI GPT-5.3/5.4、Vertex、Bedrock（含 Cohere Embed v4）等模型支持。
+- **CLI 大幅演进（v0.1.x 连续发布）**：
+    - stdin-stream 路由、队列与取消恢复稳定性增强。
+    - `--create-with-session-id`、会话恢复、upgrade 等能力完善。
+    - 大量集成测试与事件流（JSON event emitter）覆盖补齐。
+- **技能与交互能力增强**：skills 可作为 slash command 暴露，并具备 fallback 执行路径。
+- **文档与国际化更新**：README 与多语言文档同步升级。
+
+### 🔀 本次上游合并冲突处理记录
+
+- `README.md`：采用 **ours**（保留本地项目定位与说明）。
+- `locales/zh-TW/README.md`：采用 **theirs**（跟随上游内容与格式）。
+- `src/package.json`：采用 **ours**（随后统一升级至 `3.53.0`）。
+- `webview-ui/src/components/chat/ChatRow.tsx`：人工判定合并为“保留 `IntentTreeToolBlock` + 统一 `CodeAccordion` 命名”，消除拼写分歧（`CodeAccordian` → `CodeAccordion`）。
+
+### ✅ 验证
+
+- 冲突文件全部清理，无未解决冲突（`git diff --name-only --diff-filter=U` 为空）。
+- 合并提交前触发并通过仓库 lint 流程（turbo lint 全通过）。
+- 关键回归测试通过：
+    - `src`：`core/webview`、`core/task`、`command-mentions`、`openai-native` 相关测试（4 files / 90 tests）。
+    - `webview-ui`：`FileChangesPanel` 测试（1 file / 10 tests）。
+
 ## [3.52.14] - 2026-03-02
 
 Stage 2 完整交付：工具体系重构 + Environment 机制移除。
