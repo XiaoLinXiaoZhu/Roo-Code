@@ -455,8 +455,12 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 		tools: ["codebase_search", "read_media"],
 	},
 	edit: {
-		// v2: edit（精确搜索替换）、write（文件创建/覆盖）替代旧 write_to_file
-		tools: ["edit", "write", "generate_image"],
+		// write（文件创建/覆盖）替代旧 write_to_file
+		tools: ["write", "generate_image"],
+	},
+	exact_edit: {
+		// v2: edit（精确搜索替换）
+		tools: ["edit"],
 	},
 	command: {
 		// v2: exec（脚本执行）替代旧 execute_command
