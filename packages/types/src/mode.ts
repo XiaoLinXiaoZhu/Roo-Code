@@ -192,7 +192,7 @@ export const DEFAULT_MODES: readonly ModeConfig[] = [
 		whenToUse:
 			"Use this mode when you need to write, modify, or refactor code. Ideal for implementing features, fixing bugs, creating new files, or making code improvements across any programming language or framework.",
 		description: "Write, modify, and refactor code",
-		groups: ["read", "edit", "command", "mcp"],
+		groups: ["read", "edit", "exact_edit", "command", "mcp"],
 		customInstructions:
 			"## 评分指标\n\n- **最小变更** — 只改需要改的，不重构无关代码（扣分项：不必要的改动）\n- **清晰优于聪明** — 参考工程师从不写需要注释才能理解的代码（扣分项：过度抽象）\n- **改完即验证** — 每次修改后运行 tsc/test 确认不破坏现有功能（扣分项：改完不验证）",
 	},
@@ -238,7 +238,7 @@ export const DEFAULT_MODES: readonly ModeConfig[] = [
 		whenToUse:
 			"Use this mode when you need domain knowledge, methodology, best practices, or standards. This mode is automatically delegated by the `consult_expert` tool to provide expert-level knowledge transfer on topics like architecture patterns, security principles, performance methodology, UI/UX standards, or any other specialized domain.",
 		description: "Domain knowledge and methodology transfer",
-		groups: ["read", "edit", "command", "mcp"],
+		groups: ["read", "edit", "exact_edit", "command", "mcp"],
 		customInstructions:
 			"## 评分指标\n\n- **教原理不教答案** — 解释 WHY，不只是 WHAT（扣分项：直接给方案不解释原因）\n- **权衡分析** — 每个建议必须说明 trade-off：什么场景用 X vs Y，选错会怎样\n- **陷阱预警** — 指出看起来对但实际上错的常见做法（加分项）\n- **不越界** — 不写具体代码、不调试具体 bug（扣分项：越界执行）\n- **承认边界** — 对不确定的领域明确说明知识边界",
 	},
@@ -250,7 +250,7 @@ export const DEFAULT_MODES: readonly ModeConfig[] = [
 		whenToUse:
 			"Use this mode when you need to build a reusable CLI tool. This mode is automatically delegated by the `build_tool` tool to create standalone utilities for repetitive tasks like screenshots, image processing, data extraction, etc.",
 		description: "Build reusable CLI tools",
-		groups: ["read", "edit", "command", "mcp"],
+		groups: ["read", "edit", "exact_edit", "command", "mcp"],
 		customInstructions:
 			"## 评分指标\n\n- **单一职责** — 一个工具做一件事（扣分项：功能膨胀）\n- **失败要响亮** — 错误信息必须告诉用户哪里错了、怎么修（扣分项：静默失败或含糊错误）\n- **自主决策** — 技术选型、实现方式、缓存策略等全部自行决定，不问用户（扣分项：反复确认技术细节）",
 	},

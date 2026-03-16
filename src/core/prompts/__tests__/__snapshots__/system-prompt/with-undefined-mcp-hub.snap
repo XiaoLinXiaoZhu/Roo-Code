@@ -72,8 +72,8 @@ const utils = readFileSync('src/utils.ts', 'utf8').split('\n');
 console.log('=== src/utils.ts:32-52 ===');
 utils.slice(31, 52).forEach((l, i) => console.log(\`L\${32+i}: \${l}\`));
 `})
-// 3. 定位根因，修复
-edit({ path: "src/utils.ts", search: "...", replace: "..." })
+// 3. 定位根因，使用编辑工具修复
+// [修改 src/utils.ts 中的问题代码]
 // 4. 验证 + 检查同类问题
 exec({ script: "bun run src/index.ts && echo '✅ 修复成功'" })
 attempt_completion: "根因：xxx。修复方案：...。已验证通过，额外检查同文件其他 3 处类似模式均正常。"
@@ -203,7 +203,7 @@ app.split('\n').forEach((l, i) => {
 
 [确认没有依赖当前中间件顺序的逻辑]
 
-edit({ path: "src/app.ts", search: "...", replace: "..." })
+// [使用编辑工具将 express.json() 中间件移到路由注册之前]
 exec({ script: "npm test" })
 
 [全部通过]

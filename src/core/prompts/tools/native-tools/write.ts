@@ -1,6 +1,6 @@
 import type OpenAI from "openai"
 
-const WRITE_DESCRIPTION = `Create or overwrite a file with the given content. Directories are created automatically. For modifying existing files, use the edit tool instead.
+const WRITE_DESCRIPTION = `Create or overwrite a file with the given content. Directories are created automatically. For modifying existing files, use editing tools instead.
 
 **When to Use**: Creating a new file.
 - write({ path: "src/config.ts", content: "export const timeout = 10000;\\n" })

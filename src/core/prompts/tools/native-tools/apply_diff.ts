@@ -1,8 +1,12 @@
 import type OpenAI from "openai"
 
+/**
+ * @deprecated This tool is no longer actively used. Replaced by edit (exact replacement) or apply_edit (agent-based).
+ * Kept for backward compatibility only — do not maintain.
+ */
 const APPLY_DIFF_DESCRIPTION = `Apply precise, surgical text replacements to a file. Requires exact content matching.
 
-**When to Use (vs apply_edit)**:
+**When to Use**:
 - Single-point precise modification with known content
 - Simple insert/replace where you have exact code
 - Quick changes without validation overhead

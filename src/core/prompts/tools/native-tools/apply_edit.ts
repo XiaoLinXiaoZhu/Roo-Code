@@ -1,11 +1,14 @@
 import type OpenAI from "openai"
 
-const APPLY_EDIT_DESCRIPTION = `Edit and modify code using natural language instructions. A sub-agent performs batch modifications with automatic validation (tsc, lint, tests).
+const APPLY_EDIT_DESCRIPTION = `Edit and modify code using natural language instructions. This is the primary tool for all code modifications — from single-line fixes to multi-file refactors. A sub-agent reads the relevant files, applies your described changes, and validates the result.
 
-**When to Use**: Batch or multi-location changes in one instruction.
+**When to Use**: Single-location change described in plain language.
+- apply_edit({ instruction: "Change the default timeout from 5000 to 10000 in src/config.ts", files: "src/config.ts", context: null, validate: "none" })
+
+**When to Use**: Multi-location or cross-file changes in one instruction.
 - apply_edit({ instruction: "Replace all console.log with logger.debug in /workspace/src/utils/*.ts", files: "/workspace/src/utils/*.ts", context: null, validate: "npm run typecheck" })
 
-**When to Use**: Complex changes requiring context understanding, without manually tracking exact code content.
+**When to Use**: Complex refactor requiring context understanding.
 - apply_edit({ instruction: "Add null checks to all database query functions", files: "/workspace/src/db/queries.ts", context: "Use early return pattern, throw DatabaseError for null results", validate: "true" })`
 
 export default {

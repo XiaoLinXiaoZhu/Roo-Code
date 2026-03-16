@@ -1,5 +1,9 @@
 import type OpenAI from "openai"
 
+/**
+ * @deprecated This tool is no longer actively used. Replaced by write (create/overwrite files).
+ * Kept for backward compatibility only — do not maintain.
+ */
 const WRITE_TO_FILE_DESCRIPTION = `Write complete content to a file. Creates new files or overwrites existing ones. Automatically creates directories as needed.
 
 **When to Use**:
