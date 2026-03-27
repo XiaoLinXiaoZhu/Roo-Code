@@ -64,3 +64,4 @@ roo-cli-*.tar.gz*
 .roo/cache/
 .roo/temp/
 .roo/cli-output/
+.temp
