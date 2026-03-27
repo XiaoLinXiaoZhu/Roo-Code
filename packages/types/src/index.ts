@@ -32,4 +32,5 @@ export * from "./vscode-extension-host.js"
 export * from "./vscode.js"
 export * from "./worktree.js"
 
+export * from "./domain-event.js"
 export * from "./providers/index.js"
